@@ -4,7 +4,11 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
       - path: "src/ui/popup/PopupController.js"
         description: "Popup controller"
     functions: []
-  cross_references: []
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "ARCH-POPUP_SESSION"
+    - "IMPL-MESSAGE_HANDLING"
+    - "REQ-CORE_UX_PRESERVATION"
   detail_file: "implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT-pseudocode.md"
   implementation_approach:
@@ -33,15 +37,20 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
   related_decisions:
     composed_with:
       - "IMPL-MESSAGE_HANDLING"
-    depends_on: []
+    depends_on:
+      - "IMPL-MESSAGE_HANDLING"
     see_also:
       - "IMPL-MESSAGE_HANDLING"
+      - "IMPL-POPUP_SESSION"
     supersedes: []
   status: "Active"
   traceability:
-    architecture: []
+    architecture:
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-POPUP_SESSION"
     code_annotations:
       - "IMPL-POPUP_MESSAGE_TIMEOUT"
-    requirements: []
+    requirements:
+      - "REQ-CORE_UX_PRESERVATION"
     test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: message timeout wrapper around sendMessage."
     tests: []

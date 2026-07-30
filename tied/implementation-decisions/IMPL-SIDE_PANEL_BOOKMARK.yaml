@@ -23,7 +23,7 @@ IMPL-SIDE_PANEL_BOOKMARK:
       - Bookmark panel HTML: "same sections as popup (loadingState, errorState, mainInterface with quick-actions, storage, tag-management, search-section); use data-popup-ref for each ref id"
       - CSS: "reuse popup.css and shared design-tokens/components so Bookmark tab looks like popup"
       - Panel context detection: "e.g. document.getElementById('bookmarkPanel') exists and we're inside it; or flag passed from side-panel.js when creating popup"
-    summary: ""
+    summary: "Bookmark tab hosts popup-equivalent UI via createPopup({ container: bookmarkPanel }) and UIManager scoped root (data-popup-ref); By Tag switches to Tags tab in panel context."
   metadata:
     created:
       author: "AI Agent"

@@ -1,8 +1,9 @@
-# [IMPL-EXAMPLE_IMPLEMENTATION] [ARCH-EXAMPLE_DECISION] [REQ-EXAMPLE_FEATURE]
-# Placeholder for core implementation example.
-# Contract: inputs and outputs to be defined per feature.
-Template: placeholder for core implementation example.
-INPUT: (to be defined per feature)
-OUTPUT: (to be defined)
-# Example procedure stub; fill steps with INPUT/OUTPUT/DATA and procedure names.
-exampleFunction(...): (steps to be filled; use INPUT/OUTPUT/DATA and procedure names)
+# [IMPL-EXAMPLE_IMPLEMENTATION] [ARCH-EXAMPLE_DECISION] [REQ-EXAMPLE_FEATURE] — Example IMPL template stub.
+
+## TEMPLATE_STUB
+
+- [IMPL-EXAMPLE_IMPLEMENTATION] How: Template placeholder; precision contracts not required until promoted to Active.
+- Contract:
+  - INPUT: (to be defined)
+  - OUTPUT: (to be defined)
+- Template: placeholder for full Active contract when promoted.

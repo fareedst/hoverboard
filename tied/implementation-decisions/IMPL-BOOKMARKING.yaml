@@ -6,7 +6,7 @@ IMPL-BOOKMARKING:
     - "ARCH-MESSAGE_HANDLING"
     - "ARCH-UX_CORE"
     - "REQ-SMART_BOOKMARKING"
-  decision: "Thin implementation stub for IMPL-BOOKMARKING."
+  decision: "Create/update/delete bookmarks via MessageHandler without leaving the page"
   essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARKING-pseudocode.md"
   implementation_approach:
     summary: "Create/update/delete bookmarks via MessageHandler without leaving the page"
@@ -16,8 +16,8 @@ IMPL-BOOKMARKING:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: align detail traceability with expanded sidecar"
+      date: "2026-07-29"
+      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
   name: "Bookmarking"
   rationale:
     why: "Bookmarking implementation"

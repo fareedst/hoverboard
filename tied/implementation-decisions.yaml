@@ -9,6 +9,7 @@ IMPL-AI_CONFIG_OPTIONS:
     - "ARCH-AI_TAGGING_CONFIG"
     - "REQ-AI_TAGGING_CONFIG"
   detail_file: "implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-AI_CONFIG_OPTIONS-pseudocode.md"
   implementation_approach:
     summary: "ConfigManager defaultConfig and storage include aiApiKey, aiProvider, aiTagLimit; options.html section; options.js bind, load, save; Test button calls testAiApiKey."
   metadata:
@@ -41,6 +42,8 @@ IMPL-AI_CONFIG_OPTIONS:
     requirements:
       - "REQ-AI_TAGGING_CONFIG"
     tests:
+      - "options load/save tests if any"
+      - "tests/unit/config-manager.test.js (AI config)"
       - "tests/unit/config-manager.test.js"
 IMPL-AI_TAG_TEST:
   code_locations:
@@ -60,6 +63,7 @@ IMPL-AI_TAG_TEST:
     - "ARCH-AI_TAGGING_CONFIG"
     - "REQ-AI_TAGGING_CONFIG"
   detail_file: "implementation-decisions/IMPL-AI_TAG_TEST.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-AI_TAG_TEST-pseudocode.md"
   implementation_approach:
     summary: "testAiApiKey(apiKey, provider) performs minimal request (OpenAI/Gemini); returns { ok, error }. Options and popup each have Test API key button showing \"API key OK\" or error; unit-testable with fetch mock."
   metadata:
@@ -106,6 +110,7 @@ IMPL-AI_TAGGING_POPUP_UI:
     - "REQ-AI_TAGGING_POPUP"
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-AI_TAGGING_POPUP_UI.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-AI_TAGGING_POPUP_UI-pseudocode.md"
   implementation_approach:
     summary: "Popup \"Tag with AI\" button; GET_PAGE_CONTENT sent to SW (SW uses scripting.executeScript in tab); GET_AI_TAGS, getSessionTags; popup shows content.error when extraction fails; split inSession vs suggested; save bookmark with preferredBackend = getStorageMode() when new; updateSuggestedTags(suggested)."
   metadata:
@@ -141,7 +146,9 @@ IMPL-AI_TAGGING_POPUP_UI:
       - "REQ-AI_TAGGING_POPUP"
       - "REQ-STORAGE_MODE_DEFAULT"
     tests:
+      - "tests/unit/ai-tagging-popup.test.js (splitAiTagsBySession; edge case all AI tags in session)"
       - "tests/unit/ai-tagging-popup.test.js"
+      - "tests/unit/popup-live-data.test.js (getConfig mock for loadInitialData)"
 IMPL-AI_TAGGING_PROVIDER:
   code_locations:
     files:
@@ -154,6 +161,7 @@ IMPL-AI_TAGGING_PROVIDER:
     - "REQ-AI_TAGGING_POPUP"
     - "REQ-TAG_INPUT_SANITIZATION"
   detail_file: "implementation-decisions/IMPL-AI_TAGGING_PROVIDER.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-AI_TAGGING_PROVIDER-pseudocode.md"
   implementation_approach:
     summary: "requestAiTags(provider, apiKey, text, limit) calls OpenAI or Gemini, parses response to lines, sanitizeTag each, filter null, dedupe, slice(0, limit)."
   metadata:
@@ -186,6 +194,7 @@ IMPL-AI_TAGGING_PROVIDER:
       - "REQ-AI_TAGGING_POPUP"
       - "REQ-TAG_INPUT_SANITIZATION"
     tests:
+      - "tests/unit/ai-tagging-provider.test.js (mocked fetch)"
       - "tests/unit/ai-tagging-provider.test.js"
 IMPL-AI_TAGGING_READABILITY:
   code_locations:
@@ -202,6 +211,7 @@ IMPL-AI_TAGGING_READABILITY:
     - "ARCH-AI_TAGGING_FLOW"
     - "REQ-AI_TAGGING_POPUP"
   detail_file: "implementation-decisions/IMPL-AI_TAGGING_READABILITY.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-AI_TAGGING_READABILITY-pseudocode.md"
   implementation_approach:
     summary: "SW handleGetPageContent uses scripting.executeScript with inline func (title + body.innerText, 16k cap). Content script early listener for GET_PAGE_CONTENT runs extractPageContent (Readability) when present."
   metadata:
@@ -232,6 +242,7 @@ IMPL-AI_TAGGING_READABILITY:
     requirements:
       - "REQ-AI_TAGGING_POPUP"
     tests:
+      - "tests/unit/readability-extract.test.js (with jsdom or fixture HTML)"
       - "tests/unit/readability-extract.test.js"
 IMPL-ARRAY_OBJECT_UTILITIES:
   code_locations:
@@ -242,6 +253,7 @@ IMPL-ARRAY_OBJECT_UTILITIES:
     - "REQ-SHARED_UTILITIES"
   detail_file: "implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml"
   essence_pseudocode: "unique(arr), chunk(arr, size), compact(arr); deepClone(obj), isEmpty(obj), pick(obj, keys). Pure functions; no mutation.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES-pseudocode.md"
   implementation_approach:
     details: []
     summary: "arrayUtils, objectUtils in src/shared/utils.js"
@@ -275,14 +287,20 @@ IMPL-ARRAY_OBJECT_UTILITIES:
       - "REQ-SHARED_UTILITIES"
 IMPL-BADGE:
   cross_references: []
+  decision: "Tab-scoped badge text/color from bookmark state; composes with IMPL-BADGE_REFRESH"
   detail_file: "implementation-decisions/IMPL-BADGE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BADGE-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "Badge"
   rationale:
     why: "Badge implementation"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-BADGE"
+    requirements:
+      - "REQ-BADGE_INDICATORS"
 IMPL-BADGE_REFRESH:
   code_locations:
     files:
@@ -297,6 +315,7 @@ IMPL-BADGE_REFRESH:
     - "REQ-BADGE_INDICATORS"
   detail_file: "implementation-decisions/IMPL-BADGE_REFRESH.yaml"
   essence_pseudocode: "After processMessage success for saveTag/deleteTag/saveBookmark: resolve tab (sender.tab or query active); updateBadgeForTab(tab).\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BADGE_REFRESH-pseudocode.md"
   implementation_approach:
     details:
       - "Covers overlay-originated and popup-originated changes"
@@ -354,6 +373,7 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
     - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml"
   essence_pseudocode: "Local/File/Sync: create -> time=now, updated_at=now; update -> keep time, updated_at=now. Pinboard: updated_at=time; never send to API. Normalize/legacy: updated_at=time if missing.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES-pseudocode.md"
   implementation_approach:
     details: []
     summary: "Local/File/Sync/Browser saveBookmark create/update time rules; Pinboard updated_at = time."
@@ -490,6 +510,7 @@ IMPL-BOOKMARK_STATE_SYNC:
     - "ARCH-BOOKMARK_STATE_SYNC"
     - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_STATE_SYNC-pseudocode.md"
   implementation_approach:
     details:
       - "Badge compares states"
@@ -527,7 +548,10 @@ IMPL-BOOKMARK_STATE_SYNC:
       - "IMPL-BOOKMARK_STATE_SYNC"
     requirements:
       - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
-    tests: []
+    tests:
+      - "tests/unit/badge-manager.test.js"
+      - "tests/unit/tag-synchronization.test.js"
+      - "tests/unit/toggle-synchronization.test.js"
 IMPL-BOOKMARK_USAGE_TRACKING:
   code_locations:
     files:
@@ -541,6 +565,7 @@ IMPL-BOOKMARK_USAGE_TRACKING:
     - "REQ-BOOKMARK_USAGE_TRACKING"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING.yaml"
   essence_pseudocode: "recordVisit: debounce 60s; update usage map; if referrer valid add edge. getUsage/getAllUsage/getMostFrequent/getMostRecent/getInboundLinks/getOutboundLinks/getNavigationGraph/clearUsage.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING-pseudocode.md"
   implementation_approach:
     details: []
     summary: "BookmarkUsageTracker in bookmark-usage-tracker.js; recordVisit(url, referrer) with debounce; getUsage, getMostFrequent, getMostRecent, getInboundLinks, getOutboundLinks, getNavigationGraph; service worker and message handler wiring."
@@ -590,6 +615,7 @@ IMPL-BOOKMARK_USAGE_TRACKING_UI:
     - "REQ-BOOKMARK_USAGE_TRACKING"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING_UI.yaml"
   essence_pseudocode: "Surface 1: after loadInitialData fetch getBookmarkUsage(url) and getInboundLinks(url); if visitCount>0 show section else hide. Surface 2: after getAggregatedBookmarksForIndex fetch getBookmarkUsage(); merge by url; renderTableBody add visits/lastVisited cells; sort. Surface 3: TAB_USAGE; initUsageTab fetch getBookmarkUsageStats and getBookmarkNavigationGraph; render Most Visited, Recently Visited, Navigation Graph.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING_UI-pseudocode.md"
   implementation_approach:
     details: []
     summary: "Surface 1 – Usage section in"
@@ -628,14 +654,21 @@ IMPL-BOOKMARK_USAGE_TRACKING_UI:
       - "tests/unit/usage-panel.test.js"
 IMPL-BOOKMARKING:
   cross_references: []
+  decision: "Create/update/delete bookmarks via MessageHandler without leaving the page"
   detail_file: "implementation-decisions/IMPL-BOOKMARKING.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARKING-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "Bookmarking"
   rationale:
     why: "Bookmarking implementation"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-UX_CORE"
+    requirements:
+      - "REQ-SMART_BOOKMARKING"
 IMPL-BROWSER_BOOKMARK_IMPORT:
   code_locations:
     files:
@@ -651,6 +684,7 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
     - "REQ-BROWSER_BOOKMARK_IMPORT"
   detail_file: "implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml"
   essence_pseudocode: "ON load: getTree -> flattenTree -> allBookmarks. runImport: existingByUrl = getAggregatedBookmarksForIndex; for each selected build payload; Skip/Overwrite/Merge; saveBookmark per row; show imported/skipped/failed.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT-pseudocode.md"
   implementation_approach:
     details: []
     summary: "src/ui/browser-bookmark-import/ with HTML, JS (loadBrowserBookmarks, flattenTree, runImport), CSS; popup and options entry."
@@ -695,9 +729,21 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
       - "tests/unit/browser-bookmark-import.test.js"
 IMPL-BROWSER_BOOKMARK_SERVICE:
   detail_file: "implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE-pseudocode.md"
   name: "Browser Bookmark Service"
   status: "Active"
   summary: "BrowserBookmarkService in src/features/storage/browser-bookmark-service.js over chrome.bookmarks; folder path tags with root strip; URL collapse; wired as BookmarkRouter fifth provider."
+  traceability:
+    architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/browser-bookmark-service.test.js"
 IMPL-CODE_STYLE:
   code_locations:
     files:
@@ -713,6 +759,7 @@ IMPL-CODE_STYLE:
     - "ARCH-CODE_QUALITY"
     - "REQ-CODE_QUALITY"
   detail_file: "implementation-decisions/IMPL-CODE_STYLE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CODE_STYLE-pseudocode.md"
   implementation_approach:
     details:
       - "eslint.config.mjs: globalIgnores, spread @eslinter/eslint-config-standard, files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides"
@@ -766,6 +813,7 @@ IMPL-CONFIG_BACKUP_RESTORE:
     - "ARCH-CONFIG_STRUCTURE"
     - "REQ-CONFIG_PORTABILITY"
   detail_file: "implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE-pseudocode.md"
   implementation_approach:
     details: []
     summary: "ConfigManager.exportConfig(), importConfig()"
@@ -804,6 +852,7 @@ IMPL-CONFIG_MIGRATION:
     - "ARCH-CONFIG_STRUCTURE"
     - "REQ-CONFIG_PORTABILITY"
   detail_file: "implementation-decisions/IMPL-CONFIG_MIGRATION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CONFIG_MIGRATION-pseudocode.md"
   implementation_approach:
     details: []
     summary: "getAuthToken, setAuthToken, hasAuth, getAuthParam; retry in default config"
@@ -831,6 +880,9 @@ IMPL-CONFIG_MIGRATION:
       - "IMPL-CONFIG_MIGRATION"
     requirements:
       - "REQ-CONFIG_PORTABILITY"
+    tests:
+      - "tests/integration/config-manager-load.integration.test.js"
+      - "tests/unit/config-manager.test.js"
 IMPL-CONFIG_STRUCT:
   code_locations:
     files:
@@ -845,6 +897,7 @@ IMPL-CONFIG_STRUCT:
     - "REQ-CONFIGURATION"
     - "REQ-RECENT_TAGS_SYSTEM"
   detail_file: "implementation-decisions/IMPL-CONFIG_STRUCT.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CONFIG_STRUCT-pseudocode.md"
   implementation_approach:
     details:
       - "recentTagsActivityWindowMinutes and related keys in config-manager.js Zod schema"
@@ -886,6 +939,7 @@ IMPL-CONTEXT_MENU_QUICK_ACCESS:
     - "ARCH-QUICK_ACCESS_ENTRY"
     - "REQ-QUICK_ACCESS_ENTRY"
   detail_file: "implementation-decisions/IMPL-CONTEXT_MENU_QUICK_ACCESS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CONTEXT_MENU_QUICK_ACCESS-pseudocode.md"
   implementation_approach:
     summary: "setupContextMenus creates parent Hoverboard and four children; contextMenus.onClicked performs same four actions as commands."
   metadata:
@@ -926,6 +980,7 @@ IMPL-CROSS_BROWSER:
     - "REQ-EXTENSION_IDENTITY"
     - "REQ-SAFARI_ADAPTATION"
   detail_file: "implementation-decisions/IMPL-CROSS_BROWSER.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CROSS_BROWSER-pseudocode.md"
   implementation_approach:
     details:
       - "Export browser for service worker, content scripts, message-handler"
@@ -981,6 +1036,7 @@ IMPL-DEBUG_PANEL:
     - "ARCH-UI_TESTABILITY"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-DEBUG_PANEL.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-DEBUG_PANEL-pseudocode.md"
   implementation_approach:
     summary: "LOG_CATEGORIES in debug-logger; debugLogger.trace/debug in message-handler, PopupController, content-main; src/ui/debug/debug.html + debug.js (last actions, last messages, current bookmark/tags/backend)"
   metadata:
@@ -1000,6 +1056,8 @@ IMPL-DEBUG_PANEL:
     why: "Consistent DEBUG/TRACE labels for UI and message flow; optional in-extension view of last N actions and state"
   status: "Active"
   traceability:
+    architecture:
+      - "ARCH-UI_TESTABILITY"
     requirements:
       - "REQ-UI_INSPECTION"
 IMPL-DEMO_OVERLAY:
@@ -1012,6 +1070,7 @@ IMPL-DEMO_OVERLAY:
     - "PROC-DEMO_RECORDING"
     - "REQ-SIDE_PANEL_BROWSER_TABS"
   detail_file: "implementation-decisions/IMPL-DEMO_OVERLAY.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-DEMO_OVERLAY-pseudocode.md"
   implementation_approach:
     summary: "Overlay fixed at top of viewport; font 18-20px; setOverlay(action, achievement, textClass); five classes (intro, navigation, state, action, result) with assigned colors; 12 steps mapped to classes."
   metadata:
@@ -1044,8 +1103,24 @@ IMPL-DEMO_OVERLAY:
       - "IMPL-DEMO_OVERLAY"
       - "PROC-DEMO_RECORDING"
     requirements:
+      - "REQ-AI_TAGGING_POPUP"
+      - "REQ-BOOKMARK_USAGE_TRACKING"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-RECENT_TAGS_SYSTEM"
+      - "REQ-SIDE_PANEL_BOOKMARK_SEARCH"
+      - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
       - "REQ-SIDE_PANEL_BROWSER_TABS"
-    tests: []
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SIDE_PANEL_TAGS_TREE"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+    tests:
+      - "extension-demo-tabs.spec.js: Tabs panel shows filter and Copy Records when opened with hoverboard_sidepanel_active_tab=browserTabs"
+      - "extension-demo-tabs.spec.js: Tabs tab open panel switch to Tabs wait for list optional filter Copy Records"
+      - "extension-messaging.spec.js: side panel opens with Bookmarks tab visible when hoverboard_sidepanel_active_tab is set"
+      - "extension-messaging.spec.js: side panel opens with By Tag tab visible when hoverboard_sidepanel_active_tab is set to tagsTree"
+      - "extension-messaging.spec.js: side panel opens with Tabs tab visible when hoverboard_sidepanel_active_tab is set to browserTabs"
+      - "extension-usage-tracking.spec.js: bookmark panel has Quick Actions, Storage, tag sections, Search Tabs, footer (This Page demo)"
+      - "extension-usage-tracking.spec.js: side panel opens with Usage tab visible when hoverboard_sidepanel_active_tab is set to usage"
 IMPL-DEV_COMMAND_INSPECTION:
   code_locations:
     files:
@@ -1057,6 +1132,7 @@ IMPL-DEV_COMMAND_INSPECTION:
     - "REQ-UI_INSPECTION"
     - "REQ-URL_TAGS_DISPLAY"
   detail_file: "implementation-decisions/IMPL-DEV_COMMAND_INSPECTION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-DEV_COMMAND_INSPECTION-pseudocode.md"
   implementation_approach:
     summary: "DEV_COMMAND subcommands getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl (message-handler); getStorageSnapshot (service worker, returns key names only)"
   metadata:
@@ -1077,7 +1153,9 @@ IMPL-DEV_COMMAND_INSPECTION:
   status: "Active"
   traceability:
     requirements:
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
       - "REQ-UI_INSPECTION"
+      - "REQ-URL_TAGS_DISPLAY"
 IMPL-DOM_UTILITIES:
   code_locations:
     files:
@@ -1086,6 +1164,7 @@ IMPL-DOM_UTILITIES:
     - "ARCH-SHARED_UTILITIES"
     - "REQ-SHARED_UTILITIES"
   detail_file: "implementation-decisions/IMPL-DOM_UTILITIES.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-DOM_UTILITIES-pseudocode.md"
   implementation_approach:
     details: []
     summary: "domUtils and legacy helpers in src/shared/utils.js"
@@ -1113,6 +1192,8 @@ IMPL-DOM_UTILITIES:
       - "IMPL-DOM_UTILITIES"
     requirements:
       - "REQ-SHARED_UTILITIES"
+    tests:
+      - "tests/unit/dom-utils.test.js"
 IMPL-ERROR_HANDLING:
   code_locations:
     files:
@@ -1126,6 +1207,7 @@ IMPL-ERROR_HANDLING:
     - "ARCH-ERROR_HANDLING"
     - "REQ-ERROR_HANDLING"
   detail_file: "implementation-decisions/IMPL-ERROR_HANDLING.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-ERROR_HANDLING-pseudocode.md"
   implementation_approach:
     details:
       - "Error logging and reporting"
@@ -1165,6 +1247,7 @@ IMPL-ERROR_HANDLING:
       - "REQ-ERROR_HANDLING"
     tests:
       - "testErrorHandling_IMPL_ERROR_HANDLING"
+      - "tests/unit/module-import-fix.test.js"
 IMPL-EXAMPLE_IMPLEMENTATION:
   code_locations:
     files:
@@ -1181,6 +1264,7 @@ IMPL-EXAMPLE_IMPLEMENTATION:
     - "ARCH-EXAMPLE_DECISION"
     - "REQ-EXAMPLE_FEATURE"
   detail_file: "implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION-pseudocode.md"
   implementation_approach:
     details:
       - "API design decision"
@@ -1222,14 +1306,20 @@ IMPL-EXAMPLE_IMPLEMENTATION:
       - "testFeatureName_REQ_EXAMPLE_FEATURE"
 IMPL-EXT_IDENTITY:
   cross_references: []
+  decision: "Chromium extension identity: SW, content scripts, popup, options, side panel"
   detail_file: "implementation-decisions/IMPL-EXT_IDENTITY.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-EXT_IDENTITY-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "Extension Identity"
   rationale:
     why: "Extension identity implementation"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-EXT_IDENTITY"
+    requirements:
+      - "REQ-EXTENSION_IDENTITY"
 IMPL-EXTENSION_COMMANDS:
   code_locations:
     files:
@@ -1239,6 +1329,7 @@ IMPL-EXTENSION_COMMANDS:
     - "ARCH-QUICK_ACCESS_ENTRY"
     - "REQ-QUICK_ACCESS_ENTRY"
   detail_file: "implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-EXTENSION_COMMANDS-pseudocode.md"
   implementation_approach:
     summary: "manifest.json commands (open-side-panel, open-options, open-bookmarks-index, open-import); SW chrome.commands.onCommand switches and performs sidePanel.open, openOptionsPage, tabs.create."
   metadata:
@@ -1270,6 +1361,7 @@ IMPL-FEATURE_FLAGS:
     - "ARCH-CONFIG_STRUCTURE"
     - "REQ-CONFIG_PORTABILITY"
   detail_file: "implementation-decisions/IMPL-FEATURE_FLAGS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-FEATURE_FLAGS-pseudocode.md"
   implementation_approach:
     details: []
     summary: "Feature flags, UI behavior, badge config; ensureDefaults; getSettings/setSettings"
@@ -1309,6 +1401,7 @@ IMPL-FILE_BOOKMARK_SERVICE:
     - "REQ-FILE_BOOKMARK_STORAGE"
   detail_file: "implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml"
   essence_pseudocode: "INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)\nOUTPUT: bookmark object or list of bookmarks or success/error; shape matches provider contract\nDATA: adapter (readBookmarksFile, writeBookmarksFile); file shape = { version: 1, bookmarks: map url -> bookmark }\n\nLOAD bookmarks from file:\n  data = adapter.readBookmarksFile()\n  RETURN data.bookmarks (or {} if missing); in-memory map urlNorm -> bookmark\n\ngetBookmarkForUrl(url):\n  bookmarks = LOAD bookmarks from file\n  urlNorm = normalize(url)\n  RETURN bookmarks[urlNorm] or null\n\nsaveBookmark(data):\n  bookmarks = LOAD bookmarks from file\n  urlNorm = normalize(data.url)\n  bookmarks[urlNorm] = merge(data into bookmark shape with url, description, extended, tags, time, shared, toread, hash)\n  adapter.writeBookmarksFile({ version: 1, bookmarks })\n  RETURN { success: true }\n\ndeleteBookmark(url):\n  bookmarks = LOAD bookmarks from file\n  REMOVE bookmarks[normalize(url)]\n  adapter.writeBookmarksFile({ version: 1, bookmarks })\n  RETURN { success: true }\n\nsaveTag(data), deleteTag(data):\n  bookmark = getBookmarkForUrl(data.url); update tags; saveBookmark(bookmark) or equivalent\n  RETURN { success: true }\n\ngetRecentBookmarks(count):\n  bookmarks = LOAD bookmarks from file\n  list = values(bookmarks)\n  SORT list BY time DESCENDING\n  RETURN list[0..count-1]\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE-pseudocode.md"
   implementation_approach:
     details:
       - "Adapter methods: readBookmarksFile() -> Promise<{ version, bookmarks }>, writeBookmarksFile(data) -> Promise<void>"
@@ -1355,7 +1448,10 @@ IMPL-FILE_BOOKMARK_SERVICE:
     requirements:
       - "REQ-FILE_BOOKMARK_STORAGE"
     tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
       - "tests/unit/file-bookmark-service.test.js"
+      - "tests/unit/message-file-bookmark-adapter.test.js"
+      - "tests/unit/offscreen-file-bookmark-messaging.test.js"
 IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
   code_locations:
     files:
@@ -1365,6 +1461,7 @@ IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
     - "IMPL-FILE_STORAGE_TYPED_PATH"
     - "REQ-FILE_BOOKMARK_STORAGE"
   detail_file: "implementation-decisions/IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE-pseudocode.md"
   implementation_approach:
     details:
       - "expand_tilde: H=\"${HOME%/}\"; use H in all branches so ~/.hoverboard becomes /home/user/.hoverboard not /home/user//.hoverboard"
@@ -1423,6 +1520,7 @@ IMPL-FILE_STORAGE_TYPED_PATH:
     - "IMPL-NATIVE_HOST_WRAPPER"
     - "REQ-FILE_BOOKMARK_STORAGE"
   detail_file: "implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH-pseudocode.md"
   implementation_approach:
     details:
       - "Helper: path as directory -> path/hoverboard-bookmarks.json; path ending .json as file; create dir on write; see IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE for HOME normalization and post-write check"
@@ -1475,6 +1573,7 @@ IMPL-ICON_CLICK_BEHAVIOR:
     - "ARCH-ICON_CLICK_BEHAVIOR"
     - "REQ-ICON_CLICK_BEHAVIOR"
   detail_file: "implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR-pseudocode.md"
   implementation_approach:
     summary: "Remove action.default_popup; ConfigManager iconClickOpensSidePanel; options toggle; SW action.onClicked reads config and opens side panel or popup."
   metadata:
@@ -1497,7 +1596,9 @@ IMPL-ICON_CLICK_BEHAVIOR:
     requirements:
       - "REQ-ICON_CLICK_BEHAVIOR"
     tests:
+      - "tests/playwright/extension-icon-click.spec.js"
       - "tests/unit/service-worker-quick-access.test.js"
+      - "tests/unit/side-panel-icon-toggle.test.js"
 IMPL-LOCAL_BOOKMARK_SERVICE:
   code_locations:
     files:
@@ -1509,6 +1610,7 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE-pseudocode.md"
   implementation_approach:
     details:
       - "Default provider is local (ConfigManager getDefaultConfiguration().storageMode: 'local')"
@@ -1553,6 +1655,7 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
     code_annotations:
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
     requirements:
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
       - "REQ-STORAGE_MODE_DEFAULT"
     tests:
       - "tests/unit/local-bookmark-service.test.js"
@@ -1640,14 +1743,19 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   summary: "Bookmarks Index aggregates local+file+sync+browser; Store B filter; preferredBackend on delete."
   traceability:
     architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "IMPL-LOCAL_BOOKMARKS_INDEX"
     requirements:
       - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-LOCAL_BOOKMARKS_INDEX"
     tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
       - "tests/unit/bookmarks-table-index.test.js"
+      - "tests/unit/bookmarks-table-time.test.js"
+      - "tests/unit/message-handler-bookmarks-index.test.js"
 IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   code_locations:
     files:
@@ -1669,6 +1777,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
     - "REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml"
   essence_pseudocode: "parseTagsInput(raw): empty -> []; split comma, trim, filter empty, dedupe case-insensitive. mergeTags(existing, new): merge with case-insensitive dedupe. addTagsToSelected: parse input; for each selected URL merge tags; saveBookmark({ ...bookmark, tags: merged, preferredBackend }); loadBookmarks(); clear input and selection.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS-pseudocode.md"
   implementation_approach:
     details: []
     summary: "parseTagsInput and mergeTags in filter module; add-tags row; addTagsToSelected sends saveBookmark per selected with merged tags and preferredBackend; refresh and clear."
@@ -1709,6 +1818,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
     requirements:
       - "REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
     tests:
+      - "tests/unit/bookmarks-table-index.test.js (parseTagsInput, mergeTags, removeTags, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, Add tags UI)"
       - "tests/unit/bookmarks-table-index.test.js"
 IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
   code_locations:
@@ -1728,6 +1838,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
     - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml"
   essence_pseudocode: "exportBookmarks(scope): source = allBookmarks|filteredBookmarks|selected; buildCsv(source); Blob+object URL+<a download>; revoke. updateExportButtonState() disables Export selected when no selection.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT-pseudocode.md"
   implementation_approach:
     details:
       - "bookmarks-table.html: Export all and Export displayed buttons in toolbar"
@@ -1769,7 +1880,8 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
       - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
     requirements:
       - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
-    tests: []
+    tests:
+      - "tests/unit/bookmarks-table-export.test.js"
 IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
   code_locations:
     files:
@@ -1791,6 +1903,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
     - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml"
   essence_pseudocode: "runImport(file): parseImportFile -> rows; if Only new filter by allBookmarks; for each row send saveBookmark({ ...row, preferredBackend }); count imported/skipped/failed; loadBookmarks(); show result.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT-pseudocode.md"
   implementation_approach:
     details:
       - bookmarks-table-csv.js: "parseCsv(csvString) returning array of bookmark-like objects"
@@ -1835,6 +1948,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
     requirements:
       - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
     tests:
+      - "tests/unit/bookmarks-table-import-status.test.js"
       - "tests/unit/bookmarks-table-import.test.js"
 IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   code_locations:
@@ -1855,6 +1969,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
     - "REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml"
   essence_pseudocode: "applyRegexReplace(bookmark, patternStr, replacementStr, options): try RegExp(patternStr,'g'); catch return error; for each option field replace; return payload. regexReplaceSelected: read inputs/checkboxes; validate regex; for each selected applyRegexReplace and saveBookmark; loadBookmarks; selectionStillVisible; render.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE-pseudocode.md"
   implementation_approach:
     details: []
     summary: "applyRegexReplace in filter module; regex-replace row with inputs, checkboxes, Replace button; regexReplaceSelected validates regex, applyRegexReplace per selected, saveBookmark, refresh, selectionStillVisible."
@@ -1895,6 +2010,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
     requirements:
       - "REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
     tests:
+      - "tests/unit/bookmarks-table-index.test.js (applyRegexReplace, regex replace UI)"
       - "tests/unit/bookmarks-table-index.test.js"
 IMPL-LOG_LEVEL_CONFIG:
   code_locations:
@@ -1905,6 +2021,7 @@ IMPL-LOG_LEVEL_CONFIG:
     - "REQ-STRUCTURED_LOGGING"
   detail_file: "implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml"
   essence_pseudocode: "getLogLevel() from NODE_ENV; production => warn, else => debug. Used by shouldLog.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOG_LEVEL_CONFIG-pseudocode.md"
   implementation_approach:
     details: []
     summary: "getLogLevel() in src/shared/logger.js"
@@ -1947,6 +2064,7 @@ IMPL-LOGGER_CONTEXT_LEVELS:
     - "REQ-STRUCTURED_LOGGING"
   detail_file: "implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml"
   essence_pseudocode: "Logger(context); shouldLog(level); formatMessage; debug/info/warn/error. logger, createLogger.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS-pseudocode.md"
   implementation_approach:
     details: []
     summary: "Logger class, logger, createLogger in src/shared/logger.js"
@@ -1989,6 +2107,7 @@ IMPL-LOGGER_LEGACY:
     - "REQ-STRUCTURED_LOGGING"
   detail_file: "implementation-decisions/IMPL-LOGGER_LEGACY.yaml"
   essence_pseudocode: "log(context, ...args) -> debug; noisy for migration. Same logger module.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOGGER_LEGACY-pseudocode.md"
   implementation_approach:
     details: []
     summary: "log(), noisy in src/shared/logger.js"
@@ -2109,6 +2228,7 @@ IMPL-MESSAGE_HANDLING:
     - "REQ-RECENT_TAGS_SYSTEM"
     - "REQ-SMART_BOOKMARKING"
   detail_file: "implementation-decisions/IMPL-MESSAGE_HANDLING.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-MESSAGE_HANDLING-pseudocode.md"
   implementation_approach:
     details:
       - "Async request/response"
@@ -2242,6 +2362,7 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
     - "REQ-MOVE_BOOKMARK_STORAGE_UI"
   detail_file: "implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml"
   essence_pseudocode: "Popup: result = response?.data ?? response; show success/error from result. Move URL = currentPin?.url || currentTab?.url.\nRouter: if bookmark has url but no time, toSave = { ...bookmark, time: now }; save to target, delete from source, update index.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL-pseudocode.md"
   implementation_approach:
     summary: "Popup uses inner result (response.data); move URL from currentPin when available; router accepts bookmark.url and sets time when missing."
   metadata:
@@ -2290,6 +2411,7 @@ IMPL-MOVE_BOOKMARK_UI:
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml"
   essence_pseudocode: "INPUT: currentUrl, currentPin, user action (select storage, save, toggle)\nON load: backend = getStorageBackendForUrl or default; set highlighted button; show/hide file↔browser toggle.\nON storage click: url = currentPin?.url || currentTab?.url; SEND moveBookmarkToStorage(url, target); result = response?.data ?? response; refresh on success.\nON save: data.preferredBackend = getSelectedStorageBackend(); SEND saveBookmark(data).\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-MOVE_BOOKMARK_UI-pseudocode.md"
   implementation_approach:
     details:
       - "On save (createBookmark, addTagsToBookmark, handleTogglePrivate, handleReadLater): add data.preferredBackend = getSelectedStorageBackend() so save follows highlight"
@@ -2334,16 +2456,25 @@ IMPL-MOVE_BOOKMARK_UI:
     requirements:
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-STORAGE_MODE_DEFAULT"
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"
 IMPL-MV3_MIGRATION:
   cross_references: []
+  decision: "Manifest V3 service worker background; preserve messaging contracts"
   detail_file: "implementation-decisions/IMPL-MV3_MIGRATION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-MV3_MIGRATION-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "MV3 Migration"
   rationale:
     why: "Manifest V3 migration"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-MV3_MIGRATION"
+    requirements:
+      - "REQ-MANIFEST_V3_MIGRATION"
 IMPL-NATIVE_HOST_INSTALLER:
   code_locations:
     files:
@@ -2354,6 +2485,7 @@ IMPL-NATIVE_HOST_INSTALLER:
     - "ARCH-NATIVE_HOST"
     - "REQ-NATIVE_HOST_WRAPPER"
   detail_file: "implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-NATIVE_HOST_INSTALLER-pseudocode.md"
   implementation_approach:
     details:
       - "Install dir: ~/.hoverboard or %LOCALAPPDATA%\\Hoverboard"
@@ -2397,6 +2529,7 @@ IMPL-NATIVE_HOST_WRAPPER:
     - "ARCH-NATIVE_HOST"
     - "REQ-NATIVE_HOST_WRAPPER"
   detail_file: "implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-NATIVE_HOST_WRAPPER-pseudocode.md"
   implementation_approach:
     details:
       - "Helper: stdin = message JSON, stdout = response JSON"
@@ -2430,6 +2563,9 @@ IMPL-NATIVE_HOST_WRAPPER:
       - "IMPL-NATIVE_HOST_WRAPPER"
     requirements:
       - "REQ-NATIVE_HOST_WRAPPER"
+    tests:
+      - "native_host/main_test.go"
+      - "tests/unit/native-host-ping.test.js"
 IMPL-OVERLAY:
   code_locations:
     files:
@@ -2452,6 +2588,7 @@ IMPL-OVERLAY:
     - "ARCH-OVERLAY"
     - "REQ-OVERLAY_SYSTEM"
   detail_file: "implementation-decisions/IMPL-OVERLAY.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-OVERLAY-pseudocode.md"
   implementation_approach:
     details:
       - "Auto-show logic"
@@ -2492,7 +2629,8 @@ IMPL-OVERLAY:
       - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
       - "REQ-OVERLAY_REFRESH_ACTION"
       - "REQ-OVERLAY_SYSTEM"
-    tests: []
+    tests:
+      - "tests/unit/overlay-tag-persistence.test.js"
 IMPL-OVERLAY_CONTROLS:
   code_locations:
     files:
@@ -2509,6 +2647,7 @@ IMPL-OVERLAY_CONTROLS:
     - "ARCH-OVERLAY_CONTROLS"
     - "REQ-OVERLAY_CONTROL_LAYOUT"
   detail_file: "implementation-decisions/IMPL-OVERLAY_CONTROLS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-OVERLAY_CONTROLS-pseudocode.md"
   implementation_approach:
     details:
       - "24px min touch targets"
@@ -2547,7 +2686,10 @@ IMPL-OVERLAY_CONTROLS:
       - "IMPL-OVERLAY_CONTROLS"
     requirements:
       - "REQ-OVERLAY_CONTROL_LAYOUT"
-    tests: []
+    tests:
+      - "tests/unit/overlay-close-button-positioning.test.js"
+      - "tests/unit/overlay-refresh-accessibility.test.js"
+      - "tests/unit/overlay-refresh-button.test.js"
 IMPL-OVERLAY_TEST_HARNESS:
   code_locations:
     files:
@@ -2558,6 +2700,7 @@ IMPL-OVERLAY_TEST_HARNESS:
     - "ARCH-OVERLAY_TESTABILITY"
     - "REQ-OVERLAY_SYSTEM"
   detail_file: "implementation-decisions/IMPL-OVERLAY_TEST_HARNESS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-OVERLAY_TEST_HARNESS-pseudocode.md"
   implementation_approach:
     details:
       - "Auto-register on property assignments"
@@ -2595,7 +2738,10 @@ IMPL-OVERLAY_TEST_HARNESS:
     requirements:
       - "REQ-OVERLAY_CONTROL_LAYOUT"
       - "REQ-OVERLAY_SYSTEM"
-    tests: []
+    tests:
+      - "tests/unit/overlay-test-debug.test.js"
+      - "tests/utils/mock-dom.js"
+      - "tests/utils/overlay-test-harness.js"
 IMPL-PINBOARD_API:
   code_locations:
     files:
@@ -2608,6 +2754,7 @@ IMPL-PINBOARD_API:
     - "ARCH-PINBOARD_API"
     - "REQ-PINBOARD_COMPATIBILITY"
   detail_file: "implementation-decisions/IMPL-PINBOARD_API.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PINBOARD_API-pseudocode.md"
   implementation_approach:
     details:
       - "401 error handling"
@@ -2660,6 +2807,7 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
     - "IMPL-TAG_SYSTEM"
     - "REQ-PINBOARD_COMPATIBILITY"
   detail_file: "implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING-pseudocode.md"
   implementation_approach:
     details:
       - "Applied to url, description, extended, tags, shared, toread in pinboard-service"
@@ -2717,6 +2865,7 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
     - "REQ-THIS_PAGE_TAG_SORT"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION-pseudocode.md"
   implementation_approach:
     summary: "playwright.extension.config.js; global-setup builds extension; extension-fixture.js provides launchPersistentContext and getExtensionId; extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js, extension-this-page-tag-sort.spec.js cover popup, popup↔background, popup→content, GET_PAGE_CONTENT, suggested tags, GET_PAGE_SELECTION, overlay (snapshotOverlay), options/side panel messaging, options snapshot, bookmarks table, browser import, offscreen, side panel tag sort toolbar (REQ-THIS_PAGE_TAG_SORT). Run: npm run test:e2e:extension."
   metadata:
@@ -2755,6 +2904,7 @@ IMPL-POPUP_BUNDLE:
     - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
     - "REQ-EXTENSION_BUNDLED_ENTRY_POINTS"
   detail_file: "implementation-decisions/IMPL-POPUP_BUNDLE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_BUNDLE-pseudocode.md"
   implementation_approach:
     summary: "build:popup bundles src/ui/popup/popup.js to dist/src/ui/popup/popup.js; scripts/build.js runs build:popup and skips copying ui/popup/popup.js"
   metadata:
@@ -2778,14 +2928,21 @@ IMPL-POPUP_BUNDLE:
       - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
     requirements:
       - "REQ-EXTENSION_BUNDLED_ENTRY_POINTS"
+    tests:
+      - "tests/unit/popup-error-message.test.js"
 IMPL-POPUP_MESSAGE_TIMEOUT:
   code_locations:
     files:
       - path: "src/ui/popup/PopupController.js"
         description: "Popup controller"
     functions: []
-  cross_references: []
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "ARCH-POPUP_SESSION"
+    - "IMPL-MESSAGE_HANDLING"
+    - "REQ-CORE_UX_PRESERVATION"
   detail_file: "implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT-pseudocode.md"
   implementation_approach:
     details:
       - "Error handling"
@@ -2816,10 +2973,13 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
     supersedes: []
   status: "Active"
   traceability:
-    architecture: []
+    architecture:
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-POPUP_SESSION"
     code_annotations:
       - "IMPL-POPUP_MESSAGE_TIMEOUT"
-    requirements: []
+    requirements:
+      - "REQ-CORE_UX_PRESERVATION"
     tests: []
 IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
   code_locations:
@@ -2830,6 +2990,7 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
     - "ARCH-QUICK_ACCESS_ENTRY"
     - "REQ-QUICK_ACCESS_ENTRY"
   detail_file: "implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS-pseudocode.md"
   implementation_approach:
     summary: "KeyboardManager shortcuts Ctrl+Shift+KeyB/O/M/I emit openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport; side panel enableKeyboard true and setupKeyboardNavigation."
   metadata:
@@ -2874,6 +3035,7 @@ IMPL-POPUP_SESSION:
     - "ARCH-POPUP_SESSION"
     - "REQ-POPUP_PERSISTENT_SESSION"
   detail_file: "implementation-decisions/IMPL-POPUP_SESSION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_SESSION-pseudocode.md"
   implementation_approach:
     details:
       - "GET_OVERLAY_STATE fallback"
@@ -2912,7 +3074,9 @@ IMPL-POPUP_SESSION:
       - "IMPL-POPUP_SESSION"
     requirements:
       - "REQ-POPUP_PERSISTENT_SESSION"
-    tests: []
+    tests:
+      - "tests/unit/popup-checkbox.test.js"
+      - "tests/unit/popup-close-behavior.test.js"
 IMPL-POPUP_THEME_CSS:
   code_locations:
     files:
@@ -2923,6 +3087,7 @@ IMPL-POPUP_THEME_CSS:
     - "IMPL-SCREENSHOT_MODE"
     - "REQ-DARK_THEME"
   detail_file: "implementation-decisions/IMPL-POPUP_THEME_CSS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_THEME_CSS-pseudocode.md"
   implementation_approach:
     details:
       - "ThemeManager applies hb-theme-dark to document.documentElement and sets --hb-* variables; popup uses --bg-primary, --text-primary, etc. from popup.css"
@@ -2956,16 +3121,24 @@ IMPL-POPUP_THEME_CSS:
       - "IMPL-POPUP_THEME_CSS"
     requirements:
       - "REQ-DARK_THEME"
+    tests:
+      - "tests/unit/dark-theme-default.test.js"
 IMPL-PRIVACY:
   cross_references: []
+  decision: "Private/shared flags and URL inhibition privacy controls"
   detail_file: "implementation-decisions/IMPL-PRIVACY.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PRIVACY-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "Privacy"
   rationale:
     why: "Privacy implementation"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-PRIVACY"
+    requirements:
+      - "REQ-PRIVACY_CONTROLS"
 IMPL-RECENT_TAGS_POPUP_REFRESH:
   code_locations:
     files:
@@ -2983,6 +3156,7 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
     - "ARCH-TAG_SYSTEM"
     - "REQ-RECENT_TAGS_SYSTEM"
   detail_file: "implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH-pseudocode.md"
   implementation_approach:
     summary: "setupAutoRefresh visibilitychange; loadRecentTags sends getRecentBookmarks with currentTags; handler uses getUserRecentTagsExcludingCurrent; UI updates chips; failure → empty + log"
   metadata:
@@ -3035,6 +3209,7 @@ IMPL-RUNTIME_VALIDATION:
     - "ARCH-MESSAGE_HANDLING"
     - "IMPL-MESSAGE_HANDLING"
   detail_file: "implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-RUNTIME_VALIDATION-pseudocode.md"
   implementation_approach:
     details:
       - "Config schema validates merged (defaults + stored) config in ConfigManager.getConfig(); on failure use defaults"
@@ -3077,9 +3252,12 @@ IMPL-RUNTIME_VALIDATION:
       - "ARCH-MESSAGE_HANDLING"
     code_annotations:
       - "IMPL-RUNTIME_VALIDATION"
-    requirements: []
+    requirements:
+      - "REQ-CODE_QUALITY"
     tests:
+      - "tests/unit/config-manager.test.js (describe IMPL-RUNTIME_VALIDATION)"
       - "tests/unit/config-manager.test.js"
+      - "tests/unit/message-handler-contracts.test.js"
       - "tests/unit/message-handler-local-save-recall.test.js"
       - "tests/unit/message-handler-runtime-validation.test.js"
       - "tests/unit/message-schemas.test.js"
@@ -3091,6 +3269,7 @@ IMPL-SAFARI_ADAPTATION:
     - "ARCH-SAFARI_ADAPTATION"
     - "REQ-SAFARI_ADAPTATION"
   detail_file: "implementation-decisions/IMPL-SAFARI_ADAPTATION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SAFARI_ADAPTATION-pseudocode.md"
   implementation_approach:
     details:
       - "Chrome runtime uses IMPL-CROSS_BROWSER shim"
@@ -3145,6 +3324,7 @@ IMPL-SCREENSHOT_MODE:
     - "IMPL-UI_TESTABILITY_HOOKS"
     - "REQ-LOCAL_BOOKMARKS_INDEX"
   detail_file: "implementation-decisions/IMPL-SCREENSHOT_MODE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SCREENSHOT_MODE-pseudocode.md"
   implementation_approach:
     details:
       - "Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme: 'dark' (see IMPL-POPUP_THEME_CSS)"
@@ -3183,16 +3363,29 @@ IMPL-SCREENSHOT_MODE:
   traceability:
     code_annotations:
       - "IMPL-SCREENSHOT_MODE"
+    requirements:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-RECENT_TAGS_SYSTEM"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+    tests:
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/screenshot-placeholder-data.test.js"
 IMPL-SEARCH:
   cross_references: []
+  decision: "Bookmark/tab search with consistent no-match feedback"
   detail_file: "implementation-decisions/IMPL-SEARCH.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SEARCH-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "Search"
   rationale:
     why: "Search implementation"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-SEARCH"
+    requirements:
+      - "REQ-SEARCH_FUNCTIONALITY"
 IMPL-SELECTION_TO_TAG_INPUT:
   code_locations:
     files:
@@ -3204,6 +3397,7 @@ IMPL-SELECTION_TO_TAG_INPUT:
     - "ARCH-SELECTION_TO_TAG_INPUT"
     - "REQ-SELECTION_TO_TAG_INPUT"
   detail_file: "implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT-pseudocode.md"
   implementation_approach:
     details:
       - "Content script: handleMessage case GET_PAGE_SELECTION returns selection string"
@@ -3237,16 +3431,25 @@ IMPL-SELECTION_TO_TAG_INPUT:
       - "IMPL-SELECTION_TO_TAG_INPUT"
     requirements:
       - "REQ-SELECTION_TO_TAG_INPUT"
+      - "REQ-TAG_MANAGEMENT"
+    tests:
+      - "tests/unit/selection-to-tag-input.test.js"
 IMPL-SERVICE_WORKER:
   cross_references: []
+  decision: "MV3 service worker messaging, badge, recent-tags memory lifecycle"
   detail_file: "implementation-decisions/IMPL-SERVICE_WORKER.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SERVICE_WORKER-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "Service Worker"
   rationale:
     why: "Service worker implementation"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-SERVICE_WORKER"
+    requirements:
+      - "REQ-MANIFEST_V3_MIGRATION"
 IMPL-SESSION_TAGS:
   code_locations:
     files:
@@ -3261,6 +3464,7 @@ IMPL-SESSION_TAGS:
     - "ARCH-AI_TAGGING_FLOW"
     - "REQ-AI_TAGGING_POPUP"
   detail_file: "implementation-decisions/IMPL-SESSION_TAGS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SESSION_TAGS-pseudocode.md"
   implementation_approach:
     summary: "getSessionTags() and recordSessionTags(tags); chrome.storage.session or in-memory in SW; add on saveTag/saveBookmark success."
   metadata:
@@ -3304,8 +3508,9 @@ IMPL-SIDE_PANEL_BOOKMARK:
     - "IMPL-UIManager_SCOPED_ROOT"
     - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
   detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK-pseudocode.md"
   implementation_approach:
-    summary: "null"
+    summary: "Bookmark tab hosts popup-equivalent UI via createPopup({ container: bookmarkPanel }) and UIManager scoped root (data-popup-ref); By Tag switches to Tags tab in panel context."
   metadata:
     created:
       author: "AI Agent"
@@ -3357,6 +3562,7 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
     - "ARCH-SIDE_PANEL_BOOKMARK_SEARCH"
     - "REQ-SIDE_PANEL_BOOKMARK_SEARCH"
   detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK_SEARCH.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK_SEARCH-pseudocode.md"
   implementation_approach:
     summary: "filterBookmarksBySearch in tags-tree-filter.js; tags-tree.js/html/css: search input, count, Next/Previous; data-search-index on links; scroll and highlight current match."
   metadata:
@@ -3411,6 +3617,7 @@ IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
     - "ARCH-SIDE_PANEL_BROWSER_BOOKMARKS"
     - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
   detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BROWSER_BOOKMARKS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_BROWSER_BOOKMARKS-pseudocode.md"
   implementation_approach:
     summary: "Panel fetches chrome.bookmarks.getTree; flatten to list; build folder tree with counts; filter by query and folder; render list; click URL opens in new tab."
   metadata:
@@ -3459,8 +3666,9 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
     - "ARCH-SIDE_PANEL_BROWSER_TABS"
     - "REQ-SIDE_PANEL_BROWSER_TABS"
   detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS-pseudocode.md"
   implementation_approach:
-    summary: "browser-tabs-panel.js: filterBrowserTabs, buildUrlListForCopy, getVisibleTabIds; chrome.tabs.query and scripting for referrer; render list; wire filter, copy, close."
+    summary: "Tabs panel: chrome.tabs query, scope-aware filter, display modes, batch bookmark actions, gather/distribute, close/copy; preferredBackend local on create from tabs."
   metadata:
     created:
       author: "AI Agent"
@@ -3511,6 +3719,7 @@ IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS:
     - "ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS"
     - "REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS"
   detail_file: "implementation-decisions/IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS-pseudocode.md"
   implementation_approach:
     details:
       - "buildRecordsYamlForCopy: include sessionId and lastModified for closed tabs"
@@ -3521,6 +3730,7 @@ IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS:
       - "Scope: when tabSource includes recentlyClosed, force searchScope to tabInfo; show note"
       - "Sessions API check: if !chrome.sessions hide recentlyClosed and both options"
       - "Tab source: open | recentlyClosed | both in Scope section; default open"
+    summary: "Tab source open|recentlyClosed|both; GET_RECENTLY_CLOSED_TABS normalize/merge/restore; force searchScope tabInfo when closed included."
   metadata:
     created:
       author: "AI Agent"
@@ -3567,6 +3777,7 @@ IMPL-SIDE_PANEL_SNAPSHOT:
     - "REQ-SIDE_PANEL_TAGS_TREE"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT-pseudocode.md"
   implementation_approach:
     summary: "snapshotSidePanel(page) in tests/e2e/helpers.js returns { bookmarkTab, tagsTreeTab }; page.evaluate queries"
   metadata:
@@ -3591,7 +3802,9 @@ IMPL-SIDE_PANEL_SNAPSHOT:
       - "REQ-SIDE_PANEL_TAGS_TREE"
       - "REQ-UI_INSPECTION"
     tests:
+      - "tests/e2e/popup-snapshot.e2e.test.js (shape contract)"
       - "tests/e2e/popup-snapshot.e2e.test.js"
+      - "tests/playwright/extension-messaging.spec.js (Side panel snapshot describe block)"
       - "tests/playwright/extension-messaging.spec.js"
 IMPL-SIDE_PANEL_TABS:
   code_locations:
@@ -3655,6 +3868,7 @@ IMPL-SIDE_PANEL_TABS:
     - "REQ-SIDE_PANEL_BROWSER_TABS"
     - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
   detail_file: "implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_TABS-pseudocode.md"
   implementation_approach:
     details:
       - "bindWindowFocusRecentTagsRefresh: chrome.windows.onFocusChanged → getCurrent match → shouldInvokeLoadRecentTagsOnWindowFocusSync → controller.loadRecentTags (REQ-RECENT_TAGS_SYSTEM); Phase G composition + Phase H E2E per detail_file"
@@ -3733,6 +3947,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     - "ARCH-SIDE_PANEL_TAGS_TREE"
     - "REQ-SIDE_PANEL_TAGS_TREE"
   detail_file: "implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE-pseudocode.md"
   implementation_approach:
     details:
       - Panel: "tags-tree.html, tags-tree.js, tags-tree.css; tags-tree-data.js (pure buildTagToBookmarks) for unit tests"
@@ -3772,29 +3987,45 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     requirements:
       - "REQ-SIDE_PANEL_TAGS_TREE"
     tests:
+      - "tests/playwright/extension-messaging.spec.js"
       - "tests/unit/side-panel-open.test.js"
       - "tests/unit/tags-tree-data.test.js"
+      - "tests/unit/tags-tree-demo-data.test.js"
       - "tests/unit/tags-tree-filter.test.js"
+      - "tests/unit/tags-tree-ui.test.js"
 IMPL-SITE_MGMT:
   cross_references: []
+  decision: "Per-site allow/inhibit policy for content UI"
   detail_file: "implementation-decisions/IMPL-SITE_MGMT.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SITE_MGMT-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "Site Management"
   rationale:
     why: "Site management implementation"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-SITE_MGMT"
+    requirements:
+      - "REQ-SITE_MANAGEMENT"
 IMPL-STORAGE:
   cross_references: []
+  decision: "chrome.storage.sync/local settings and portable export/import"
   detail_file: "implementation-decisions/IMPL-STORAGE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-STORAGE-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "Storage"
   rationale:
     why: "Storage implementation"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-STORAGE"
+    requirements:
+      - "REQ-CHROME_STORAGE_USAGE"
+      - "REQ-CONFIG_PORTABILITY"
 IMPL-STORAGE_INDEX:
   code_locations:
     files:
@@ -3879,6 +4110,7 @@ IMPL-SUGGESTED_TAGS:
     - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
     - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
   detail_file: "implementation-decisions/IMPL-SUGGESTED_TAGS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SUGGESTED_TAGS-pseudocode.md"
   implementation_approach:
     details: []
     summary: "Extract from title, URL, meta, headings, emphasis, definitions, tables, nav, breadcrumbs, images, links (per-source limits). Tokenize, filter noise, frequency sort, case preservation, sanitize, deduplicate, apply limit. Overlay: TagService.extractSuggestedTagsFromContent. Popup (Chromium): chrome.scripting.executeScript MAIN files (suggested-tags-main-world-snippet.js) then func calling global extractor; PopupController normalizes to { tag, relevance, inPageFrequency } and filters current bookmark tags before updateSuggestedTags."
@@ -3931,6 +4163,7 @@ IMPL-SYNC_BOOKMARK_SERVICE:
     - "ARCH-SYNC_STORAGE_PROVIDER"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
   detail_file: "implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE-pseudocode.md"
   implementation_approach:
     summary: "SyncBookmarkService in src/features/storage/sync-bookmark-service.js; chrome.storage.sync key hoverboard_sync_bookmarks."
   metadata:
@@ -3947,6 +4180,14 @@ IMPL-SYNC_BOOKMARK_SERVICE:
       - "Sync across Chrome profile devices; quota ~100 KB documented"
     why: "Peer storage backend (sync) under five-provider BookmarkRouter using chrome.storage.sync"
   status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+      - "ARCH-SYNC_STORAGE_PROVIDER"
+    requirements:
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    tests:
+      - "tests/unit/sync-bookmark-service.test.js"
 IMPL-TAB_SEARCH_NO_MATCH_UI:
   code_locations:
     files:
@@ -3967,6 +4208,7 @@ IMPL-TAB_SEARCH_NO_MATCH_UI:
     - "ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK"
     - "REQ-TAB_SEARCH_NO_MATCH_UX"
   detail_file: "implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI-pseudocode.md"
   implementation_approach:
     details:
       - "CSS: .button.secondary.search-no-match { border-color: bright red; transition: border-color 2s ease; }"
@@ -4025,6 +4267,7 @@ IMPL-TAB_SEARCH_SERVICE:
   cross_references:
     - "REQ-SEARCH_FUNCTIONALITY"
   detail_file: "implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TAB_SEARCH_SERVICE-pseudocode.md"
   implementation_approach:
     details:
       - "Chrome API errors surfaced as rejected promise"
@@ -4088,6 +4331,7 @@ IMPL-TAG_SYSTEM:
     - "REQ-RECENT_TAGS_SYSTEM"
     - "REQ-TAG_INPUT_SANITIZATION"
   detail_file: "implementation-decisions/IMPL-TAG_SYSTEM.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TAG_SYSTEM-pseudocode.md"
   implementation_approach:
     details:
       - "addTagToUserRecentList → recentTagsMemory.addTag"
@@ -4146,6 +4390,7 @@ IMPL-TESTING:
   cross_references:
     - "ARCH-TESTING_STRATEGY"
   detail_file: "implementation-decisions/IMPL-TESTING.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TESTING-pseudocode.md"
   implementation_approach:
     details:
       - "Integration testing implementation details"
@@ -4186,6 +4431,7 @@ IMPL-TESTING:
       - "REQ-CODE_QUALITY"
     tests:
       - "All test files implement this strategy"
+      - "tests/unit/simple.test.js"
 IMPL-TEXT_UTILITIES:
   code_locations:
     files:
@@ -4194,6 +4440,7 @@ IMPL-TEXT_UTILITIES:
     - "ARCH-SHARED_UTILITIES"
     - "REQ-SHARED_UTILITIES"
   detail_file: "implementation-decisions/IMPL-TEXT_UTILITIES.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TEXT_UTILITIES-pseudocode.md"
   implementation_approach:
     details: []
     summary: "stringUtils in src/shared/utils.js"
@@ -4223,14 +4470,20 @@ IMPL-TEXT_UTILITIES:
       - "REQ-SHARED_UTILITIES"
 IMPL-THEME:
   cross_references: []
+  decision: "Dark theme default with toggle and persistence"
   detail_file: "implementation-decisions/IMPL-THEME.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-THEME-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "Theme"
   rationale:
     why: "Theme implementation"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-THEME"
+    requirements:
+      - "REQ-DARK_THEME"
 IMPL-THIS_PAGE_TAG_SORT:
   cross_references:
     - "ARCH-THIS_PAGE_TAG_SORT"
@@ -4239,6 +4492,7 @@ IMPL-THIS_PAGE_TAG_SORT:
     - "IMPL-UIManager_SCOPED_ROOT"
     - "REQ-THIS_PAGE_TAG_SORT"
   detail_file: "implementation-decisions/IMPL-THIS_PAGE_TAG_SORT.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-THIS_PAGE_TAG_SORT-pseudocode.md"
   metadata:
     last_updated:
       author: "AI Agent"
@@ -4246,6 +4500,20 @@ IMPL-THIS_PAGE_TAG_SORT:
       reason: "S13 PROC-AGENT_REQ_CHECKLIST: REQ/ARCH detail synced; TIED matches code/tests"
   name: "This Page tag sort implementation"
   status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-THIS_PAGE_TAG_SORT"
+    requirements:
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+      - "REQ-THIS_PAGE_TAG_SORT"
+    tests:
+      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
+      - "tests/playwright/extension-this-page-tag-sort.spec.js"
+      - "tests/unit/popup-refresh-tag-frequency-map.test.js"
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/tag-chip-sort.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
 IMPL-TIED_FILES:
   code_locations:
     files:
@@ -4315,6 +4583,7 @@ IMPL-TIME_ASYNC_UTILITIES:
     - "ARCH-SHARED_UTILITIES"
     - "REQ-SHARED_UTILITIES"
   detail_file: "implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TIME_ASYNC_UTILITIES-pseudocode.md"
   implementation_approach:
     details: []
     summary: "timeUtils in src/shared/utils.js"
@@ -4359,6 +4628,7 @@ IMPL-TYPESCRIPT_MIGRATION:
     - "IMPL-MESSAGE_HANDLING"
     - "IMPL-RUNTIME_VALIDATION"
   detail_file: "implementation-decisions/IMPL-TYPESCRIPT_MIGRATION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TYPESCRIPT_MIGRATION-pseudocode.md"
   implementation_approach:
     details:
       - "getConfig/getOptions/updateConfig/saveSettings use MergedConfig; processMessage and message client use MessageEnvelope and payload types"
@@ -4389,8 +4659,12 @@ IMPL-TYPESCRIPT_MIGRATION:
       - "ARCH-MESSAGE_HANDLING"
     code_annotations:
       - "IMPL-TYPESCRIPT_MIGRATION"
+    requirements:
+      - "REQ-MAINTAINABILITY"
     tests:
+      - "npm run typecheck (tsc --noEmit) validates type-checked .js files and .d.ts"
       - "npm run typecheck (validates type-checked .js and .d.ts)"
+      - "npm run validate (includes typecheck) is the gate before build; run before pushing"
       - "npm run validate (includes typecheck; gate before build and before push)"
 IMPL-UI_ACTION_CONTRACT:
   code_locations:
@@ -4400,6 +4674,7 @@ IMPL-UI_ACTION_CONTRACT:
     - "ARCH-UI_TESTABILITY"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-UI_ACTION_CONTRACT-pseudocode.md"
   implementation_approach:
     summary: "src/shared/ui-action-contract.js re-exports MESSAGE_TYPES; exports POPUP_ACTION_IDS, POPUP_ACTION_TO_MESSAGE, CONTENT_MESSAGE_TYPES, OVERLAY_ACTION_IDS"
   metadata:
@@ -4425,6 +4700,9 @@ IMPL-UI_ACTION_CONTRACT:
       - "IMPL-UI_ACTION_CONTRACT"
     requirements:
       - "REQ-UI_INSPECTION"
+    tests:
+      - "tests/unit/content-messaging-contracts.test.js"
+      - "tests/unit/popup-message-contract.test.js"
 IMPL-UI_INSPECTOR:
   code_locations:
     files:
@@ -4436,6 +4714,7 @@ IMPL-UI_INSPECTOR:
     - "ARCH-UI_TESTABILITY"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-UI_INSPECTOR.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-UI_INSPECTOR-pseudocode.md"
   implementation_approach:
     summary: "src/shared/ui-inspector.js; wired in service-worker (recordMessage), PopupController (recordAction), content-main (recordAction)"
   metadata:
@@ -4472,6 +4751,7 @@ IMPL-UI_TESTABILITY_HOOKS:
     - "REQ-MODULE_VALIDATION"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-UI_TESTABILITY_HOOKS.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-UI_TESTABILITY_HOOKS-pseudocode.md"
   implementation_approach:
     summary: "Optional _onMessageProcessed in MessageHandler (called after processMessage); _onAction/_onStateChange in PopupController; _onStateChange in OverlayManager (visible, contentSnapshot)"
   metadata:
@@ -4496,6 +4776,8 @@ IMPL-UI_TESTABILITY_HOOKS:
     requirements:
       - "REQ-MODULE_VALIDATION"
       - "REQ-UI_INSPECTION"
+    tests:
+      - "tests/unit/overlay-refresh-accessibility.test.js"
 IMPL-UIManager_SCOPED_ROOT:
   code_locations:
     files:
@@ -4505,6 +4787,7 @@ IMPL-UIManager_SCOPED_ROOT:
     - "IMPL-SIDE_PANEL_BOOKMARK"
     - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
   detail_file: "implementation-decisions/IMPL-UIManager_SCOPED_ROOT.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-UIManager_SCOPED_ROOT-pseudocode.md"
   implementation_approach:
     summary: "UIManager constructor accepts optional container. In cacheElements(), if container set, use container.querySelector('[data-popup-ref=\"key\"]') for each key; else document.getElementById(key). Section labels and other selectors scope to container when set."
   metadata:
@@ -4546,6 +4829,7 @@ IMPL-URL_INHIBITION:
     - "REQ-SITE_MANAGEMENT"
   detail_file: "implementation-decisions/IMPL-URL_INHIBITION.yaml"
   essence_pseudocode: "getInhibitUrls(); addInhibitUrl(entry); setInhibitUrls(list); isUrlInhibited(url) — substring match against list.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-URL_INHIBITION-pseudocode.md"
   implementation_approach:
     details: []
     summary: "Inhibition list in storage; substring matching for isUrlInhibited"
@@ -4599,6 +4883,7 @@ IMPL-URL_TAGS_DISPLAY:
     - "REQ-URL_TAGS_DISPLAY"
   detail_file: "implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml"
   essence_pseudocode: "normalizeBookmarkForDisplay; getBookmarkForDisplay; getTagsForUrl; getBadgeDisplayValue. Message handler/popup/router/badge use single source.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-URL_TAGS_DISPLAY-pseudocode.md"
   implementation_approach:
     details:
       - "BookmarkRouter: _hasTags and _isEmptyBookmark use normalizeBookmarkForDisplay for tag shape"
@@ -4655,6 +4940,7 @@ IMPL-URL_TAGS_DISPLAY:
       - "tests/unit/bookmark-router.test.js"
       - "tests/unit/message-handler-url-tags.test.js"
       - "tests/unit/popup-live-data.test.js"
+      - "tests/unit/tag-storage.test.js"
       - "tests/unit/url-tags-manager.test.js"
 IMPL-URL_UTILITIES:
   code_locations:
@@ -4665,6 +4951,7 @@ IMPL-URL_UTILITIES:
     - "REQ-SHARED_UTILITIES"
   detail_file: "implementation-decisions/IMPL-URL_UTILITIES.yaml"
   essence_pseudocode: "processUrl(url); isValidUrl(url); getDomain(url). Pure functions in utils.js.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-URL_UTILITIES-pseudocode.md"
   implementation_approach:
     details: []
     summary: "urlUtils in src/shared/utils.js"
@@ -4700,11 +4987,18 @@ IMPL-URL_UTILITIES:
       - "REQ-SHARED_UTILITIES"
 IMPL-UX_CORE:
   cross_references: []
+  decision: "Preserve multi-action popup/overlay workflows and persistent popup session"
   detail_file: "implementation-decisions/IMPL-UX_CORE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-UX_CORE-pseudocode.md"
   implementation_approach:
     summary: ""
   name: "UX Core"
   rationale:
     why: "Core UX implementation"
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-UX_CORE"
+    requirements:
+      - "REQ-CORE_UX_PRESERVATION"
+      - "REQ-POPUP_PERSISTENT_SESSION"

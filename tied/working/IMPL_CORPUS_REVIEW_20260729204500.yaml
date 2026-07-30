@@ -1,0 +1,38 @@
+# IMPL Corpus Review tracker (lightweight — not a full agent-req checklist copy)
+# Parent: IMPL_CORPUS_REVIEW_20260729204500-plan.md
+# Process: IMPL corpus remediation 2026-07-29
+inventory:
+  detail_files: "103"
+  indexed: "103"
+  sidecars: "100"
+  yaml_only:
+    - "IMPL-MCP_FEEDBACK_TOOLS"
+    - "IMPL-MODULE_VALIDATION"
+    - "IMPL-TIED_FILES"
+last_updated: "2026-07-29"
+phases:
+  - id: "phase0"
+    name: "Vendor template + working artifacts"
+    status: "completed"
+  - id: "phase1"
+    name: "Index ↔ detail hygiene"
+    status: "completed"
+  - id: "phase2"
+    name: "Storage cluster sidecar uplift"
+    status: "completed"
+  - id: "phase3"
+    name: "UI surface sidecar uplift"
+    status: "completed"
+  - id: "phase4"
+    name: "Utility/config/AI/logging sidecar uplift"
+    status: "completed"
+  - id: "phase5"
+    name: "Thin stubs / Templates / YAML-only policy"
+    status: "completed"
+  - id: "phase6"
+    name: "Validate + vocab + CHANGELOG"
+    status: "completed"
+token: "IMPL_CORPUS_REVIEW"
+validation:
+  note: "Three methodology IMPLs lack essence (YAML-only policy); report still ok."
+  tied_validate_consistency: "ok"

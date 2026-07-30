@@ -80,6 +80,8 @@ Prefer in `essence_pseudocode` (not domain terms):
 
 **Migration:** Untouched legacy Active blocks may omit precision keywords with Layer B N/A `pre-contract-grammar` until next edit. See [`../docs/implementation-decisions.md`](../docs/implementation-decisions.md) and [`../docs/pseudocode-validation-checklist.yaml`](../docs/pseudocode-validation-checklist.yaml).
 
+**Hoverboard corpus (2026-07-29):** Project Active IMPL sidecars were uplifted to H2 + PRE/POST/EFFECTS (SHAPE-003) under `IMPL_CORPUS_REVIEW_20260729204500`; client template vendored at [`templates/impl-essence-pseudocode-template.md`](../../templates/impl-essence-pseudocode-template.md). New/changed Active blocks must keep contract precision; do not regress to legacy INPUT/OUTPUT-only shape.
+
 ---
 
 ## CITDP naming

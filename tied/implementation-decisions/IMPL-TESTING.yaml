@@ -48,7 +48,8 @@ IMPL-TESTING:
       - "ARCH-TESTING_STRATEGY"
     code_annotations:
       - "IMPL-TESTING"
-    requirements: []
+    requirements:
+      - "REQ-CODE_QUALITY"
     tests:
       - "All test files implement this strategy"
       - "tests/unit/simple.test.js"

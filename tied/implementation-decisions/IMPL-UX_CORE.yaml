@@ -6,7 +6,7 @@ IMPL-UX_CORE:
     - "ARCH-UX_CORE"
     - "REQ-CORE_UX_PRESERVATION"
     - "REQ-POPUP_PERSISTENT_SESSION"
-  decision: "Thin implementation stub for IMPL-UX_CORE."
+  decision: "Preserve multi-action popup/overlay workflows and persistent popup session"
   essence_pseudocode_path: "implementation-decisions/IMPL-UX_CORE-pseudocode.md"
   implementation_approach:
     summary: "Preserve multi-action popup/overlay workflows and persistent popup session"
@@ -16,8 +16,8 @@ IMPL-UX_CORE:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: align detail traceability with expanded sidecar"
+      date: "2026-07-29"
+      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
   name: "UX Core"
   rationale:
     why: "Core UX implementation"

@@ -6,7 +6,7 @@ IMPL-STORAGE:
     - "ARCH-STORAGE"
     - "REQ-CHROME_STORAGE_USAGE"
     - "REQ-CONFIG_PORTABILITY"
-  decision: "Thin implementation stub for IMPL-STORAGE."
+  decision: "chrome.storage.sync/local settings and portable export/import"
   essence_pseudocode_path: "implementation-decisions/IMPL-STORAGE-pseudocode.md"
   implementation_approach:
     summary: "chrome.storage.sync/local settings and portable export/import"
@@ -16,8 +16,8 @@ IMPL-STORAGE:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: align detail traceability with expanded sidecar"
+      date: "2026-07-29"
+      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
   name: "Storage"
   rationale:
     why: "Storage implementation"

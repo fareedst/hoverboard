@@ -1,27 +1,67 @@
-# [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY]
-# Auth token in sync storage; getAuthToken, setAuthToken, hasAuth, getAuthParam; options save writes token.
+# [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] — Auth token in sync storage; getAuthToken, setAuthToken, hasAuth, getAuthParam; options save writes token.
 
-# Contract: setAuthToken takes token; getAuthToken/hasAuth/getAuthParam return token, boolean, or param value.
-INPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)
-OUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)
-DATA: auth stored in sync storage; default config (retry settings)
+## GET_AUTH_TOKEN
 
-# Load from sync storage; return token or null; write token; hasAuth = getAuthToken() !== null; getAuthParam from config.
-getAuthToken():
-  TRY LOAD auth from sync storage
-  RETURN token or null
+- [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] How: Implements getAuthToken() behavior for IMPL-CONFIG_MIGRATION.
+- Contract:
+  - INPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)
+  - PRE: caller supplies valid inputs for this block; dependencies wired
+  - OUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)
+  - POST:
+    - success => block outputs match OUTPUT shape
+  - DATA: auth stored in sync storage; default config (retry settings)
+  - EFFECTS: IO
+  - TERMINATION: total
+- PROCEDURE: GET_AUTH_TOKEN
+  - TRY LOAD auth from sync storage
+  - RETURN token or null
 
-setAuthToken(token):
-  WRITE token to sync storage (auth key)
+## SET_AUTH_TOKEN
 
-hasAuth():
-  RETURN getAuthToken() !== null
+- [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] How: Implements setAuthToken(token) behavior for IMPL-CONFIG_MIGRATION.
+- Contract:
+  - INPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)
+  - PRE: caller supplies valid inputs for this block; dependencies wired
+  - OUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)
+  - POST:
+    - success => block outputs match OUTPUT shape
+  - DATA: auth stored in sync storage; default config (retry settings)
+  - EFFECTS: IO
+  - TERMINATION: total
+- PROCEDURE: SET_AUTH_TOKEN
+  - WRITE token to sync storage (auth key)
 
-getAuthParam(name):
-  LOAD default config or stored config
-  RETURN value for name (e.g. retry count)
+## HAS_AUTH
 
-# Read token from UI; setAuthToken(token).
-on save settings (options UI):
-  READ token from UI
-  setAuthToken(token)
+- [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] How: Implements hasAuth() behavior for IMPL-CONFIG_MIGRATION.
+- Contract:
+  - INPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)
+  - PRE: caller supplies valid inputs for this block; dependencies wired
+  - OUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)
+  - POST:
+    - success => block outputs match OUTPUT shape
+  - DATA: auth stored in sync storage; default config (retry settings)
+  - EFFECTS: IO
+  - TERMINATION: total
+- PROCEDURE: HAS_AUTH
+  - RETURN getAuthToken() !== null
+
+## GET_AUTH_PARAM
+
+- [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] How: Implements getAuthParam(name) behavior for IMPL-CONFIG_MIGRATION.
+- Contract:
+  - INPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)
+  - PRE: caller supplies valid inputs for this block; dependencies wired
+  - OUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)
+  - POST:
+    - success => block outputs match OUTPUT shape
+  - DATA: auth stored in sync storage; default config (retry settings)
+  - EFFECTS: IO
+  - TERMINATION: total
+- PROCEDURE: GET_AUTH_PARAM
+  - LOAD default config or stored config
+  - RETURN value for name (e.g. retry count)
+  - How (sub-block): Read token from UI; setAuthToken(token).
+  - 1. on save settings (options UI):
+  - READ token from UI
+  - setAuthToken(token)

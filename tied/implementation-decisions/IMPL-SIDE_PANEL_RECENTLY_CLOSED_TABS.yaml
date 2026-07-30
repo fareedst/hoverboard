@@ -21,6 +21,7 @@ IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS:
       - "Scope: when tabSource includes recentlyClosed, force searchScope to tabInfo; show note"
       - "Sessions API check: if !chrome.sessions hide recentlyClosed and both options"
       - "Tab source: open | recentlyClosed | both in Scope section; default open"
+    summary: "Tab source open|recentlyClosed|both; GET_RECENTLY_CLOSED_TABS normalize/merge/restore; force searchScope tabInfo when closed included."
   metadata:
     created:
       author: "AI Agent"

@@ -7,7 +7,7 @@ IMPL-SERVICE_WORKER:
   cross_references:
     - "ARCH-SERVICE_WORKER"
     - "REQ-MANIFEST_V3_MIGRATION"
-  decision: "Thin implementation stub for IMPL-SERVICE_WORKER."
+  decision: "MV3 service worker messaging, badge, recent-tags memory lifecycle"
   essence_pseudocode_path: "implementation-decisions/IMPL-SERVICE_WORKER-pseudocode.md"
   implementation_approach:
     summary: "MV3 service worker messaging, badge, recent-tags memory lifecycle"
@@ -17,8 +17,8 @@ IMPL-SERVICE_WORKER:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: align detail traceability with expanded sidecar"
+      date: "2026-07-29"
+      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
   name: "Service Worker"
   rationale:
     why: "Service worker implementation"

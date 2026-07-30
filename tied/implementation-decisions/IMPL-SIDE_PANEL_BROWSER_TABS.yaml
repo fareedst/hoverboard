@@ -54,6 +54,7 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - Close: "confirm(\"Close N tabs?\"); on confirm chrome.tabs.remove for each visible id; show success count"
       - Copy Records: "build YAML list from visible tabs (each item id, windowId, title, url, referrer), clipboard.writeText(yamlString), show \"Copied N records\""
       - Copy: "collect URLs of visible tabs, clipboard.writeText(urls.join(\"\\n\")), show count"
+    summary: "Tabs panel: chrome.tabs query, scope-aware filter, display modes, batch bookmark actions, gather/distribute, close/copy; preferredBackend local on create from tabs."
   metadata:
     created:
       author: "AI Agent"

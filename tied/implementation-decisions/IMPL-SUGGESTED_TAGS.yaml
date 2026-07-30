@@ -60,6 +60,18 @@ IMPL-SUGGESTED_TAGS:
       - "tests/unit/popup-suggested-tags.test.js"
       - "tests/unit/suggested-tag-original-case.test.js"
   traceability:
+    architecture:
+      - "ARCH-SUGGESTED_TAGS"
+    code_annotations:
+      - "ARCH-SUGGESTED_TAGS"
+      - "IMPL-SUGGESTED_TAGS"
+      - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+      - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+    requirements:
+      - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+      - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     tests:
       - "tests/integration/this-page-tag-sort-composition.integration.test.js"
       - "tests/unit/popup-suggested-tags.test.js"

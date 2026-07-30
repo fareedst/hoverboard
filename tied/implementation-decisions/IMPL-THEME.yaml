@@ -5,7 +5,7 @@ IMPL-THEME:
   cross_references:
     - "ARCH-THEME"
     - "REQ-DARK_THEME"
-  decision: "Thin implementation stub for IMPL-THEME."
+  decision: "Dark theme default with toggle and persistence"
   essence_pseudocode_path: "implementation-decisions/IMPL-THEME-pseudocode.md"
   implementation_approach:
     summary: "Dark theme default with toggle and persistence"
@@ -15,8 +15,8 @@ IMPL-THEME:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: align detail traceability with expanded sidecar"
+      date: "2026-07-29"
+      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
   name: "Theme"
   rationale:
     why: "Theme implementation"

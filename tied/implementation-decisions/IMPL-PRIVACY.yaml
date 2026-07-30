@@ -5,7 +5,7 @@ IMPL-PRIVACY:
   cross_references:
     - "ARCH-PRIVACY"
     - "REQ-PRIVACY_CONTROLS"
-  decision: "Thin implementation stub for IMPL-PRIVACY."
+  decision: "Private/shared flags and URL inhibition privacy controls"
   essence_pseudocode_path: "implementation-decisions/IMPL-PRIVACY-pseudocode.md"
   implementation_approach:
     summary: "Private/shared flags and URL inhibition privacy controls"
@@ -15,8 +15,8 @@ IMPL-PRIVACY:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: align detail traceability with expanded sidecar"
+      date: "2026-07-29"
+      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
   name: "Privacy"
   rationale:
     why: "Privacy implementation"

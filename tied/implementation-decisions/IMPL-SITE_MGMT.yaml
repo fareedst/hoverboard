@@ -5,7 +5,7 @@ IMPL-SITE_MGMT:
   cross_references:
     - "ARCH-SITE_MGMT"
     - "REQ-SITE_MANAGEMENT"
-  decision: "Thin implementation stub for IMPL-SITE_MGMT."
+  decision: "Per-site allow/inhibit policy for content UI"
   essence_pseudocode_path: "implementation-decisions/IMPL-SITE_MGMT-pseudocode.md"
   implementation_approach:
     summary: "Per-site allow/inhibit policy for content UI"
@@ -15,8 +15,8 @@ IMPL-SITE_MGMT:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: align detail traceability with expanded sidecar"
+      date: "2026-07-29"
+      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
   name: "Site Management"
   rationale:
     why: "Site management implementation"

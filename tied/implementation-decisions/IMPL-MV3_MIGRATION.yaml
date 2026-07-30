@@ -5,7 +5,7 @@ IMPL-MV3_MIGRATION:
   cross_references:
     - "ARCH-MV3_MIGRATION"
     - "REQ-MANIFEST_V3_MIGRATION"
-  decision: "Thin implementation stub for IMPL-MV3_MIGRATION."
+  decision: "Manifest V3 service worker background; preserve messaging contracts"
   essence_pseudocode_path: "implementation-decisions/IMPL-MV3_MIGRATION-pseudocode.md"
   implementation_approach:
     summary: "Manifest V3 service worker background; preserve messaging contracts"
@@ -15,8 +15,8 @@ IMPL-MV3_MIGRATION:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: align detail traceability with expanded sidecar"
+      date: "2026-07-29"
+      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
   name: "MV3 Migration"
   rationale:
     why: "Manifest V3 migration"
