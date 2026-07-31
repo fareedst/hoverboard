@@ -42,7 +42,7 @@ IMPL-MESSAGE_HANDLING:
     last_updated:
       author: "AI Agent"
       date: "2026-07-30"
-      reason: "UNWRAP_MESSAGE_RESPONSE + content-main readMessageResponse coverage"
+      reason: "Add message-response-missing composition suite"
   name: "Message Handling System Implementation"
   rationale:
     benefits:
@@ -71,6 +71,7 @@ IMPL-MESSAGE_HANDLING:
       - "REQ-SMART_BOOKMARKING"
     tests:
       - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/integration/message-response-missing-composition.integration.test.js"
       - "tests/playwright/extension-messaging.spec.js"
       - "tests/unit/content-message-response-missing.test.js"
       - "tests/unit/content-messaging-contracts.test.js"

@@ -829,6 +829,19 @@ IMPL-CODE_STYLE:
       - "REQ-CODE_QUALITY"
     tests:
       - "npm run lint; npm run lint:fix; npm run validate"
+IMPL-COMPOSITION_TEST_PATTERNS:
+  category: "Testing"
+  cross_references:
+    - "ARCH-COMPOSITION_TEST_PATTERNS"
+    - "ARCH-UI_TESTABILITY"
+    - "IMPL-MESSAGE_HANDLING"
+    - "IMPL-UI_TESTABILITY_HOOKS"
+    - "PROC-TEST_STRATEGY"
+    - "REQ-COMPOSITION_TEST_RECOGNITION"
+  detail_file: "implementation-decisions/IMPL-COMPOSITION_TEST_PATTERNS.yaml"
+  name: "Composition Test Pattern Recognition Implementation"
+  priority: "P1"
+  status: "Active"
 IMPL-CONFIG_BACKUP_RESTORE:
   code_locations:
     files:

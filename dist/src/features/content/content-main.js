@@ -15472,7 +15472,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         aiProvider: external_exports.string().optional(),
         aiTagLimit: external_exports.number().int().min(0).optional(),
         // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
-        iconClickOpensSidePanel: external_exports.boolean().optional()
+        iconClickOpensSidePanel: external_exports.boolean().optional(),
+        // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Opt-in outbound Index link health checks (default false).
+        linkHealthChecksEnabled: external_exports.boolean().optional()
       }).passthrough();
       ConfigManager = class {
         constructor() {
@@ -15598,7 +15600,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
             aiProvider: "openai",
             aiTagLimit: 64,
             // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
-            iconClickOpensSidePanel: true
+            iconClickOpensSidePanel: true,
+            // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first: outbound link checks off until user enables in Options.
+            linkHealthChecksEnabled: false
           };
         }
         /**

@@ -15450,7 +15450,9 @@ var init_config_manager = __esm({
       aiProvider: external_exports.string().optional(),
       aiTagLimit: external_exports.number().int().min(0).optional(),
       // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
-      iconClickOpensSidePanel: external_exports.boolean().optional()
+      iconClickOpensSidePanel: external_exports.boolean().optional(),
+      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Opt-in outbound Index link health checks (default false).
+      linkHealthChecksEnabled: external_exports.boolean().optional()
     }).passthrough();
     ConfigManager = class {
       constructor() {
@@ -15576,7 +15578,9 @@ var init_config_manager = __esm({
           aiProvider: "openai",
           aiTagLimit: 64,
           // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
-          iconClickOpensSidePanel: true
+          iconClickOpensSidePanel: true,
+          // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first: outbound link checks off until user enables in Options.
+          linkHealthChecksEnabled: false
         };
       }
       /**
@@ -17408,6 +17412,28 @@ function syncBookmarkNotesFields({
   return { notesEditable };
 }
 
+// src/shared/link-health.js
+function isLinkHealthChecksEnabled(config2) {
+  return config2?.linkHealthChecksEnabled === true;
+}
+function formatLinkHealthHint(rec, opts = {}) {
+  if (!opts.enabled) return "";
+  if (!rec || !rec.status) return "";
+  if (rec.httpStatus != null) return `Health: ${rec.status} (${rec.httpStatus})`;
+  return `Health: ${rec.status}`;
+}
+function applyLinkHealthHint(el, text) {
+  if (!el) return;
+  const t = String(text || "");
+  if (!t) {
+    el.hidden = true;
+    el.textContent = "";
+    return;
+  }
+  el.hidden = false;
+  el.textContent = t;
+}
+
 // src/ui/popup/UIManager.js
 var UIManager = class {
   constructor({ errorHandler, stateManager, config: config2 = {}, container = null } = {}) {
@@ -17542,6 +17568,7 @@ var UIManager = class {
       bookmarkTitleInput: get("bookmarkTitleInput"),
       bookmarkNotesInput: get("bookmarkNotesInput"),
       bookmarkNotesHint: get("bookmarkNotesHint"),
+      linkHealthHint: get("linkHealthHint"),
       saveBookmarkDetailsBtn: get("saveBookmarkDetailsBtn")
     };
     this._tagSortUiEnabled = !!this.elements.tagSortToggle;
@@ -17950,6 +17977,13 @@ var UIManager = class {
       notesInput: this.elements.bookmarkNotesInput,
       notesHintEl: this.elements.bookmarkNotesHint
     });
+  }
+  /**
+   * [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Show or clear compact stored health hint on This Page/popup.
+   * @param {string} text
+   */
+  setLinkHealthHint(text) {
+    applyLinkHealthHint(this.elements.linkHealthHint, text);
   }
   /**
    * [REQ-MOVE_BOOKMARK_STORAGE_UI] No-op: move is done via storage backend buttons. Kept for API compatibility.
@@ -19599,6 +19633,7 @@ var PopupController = class {
       const tagWithAiBtn = this.uiManager.elements.tagWithAiBtn;
       if (tagWithAiBtn) tagWithAiBtn.disabled = !aiApiKey || !urlOk;
       await this.refreshUsageSection();
+      await this.refreshLinkHealthHint();
       this.isInitialized = true;
       debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Popup initialization completed successfully");
       if (this._onStateChange) {
@@ -21346,6 +21381,33 @@ var PopupController = class {
     } catch (err) {
       debugError("[IMPL-BOOKMARK_USAGE_TRACKING_UI] refreshUsageSection failed:", err);
       this.uiManager.updateUsageSection(null, "");
+    }
+  }
+  /**
+   * [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
+   * When opt-in enabled, show compact stored health hint for current tab URL.
+   */
+  async refreshLinkHealthHint() {
+    if (!this.uiManager?.setLinkHealthHint) return;
+    try {
+      const config2 = await this.configManager.getConfig();
+      const enabled = isLinkHealthChecksEnabled(config2);
+      if (!enabled) {
+        this.uiManager.setLinkHealthHint("");
+        return;
+      }
+      const url2 = this.currentTab?.url;
+      if (!url2 || typeof this.sendMessage !== "function") {
+        this.uiManager.setLinkHealthHint("");
+        return;
+      }
+      const response = await this.sendMessage({ type: "GET_LINK_HEALTH" });
+      const map2 = response?.success ? response.data || {} : {};
+      const rec = map2[url2];
+      this.uiManager.setLinkHealthHint(formatLinkHealthHint(rec, { enabled: true }));
+    } catch (err) {
+      debugError("[IMPL-LINK_HEALTH] refreshLinkHealthHint failed:", err);
+      this.uiManager.setLinkHealthHint("");
     }
   }
   /**

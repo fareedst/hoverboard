@@ -126,6 +126,22 @@
         <span id="api-snapshot-options-status" class="help-text" style="margin-left: 0.5em;"></span>
       </section>
 
+      <!-- [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first opt-in for outbound Index link checks -->
+      <section class="section" id="link-health-section">
+        <h2>Link health</h2>
+        <p class="help-text">
+          When enabled, Local Bookmarks Index can check selected or displayed URLs with a direct HTTP HEAD/GET from this browser
+          (no third-party uptime service). Default off.
+        </p>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="link-health-checks-enabled">
+            <span class="checkmark"></span>
+            Enable link health checks
+          </label>
+        </div>
+      </section>
+
       <!-- [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (default) or popup -->
       <section class="section" id="icon-click-section">
         <h2>Extension icon</h2>

@@ -576,14 +576,19 @@ import { ConfigManager } from '../../config/config-manager.js'
 import { PinboardService } from '../../features/pinboard/pinboard-service.js'
 import { testAiApiKey } from '../../features/ai/ai-api-test.js'
 
-class OptionsController {
-  constructor () {
-    this.configManager = new ConfigManager()
-    this.pinboardService = new PinboardService()
+export class OptionsController {
+  /**
+   * @param {{ skipInit?: boolean, configManager?: ConfigManager, pinboardService?: PinboardService }} [opts]
+   */
+  constructor (opts = {}) {
+    this.configManager = opts.configManager || new ConfigManager()
+    this.pinboardService = opts.pinboardService || new PinboardService()
     this.elements = {}
     this.isLoading = false
 
-    this.init()
+    if (!opts.skipInit) {
+      this.init()
+    }
   }
 
   async init () {
@@ -627,6 +632,8 @@ class OptionsController {
 
     // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on icon: side panel vs popup
     this.elements.iconClickOpensSidePanel = document.getElementById('icon-click-opens-side-panel')
+    // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
+    this.elements.linkHealthChecksEnabled = document.getElementById('link-health-checks-enabled')
 
     // Display settings
     this.elements.showHoverOnLoad = document.getElementById('show-hover-on-load')
@@ -808,6 +815,10 @@ class OptionsController {
       if (this.elements.iconClickOpensSidePanel) {
         this.elements.iconClickOpensSidePanel.checked = config.iconClickOpensSidePanel !== false
       }
+      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Load opt-in; default false
+      if (this.elements.linkHealthChecksEnabled) {
+        this.elements.linkHealthChecksEnabled.checked = config.linkHealthChecksEnabled === true
+      }
 
       // Update visibility UI
       this.currentTheme = config.defaultVisibilityTheme
@@ -871,7 +882,11 @@ class OptionsController {
         aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64,
 
         // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on icon: side panel (true) or popup (false)
-        iconClickOpensSidePanel: this.elements.iconClickOpensSidePanel ? this.elements.iconClickOpensSidePanel.checked : true
+        iconClickOpensSidePanel: this.elements.iconClickOpensSidePanel ? this.elements.iconClickOpensSidePanel.checked : true,
+        // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first opt-in for Index link checks
+        linkHealthChecksEnabled: this.elements.linkHealthChecksEnabled
+          ? this.elements.linkHealthChecksEnabled.checked
+          : false
       }
 
       // Save configuration
@@ -1307,13 +1322,16 @@ class OptionsController {
   }
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+// Initialize when DOM is ready (skip under Jest so unit tests can import OptionsController)
+const isJest = typeof process !== 'undefined' && process.env?.JEST_WORKER_ID != null
+if (!isJest) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      // eslint-disable-next-line no-new
+      new OptionsController()
+    })
+  } else {
     // eslint-disable-next-line no-new
     new OptionsController()
-  })
-} else {
-  // eslint-disable-next-line no-new
-  new OptionsController()
+  }
 }

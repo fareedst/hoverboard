@@ -14380,7 +14380,9 @@ var init_config_manager = __esm({
       aiProvider: external_exports.string().optional(),
       aiTagLimit: external_exports.number().int().min(0).optional(),
       // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
-      iconClickOpensSidePanel: external_exports.boolean().optional()
+      iconClickOpensSidePanel: external_exports.boolean().optional(),
+      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Opt-in outbound Index link health checks (default false).
+      linkHealthChecksEnabled: external_exports.boolean().optional()
     }).passthrough();
     ConfigManager = class {
       constructor() {
@@ -14506,7 +14508,9 @@ var init_config_manager = __esm({
           aiProvider: "openai",
           aiTagLimit: 64,
           // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
-          iconClickOpensSidePanel: true
+          iconClickOpensSidePanel: true,
+          // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first: outbound link checks off until user enables in Options.
+          linkHealthChecksEnabled: false
         };
       }
       /**
@@ -22118,12 +22122,17 @@ async function testAiApiKey(apiKey, provider, fetchFn = globalThis.fetch) {
 
 // src/ui/options/options.js
 var OptionsController = class {
-  constructor() {
-    this.configManager = new ConfigManager();
-    this.pinboardService = new PinboardService();
+  /**
+   * @param {{ skipInit?: boolean, configManager?: ConfigManager, pinboardService?: PinboardService }} [opts]
+   */
+  constructor(opts = {}) {
+    this.configManager = opts.configManager || new ConfigManager();
+    this.pinboardService = opts.pinboardService || new PinboardService();
     this.elements = {};
     this.isLoading = false;
-    this.init();
+    if (!opts.skipInit) {
+      this.init();
+    }
   }
   async init() {
     this.bindElements();
@@ -22160,6 +22169,7 @@ var OptionsController = class {
     this.elements.authToken = document.getElementById("auth-token");
     this.elements.testAuth = document.getElementById("test-auth");
     this.elements.iconClickOpensSidePanel = document.getElementById("icon-click-opens-side-panel");
+    this.elements.linkHealthChecksEnabled = document.getElementById("link-health-checks-enabled");
     this.elements.showHoverOnLoad = document.getElementById("show-hover-on-load");
     this.elements.hoverShowTooltips = document.getElementById("hover-show-tooltips");
     this.elements.recentPostsCount = document.getElementById("recent-posts-count");
@@ -22279,6 +22289,9 @@ var OptionsController = class {
       if (this.elements.iconClickOpensSidePanel) {
         this.elements.iconClickOpensSidePanel.checked = config2.iconClickOpensSidePanel !== false;
       }
+      if (this.elements.linkHealthChecksEnabled) {
+        this.elements.linkHealthChecksEnabled.checked = config2.linkHealthChecksEnabled === true;
+      }
       this.currentTheme = config2.defaultVisibilityTheme;
       this.updateThemeDisplay();
       this.updateTransparencyState();
@@ -22328,7 +22341,9 @@ var OptionsController = class {
         aiProvider: this.elements.aiProvider ? this.elements.aiProvider.value : "openai",
         aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64,
         // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on icon: side panel (true) or popup (false)
-        iconClickOpensSidePanel: this.elements.iconClickOpensSidePanel ? this.elements.iconClickOpensSidePanel.checked : true
+        iconClickOpensSidePanel: this.elements.iconClickOpensSidePanel ? this.elements.iconClickOpensSidePanel.checked : true,
+        // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first opt-in for Index link checks
+        linkHealthChecksEnabled: this.elements.linkHealthChecksEnabled ? this.elements.linkHealthChecksEnabled.checked : false
       };
       await this.configManager.updateConfig(settings);
       const authToken = this.elements.authToken.value.trim();
@@ -22685,10 +22700,16 @@ var OptionsController = class {
     }
   }
 };
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
+var isJest = typeof process !== "undefined" && process.env?.JEST_WORKER_ID != null;
+if (!isJest) {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      new OptionsController();
+    });
+  } else {
     new OptionsController();
-  });
-} else {
-  new OptionsController();
+  }
 }
+export {
+  OptionsController
+};

@@ -1,0 +1,79 @@
+IMPL-COMPOSITION_TEST_PATTERNS:
+  code_locations:
+    files:
+      - path: "scripts/composition-test-plan-core.js"
+        description: "Pure MATCH/CLASSIFY/escape helpers"
+      - path: "scripts/composition-test-plan.js"
+        description: "Composition edge discovery and plan report CLI"
+      - path: "tests/integration/_templates/composition-test.template.js"
+        description: "Generated composition test template"
+      - path: "tied/vocab/test-composition.md"
+        description: "Canonical pattern catalog"
+    functions:
+      - "CLASSIFY_COMPOSITION_EDGE"
+      - "EMIT_COMPOSITION_TEST_PLAN"
+      - "escapeMarkdownCell"
+      - "MATCH_COMPOSITION_PATTERN"
+  cross_references:
+    - "ARCH-COMPOSITION_TEST_PATTERNS"
+    - "ARCH-UI_TESTABILITY"
+    - "REQ-COMPOSITION_TEST_RECOGNITION"
+    - "REQ-MODULE_VALIDATION"
+  essence_pseudocode_path: "implementation-decisions/IMPL-COMPOSITION_TEST_PATTERNS-pseudocode.md"
+  implementation_approach:
+    details:
+      - "scripts/composition-test-plan-core.js (pure MATCH/CLASSIFY)"
+      - "scripts/composition-test-plan.js"
+      - "tests/integration/_templates/composition-test.template.js"
+      - "tied/vocab/test-composition.md"
+      - "tied/working/composition-edge-classification.md seed inventory"
+    summary: "Parse Active IMPL YAML + sidecars for composed_with and ON/WHEN/REGISTER/SEND signals; join to tests/integration; emit markdown/JSON plan; ship template asserting trigger→unit→args→effect."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-30"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-30"
+      reason: "Point traceability.tests at unit classifier + composition suites; script is code_location not test"
+  name: "Composition Test Pattern Recognition Implementation"
+  rationale:
+    benefits:
+      - "npm run composition:plan"
+      - "Reusable generated-test template"
+      - "Traceable edge statuses"
+    problems_solved:
+      - "Ambiguous E2E boundaries"
+      - "Manual scanning of composed_with"
+      - "Missing composition suite paths"
+    why: "Implement pattern matching, edge classification, and a reviewable composition-plan report so generated tests follow unit-first then composition RED ordering."
+  related_decisions:
+    composed_with:
+      - "IMPL-MESSAGE_HANDLING"
+      - "IMPL-MODULE_VALIDATION"
+      - "IMPL-UI_TESTABILITY_HOOKS"
+    depends_on:
+      - "IMPL-UI_TESTABILITY_HOOKS"
+    see_also:
+      - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
+      - "IMPL-TESTING"
+    supersedes: []
+  status: "Active"
+  test_coverage_note: "No Playwright E2E for pattern recognition: classifier unit-tested; representative edges covered by composition suites. Platform-only edges require explicit e2e_only_reason."
+  traceability:
+    architecture:
+      - "ARCH-COMPOSITION_TEST_PATTERNS"
+      - "ARCH-UI_TESTABILITY"
+    code_annotations:
+      - "IMPL-COMPOSITION_TEST_PATTERNS"
+    requirements:
+      - "REQ-COMPOSITION_TEST_RECOGNITION"
+      - "REQ-MODULE_VALIDATION"
+    tests:
+      - "tests/integration/message-response-missing-composition.integration.test.js"
+      - "tests/integration/popup-link-health-hint-composition.integration.test.js"
+      - "tests/integration/popup-message-timeout-composition.integration.test.js"
+      - "tests/integration/popup-open-tags-tree-composition.integration.test.js"
+      - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
+      - "tests/unit/composition-test-plan.test.js"

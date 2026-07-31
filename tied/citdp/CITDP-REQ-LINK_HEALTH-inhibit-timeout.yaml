@@ -1,0 +1,53 @@
+CITDP-REQ-LINK_HEALTH-inhibit-timeout:
+  change_definition:
+    current_behavior: "CHECK_LINK_HEALTH fetches every http(s) URL with unbounded HEAD/GET; no hoverboard_inhibit_urls skip; no AbortController timeout."
+    desired_behavior: "Skip fetch for URLs matching site inhibit list (record unreachable/inhibited); bound each HEAD/GET with AbortController timeout; no SaaS; do not buffer GET bodies."
+    non_goals:
+      - "Archive/reader (Phase 4)"
+      - "Collections tag polish (R1c)"
+      - "Link-health Options opt-in toggle (R1b)"
+      - "Playwright E2E"
+      - "This Page/popup health hint (R1b)"
+    success_criteria:
+      - "fetchWithLinkHealthTimeout abort path unit green"
+      - "SW inhibit skip: no fetch, unreachable/inhibited record"
+      - "SW timeout: AbortError → unreachable/timeout"
+      - "tied_validate_consistency ok"
+      - "urlMatchesInhibitList unit green"
+  completion_criteria:
+    verification_gate_notes: "Unit + SW unit green; composition unchanged; tied_validate_consistency"
+  impact_analysis:
+    modules_or_boundaries: "src/shared/link-health.js helpers; src/core/service-worker.js _checkLinkHealth; tests/unit/link-health*.test.js; REQ/IMPL-LINK_HEALTH LEAP"
+    tied_tokens_affected:
+      - "ARCH-LINK_HEALTH"
+      - "IMPL-LINK_HEALTH"
+      - "REQ-LINK_HEALTH"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: []
+    notes: "R1a shipped: urlMatchesInhibitList + fetchWithLinkHealthTimeout; SW wired; ARCH/REQ/IMPL + vocab RECORD; full-block sync."
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-LINK_HEALTH-inhibit-timeout"
+    primary_tokens:
+      - "ARCH-LINK_HEALTH"
+      - "IMPL-LINK_HEALTH"
+      - "IMPL-URL_INHIBITION"
+      - "REQ-LINK_HEALTH"
+      - "REQ-SITE_MANAGEMENT"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-30"
+    title: "Link health — inhibit-list skip + AbortController fetch timeout"
+  risk_analysis:
+    risks:
+      - id: "RISK-001"
+        description: "Inhibit substring match too broad skips legitimate health checks"
+        mitigation: "Reuse ConfigManager isUrlAllowed substring semantics; document in vocab"
+      - id: "RISK-002"
+        description: "Timeout too aggressive false unreachable"
+        mitigation: "Default 8s per request; AbortError maps to timeout error string"
+  tdd_sequence:
+    summary: "Failing unit tests for helpers and SW; implement helpers; wire SW; green; LEAP closeout"
+  test_strategy:
+    summary: "Unit pure inhibit match + timeout helper; SW unit for inhibit skip and abort; no Playwright"

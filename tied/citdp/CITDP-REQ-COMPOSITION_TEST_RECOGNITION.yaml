@@ -1,0 +1,59 @@
+CITDP-REQ-COMPOSITION_TEST_RECOGNITION:
+  change_definition:
+    current_behavior: "Composition edges were discovered ad hoc; no canonical pattern catalog, edge-status vocabulary, or npm composition:plan report; several bindings lacked dedicated composition suites."
+    desired_behavior: "Canonical pattern catalog in tied/vocab/test-composition.md; Active IMPL edges classified covered|partial|unit-only|candidate|e2e_only via scripts/composition-test-plan.js; generated-test template; unit-first then composition RED; e2e_only only with explicit platform reason; seed inventory in tied/working/composition-edge-classification.md."
+    non_goals:
+      - "Playwright E2E for every composition edge"
+      - "Replacing unit tests with composition tests"
+      - "Silent e2e_only classification"
+    success_criteria:
+      - "MATCH_COMPOSITION_PATTERN / CLASSIFY_COMPOSITION_EDGE unit green"
+      - "New composition suites for timeout, scoped createPopup, suggested chip, openTagsTree, missing response"
+      - "No silent e2e_only without e2e_only_reason"
+      - "npm run composition:plan emits counts and edge rows"
+      - "tied_validate_consistency ok"
+  completion_criteria:
+    verification_gate_notes: "Unit classifier + composition suites green; composition:plan runnable; tied_validate_consistency; js-yaml direct dep for plan script."
+  impact_analysis:
+    modules_or_boundaries: "scripts/composition-test-plan.js; tests/integration/_templates; tied/vocab/test-composition.md; representative composition suites; IMPL/ARCH/REQ composition-recognition stack"
+    tied_tokens_affected:
+      - "ARCH-COMPOSITION_TEST_PATTERNS"
+      - "IMPL-COMPOSITION_TEST_PATTERNS"
+      - "IMPL-MESSAGE_HANDLING"
+      - "IMPL-POPUP_MESSAGE_TIMEOUT"
+      - "IMPL-SIDE_PANEL_BOOKMARK"
+      - "REQ-COMPOSITION_TEST_RECOGNITION"
+    tied_tokens_new:
+      - "ARCH-COMPOSITION_TEST_PATTERNS"
+      - "IMPL-COMPOSITION_TEST_PATTERNS"
+      - "REQ-COMPOSITION_TEST_RECOGNITION"
+  leap_feedback:
+    divergences_from_analysis: []
+    notes: "Shipped pattern catalog + plan script + composition suites; capture-UI link-health hint composition and Options load/save added in reconcile pass; CITDP created to account for new REQ/ARCH/IMPL stack."
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-COMPOSITION_TEST_RECOGNITION"
+    primary_tokens:
+      - "ARCH-COMPOSITION_TEST_PATTERNS"
+      - "IMPL-COMPOSITION_TEST_PATTERNS"
+      - "REQ-COMPOSITION_TEST_RECOGNITION"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-30"
+    title: "Composition test recognition — pattern catalog, plan script, edge suites"
+  risk_analysis:
+    risks:
+      - id: "RISK-001"
+        description: "Plan script over-classifies unit-only edges as covered via loose suite name matching"
+        mitigation: "Unit tests for CLASSIFY/MATCH; evidence strings list matched suites; seed inventory reviewed"
+        severity: "medium"
+      - id: "RISK-002"
+        description: "Agents skip unit RED and jump to composition"
+        mitigation: "Plan guidance and vocab enforce unit-first RED; checklist PROC-TIED_DEV_CYCLE"
+        severity: "medium"
+  tdd_sequence:
+    summary: "Unit RED for MATCH/CLASSIFY helpers; implement plan script; composition RED for missing edges; green; LEAP closeout"
+  test_strategy:
+    matrix_notes: "E2E only when e2e_only_reason names a platform constraint; Jest e2e target currently empty for this work."
+    summary: "Unit: composition-test-plan.test.js for pattern match, classify, markdown escape. Composition: representative suites for MESSAGE_DISPATCH / UI_EMIT_COMMAND / SCOPED_DOM_BINDING / timeout. No Playwright E2E for recognition itself."
+  unchanged_behavior: "Existing unit tests and prior composition suites remain authoritative for their IMPLs; plan report is advisory discovery, not a runtime product feature."

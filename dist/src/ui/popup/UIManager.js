@@ -970,6 +970,7 @@ import {
   sortTagChipRows
 } from '../../shared/tag-chip-sort.js'
 import { syncBookmarkNotesFields as syncBookmarkNotesFieldsHelper } from '../../shared/bookmark-notes-ui.js'
+import { applyLinkHealthHint } from '../../shared/link-health.js'
 
 export class UIManager {
   constructor ({ errorHandler, stateManager, config = {}, container = null } = {}) {
@@ -1139,6 +1140,7 @@ export class UIManager {
       bookmarkTitleInput: get('bookmarkTitleInput'),
       bookmarkNotesInput: get('bookmarkNotesInput'),
       bookmarkNotesHint: get('bookmarkNotesHint'),
+      linkHealthHint: get('linkHealthHint'),
       saveBookmarkDetailsBtn: get('saveBookmarkDetailsBtn')
     }
     this._tagSortUiEnabled = !!this.elements.tagSortToggle
@@ -1620,6 +1622,14 @@ export class UIManager {
       notesInput: this.elements.bookmarkNotesInput,
       notesHintEl: this.elements.bookmarkNotesHint
     })
+  }
+
+  /**
+   * [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Show or clear compact stored health hint on This Page/popup.
+   * @param {string} text
+   */
+  setLinkHealthHint (text) {
+    applyLinkHealthHint(this.elements.linkHealthHint, text)
   }
 
   /**

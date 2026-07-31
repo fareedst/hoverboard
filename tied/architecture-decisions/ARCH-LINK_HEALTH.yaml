@@ -1,8 +1,13 @@
 ARCH-LINK_HEALTH:
-  decision: "Direct fetch from SW; store side table not on pin."
+  decision: "Direct fetch from SW (no SaaS); privacy-first opt-in default off; skip hoverboard_inhibit_urls; bounded AbortController per HEAD/GET; store side table not on pin; optional This Page/popup hint from stored map."
+  metadata:
+    last_updated:
+      author: "agent"
+      date: "2026-07-30"
+      reason: "R1b: document opt-in + capture hint"
   name: "Link Health Architecture"
   status: "Accepted"
-  summary: "Service worker checks URLs; chrome.storage.local map; Index column/filter."
+  summary: "SW checks URLs behind linkHealthChecksEnabled opt-in; inhibit skip + AbortController timeout; chrome.storage.local map; Index column; capture UI hint."
   traceability:
     implementation:
       - "IMPL-LINK_HEALTH"

@@ -30,8 +30,8 @@ IMPL-SIDE_PANEL_BOOKMARK:
       date: "2026-02-25"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-30"
+      reason: "Add createPopup scoped and openTagsTree composition suites"
   name: "Side Panel Bookmark Tab Implementation"
   rationale:
     benefits:
@@ -60,5 +60,7 @@ IMPL-SIDE_PANEL_BOOKMARK:
     requirements:
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     tests:
+      - "tests/integration/popup-open-tags-tree-composition.integration.test.js"
+      - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
       - "tests/unit/side-panel-tabs.test.js"
       - "tests/unit/ui-manager-scoped-root.test.js"

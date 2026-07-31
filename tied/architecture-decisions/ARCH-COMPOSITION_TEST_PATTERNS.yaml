@@ -1,0 +1,40 @@
+ARCH-COMPOSITION_TEST_PATTERNS:
+  decision: "Maintain a project-specific catalog of composition pattern IDs and a testability ladder that maps bindings to unit, composition, or justified E2E levels; expose edges via composed_with, sidecar binding signals, and a composition-plan report for generated tests."
+  implementation_approach:
+    details:
+      - "Edge status: covered, partial, unit-only, candidate, e2e_only"
+      - "Ordering: IMPL pseudo-code → unit RED/GREEN → composition RED/GREEN → E2E only with named constraint"
+      - "Pattern IDs: MESSAGE_DISPATCH, UI_EMIT_COMMAND, ORCHESTRATOR_STATUS, ROUTER_STORAGE, LAZY_INIT_GUARD, EVENT_REFRESH_GUARD, ORDERED_ASYNC_HANDOFF, NATIVE_ADAPTER_CALLBACK, SCOPED_DOM_BINDING"
+      - "Report: scripts/composition-test-plan.js / npm run composition:plan"
+      - "Template: tests/integration/_templates/composition-test.template.js"
+    summary: "Vocab catalog + PROC-TEST_STRATEGY ladder + composition-plan script + generated-test template; reuse existing test seams rather than new E2E hooks."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-30"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-30"
+      reason: "Composition Test Recognition plan"
+  name: "Composition Test Pattern Catalog Architecture"
+  rationale:
+    benefits:
+      - "Agents reuse the same pattern IDs"
+      - "Clear boundary vs Playwright E2E"
+      - "Reportable edge inventory"
+    problems_solved:
+      - "No shared vocabulary for composition families"
+      - "Silent E2E classification"
+      - "Weak link from IMPL composed_with to test generation"
+    why: "Pattern recognition must sit between module validation and UI testability so bindings are first-class architectural surfaces, not ad-hoc integration suite names."
+  status: "Active"
+  traceability:
+    implementation:
+      - "IMPL-COMPOSITION_TEST_PATTERNS"
+      - "IMPL-MESSAGE_HANDLING"
+      - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
+      - "IMPL-UI_TESTABILITY_HOOKS"
+    requirements:
+      - "REQ-COMPOSITION_TEST_RECOGNITION"
+      - "REQ-MODULE_VALIDATION"
+      - "REQ-UI_INSPECTION"

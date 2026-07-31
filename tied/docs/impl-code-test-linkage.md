@@ -163,12 +163,20 @@ These phases extend validated unit modules to composition and E2E layers.
 
 **Goal**: Test bindings between modules without invoking the UI.
 
-- [ ] **G1.** Identify bindings: event listeners, IPC, entry-point delegation, function wiring.
-- [ ] **G2.** For each binding, find the IMPL whose pseudo-code describes it. If none exists, extend an existing IMPL or create a new one.
-- [ ] **G3.** Write failing composition test (component/integration/contract) for each binding. The test carries the IMPL block's token comments and verifies: trigger → correct unit → correct args → correct effect, without UI.
-- [ ] **G4.** Write composition code to pass the test. Apply three-way alignment.
+- [ ] **G1.** Identify bindings: event listeners, IPC, entry-point delegation, function wiring. Match each binding to a **composition pattern ID** from [`tied/vocab/test-composition.md`](../vocab/test-composition.md) (e.g. `MESSAGE_DISPATCH`, `UI_EMIT_COMMAND`, `ORCHESTRATOR_STATUS`). Prefer recognizing an existing Hoverboard pattern over inventing a one-off name.
+- [ ] **G2.** For each binding, find the IMPL whose pseudo-code describes it. If none exists, extend an existing IMPL or create a new one. Document the edge in `related_decisions.composed_with` and classify edge status (`covered` / `partial` / `unit-only` / `candidate` / justified `e2e_only`).
+- [ ] **G3.** Confirm **unit-first RED**: every algorithm/PROCEDURE on the binding path already has a unit test (Phase D) before writing composition RED. Then write a failing composition test for each binding. The test carries the IMPL block's token comments (or copies the block lead) and verifies: trigger → correct unit → correct args → correct effect, without UI.
+- [ ] **G4.** Write composition code to pass the test. Apply three-way alignment. Re-run `npm run composition:plan` and confirm the edge moves toward `covered`.
 
 **Key decision — extend vs. create**: If the binding is a natural part of an existing IMPL's workflow (e.g., wiring up an event handler that the IMPL already describes), extend that IMPL's pseudo-code. If the binding represents a distinct design decision with its own rationale, create a new IMPL.
+
+**Testability ladder** ([REQ-COMPOSITION_TEST_RECOGNITION] / [PROC-TEST_STRATEGY]):
+
+| Question | Level |
+|----------|-------|
+| Can I call a function and assert OUTPUT? | **unit** (Phase D) — mandatory before composition |
+| Can I fire an event/message/emitter and observe the next unit? | **composition** (Phase G) |
+| Does it require a real extension host or named platform constraint? | **E2E** (Phase H) only — never silently default here |
 
 #### Phase H — E2E
 
@@ -263,7 +271,15 @@ Is the behavior testable by:
   - only via UI interaction?     → E2E test (Phase H)
 ```
 
-When marking a block `e2e_only`, the `e2e_only_reason` must name a **specific platform constraint**, not a vague justification. "Complex UI flow" is not sufficient. "Native OS file dialog cannot be triggered programmatically in the test environment" is sufficient.
+When marking a block `e2e_only`, the `e2e_only_reason` must name a **specific platform constraint**, not a vague justification. "Complex UI flow" is not sufficient. "Native OS file dialog cannot be triggered programmatically in the test environment" is sufficient. Never silently classify a binding as E2E-only; the composition-plan report must show an explicit justification.
+
+### Composition pattern recognition (Hoverboard)
+
+Canonical pattern IDs and edge-status vocabulary live in [`tied/vocab/test-composition.md`](../vocab/test-composition.md). Traceability: [REQ-COMPOSITION_TEST_RECOGNITION], [ARCH-COMPOSITION_TEST_PATTERNS], [IMPL-COMPOSITION_TEST_PATTERNS].
+
+- Run `npm run composition:plan` to list Active `composed_with` edges, sidecar binding signals (`ON`/`WHEN`/`REGISTER`/`SEND`/`AWAIT`), and matched `tests/integration/**/*.integration.test.js` paths.
+- Generated composition tests should reuse existing seams (`setPopupComponentsForTest`, `switchTabForTest`, UI emitters, message listeners, mocked Chrome/native adapters) rather than adding E2E-only hooks.
+- Template: `tests/integration/_templates/composition-test.template.js`.
 
 ---
 

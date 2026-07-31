@@ -30,6 +30,7 @@
 | **injectionOutcome** | inject log (alone) | UI inspector `recordAction` id for precheck/skip/fail of content or suggested-tags scripting |
 | **Search Bookmarks** | library search, search library | Capture UI control opening Local Bookmarks Index with `?q=`; **not** Search tabs (`search` / `SEARCH_TABS`) — [REQ-LIBRARY_SEARCH_ENTRY] |
 | **Title/Notes Details** | details section | Popup/This Page Title (`description`) + Notes (`extended`) editors — [REQ-BOOKMARK_NOTES_UI] |
+| **link health hint** | health status line | Compact This Page/popup “Health: …” from stored map when **linkHealthChecksEnabled** — [REQ-LINK_HEALTH] |
 
 ---
 
@@ -49,7 +50,8 @@
 | Open tags tree | By Tag (footer) | — | `openTagsTree` → `OPEN_SIDE_PANEL` | popup |
 | Open index | Bookmarks index | — | `OPEN_BOOKMARKS_INDEX` / `openBookmarksIndex` | SW `_openBookmarksIndexTab` (tabs.create + `REQUEST_SIDE_PANEL_CLOSE`) |
 | Search Bookmarks | Search Bookmarks | — | `OPEN_BOOKMARKS_INDEX` + `{ q }` | [IMPL-LIBRARY_SEARCH_ENTRY] `OPEN_LIBRARY_SEARCH` |
-| Title/Notes Details | Title / Notes / Save details | — | `saveBookmark` (via Details) | [IMPL-BOOKMARK_NOTES_UI] |
+| linkHealthChecksEnabled | Enable link health checks | `linkHealthChecksEnabled` | — | ConfigManager / Options |
+| link health hint | (Details help text) | — | `GET_LINK_HEALTH` | `formatLinkHealthHint` / `refreshLinkHealthHint` |
 | Open import | Browser bookmark import | — | `openBrowserBookmarkImport` | chrome.tabs.create |
 
 ### Overlay action IDs (`OVERLAY_ACTION_IDS`)

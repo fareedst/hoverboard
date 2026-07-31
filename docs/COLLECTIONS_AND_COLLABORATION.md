@@ -13,6 +13,8 @@ Hoverboard does **not** introduce a separate Collections product object.
 
 Prefer flat tags for Local/File/Sync/Pinboard; use nested folders when saving to **Browser** storage if you want native Chrome hierarchy.
 
+By Tag is tag→URL sections, not path-segment trees; slash tags are sanitized.
+
 ## Collaboration = File share (ad hoc)
 
 There are **no** multi-user ACLs, invites, or shared-collection servers.

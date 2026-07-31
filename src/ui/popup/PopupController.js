@@ -1533,6 +1533,10 @@ import {
   bookmarkDetailsUnchanged,
   notesEditableForBackend
 } from '../../shared/bookmark-notes-ui.js'
+import {
+  isLinkHealthChecksEnabled,
+  formatLinkHealthHint
+} from '../../shared/link-health.js'
 
 /** [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] Extension-root path for scripting.executeScript files */
 const SUGGESTED_TAGS_MAIN_WORLD_FILE = 'src/features/tagging/suggested-tags-main-world-snippet.js'
@@ -1843,6 +1847,9 @@ export class PopupController {
 
       // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] This Page inline usage section
       await this.refreshUsageSection()
+
+      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Compact This Page/popup hint when opt-in and stored record exist
+      await this.refreshLinkHealthHint()
 
       // Mark as initialized
       this.isInitialized = true
@@ -3902,6 +3909,34 @@ export class PopupController {
     } catch (err) {
       debugError('[IMPL-BOOKMARK_USAGE_TRACKING_UI] refreshUsageSection failed:', err)
       this.uiManager.updateUsageSection(null, '')
+    }
+  }
+
+  /**
+   * [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
+   * When opt-in enabled, show compact stored health hint for current tab URL.
+   */
+  async refreshLinkHealthHint () {
+    if (!this.uiManager?.setLinkHealthHint) return
+    try {
+      const config = await this.configManager.getConfig()
+      const enabled = isLinkHealthChecksEnabled(config)
+      if (!enabled) {
+        this.uiManager.setLinkHealthHint('')
+        return
+      }
+      const url = this.currentTab?.url
+      if (!url || typeof this.sendMessage !== 'function') {
+        this.uiManager.setLinkHealthHint('')
+        return
+      }
+      const response = await this.sendMessage({ type: 'GET_LINK_HEALTH' })
+      const map = response?.success ? (response.data || {}) : {}
+      const rec = map[url]
+      this.uiManager.setLinkHealthHint(formatLinkHealthHint(rec, { enabled: true }))
+    } catch (err) {
+      debugError('[IMPL-LINK_HEALTH] refreshLinkHealthHint failed:', err)
+      this.uiManager.setLinkHealthHint('')
     }
   }
 

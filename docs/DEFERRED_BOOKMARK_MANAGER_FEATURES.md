@@ -15,4 +15,10 @@ The following items from common self-hosted bookmark managers are **explicitly o
 | Native **mobile apps** | Out of scope (Chromium extension; Safari deferred) |
 | True multi-user **collaboration ACLs** | Out of scope (see [COLLECTIONS_AND_COLLABORATION.md](COLLECTIONS_AND_COLLABORATION.md)) |
 
-Shipped under the phased plan instead: Title/Notes UI, Local Query API, library search entry, aggregate snapshot, File write API, link health, collections-as-tags documentation.
+Shipped under the phased plan instead: Title/Notes UI, Local Query API, library search entry, aggregate snapshot, File write API, link health (including R1a inhibit/timeout and R1b opt-in/This Page hint), and R1c collections N/A closeout with collections-as-tags documentation.
+
+## Shipped vs deferred
+
+- **Shipped under 1A/2B:** [Local Query API](LOCAL_API.md), link health, and collections modeled through tags, By Tag, and Browser folders ([COLLECTIONS_AND_COLLABORATION.md](COLLECTIONS_AND_COLLABORATION.md)).
+- **Accepted 2B limitations:** Start the Local Query API through the documented CLI/install path; no Options one-click launcher is provided. The aggregate snapshot omits Pinboard by default for privacy; adding it requires a future explicit opt-in requirement.
+- **Deferred under 1A:** The Phase 4 items above remain the only reopen path and require a written product decision that supersedes 1A.

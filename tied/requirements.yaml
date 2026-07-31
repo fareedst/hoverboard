@@ -456,6 +456,18 @@ REQ-CODE_QUALITY:
   validation_criteria:
     - method: "CI or local validate script"
       coverage: "npm run validate runs lint, manifest validation, and security:check"
+REQ-COMPOSITION_TEST_RECOGNITION:
+  category: "Functional"
+  cross_references:
+    - "ARCH-COMPOSITION_TEST_PATTERNS"
+    - "ARCH-UI_TESTABILITY"
+    - "IMPL-COMPOSITION_TEST_PATTERNS"
+    - "PROC-TEST_STRATEGY"
+    - "REQ-MODULE_VALIDATION"
+  detail_file: "requirements/REQ-COMPOSITION_TEST_RECOGNITION.yaml"
+  name: "Composition Test Pattern Recognition"
+  priority: "P1"
+  status: "Active"
 REQ-CONFIG_PORTABILITY:
   category: "Non-Functional"
   detail_file: "requirements/REQ-CONFIG_PORTABILITY.yaml"

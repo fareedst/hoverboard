@@ -1,0 +1,56 @@
+REQ-COMPOSITION_TEST_RECOGNITION:
+  category: "Functional"
+  description: "Hoverboard must recognize stable composition patterns (bindings between validated units) so agents and tooling can generate composition tests that assert trigger → receiving unit → arguments → observable effect without UI invocation, after unit-first RED coverage of each algorithm."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-30"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-30"
+      reason: "Composition Test Recognition plan"
+  name: "Composition Test Pattern Recognition"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Composition-plan report for coverage gaps"
+      - "Stable pattern IDs for generated tests"
+      - "Unit-first then composition RED ordering enforced"
+    problems_solved:
+      - "Composition tests written before unit RED for algorithms"
+      - "E2E used where composition would suffice"
+      - "Undiscoverable composition edges"
+    why: "Composition suites already exist for several families, but bindings are hard to discover from IMPL composed_with and sidecars alone; without a catalog and ladder, agents skip composition or jump to E2E."
+  related_requirements:
+    depends_on:
+      - "REQ-MODULE_VALIDATION"
+    related_to:
+      - "REQ-UI_INSPECTION"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "A composition-plan report classifies Active edges as covered, partial, unit-only, candidate, or justified e2e_only with evidence"
+    - criterion: "Canonical composition vocabulary lists pattern IDs with trigger, units, effect, level, and example suite"
+    - criterion: "Every non-E2E candidate edge has a composition-test plan or a passing composition suite"
+    - criterion: "Generated composition tests assert trigger, delegation, arguments, and effect—not only listener registration"
+    - criterion: "Testability ladder is documented: function→unit; event/message/wiring→composition; named platform constraint→E2E only"
+    - criterion: "Unit-first RED is required before composition RED for algorithms on a binding path"
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-COMPOSITION_TEST_PATTERNS"
+      - "ARCH-MODULE_VALIDATION"
+      - "ARCH-UI_TESTABILITY"
+    implementation:
+      - "IMPL-COMPOSITION_TEST_PATTERNS"
+      - "IMPL-MESSAGE_HANDLING"
+      - "IMPL-UI_TESTABILITY_HOOKS"
+    tests:
+      - "scripts/composition-test-plan.js"
+      - "tests/integration/_templates/composition-test.template.js"
+  validation_criteria:
+    - method: "Documentation review"
+      coverage: "tied/vocab/test-composition.md and PROC-TEST_STRATEGY ladder"
+    - method: "Automated tooling"
+      coverage: "npm run composition:plan lists edges with status"
+    - method: "Automated testing"
+      coverage: "Prioritized composition suites pass without UI invocation"

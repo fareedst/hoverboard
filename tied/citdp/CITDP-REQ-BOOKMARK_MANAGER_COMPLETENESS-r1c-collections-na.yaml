@@ -1,0 +1,54 @@
+CITDP-REQ-BOOKMARK_MANAGER_COMPLETENESS-r1c-collections-na:
+  change_definition:
+    current_behavior: "Collections are represented by existing tags, By Tag sections, Index tag filters, and Browser folder mappings; there is no separate nested slash-path Collections UI."
+    desired_behavior: "Close R1c as N/A with documented evidence: By Tag renders tag sections with URL leaves; the Local Bookmarks Index filters whole tag strings; sanitizeTag replaces slash characters with underscores; folderPathToTags and ENSURE_TAG_FOLDERS map native Browser folder paths to tags; native hierarchy remains on the Browser Bookmarks surface."
+    non_goals:
+      - "Archive, reader, public/cloud REST, webhooks, mobile, or ACL work"
+      - "Build a slash-path nested tag tree UI"
+      - "Change By Tag or Local Bookmarks Index display behavior"
+      - "Create a new Collections entity"
+    success_criteria:
+      - "By Tag evidence identifies tag sections and URL leaves rather than parent/child path nodes"
+      - "CITDP record has leap_feedback.record_status complete"
+      - "Index evidence identifies whole-string tag filtering"
+      - "Phase 4 features remain explicitly deferred under product decision 1A"
+      - "sanitizeTag slash-to-underscore behavior and folder-to-tag mapping are recorded"
+  completion_criteria:
+    docs_updated:
+      - "docs/COLLECTIONS_AND_COLLABORATION.md"
+      - "docs/DEFERRED_BOOKMARK_MANAGER_FEATURES.md"
+      - "docs/LOCAL_API.md"
+    verification_gate_notes: "Documentation-only closeout; no product code or test changes; no TIED REQ/ARCH/IMPL mutation required."
+  impact_analysis:
+    impl_inventory_notes: "Reviewed src/ui/side-panel/tags-tree.js and related By Tag rendering, src/ui/bookmarks-table/bookmarks-table.js tag filtering, and existing sanitizeTag/folderPathToTags/ENSURE_TAG_FOLDERS conventions."
+    modules_or_boundaries: "By Tag side-panel surface; Local Bookmarks Index; Browser bookmark folder/tag mapping; collections documentation."
+    tied_tokens_affected:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "Original R1c wording suggested nested/path tag display polish; repository audit shows the existing surfaces satisfy the metadata-first collections model without a new UI."
+    notes: "R1c closed as N/A. Evidence is preserved here instead of adding a new product requirement."
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-BOOKMARK_MANAGER_COMPLETENESS-r1c-collections-na"
+    primary_tokens:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-30"
+    title: "Bookmark manager completeness — R1c collections N/A closeout"
+  risk_analysis:
+    risks:
+      - id: "RISK-001"
+        description: "Users may interpret flat tag sections as missing nested collection support."
+        mitigation: "Document By Tag as tag-to-URL sections and point users to Browser folders for native hierarchy."
+        residual: "low"
+        severity: "low"
+  tdd_sequence:
+    summary: "No TDD sequence: audit and documentation closeout only; no runtime behavior changed."
+  test_strategy:
+    matrix_notes: "No unit, composition, or E2E tests added because the decision records existing shipped behavior and intentionally makes no runtime change."
+    summary: "Documentation/CITDP evidence only; existing By Tag, Index, sanitizeTag, and Browser-folder behavior remains covered by the current implementation."
+  unchanged_behavior: "Tags remain the collection model for Local/File/Sync/Pinboard; Browser folders remain the native hierarchy option; no runtime code or tests change."

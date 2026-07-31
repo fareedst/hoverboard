@@ -14380,7 +14380,9 @@ var init_config_manager = __esm({
       aiProvider: external_exports.string().optional(),
       aiTagLimit: external_exports.number().int().min(0).optional(),
       // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
-      iconClickOpensSidePanel: external_exports.boolean().optional()
+      iconClickOpensSidePanel: external_exports.boolean().optional(),
+      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Opt-in outbound Index link health checks (default false).
+      linkHealthChecksEnabled: external_exports.boolean().optional()
     }).passthrough();
     ConfigManager = class {
       constructor() {
@@ -14506,7 +14508,9 @@ var init_config_manager = __esm({
           aiProvider: "openai",
           aiTagLimit: 64,
           // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
-          iconClickOpensSidePanel: true
+          iconClickOpensSidePanel: true,
+          // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first: outbound link checks off until user enables in Options.
+          linkHealthChecksEnabled: false
         };
       }
       /**
@@ -22074,12 +22078,79 @@ var init_pinboard_service = __esm({
 // src/shared/link-health.js
 var link_health_exports = {};
 __export(link_health_exports, {
+  LINK_HEALTH_FETCH_TIMEOUT_MS: () => LINK_HEALTH_FETCH_TIMEOUT_MS,
+  LINK_HEALTH_INHIBITED_ERROR: () => LINK_HEALTH_INHIBITED_ERROR,
   LINK_HEALTH_STORAGE_KEY: () => LINK_HEALTH_STORAGE_KEY,
+  LINK_HEALTH_TIMEOUT_ERROR: () => LINK_HEALTH_TIMEOUT_ERROR,
+  applyLinkHealthControlsGate: () => applyLinkHealthControlsGate,
+  applyLinkHealthHint: () => applyLinkHealthHint,
   buildHealthRecord: () => buildHealthRecord,
   classifyHttpStatus: () => classifyHttpStatus,
+  fetchWithLinkHealthTimeout: () => fetchWithLinkHealthTimeout,
   filterBookmarksByHealth: () => filterBookmarksByHealth,
-  mergeHealthMap: () => mergeHealthMap
+  formatLinkHealthHint: () => formatLinkHealthHint,
+  isLinkHealthChecksEnabled: () => isLinkHealthChecksEnabled,
+  mergeHealthMap: () => mergeHealthMap,
+  urlMatchesInhibitList: () => urlMatchesInhibitList
 });
+function urlMatchesInhibitList(url2, inhibitUrls) {
+  if (!url2 || typeof url2 !== "string") return false;
+  const list = Array.isArray(inhibitUrls) ? inhibitUrls : [];
+  const normalizedUrl = url2.replace(/^https?:\/\//i, "");
+  return list.some((entry) => {
+    const inhibitUrl = String(entry || "").trim();
+    if (!inhibitUrl) return false;
+    return normalizedUrl.includes(inhibitUrl) || inhibitUrl.includes(normalizedUrl);
+  });
+}
+async function fetchWithLinkHealthTimeout(url2, init = {}, options = {}) {
+  const timeoutMs = options.timeoutMs ?? LINK_HEALTH_FETCH_TIMEOUT_MS;
+  const fetchFn = options.fetchFn ?? globalThis.fetch;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetchFn(url2, {
+      ...init,
+      redirect: init.redirect ?? "follow",
+      signal: controller.signal
+    });
+  } catch (e) {
+    if (e?.name === "AbortError" || controller.signal.aborted) {
+      const err = new Error(LINK_HEALTH_TIMEOUT_ERROR);
+      err.name = "AbortError";
+      throw err;
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+function isLinkHealthChecksEnabled(config2) {
+  return config2?.linkHealthChecksEnabled === true;
+}
+function formatLinkHealthHint(rec, opts = {}) {
+  if (!opts.enabled) return "";
+  if (!rec || !rec.status) return "";
+  if (rec.httpStatus != null) return `Health: ${rec.status} (${rec.httpStatus})`;
+  return `Health: ${rec.status}`;
+}
+function applyLinkHealthHint(el, text) {
+  if (!el) return;
+  const t = String(text || "");
+  if (!t) {
+    el.hidden = true;
+    el.textContent = "";
+    return;
+  }
+  el.hidden = false;
+  el.textContent = t;
+}
+function applyLinkHealthControlsGate(enabled, checkButton) {
+  if (!checkButton) return;
+  const on = !!enabled;
+  checkButton.hidden = !on;
+  if ("disabled" in checkButton) checkButton.disabled = !on;
+}
 function classifyHttpStatus(status) {
   const n = Number(status);
   if (!Number.isFinite(n) || n <= 0) return "unknown";
@@ -22123,11 +22194,14 @@ function filterBookmarksByHealth(bookmarks, healthMap, statusFilter) {
     return st === f;
   });
 }
-var LINK_HEALTH_STORAGE_KEY;
+var LINK_HEALTH_STORAGE_KEY, LINK_HEALTH_FETCH_TIMEOUT_MS, LINK_HEALTH_INHIBITED_ERROR, LINK_HEALTH_TIMEOUT_ERROR;
 var init_link_health = __esm({
   "src/shared/link-health.js"() {
     "use strict";
     LINK_HEALTH_STORAGE_KEY = "hoverboard_link_health";
+    LINK_HEALTH_FETCH_TIMEOUT_MS = 8e3;
+    LINK_HEALTH_INHIBITED_ERROR = "inhibited";
+    LINK_HEALTH_TIMEOUT_ERROR = "timeout";
   }
 });
 
@@ -26267,24 +26341,58 @@ var HoverboardServiceWorker = class {
   }
   /**
    * [REQ-LINK_HEALTH] [ARCH-LINK_HEALTH] [IMPL-LINK_HEALTH]
-   * Direct HEAD then GET; persist under hoverboard_link_health.
+   * Direct HEAD then GET with inhibit skip + AbortController timeout; persist under hoverboard_link_health.
+   * @param {string[]} urls
+   * @param {{ timeoutMs?: number }} [options] - optional timeout override (tests)
    */
-  async _checkLinkHealth(urls = []) {
-    const { buildHealthRecord: buildHealthRecord2, mergeHealthMap: mergeHealthMap2, LINK_HEALTH_STORAGE_KEY: LINK_HEALTH_STORAGE_KEY2 } = await Promise.resolve().then(() => (init_link_health(), link_health_exports));
+  async _checkLinkHealth(urls = [], options = {}) {
+    const {
+      buildHealthRecord: buildHealthRecord2,
+      mergeHealthMap: mergeHealthMap2,
+      urlMatchesInhibitList: urlMatchesInhibitList2,
+      fetchWithLinkHealthTimeout: fetchWithLinkHealthTimeout2,
+      isLinkHealthChecksEnabled: isLinkHealthChecksEnabled2,
+      LINK_HEALTH_STORAGE_KEY: LINK_HEALTH_STORAGE_KEY2,
+      LINK_HEALTH_INHIBITED_ERROR: LINK_HEALTH_INHIBITED_ERROR2,
+      LINK_HEALTH_FETCH_TIMEOUT_MS: LINK_HEALTH_FETCH_TIMEOUT_MS2
+    } = await Promise.resolve().then(() => (init_link_health(), link_health_exports));
+    let config2 = {};
+    try {
+      config2 = await this.configManager.getConfig();
+    } catch (e) {
+      console.debug("DEBUG: [REQ-LINK_HEALTH] getConfig failed; treating checks as disabled", e?.message || e);
+    }
+    if (!isLinkHealthChecksEnabled2(config2)) {
+      console.debug("DEBUG: [REQ-LINK_HEALTH] CHECK_LINK_HEALTH rejected (opt-in off)");
+      return { success: false, error: "Link health checks disabled", checked: 0, results: {} };
+    }
+    const timeoutMs = options.timeoutMs ?? LINK_HEALTH_FETCH_TIMEOUT_MS2;
     const list = (Array.isArray(urls) ? urls : []).filter((u) => typeof u === "string" && /^https?:/i.test(u)).slice(0, 50);
+    let inhibitUrls = [];
+    try {
+      inhibitUrls = await this.configManager.getInhibitUrls();
+    } catch (e) {
+      console.debug("DEBUG: [REQ-LINK_HEALTH] getInhibitUrls failed; treating as empty", e?.message || e);
+      inhibitUrls = [];
+    }
     const stored = await chrome.storage.local.get(LINK_HEALTH_STORAGE_KEY2);
     let map2 = stored[LINK_HEALTH_STORAGE_KEY2] || {};
     const results = {};
     for (const url2 of list) {
       let record2;
-      try {
-        let res = await fetch(url2, { method: "HEAD", redirect: "follow" });
-        if (!res.ok && (res.status === 405 || res.status === 501)) {
-          res = await fetch(url2, { method: "GET", redirect: "follow" });
+      if (urlMatchesInhibitList2(url2, inhibitUrls)) {
+        console.debug("DEBUG: [REQ-LINK_HEALTH] skip fetch (inhibited)", url2);
+        record2 = buildHealthRecord2({ error: LINK_HEALTH_INHIBITED_ERROR2 });
+      } else {
+        try {
+          let res = await fetchWithLinkHealthTimeout2(url2, { method: "HEAD" }, { timeoutMs });
+          if (!res.ok && (res.status === 405 || res.status === 501)) {
+            res = await fetchWithLinkHealthTimeout2(url2, { method: "GET" }, { timeoutMs });
+          }
+          record2 = buildHealthRecord2({ status: res.status, ok: res.ok });
+        } catch (e) {
+          record2 = buildHealthRecord2({ error: e.message || String(e) });
         }
-        record2 = buildHealthRecord2({ status: res.status, ok: res.ok });
-      } catch (e) {
-        record2 = buildHealthRecord2({ error: e.message || String(e) });
       }
       map2 = mergeHealthMap2(map2, url2, record2);
       results[url2] = record2;

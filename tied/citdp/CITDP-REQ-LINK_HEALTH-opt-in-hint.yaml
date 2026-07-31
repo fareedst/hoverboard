@@ -1,0 +1,53 @@
+CITDP-REQ-LINK_HEALTH-opt-in-hint:
+  change_definition:
+    current_behavior: "Index Check link health always available; no Options gate; popup/This Page has no stored-health hint."
+    desired_behavior: "Config linkHealthChecksEnabled default false; Options toggle; Index Check + SW CHECK_LINK_HEALTH gated; compact This Page/popup hint from GET_LINK_HEALTH when enabled and record exists."
+    non_goals:
+      - "Archive/reader (Phase 4)"
+      - "Auto-check on page load"
+      - "Collections tag polish (R1c)"
+      - "Playwright E2E"
+    success_criteria:
+      - "Default linkHealthChecksEnabled false"
+      - "formatLinkHealthHint + applyLinkHealthHint unit/composition"
+      - "Index Check disabled/hidden when off"
+      - "Options checkbox load/save"
+      - "PopupController refreshLinkHealthHint composition (GET_LINK_HEALTH → setLinkHealthHint)"
+      - "SW rejects CHECK when off"
+      - "tied_validate_consistency ok"
+  completion_criteria:
+    verification_gate_notes: "Unit + composition + SW unit + Options load/save unit green; tied_validate_consistency; no Playwright E2E (unit/composition sufficient)."
+  impact_analysis:
+    modules_or_boundaries: "ConfigManager defaults/schema; options.html/js; link-health.js helpers; bookmarks-table gate; SW _checkLinkHealth; PopupController/UIManager hint; popup.html"
+    tied_tokens_affected:
+      - "ARCH-LINK_HEALTH"
+      - "IMPL-LINK_HEALTH"
+      - "REQ-LINK_HEALTH"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: []
+    notes: "R1b shipped: linkHealthChecksEnabled default false; Options toggle; Index/SW gate; capture UI hint; vocab RECORD. Reconcile pass added popup-link-health-hint composition and options-link-health unit coverage."
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-LINK_HEALTH-opt-in-hint"
+    primary_tokens:
+      - "ARCH-LINK_HEALTH"
+      - "IMPL-CONFIG_STRUCT"
+      - "IMPL-LINK_HEALTH"
+      - "REQ-LINK_HEALTH"
+      - "REQ-PRIVACY_CONTROLS"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-30"
+    title: "Link health — Options opt-in (default off) + This Page/popup health hint"
+  risk_analysis:
+    risks:
+      - id: "RISK-001"
+        description: "Users with prior health map see column without realizing checks are off"
+        mitigation: "Gate Check button + SW; column remains read-only history; Options help text"
+        residual: "low"
+        severity: "low"
+  tdd_sequence:
+    summary: "Failing unit/composition; implement helpers/config/UI/SW; green; LEAP closeout"
+  test_strategy:
+    summary: "Unit helpers for enabled flag + hint text; Options load/save unit; composition runCheckLinkHealth gated; composition PopupController→GET_LINK_HEALTH→setLinkHealthHint; SW reject when disabled; no Playwright"

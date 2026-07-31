@@ -69,6 +69,20 @@ describe('[REQ-LINK_HEALTH] runCheckLinkHealth composition', () => {
     expect(resultEl.textContent).toBe('fetch blocked')
   })
 
+  test('enabled false does not sendMessage', async () => {
+    const sendMessage = jest.fn()
+    const result = await runCheckLinkHealth({
+      urls: ['https://example.com/'],
+      sendMessage,
+      resultEl,
+      enabled: false
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toMatch(/disabled/i)
+    expect(sendMessage).not.toHaveBeenCalled()
+    expect(resultEl.textContent).toBe('Link health checks disabled')
+  })
+
   test('formatHealthCellLabel and filterBookmarksByHealth for Index column/filter', () => {
     expect(formatHealthCellLabel(null)).toBe('—')
     expect(formatHealthCellLabel({ status: 'ok', httpStatus: 200 })).toBe('ok (200)')

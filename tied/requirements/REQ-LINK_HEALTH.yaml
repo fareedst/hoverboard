@@ -1,6 +1,11 @@
 REQ-LINK_HEALTH:
   category: "Functional"
   description: "Users can run batch link health checks on Index-selected or displayed bookmarks. The extension performs direct HTTP HEAD (fallback GET) from the service worker, stores last status and checked_at in chrome.storage.local, and surfaces results on the Index. Inhibit-list and privacy: no third-party uptime SaaS."
+  metadata:
+    last_updated:
+      author: "agent"
+      date: "2026-07-30"
+      reason: "R1b: opt-in setting + This Page/popup health hint"
   name: "Link Health Monitoring"
   priority: "P2"
   rationale:
@@ -17,9 +22,13 @@ REQ-LINK_HEALTH:
     supersedes: []
   satisfaction_criteria:
     - criterion: "CHECK_LINK_HEALTH message checks URLs via fetch HEAD then GET"
+    - criterion: "Each HEAD/GET uses AbortController with bounded timeout; abort records unreachable/timeout; GET does not buffer body"
     - criterion: "Index shows Health column and optional status filter"
+    - criterion: "linkHealthChecksEnabled defaults false; Options toggle; Index Check and SW CHECK gated when off"
     - criterion: "Results persisted under hoverboard_link_health"
     - criterion: "Unit tests for classify/filter helpers"
+    - criterion: "URLs matching hoverboard_inhibit_urls are skipped (no fetch); recorded as unreachable with error inhibited"
+    - criterion: "When enabled, This Page/popup shows compact health hint for current URL from stored map (GET_LINK_HEALTH); no SaaS"
   status: "Implemented"
   traceability:
     architecture:

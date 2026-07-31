@@ -27,8 +27,10 @@
 | **regex find-and-replace** | bulk replace | Title / URL / Tags / Notes fields on selection |
 | **index-open dismisses side panel** | close sidebar on index | On Local Bookmarks Index **tab create** (popup / command / context menu) only; broadcast `REQUEST_SIDE_PANEL_CLOSE`. Not on index page refresh. Toolbar icon may reopen the **side panel**. |
 | **Search Bookmarks** | library search (alone) | Capture UI control that opens Index with `?q=`; **not** Search tabs ([REQ-LIBRARY_SEARCH_ENTRY]) |
-| **link health** | dead-link check, uptime | Batch HTTP HEAD→GET status for Index URLs; side table `hoverboard_link_health` ([REQ-LINK_HEALTH]) |
+| **link health** | dead-link check, uptime | Batch HTTP HEAD→GET status for Index URLs with inhibit skip + AbortController timeout; gated by **linkHealthChecksEnabled** (default off); side table `hoverboard_link_health` ([REQ-LINK_HEALTH]) |
+| **linkHealthChecksEnabled** | enable link checks | Options **Enable link health checks**; ConfigManager default `false` |
 | **Health column** | status column | Index column + optional filter over last link-health result |
+| **link health hint** | health badge (capture) | Compact This Page/popup text from stored map when opt-in on |
 | **Refresh API snapshot** | write aggregate snapshot | Index/Options action → `REFRESH_API_SNAPSHOT` writes `aggregate-snapshot.json` for Local Query API |
 
 ---
@@ -75,7 +77,7 @@
 - **Browser (B)** — Stores checkbox `#store-browser` for backend `browser` (native `chrome.bookmarks`); peer to Local/File/Sync for filter, move, and import targets.
 - **index-open dismisses side panel** — Creating the Local Bookmarks Index tab via popup, command, or context menu dismisses an already-open **side panel** (`REQUEST_SIDE_PANEL_CLOSE`). Refresh of the index document does not re-dismiss. Options page `href` open does not use this path.
 - **Search Bookmarks** — Popup/This Page control; opens Local Bookmarks Index with encoded `?q=` prefilled into the Index search field. Distinct from Search tabs.
-- **link health** — SW fetch HEAD then GET; results in `chrome.storage.local` key `hoverboard_link_health`; Index **Health column** and status filter.
+- **link health** — SW fetch HEAD then GET with AbortController timeout; skip URLs matching **inhibit URL** list (`hoverboard_inhibit_urls`); gated by **linkHealthChecksEnabled** (Options, default off); results in `chrome.storage.local` key `hoverboard_link_health`; Index **Health column** and status filter; optional This Page/popup **link health hint**.
 - **Refresh API snapshot** — Writes multi-backend `aggregate-snapshot.json` under the File storage directory for Local Query API GET preference (Phase 2).
 - **Index orchestrators** — Composition-testable Index UI helpers: `prefillSearchFromQuery` (`bookmarks-table-library-search.js`), `runCheckLinkHealth` / `formatHealthCellLabel` (`bookmarks-table-link-health.js`), `runRefreshApiSnapshot` (`bookmarks-table-api-snapshot.js`). Wired thinly from `bookmarks-table.js` init / button handlers.
 
@@ -91,10 +93,16 @@
 | Prefill Index search from `?q=` | `PREFILL_INDEX_SEARCH_FROM_QUERY` | [IMPL-LIBRARY_SEARCH_ENTRY](../implementation-decisions/IMPL-LIBRARY_SEARCH_ENTRY.yaml) |
 | Classify HTTP status | `CLASSIFY_HTTP_STATUS` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
 | Build health record | `BUILD_HEALTH_RECORD` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
+| Match inhibit list | `URL_MATCHES_INHIBIT_LIST` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
+| Fetch with link-health timeout | `FETCH_WITH_LINK_HEALTH_TIMEOUT` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
+| Link health checks enabled flag | `IS_LINK_HEALTH_CHECKS_ENABLED` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
+| Format capture-UI health hint | `FORMAT_LINK_HEALTH_HINT` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
+| Gate Index check controls | `APPLY_LINK_HEALTH_CONTROLS_GATE` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
 | Check link health batch | `CHECK_LINK_HEALTH` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
 | Get link health map | `GET_LINK_HEALTH` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
 | Filter Index by health | `FILTER_BOOKMARKS_BY_HEALTH` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
 | Index Check link health UI | `RUN_CHECK_LINK_HEALTH_UI` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
+| Capture UI link health hint | `CAPTURE_UI_LINK_HEALTH_HINT` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
 | Index Refresh API snapshot UI | `RUN_REFRESH_API_SNAPSHOT_UI` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
 | Load index rows | `LOAD_LOCAL_BOOKMARKS_INDEX` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
 | Store-change reload predicate | `shouldReloadBookmarksOnStoreChange` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
@@ -121,14 +129,22 @@
 | Import control group | Named concepts |
 | import result pending / final | Named concepts |
 | BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY | Pseudo-code block names |
+| APPLY_LINK_HEALTH_CONTROLS_GATE | Pseudo-code block names |
 | BUILD_HEALTH_RECORD | Pseudo-code block names |
+| CAPTURE_UI_LINK_HEALTH_HINT | Pseudo-code block names |
 | CHECK_LINK_HEALTH | Pseudo-code block names |
 | CLASSIFY_HTTP_STATUS | Pseudo-code block names |
+| FETCH_WITH_LINK_HEALTH_TIMEOUT | Pseudo-code block names |
 | FILTER_BOOKMARKS_BY_HEALTH | Pseudo-code block names |
+| FORMAT_LINK_HEALTH_HINT | Pseudo-code block names |
 | GET_LINK_HEALTH | Pseudo-code block names |
 | Health column | Preferred terms |
 | index-open dismisses side panel | Preferred terms / Named concepts |
+| IS_LINK_HEALTH_CHECKS_ENABLED | Pseudo-code block names |
 | link health | Preferred terms / Named concepts |
+| link health hint | Preferred terms |
+| linkHealthChecksEnabled | Preferred terms |
+| URL_MATCHES_INHIBIT_LIST | Pseudo-code block names |
 | Local Bookmarks Index | Preferred terms |
 | OPEN_BOOKMARKS_INDEX_TAB | Pseudo-code block names |
 | OPEN_LIBRARY_SEARCH | Pseudo-code block names |

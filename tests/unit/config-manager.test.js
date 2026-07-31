@@ -1134,6 +1134,7 @@ describe('ConfigManager', () => {
       const defaults = configManager.getDefaultConfiguration();
       expect(defaults).toHaveProperty('hoverShowRecentTags');
       expect(defaults).toHaveProperty('inhibitSitesOnPageLoad');
+      expect(defaults.linkHealthChecksEnabled).toBe(false);
     });
 
     test('getOptions returns UI-safe subset [IMPL-FEATURE_FLAGS]', async () => {

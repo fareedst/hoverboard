@@ -491,6 +491,18 @@ ARCH-CODE_QUALITY:
       - "REQ-CODE_QUALITY"
     tests:
       - "npm run lint; npm run validate"
+ARCH-COMPOSITION_TEST_PATTERNS:
+  category: "Testing"
+  cross_references:
+    - "ARCH-TESTING_STRATEGY"
+    - "ARCH-UI_TESTABILITY"
+    - "IMPL-COMPOSITION_TEST_PATTERNS"
+    - "REQ-COMPOSITION_TEST_RECOGNITION"
+    - "REQ-MODULE_VALIDATION"
+  detail_file: "architecture-decisions/ARCH-COMPOSITION_TEST_PATTERNS.yaml"
+  name: "Composition Test Pattern Catalog Architecture"
+  priority: "P1"
+  status: "Active"
 ARCH-CONFIG_STRUCTURE:
   cross_references: []
   detail_file: "architecture-decisions/ARCH-CONFIG_STRUCTURE.yaml"

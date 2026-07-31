@@ -47,6 +47,7 @@
 | Badge texts | Badge Settings | `badgeTextIfNotBookmarked`, `badgeTextIfPrivate`, `badgeTextIfQueued`, `badgeTextIfBookmarkedNoTags` | `-`, `*`, `!`, `0` |
 | AI | AI Tagging | `aiApiKey`, `aiProvider`, `aiTagLimit` | `''`, `openai`, `64` |
 | Icon click | Extension icon | `iconClickOpensSidePanel` | `true` |
+| Link health checks | Enable link health checks | `linkHealthChecksEnabled` | `false` |
 | File path | File storage path | `hoverboard_file_storage_path` | `~/.hoverboard` |
 | File configured | — | `hoverboard_file_storage_configured` | — |
 | Strip URL hash | Advanced | `uxUrlStripHash` | `false` |

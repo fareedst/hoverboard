@@ -26,6 +26,10 @@ go build -o hoverboard-local-api ./cmd/hoverboard-local-api
 ~/.hoverboard/hoverboard-local-api
 ```
 
+The supported start path is the CLI command above or the binary copied by
+`install.sh`; an Options one-click launcher is an accepted out-of-scope
+limitation for the current 2B snapshot.
+
 Environment:
 
 - `HOVERBOARD_HOME` — install dir (default `~/.hoverboard`)
@@ -53,4 +57,4 @@ curl -s -X DELETE -H "Authorization: Bearer $TOKEN" \
 
 ## Aggregate snapshot
 
-When the extension writes `~/.hoverboard/aggregate-snapshot.json` (Local + File + Sync + Browser), the API prefers that file for `GET` list/search. Writes still target File JSON only.
+When the extension writes `~/.hoverboard/aggregate-snapshot.json` (Local + File + Sync + Browser), the API prefers that file for `GET` list/search. Writes still target File JSON only. Pinboard is intentionally omitted from the default snapshot for privacy; including it requires a future explicit opt-in requirement.
