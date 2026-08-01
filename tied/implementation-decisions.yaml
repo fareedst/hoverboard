@@ -1804,18 +1804,19 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX-pseudocode.md"
   implementation_approach:
     details:
-      - "Backend filter Store L/F/Y/B (local/file/sync/browser)"
-      - "Delete passes preferredBackend from Storage column"
-      - "getAllBookmarksForIndex aggregates local+file+sync+browser with storage field"
-    summary: "Bookmarks Index UI aggregates local/file/sync/browser; Store B for browser."
+      - "bookmarks-table-controls.js owns pure active-group validation and independent head/footer tab state for unit testing"
+      - "bookmarks-table.css reserves head/footer space, offsets sticky table headers, keeps focus-visible tab styles, and prevents the list from being obscured"
+      - "bookmarks-table.html groups Stores, Show only, Hide, and Table Display behind a head tablist with one visible panel; the footer tablist exposes Actions, Import, and Export with one visible panel"
+      - "bookmarks-table.js wires tab activation and ARIA/hidden state without changing existing filter, import, export, snapshot, or link-health handlers"
+    summary: "Fixed accessible head/footer control panels around a viewport-filling bookmark list; preserve existing index data, filter, selection, and action wiring."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-13T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Clear stale inline essence; align with browser aggregate sidecar"
+      date: "2026-07-31"
+      reason: "Add fixed accessible head/footer control panels and viewport-filling bookmark list"
     last_validated:
       date: "2026-02-13T00:00:00.000Z"
       result: "pass"
@@ -1853,7 +1854,8 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - "REQ-LOCAL_BOOKMARKS_INDEX"
     tests:
       - "tests/integration/message-handler-router-storage.integration.test.js"
-      - "tests/unit/bookmarks-table-index.test.js"
+      - "tests/unit/bookmarks-table-controls.test.js (control tab state)"
+      - "tests/unit/bookmarks-table-index.test.js (filtering and fixed head/footer layout)"
       - "tests/unit/bookmarks-table-time.test.js"
       - "tests/unit/message-handler-bookmarks-index.test.js"
 IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:

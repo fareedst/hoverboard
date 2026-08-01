@@ -1,9 +1,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
  * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column; Stores L/F/S/B. Contract: page load and user actions; displayed table and filtered list; state data.
- * 
+ *
  * ## LOAD_LOCAL_BOOKMARKS_INDEX
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: LOAD_LOCAL_BOOKMARKS_INDEX: aggregate first; treat error/success:false as failure even when bookmarks is []; then filter.
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
@@ -27,9 +27,9 @@
  *   - applySearchAndFilter()
  *   - 1. ON page load:
  *   - LOAD_LOCAL_BOOKMARKS_INDEX
- * 
+ *
  * ## SHOULD_RELOAD_BOOKMARKS_ON_STORE_CHANGE
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: Store checkbox change refilters; if cache empty and at least one store checked, reload (cold SW recovery).
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
@@ -43,9 +43,9 @@
  *   - TERMINATION: total
  * - PROCEDURE: SHOULD_RELOAD_BOOKMARKS_ON_STORE_CHANGE
  *   - RETURN allBookmarksLength == 0 AND allowedStoresSize > 0
- * 
+ *
  * ## GET_ALLOWED_STORES
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: getAllowedStores includes browser when #store-browser checked; Move/Import-to targets include browser.
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
@@ -60,9 +60,9 @@
  * - PROCEDURE: GET_ALLOWED_STORES
  *   - SET from checked #store-local|#store-file|#store-sync|#store-browser → { local, file, sync, browser }
  *   - How (sub-block): Apply stores filter, search, show-only, exclude tags; sort and render.
- * 
+ *
  * ## APPLY_SEARCH_AND_FILTER
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: Implements applySearchAndFilter() behavior for IMPL-LOCAL_BOOKMARKS_INDEX.
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
@@ -81,9 +81,109 @@
  *   - APPLY exclude tags (matchExcludeTags)
  *   - SORT by sortKey (e.g. time desc)
  *   - renderTableBody(filteredBookmarks); updateRowCount()
- * 
+ *
+ * ## HEAD_CONTROL_PANEL
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: HEAD_CONTROL_PANEL keeps the filter controls fixed at the viewport head and exposes one of Stores, Show only, Hide, or Table Display at a time.
+ * - Contract:
+ *   - INPUT: requestedGroup (string), currentGroup (string)
+ *   - PRE: requestedGroup is one of stores | show-only | hide | table-display
+ *   - OUTPUT: active head group and corresponding visible panel
+ *   - POST:
+ *     - success => exactly one head panel is visible and its tab is selected
+ *     - invalid group => currentGroup and panel visibility remain unchanged
+ *   - FAILURE_MODES: InvalidGroup
+ *   - DATA: activeHeadGroup
+ *   - DATA_TRANSITION: activeHeadGroup changes only to a valid head group
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SET_HEAD_CONTROL_GROUP
+ *   - IF requestedGroup is not a valid head group: RETURN { activeGroup: currentGroup, error: InvalidGroup }
+ *   - SET activeHeadGroup = requestedGroup
+ *   - SET selected tab state for requestedGroup
+ *   - SET hidden = false only for requestedGroup panel
+ *   - SET hidden = true for every other head panel
+ *   - RETURN { activeGroup: activeHeadGroup }
+ *
+ * ## FOOTER_CONTROL_PANEL
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: FOOTER_CONTROL_PANEL keeps Actions, Import, and Export fixed at the viewport bottom and displays one control group at a time.
+ * - Contract:
+ *   - INPUT: requestedGroup (string), currentGroup (string)
+ *   - PRE: requestedGroup is one of actions | import | export
+ *   - OUTPUT: active footer group and corresponding visible panel
+ *   - POST:
+ *     - success => exactly one footer panel is visible and its tab is selected
+ *     - invalid group => currentGroup and panel visibility remain unchanged
+ *   - FAILURE_MODES: InvalidGroup
+ *   - DATA: activeFooterGroup
+ *   - DATA_TRANSITION: activeFooterGroup changes only to a valid footer group
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SET_FOOTER_CONTROL_GROUP
+ *   - IF requestedGroup is not a valid footer group: RETURN { activeGroup: currentGroup, error: InvalidGroup }
+ *   - SET activeFooterGroup = requestedGroup
+ *   - SET selected tab state for requestedGroup
+ *   - SET hidden = false only for requestedGroup panel
+ *   - SET hidden = true for every other footer panel
+ *   - RETURN { activeGroup: activeFooterGroup }
+ *
+ * ## INITIALIZE_INDEX_CONTROL_TABS
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS defaults to Stores at the head and Actions at the footer, then binds accessible tab activation without changing control behavior.
+ * - Contract:
+ *   - INPUT: headTabList, headPanels, footerTabList, footerPanels
+ *   - PRE: each tab references a known panel through aria-controls
+ *   - OUTPUT: initialized head and footer control panels
+ *   - POST:
+ *     - success => Stores and Actions are selected; exactly one panel in each region is visible
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: INITIALIZE_INDEX_CONTROL_TABS
+ *   - CALL SET_HEAD_CONTROL_GROUP("stores", "stores")
+ *   - CALL SET_FOOTER_CONTROL_GROUP("actions", "actions")
+ *   - ON head tab activation: CALL SET_HEAD_CONTROL_GROUP(requestedGroup, activeHeadGroup)
+ *   - ON footer tab activation: CALL SET_FOOTER_CONTROL_GROUP(requestedGroup, activeFooterGroup)
+ *
+ * ## SYNC_CONTROL_PANEL_OFFSETS
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SYNC_CONTROL_PANEL_OFFSETS measures the fixed head and footer regions so sticky table headers and list spacing avoid control overlap.
+ * - Contract:
+ *   - INPUT: headPanel (element), footerPanel (element), root (element)
+ *   - PRE: root exists; missing panel elements are allowed
+ *   - OUTPUT: root CSS variables for head offset and footer spacing
+ *   - POST:
+ *     - success => CSS variables equal the current measured panel heights
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SYNC_CONTROL_PANEL_OFFSETS
+ *   - IF root is missing: RETURN
+ *   - IF headPanel exists: SET --index-head-sticky-height = headPanel.offsetHeight pixels
+ *   - IF footerPanel exists: SET --index-footer-sticky-height = footerPanel.offsetHeight pixels
+ *   - CALL APPLY_STICKY_THEAD_OFFSET
+ *   - ON panel resize: REPEAT SYNC_CONTROL_PANEL_OFFSETS
+ *
+ * ## APPLY_STICKY_THEAD_OFFSET
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: APPLY_STICKY_THEAD_OFFSET keeps table headings at the table top initially and offsets them below the fixed head controls only after the bookmark list scrolls underneath.
+ * - Contract:
+ *   - INPUT: tableWrapper (element), headPanel (element), root (element)
+ *   - PRE: root, tableWrapper, and headPanel exist
+ *   - OUTPUT: root sticky-thead-offset class state
+ *   - POST:
+ *     - tableWrapper top >= headPanel height => root does not have sticky-thead-offset
+ *     - tableWrapper top < headPanel height => root has sticky-thead-offset
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_STICKY_THEAD_OFFSET
+ *   - tableTop = tableWrapper.getBoundingClientRect().top
+ *   - headHeight = headPanel.offsetHeight
+ *   - IF tableTop < headHeight: ADD sticky-thead-offset to root
+ *   - ELSE: REMOVE sticky-thead-offset from root
+ *   - ON scroll, table visibility change, or IntersectionObserver callback: REPEAT APPLY_STICKY_THEAD_OFFSET
+ *
  * ## BULK_DELETE
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-BOOKMARK_ROUTER] How: Bulk Delete uses row Storage column as preferredBackend; pending/final #delete-result mirrors Import status UX. Orchestrator: runBulkDelete (bookmarks-table-bulk-delete.js) for composition-testable wiring.
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
@@ -112,9 +212,9 @@
  *   - How (sub-block): buildDeletePayload(bookmark):
  *   - IF bookmark missing or no url: RETURN null
  *   - RETURN { url: bookmark.url, preferredBackend: lowercase(bookmark.storage) OR "local" }
- * 
+ *
  * ## OPEN_BOOKMARKS_INDEX_TAB
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: concurrent cold-start messages share one in-flight initBookmarkProvider promise (createProviderInitMutex). OPEN_BOOKMARKS_INDEX_TAB: create index tab then dismiss already-open side panel (tab-create only; not page refresh). How: SW owns create+broadcast so popup/command/menu share one path; panel closes via REQUEST_SIDE_PANEL_CLOSE (icon-toggle semantics).
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
@@ -137,15 +237,15 @@
  *   - 4. Popup: bookmarksIndexBtn -> openBookmarksIndex -> SEND OPEN_BOOKMARKS_INDEX
  *   - 5. Options: bookmarks-index-link href -> extension URL (no dismiss; out of scope)
  *   - How (sub-block): Index page init must NOT send REQUEST_SIDE_PANEL_CLOSE (refresh must not re-dismiss after icon reopen).
- * 
+ *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS ===
  * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] — Add/delete tags to selected bookmarks; parseTagsInput, mergeTags, removeTags, selectionStillVisible; saveBookmark per row. Parse comma-separated input; trim and dedupe case-insensitive.
- * 
+ *
  * ## MAIN
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] How: Logical block for IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.
  * - Contract:
  *   - INPUT: context / caller args
@@ -167,15 +267,15 @@
  *   - 5. addTagsToSelected(): newTags = parseTagsInput(addTagsInput.value); IF newTags.length === 0 RETURN; urls = Array.from(selectedUrls); byUrl = Map(allBookmarks: url -> bookmark); FOR url IN urls: b = byUrl.get(url); IF !b CONTINUE; payload = buildAddTagsPayload(b, newTags); IF payload SEND saveBookmark(payload); urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); FOR url IN selectionStillVisible(urlsToRestore, filteredBookmarks): selectedUrls.add(url); renderTableBody(); addTagsInput.value = ""; updateMoveControlsState()
  *   - How (sub-block): For each selected URL remove tags and send saveBookmark; refresh and restore selection for still-visible.
  *   - 6. deleteTagsFromSelected(): tagsToRemove = parseTagsInput(addTagsInput.value); IF tagsToRemove.length === 0 RETURN; urls = Array.from(selectedUrls); byUrl = Map(allBookmarks: url -> bookmark); FOR url IN urls: b = byUrl.get(url); IF !b CONTINUE; payload = buildRemoveTagsPayload(b, tagsToRemove); IF payload SEND saveBookmark(payload); urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); FOR url IN selectionStillVisible(urlsToRestore, filteredBookmarks): selectedUrls.add(url); renderTableBody(); addTagsInput.value = ""; updateMoveControlsState()
- * 
+ *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE ===
  * [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] — Regex find-and-replace on selected fields; applyRegexReplace (pure); regexReplaceSelected sends saveBookmark when changed. Pure function: build payload and set changed iff any selected field value changed.
- * 
+ *
  * ## APPLY_REGEX_REPLACE
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] How: Implements applyRegexReplace(bookmark, patternStr, replacementStr, options { title, url, tags, notes }) behavior for IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.
  * - Contract:
  *   - INPUT: context / caller args
@@ -201,9 +301,9 @@
  *   - payload = { url, description: desc, tags: tagsArr, extended: ext, preferredBackend, ...time/updated_at/shared/toread }
  *   - RETURN { payload, error: null, changed }
  *   - How (sub-block): Per selected URL apply regex; save only when changed; refresh and restore selection.
- * 
+ *
  * ## REGEX_REPLACE_SELECTED
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] How: Implements regexReplaceSelected() behavior for IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.
  * - Contract:
  *   - INPUT: context / caller args
@@ -224,7 +324,7 @@
  *   - byUrl = Map(allBookmarks: url -> bookmark)
  *   - FOR url IN selectedUrls: b = byUrl.get(url); IF !b CONTINUE; result = applyRegexReplace(b, patternStr, replacementStr, options); IF result.error show and RETURN; IF !result.payload CONTINUE; IF result.changed === false CONTINUE; SEND saveBookmark(result.payload)
  *   - urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); selectionStillVisible; renderTableBody(); clear error; updateMoveControlsState()
- * 
+ *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE ===
  */
 import fs from 'fs'
@@ -250,7 +350,6 @@ import {
   applyRegexReplace
 } from '../../src/ui/bookmarks-table/bookmarks-table-filter.js'
 import { formatTimeAbsolute, formatTimeAge } from '../../src/ui/bookmarks-table/bookmarks-table-time.js'
-import { setTableDisplayStickyHeight } from '../../src/ui/bookmarks-table/bookmarks-table-sticky.js'
 
 describe('matchStorageFilter [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
   test('returns true for any bookmark when value is empty (All)', () => {
@@ -617,52 +716,39 @@ describe('Time column formatters integration [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-L
   })
 })
 
-describe('setTableDisplayStickyHeight [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]', () => {
-  test('sets --table-display-sticky-height on root to tableDisplayEl offsetHeight in px', () => {
-    const root = document.createElement('div')
-    const tableDisplayEl = document.createElement('div')
-    Object.defineProperty(tableDisplayEl, 'offsetHeight', { value: 72, configurable: true })
-    setTableDisplayStickyHeight(tableDisplayEl, root)
-    expect(root.style.getPropertyValue('--table-display-sticky-height')).toBe('72px')
-  })
-
-  test('updates when offsetHeight changes', () => {
-    const root = document.createElement('div')
-    let height = 48
-    const tableDisplayEl = document.createElement('div')
-    Object.defineProperty(tableDisplayEl, 'offsetHeight', {
-      get () { return height },
-      configurable: true
-    })
-    setTableDisplayStickyHeight(tableDisplayEl, root)
-    expect(root.style.getPropertyValue('--table-display-sticky-height')).toBe('48px')
-    height = 96
-    setTableDisplayStickyHeight(tableDisplayEl, root)
-    expect(root.style.getPropertyValue('--table-display-sticky-height')).toBe('96px')
-  })
-
-  test('does nothing when tableDisplayEl is null', () => {
-    const root = document.createElement('div')
-    setTableDisplayStickyHeight(null, root)
-    expect(root.style.getPropertyValue('--table-display-sticky-height')).toBe('')
-  })
-
-  test('does nothing when rootEl is null', () => {
-    const tableDisplayEl = document.createElement('div')
-    Object.defineProperty(tableDisplayEl, 'offsetHeight', { value: 72, configurable: true })
-    expect(() => setTableDisplayStickyHeight(tableDisplayEl, null)).not.toThrow()
-  })
-
-  test('does nothing when both are null', () => {
-    expect(() => setTableDisplayStickyHeight(null, null)).not.toThrow()
-  })
-})
-
 /**
  * [REQ-LOCAL_BOOKMARKS_INDEX] Bookmark count at bottom of page: row count must be the last content in the page container.
  * Validates that the index HTML has .footer-info as the last block in .container and contains #row-count.
  */
-describe('bookmark count at bottom of page [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
+describe('fixed Local Bookmarks Index controls [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]', () => {
+  test('index HTML has four head tabs and one visible default head panel', () => {
+    const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
+    const html = fs.readFileSync(htmlPath, 'utf8')
+    const head = html.slice(html.indexOf('class="index-head-controls"'), html.indexOf('<div id="empty-state"'))
+    expect(head.match(/data-control-tab="head"/g)).toHaveLength(4)
+    expect(head).toContain('data-control-group="stores" aria-controls="head-panel-stores" aria-selected="true"')
+    expect(head).toContain('data-control-group="show-only"')
+    expect(head).toContain('data-control-group="hide"')
+    expect(head).toContain('data-control-group="table-display"')
+    expect(head.match(/data-control-panel="head"/g)).toHaveLength(4)
+    expect(head.match(/data-control-panel="head"[^>]* hidden/g)).toHaveLength(3)
+  })
+
+  test('index HTML has Actions, Import, and Export footer tabs with Actions visible by default', () => {
+    const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
+    const html = fs.readFileSync(htmlPath, 'utf8')
+    const footer = html.slice(html.indexOf('class="index-footer"'), html.indexOf('</section>\n  </div>'))
+    expect(footer.match(/data-control-tab="footer"/g)).toHaveLength(3)
+    expect(footer).toContain('data-control-group="actions" aria-controls="footer-panel-actions" aria-selected="true"')
+    expect(footer).toContain('data-control-group="import"')
+    expect(footer).toContain('data-control-group="export"')
+    expect(footer).toContain('id="footer-panel-export"')
+    expect(footer.match(/data-control-panel="footer"[^>]* hidden/g)).toHaveLength(2)
+    expect(footer).toContain('id="refresh-api-snapshot"')
+    expect(footer).toContain('id="import-trigger"')
+    expect(footer).toContain('id="export-all"')
+  })
+
   test('index HTML has footer-info with row-count as last content in container', () => {
     const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
     const html = fs.readFileSync(htmlPath, 'utf8')
@@ -689,12 +775,18 @@ describe('bookmark count at bottom of page [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
     expect(footerInfoPos).toBeGreaterThan(spacerPos)
   })
 
-  test('index CSS has footer-info sticky at bottom so count stays visible when scrolling [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
+  test('index CSS keeps head and footer controls sticky around the bookmark list [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
     const cssPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.css')
     const css = fs.readFileSync(cssPath, 'utf8')
+    expect(css).toContain('.index-head-controls')
+    expect(css).toContain('.index-footer')
+    expect(css).toContain('top: 0')
+    expect(css).toContain('bottom: 0')
+    expect(css).toContain('.container.sticky-thead-offset .bookmarks-table th')
+    expect(css).toMatch(/\.container\.sticky-thead-offset\s+\.bookmarks-table th\s*\{[\s\S]*?top:\s*var\(--index-head-sticky-height/)
+    expect(css).toContain('--index-footer-sticky-height')
     expect(css).toContain('.footer-info')
     expect(css).toMatch(/position:\s*sticky/)
-    expect(css).toMatch(/bottom:\s*0/)
   })
 })
 

@@ -144,6 +144,106 @@
  *   - SORT by sortKey (e.g. time desc)
  *   - renderTableBody(filteredBookmarks); updateRowCount()
  *
+ * ## HEAD_CONTROL_PANEL
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: HEAD_CONTROL_PANEL keeps the filter controls fixed at the viewport head and exposes one of Stores, Show only, Hide, or Table Display at a time.
+ * - Contract:
+ *   - INPUT: requestedGroup (string), currentGroup (string)
+ *   - PRE: requestedGroup is one of stores | show-only | hide | table-display
+ *   - OUTPUT: active head group and corresponding visible panel
+ *   - POST:
+ *     - success => exactly one head panel is visible and its tab is selected
+ *     - invalid group => currentGroup and panel visibility remain unchanged
+ *   - FAILURE_MODES: InvalidGroup
+ *   - DATA: activeHeadGroup
+ *   - DATA_TRANSITION: activeHeadGroup changes only to a valid head group
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SET_HEAD_CONTROL_GROUP
+ *   - IF requestedGroup is not a valid head group: RETURN { activeGroup: currentGroup, error: InvalidGroup }
+ *   - SET activeHeadGroup = requestedGroup
+ *   - SET selected tab state for requestedGroup
+ *   - SET hidden = false only for requestedGroup panel
+ *   - SET hidden = true for every other head panel
+ *   - RETURN { activeGroup: activeHeadGroup }
+ *
+ * ## FOOTER_CONTROL_PANEL
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: FOOTER_CONTROL_PANEL keeps Actions, Import, and Export fixed at the viewport bottom and displays one control group at a time.
+ * - Contract:
+ *   - INPUT: requestedGroup (string), currentGroup (string)
+ *   - PRE: requestedGroup is one of actions | import | export
+ *   - OUTPUT: active footer group and corresponding visible panel
+ *   - POST:
+ *     - success => exactly one footer panel is visible and its tab is selected
+ *     - invalid group => currentGroup and panel visibility remain unchanged
+ *   - FAILURE_MODES: InvalidGroup
+ *   - DATA: activeFooterGroup
+ *   - DATA_TRANSITION: activeFooterGroup changes only to a valid footer group
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SET_FOOTER_CONTROL_GROUP
+ *   - IF requestedGroup is not a valid footer group: RETURN { activeGroup: currentGroup, error: InvalidGroup }
+ *   - SET activeFooterGroup = requestedGroup
+ *   - SET selected tab state for requestedGroup
+ *   - SET hidden = false only for requestedGroup panel
+ *   - SET hidden = true for every other footer panel
+ *   - RETURN { activeGroup: activeFooterGroup }
+ *
+ * ## INITIALIZE_INDEX_CONTROL_TABS
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS defaults to Stores at the head and Actions at the footer, then binds accessible tab activation without changing control behavior.
+ * - Contract:
+ *   - INPUT: headTabList, headPanels, footerTabList, footerPanels
+ *   - PRE: each tab references a known panel through aria-controls
+ *   - OUTPUT: initialized head and footer control panels
+ *   - POST:
+ *     - success => Stores and Actions are selected; exactly one panel in each region is visible
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: INITIALIZE_INDEX_CONTROL_TABS
+ *   - CALL SET_HEAD_CONTROL_GROUP("stores", "stores")
+ *   - CALL SET_FOOTER_CONTROL_GROUP("actions", "actions")
+ *   - ON head tab activation: CALL SET_HEAD_CONTROL_GROUP(requestedGroup, activeHeadGroup)
+ *   - ON footer tab activation: CALL SET_FOOTER_CONTROL_GROUP(requestedGroup, activeFooterGroup)
+ *
+ * ## SYNC_CONTROL_PANEL_OFFSETS
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SYNC_CONTROL_PANEL_OFFSETS measures the fixed head and footer regions so sticky table headers and list spacing avoid control overlap.
+ * - Contract:
+ *   - INPUT: headPanel (element), footerPanel (element), root (element)
+ *   - PRE: root exists; missing panel elements are allowed
+ *   - OUTPUT: root CSS variables for head offset and footer spacing
+ *   - POST:
+ *     - success => CSS variables equal the current measured panel heights
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SYNC_CONTROL_PANEL_OFFSETS
+ *   - IF root is missing: RETURN
+ *   - IF headPanel exists: SET --index-head-sticky-height = headPanel.offsetHeight pixels
+ *   - IF footerPanel exists: SET --index-footer-sticky-height = footerPanel.offsetHeight pixels
+ *   - CALL APPLY_STICKY_THEAD_OFFSET
+ *   - ON panel resize: REPEAT SYNC_CONTROL_PANEL_OFFSETS
+ *
+ * ## APPLY_STICKY_THEAD_OFFSET
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: APPLY_STICKY_THEAD_OFFSET keeps table headings at the table top initially and offsets them below the fixed head controls only after the bookmark list scrolls underneath.
+ * - Contract:
+ *   - INPUT: tableWrapper (element), headPanel (element), root (element)
+ *   - PRE: root, tableWrapper, and headPanel exist
+ *   - OUTPUT: root sticky-thead-offset class state
+ *   - POST:
+ *     - tableWrapper top >= headPanel height => root does not have sticky-thead-offset
+ *     - tableWrapper top < headPanel height => root has sticky-thead-offset
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_STICKY_THEAD_OFFSET
+ *   - tableTop = tableWrapper.getBoundingClientRect().top
+ *   - headHeight = headPanel.offsetHeight
+ *   - IF tableTop < headHeight: ADD sticky-thead-offset to root
+ *   - ELSE: REMOVE sticky-thead-offset from root
+ *   - ON scroll, table visibility change, or IntersectionObserver callback: REPEAT APPLY_STICKY_THEAD_OFFSET
+ *
  * ## BULK_DELETE
  *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-BOOKMARK_ROUTER] How: Bulk Delete uses row Storage column as preferredBackend; pending/final #delete-result mirrors Import status UX. Orchestrator: runBulkDelete (bookmarks-table-bulk-delete.js) for composition-testable wiring.
@@ -750,12 +850,12 @@ import { initToolPageVersion } from '../styles/tool-page-version.js'
 import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
-import { setTableDisplayStickyHeight } from './bookmarks-table-sticky.js'
 import { setImportResultPending, setImportResultFinal, setImportResultError, formatImportResultMessage } from './bookmarks-table-import-status.js'
 import { runBulkDelete } from './bookmarks-table-bulk-delete.js'
 import { prefillSearchFromQuery } from './bookmarks-table-library-search.js'
 import { runCheckLinkHealth, formatHealthCellLabel } from './bookmarks-table-link-health.js'
 import { runRefreshApiSnapshot } from './bookmarks-table-api-snapshot.js'
+import { createControlTabState, selectControlGroup } from './bookmarks-table-controls.js'
 import { filterBookmarksByHealth, isLinkHealthChecksEnabled, applyLinkHealthControlsGate } from '../../shared/link-health.js'
 import {
   isAggregatedIndexLoadFailure,
@@ -782,6 +882,8 @@ let timeDisplayMode = 'age'
 const selectedUrls = new Set()
 /** [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] url -> health record */
 let linkHealthMap = {}
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Independent active head/footer control groups. */
+let controlTabState = createControlTabState()
 
 const elements = {
   searchInput: document.getElementById('search-input'),
@@ -1263,6 +1365,7 @@ function toggleEmptyState () {
   }
   elements.emptyState.classList.toggle('hidden', !showEmpty)
   elements.tableWrapper.classList.toggle('hidden', showEmpty)
+  syncStickyTableHeaderOffset()
 }
 
 function setSort (key) {
@@ -1466,8 +1569,91 @@ function handleStoreFilterChange () {
   })
 }
 
+/**
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS defaults to Stores at the head and Actions at the footer, then binds accessible tab activation without changing control behavior.
+ */
+function updateControlTabDom (region, activeGroup) {
+  const regionEl = document.querySelector(`[data-control-region="${region}"]`)
+  if (!regionEl) return
+  regionEl.querySelectorAll('[data-control-tab]').forEach((tab) => {
+    const selected = tab.dataset.controlGroup === activeGroup
+    tab.setAttribute('aria-selected', String(selected))
+    tab.tabIndex = selected ? 0 : -1
+  })
+  regionEl.querySelectorAll('[data-control-panel]').forEach((panel) => {
+    panel.hidden = panel.dataset.controlGroup !== activeGroup
+  })
+}
+
+/** [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SET_HEAD_CONTROL_GROUP and SET_FOOTER_CONTROL_GROUP reject invalid groups and synchronize one selected tab with one visible panel. */
+function activateControlGroup (region, group, focus = false) {
+  const nextState = selectControlGroup(controlTabState, region, group)
+  if (nextState === controlTabState) return
+  controlTabState = nextState
+  updateControlTabDom(region, group)
+  if (focus) {
+    document.querySelector(`[data-control-region="${region}"] [data-control-group="${group}"][data-control-tab]`)?.focus()
+  }
+  syncControlPanelOffsets()
+}
+
+/** [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: APPLY_STICKY_THEAD_OFFSET keeps the heading row at the table top initially, then applies the measured head-panel offset only after the list scrolls beneath the fixed controls. */
+function syncStickyTableHeaderOffset () {
+  const container = document.querySelector('.container')
+  const tableWrapper = document.querySelector('#table-wrapper')
+  const headPanel = document.querySelector('.index-head-controls')
+  if (!container || !tableWrapper || !headPanel) return
+
+  const tableTop = tableWrapper.getBoundingClientRect().top
+  const headHeight = headPanel.offsetHeight
+  container.classList.toggle('sticky-thead-offset', tableTop < headHeight)
+}
+
+/** [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SYNC_CONTROL_PANEL_OFFSETS measures fixed regions for sticky table headers and footer spacing. */
+function syncControlPanelOffsets () {
+  const container = document.querySelector('.container')
+  if (!container) return
+  const headPanel = document.querySelector('.index-head-controls')
+  const footerPanel = document.querySelector('.index-footer')
+  if (headPanel) container.style.setProperty('--index-head-sticky-height', `${headPanel.offsetHeight}px`)
+  if (footerPanel) container.style.setProperty('--index-footer-sticky-height', `${footerPanel.offsetHeight}px`)
+  syncStickyTableHeaderOffset()
+}
+
+function initControlTabs () {
+  /**
+   * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS defaults to Stores at the head and Actions at the footer, then binds accessible tab activation without changing control behavior.
+   */
+  updateControlTabDom('head', controlTabState.head)
+  updateControlTabDom('footer', controlTabState.footer)
+  document.querySelectorAll('[data-control-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      activateControlGroup(tab.dataset.controlTab, tab.dataset.controlGroup)
+    })
+    tab.addEventListener('keydown', (event) => {
+      const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End']
+      if (!keys.includes(event.key)) return
+      event.preventDefault()
+      const region = tab.dataset.controlTab
+      const tabs = Array.from(document.querySelectorAll(`[data-control-region="${region}"] [data-control-tab]`))
+      const currentIndex = tabs.indexOf(tab)
+      const nextIndex = event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? tabs.length - 1
+          : (currentIndex + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length
+      const nextTab = tabs[nextIndex]
+      if (nextTab) {
+        activateControlGroup(region, nextTab.dataset.controlGroup, true)
+      }
+    })
+  })
+  syncControlPanelOffsets()
+}
+
 function init () {
   initToolPageVersion()
+  initControlTabs()
   elements.searchInput.addEventListener('input', applySearchAndFilter)
   elements.searchClear.addEventListener('click', () => {
     elements.searchInput.value = ''
@@ -1548,20 +1734,25 @@ function init () {
   if (elements.timeColumnSource) timeColumnSource = elements.timeColumnSource.value
   if (elements.timeDisplayMode) timeDisplayMode = elements.timeDisplayMode.value
 
-  /* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Sticky Table Display: set --table-display-sticky-height and observe resize */
-  const container = document.querySelector('.container')
-  const tableDisplayEl = document.querySelector('.table-display-above')
-  if (tableDisplayEl && container) {
-    setTableDisplayStickyHeight(tableDisplayEl, container)
-    const ro = new ResizeObserver(() => setTableDisplayStickyHeight(tableDisplayEl, container))
-    ro.observe(tableDisplayEl)
-    /* Apply thead sticky offset only when Table Display has scrolled out of view so header is not painted as second row */
-    const io = new IntersectionObserver((entries) => {
-      const e = entries[0]
-      const past = e && !e.isIntersecting && e.boundingClientRect.top < 0
-      container.classList.toggle('sticky-thead-offset', !!past)
-    }, { threshold: 0, rootMargin: '0px' })
-    io.observe(tableDisplayEl)
+  /* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] SYNC_CONTROL_PANEL_OFFSETS measures fixed head/footer regions for sticky headers and list spacing. */
+  if (typeof ResizeObserver === 'function') {
+    const ro = new ResizeObserver(syncControlPanelOffsets)
+    const headPanel = document.querySelector('.index-head-controls')
+    const footerPanel = document.querySelector('.index-footer')
+    if (headPanel) ro.observe(headPanel)
+    if (footerPanel) ro.observe(footerPanel)
+  }
+  syncControlPanelOffsets()
+
+  /* [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] APPLY_STICKY_THEAD_OFFSET observes the bookmark list and rechecks its position during scrolling so the heading row moves below the fixed head controls only when needed. */
+  const tableWrapper = document.querySelector('#table-wrapper')
+  if (tableWrapper) {
+    window.addEventListener('scroll', syncStickyTableHeaderOffset, { passive: true })
+    if (typeof IntersectionObserver === 'function') {
+      const io = new IntersectionObserver(() => syncStickyTableHeaderOffset())
+      io.observe(tableWrapper)
+    }
+    syncStickyTableHeaderOffset()
   }
 
   // [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY] Prefill search from ?q=

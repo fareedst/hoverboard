@@ -1014,6 +1014,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
     - "REQ-LOCAL_BOOKMARKS_INDEX"
+  decision: "A single extension page displays the aggregated Local, File, Sync, and Browser bookmark list. The page is divided into a fixed head control panel, the remaining bookmark-list viewport, and a fixed footer control panel. Head tabs expose Stores (L/F/S/B), Show only, Hide, and Table Display one group at a time; footer tabs expose Actions, Import, and Export one group at a time. Actions owns Refresh API snapshot and Check link health. Existing data loading, filtering, selection, move, delete, import, export, snapshot, and link-health wiring remains unchanged."
   detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml"
   implementation_approach:
     details:
@@ -1023,6 +1024,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
       - "Stores checkboxes Local/File/Sync/Browser; empty set yields 0 rows"
       - "SW OPEN_BOOKMARKS_INDEX_TAB; index-open dismisses side panel"
     summary: "Dedicated extension HTML page; data from getAggregatedBookmarksForIndex (local+file+sync+browser with storage field); Stores L/F/S/B; table Storage column Local|File|Sync|Browser; client-side search/filter/sort; Bulk Delete preferredBackend; Bulk Move via moveBookmarkToStorage."
+  layout: "Fixed head controls with accessible tab buttons and one visible panel at a time; flexible bookmark-list region with top/bottom spacing and sticky table-header offset; fixed footer with Actions, Import, and Export tabs and one visible panel at a time. Preserve responsive wrapping and keyboard focus visibility."
   metadata:
     created:
       author: "AI Agent"
@@ -1049,7 +1051,8 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
       - "ARCH-LOCAL_STORAGE_PROVIDER"
       - "ARCH-MESSAGE_HANDLING"
   status: "Active"
-  summary: "Local Bookmarks Index page for local/file/sync/browser (Stores L/F/S/B); aggregate getAllBookmarksForIndex; store-change reload; Bulk Delete preferredBackend; index-open dismisses side panel."
+  sticky_table_display: "The head control panel remains fixed at the viewport head. The selected Table Display panel and table column headers remain aligned below it while scrolling; the bookmark-list body occupies the space between the head and footer. At the initial table position, column headers remain at the table top; once the list scrolls beneath the head panel, the headers use the measured head offset. The selected footer panel remains fixed at the viewport bottom, and list padding prevents the controls from obscuring rows."
+  summary: "Single Local Bookmarks Index page with accessible fixed head/footer control tabs, a viewport-filling bookmark list, and preserved Stores/Show only/Hide/Table Display, Actions/Import/Export behavior."
   traceability:
     code_annotations:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"

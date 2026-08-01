@@ -960,10 +960,17 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       - "REQ-STORAGE_MODE_DEFAULT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Dedicated extension page displays table with search (title/URL/tags/notes), filters (tag, toread, shared), Stores L/F/S/B, sortable columns including Storage (Local | File | Sync | Browser), default time desc, URL as link"
-    - criterion: "Entry point from popup and/or options opens the index page in a new tab"
-    - criterion: "Primary data via getAggregatedBookmarksForIndex (local + file + sync + browser with storage field); fallback getLocalBookmarksForIndex (LocalBookmarkService only)"
+    - criterion: "Actions contains Refresh API snapshot and Check link health; Import remains a dedicated group; Export is a sibling dedicated group with all, displayed, and selected scopes."
+    - criterion: "Canonical Local Bookmarks Index and interchange terms remain defined in tied/vocab/bookmarks-index.md."
+    - criterion: "Dedicated extension page displays table with search (title/URL/tags/notes), filters (tag, toread, shared), Stores L/F/S/B, sortable columns including Storage (Local | File | Sync | Browser), default time desc, URL as link."
+    - criterion: "Entry point from popup and/or options opens the Local Bookmarks Index page in a new tab."
+    - criterion: "Existing filter semantics, import/export behavior, result announcements, snapshot behavior, link-health gating, and control IDs remain unchanged."
+    - criterion: "Primary data uses getAggregatedBookmarksForIndex for local + file + sync + browser bookmarks with storage fields, with getLocalBookmarksForIndex as the LocalBookmarkService fallback."
+    - criterion: "The bookmark list occupies the remaining viewport without being obscured by the fixed head or footer panels; the table header remains positioned below the head panel when sticky."
+    - criterion: "The Local Bookmarks Index has a fixed footer with accessible Actions, Import, and Export tabs; exactly one footer group is visible at a time and Actions is the default."
+    - criterion: "The Local Bookmarks Index has a fixed head control panel with accessible tabs for Stores (L / F / S / B), Show only, Hide, and Table Display; exactly one head group is visible at a time."
   status: "Implemented"
+  summary: "A dedicated Local Bookmarks Index page shows local, file, sync, and browser bookmarks. A fixed head control panel switches between Stores (L/F/S/B), Show only, Hide, and Table Display; a fixed footer switches between Actions, Import, and Export while the bookmark list occupies the remaining viewport. Existing filtering, selection, move, delete, import, export, snapshot, and link-health behavior is preserved."
   traceability:
     architecture:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
@@ -974,7 +981,8 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       - "IMPL-BOOKMARK_ROUTER"
       - "IMPL-LOCAL_BOOKMARKS_INDEX"
     tests:
-      - "tests/unit/bookmarks-table-index.test.js (matchStoresFilter, getShowOnlyDefaultState, etc.)"
+      - "tests/unit/bookmarks-table-controls.test.js (control tab state defaults and transitions)"
+      - "tests/unit/bookmarks-table-index.test.js (matchStoresFilter, getShowOnlyDefaultState, fixed head/footer layout)"
       - "tests/unit/bookmarks-table-load.test.js"
       - "tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)"
       - "tests/unit/message-handler-bookmarks-index.test.js"

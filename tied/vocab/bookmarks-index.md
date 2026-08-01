@@ -32,6 +32,9 @@
 | **Health column** | status column | Index column + optional filter over last link-health result |
 | **link health hint** | health badge (capture) | Compact This Page/popup text from stored map when opt-in on |
 | **Refresh API snapshot** | write aggregate snapshot | Index/Options action → `REFRESH_API_SNAPSHOT` writes `aggregate-snapshot.json` for Local Query API |
+| **fixed head control panel** | head controls | Sticky Local Bookmarks Index filter region with one active control group |
+| **fixed footer control panel** | footer controls | Sticky Local Bookmarks Index action region with one active control group |
+| **one-visible-group rule** | multiple visible control groups | Each control region exposes exactly one selected tab and visible fieldset |
 
 ---
 
@@ -44,6 +47,9 @@
 | Library search entry | Search Bookmarks | `OPEN_BOOKMARKS_INDEX` `{ q }` | Index search prefill | [IMPL-LIBRARY_SEARCH_ENTRY] |
 | Link health check | Check link health | `CHECK_LINK_HEALTH` / `GET_LINK_HEALTH` | `hoverboard_link_health` | [IMPL-LINK_HEALTH] |
 | API snapshot refresh | Refresh API snapshot | `REFRESH_API_SNAPSHOT` | `aggregate-snapshot.json` | [IMPL-LOCAL_QUERY_API] |
+| Head sticky offset | `--index-head-sticky-height` | CSS variable measured from the fixed head control panel | [IMPL-LOCAL_BOOKMARKS_INDEX] |
+| Footer sticky spacing | `--index-footer-sticky-height` | CSS variable measured from the fixed footer control panel | [IMPL-LOCAL_BOOKMARKS_INDEX] |
+| Scroll-gated table header offset | `sticky-thead-offset` | Root class applied when the bookmark list scrolls beneath the fixed head panel | [IMPL-LOCAL_BOOKMARKS_INDEX] |
 | Index prefill helper | Search Bookmarks (`?q=`) | — | — | `prefillSearchFromQuery` ([IMPL-LIBRARY_SEARCH_ENTRY]) |
 | Index Check link health UI | Check link health | `CHECK_LINK_HEALTH` | — | `runCheckLinkHealth` / `formatHealthCellLabel` ([IMPL-LINK_HEALTH]) |
 | Index Refresh API snapshot UI | Refresh API snapshot | `REFRESH_API_SNAPSHOT` | — | `runRefreshApiSnapshot` ([IMPL-LOCAL_QUERY_API]) |
@@ -66,6 +72,9 @@
 - **allBookmarks / filteredBookmarks / selectedUrls** — In-page data sets for display and bulk ops.
 - **timeColumnSource / timeDisplayMode / sortKey** — Table time-column controls.
 - **Show only / Hide** — Tag include/exclude, to-read, private, and time-range filters.
+- **fixed head control panel** — Sticky Local Bookmarks Index filter region; its accessible tabs select exactly one of **Stores**, **Show only**, **Hide**, or **Table Display**.
+- **fixed footer control panel** — Sticky Local Bookmarks Index action region; its accessible tabs select exactly one of **Actions**, **Import**, or **Export**.
+- **one-visible-group rule** — Each control region exposes one selected tab and one visible fieldset; inactive panels are hidden without losing their form values.
 - **Visits / Last Visited** — Usage columns when usage tracking data exists.
 - **Add tags / Delete tags** — Bulk tag ops on selected rows (merge/dedupe case-insensitive).
 - **Skip / Overwrite / Merge tags** — When imported URL already exists: leave alone; replace record; or merge tag sets.
@@ -105,6 +114,11 @@
 | Capture UI link health hint | `CAPTURE_UI_LINK_HEALTH_HINT` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
 | Index Refresh API snapshot UI | `RUN_REFRESH_API_SNAPSHOT_UI` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
 | Load index rows | `LOAD_LOCAL_BOOKMARKS_INDEX` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| Fixed head controls | `HEAD_CONTROL_PANEL` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| Fixed footer controls | `FOOTER_CONTROL_PANEL` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| Initialize control tabs | `INITIALIZE_INDEX_CONTROL_TABS` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| Sync sticky control offsets | `SYNC_CONTROL_PANEL_OFFSETS` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| Apply scroll-gated table header offset | `APPLY_STICKY_THEAD_OFFSET` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
 | Store-change reload predicate | `shouldReloadBookmarksOnStoreChange` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
 | SW provider init mutex | `PROVIDER_INIT_MUTEX` / `ensureBookmarkProviderInitialized` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
 | Bulk Delete | `BULK_DELETE` / `runBulkDelete` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
@@ -124,6 +138,9 @@
 | delete result pending / final | Named concepts |
 | Browser Bookmark Import | Preferred terms |
 | export scope | Preferred terms |
+| fixed footer control panel | Named concepts |
+| fixed head control panel | Named concepts |
+| one-visible-group rule | Named concepts |
 | import conflict policy | Preferred terms |
 | Import to | Preferred terms |
 | Import control group | Named concepts |

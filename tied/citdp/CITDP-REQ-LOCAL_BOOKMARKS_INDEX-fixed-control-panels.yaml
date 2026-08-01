@@ -1,0 +1,60 @@
+CITDP-REQ-LOCAL_BOOKMARKS_INDEX-fixed-control-panels:
+  change_definition:
+    current_behavior: "Stores, Show only, Hide, and Table Display controls were always visible above the bookmark table; Actions and Import were stacked below it and Export controls were mixed into Actions."
+    desired_behavior: "The page has a fixed head control panel with accessible Stores, Show only, Hide, and Table Display tabs and a fixed footer with accessible Actions, Import, and Export tabs. Exactly one panel per region is visible; the bookmark list occupies the remaining viewport."
+    non_goals:
+      - "No change to bookmark loading, filtering semantics, selection, sorting, import/export scopes, API snapshot behavior, or link-health behavior."
+      - "No new semantic token or domain term."
+    success_criteria:
+      - "Accessible tab activation exposes one panel per region and preserves keyboard focus behavior."
+      - "Head and footer tab state defaults to Stores and Actions."
+      - "Refresh API snapshot and Check link health remain in Actions; Import and Export are dedicated footer panels."
+      - "The list is not obscured by sticky head/footer regions and table headers remain below the head offset."
+    unchanged_behavior: "Existing control IDs, event handlers, messages, and data-flow contracts remain unchanged."
+  completion_criteria:
+    verification_gate_notes: "Full Jest: 142 suites passed, 1,500 tests passed, 1 skipped. Focused control/index tests: 109 passed. Affected composition suites: 10 passed. Playwright: 2 targeted fixed-control-panel E2E tests passed after installing the expected Chromium executable; coverage includes head/footer activation, one-visible-group behavior, keyboard navigation, and sticky positioning. npm run build:only, npm run lint, npm run typecheck, npm run validate:tokens, IMPL full-block synchronization check, literal sidecar-copy check, and tied_validate_consistency all passed. ReadLints reported no diagnostics."
+    verification_gate_status: "passed"
+  impact_analysis:
+    impl_inventory_notes: "Updated bookmarks-table.html, bookmarks-table.css, bookmarks-table.js, added bookmarks-table-controls.js, and added control-state/static-layout/runtime E2E tests."
+    modules_or_boundaries: "Control state helper; tab DOM/composition wiring; HTML control panels; sticky layout CSS; existing bookmark data/action modules remain unchanged."
+    tied_tokens_affected:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "IMPL-LINK_HEALTH"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "IMPL-LOCAL_QUERY_API"
+      - "REQ-LINK_HEALTH"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "REQ-LOCAL_QUERY_API"
+  leap_feedback:
+    divergences_from_analysis: "The initial design treated the existing table-display sticky observer as sufficient; implementation replaced it with measured head/footer offsets because all head controls now share the fixed panel. Pseudo-code was updated with SYNC_CONTROL_PANEL_OFFSETS before final validation. Final LEAP reconciliation also restored the baseline Local Bookmarks Index traceability criteria, replaced stale Sticky Table Display validation references, and removed the obsolete bookmarks-table-sticky.js helper and setTableDisplayStickyHeight tests."
+    record_status: "complete"
+    tied_stack_updates_required:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX layout and sticky behavior updated"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX approach and token-commented pseudo-code updated"
+      - "REQ-LOCAL_BOOKMARKS_INDEX satisfaction criteria, table-page contract, and validation evidence updated"
+      - "tied/vocab/bookmarks-index.md records fixed-panel terminology and offset naming"
+  record_identity:
+    change_request_id: "REQ-LOCAL_BOOKMARKS_INDEX"
+    recorded_at: "2026-07-31"
+    title: "Fixed accessible head and footer control panels for Local Bookmarks Index"
+  risk_analysis:
+    risks:
+      - risk: "Sticky controls could obscure table rows or headers at different panel heights."
+        mitigation: "Measure head/footer heights with ResizeObserver, set CSS variables, offset table headers, and reserve footer spacing."
+      - risk: "Tab markup could expose multiple active panels or lose keyboard access."
+        mitigation: "Pure state validation, aria-selected/hidden synchronization, roving tabindex, Home/End/Arrow key handling, static DOM tests, and targeted Playwright E2E tests."
+      - risk: "Moving existing controls could break event wiring."
+        mitigation: "Preserve all existing control IDs and run the full Jest suite plus focused regression tests."
+  tdd_sequence:
+    composition_tests: "Static DOM assertions verify head/footer tab counts, default visibility, control placement, and sticky offset declarations; targeted Playwright tests verify runtime activation and keyboard behavior."
+    summary: "RED control-state tests first; implemented pure helper; added static composition/layout assertions; wired HTML/CSS/JS; added runtime E2E coverage; ran focused, composition, and full tests."
+    unit_tests: "tests/unit/bookmarks-table-controls.test.js and updated tests/unit/bookmarks-table-index.test.js"
+  test_strategy:
+    matrix_notes: "Unit: valid defaults, independent region transitions, wrong-region rejection. Composition/static: accessible tab attributes, exactly one default visible panel, action/import/export placement, sticky layout declarations. Regression: existing index/export behavior and full repository Jest suite. E2E: head/footer activation, one-visible-group behavior, keyboard navigation, and computed sticky positioning."
+    summary: "Use unit tests for pure state, static composition assertions for DOM contracts, full regression suite for unchanged behavior, and Playwright E2E for runtime tab activation and layout."

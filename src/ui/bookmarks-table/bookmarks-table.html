@@ -21,84 +21,92 @@
       <p class="subtitle">Search, filter, sort, and open bookmarks stored in browser or file (Storage column: Local | File | Sync | Browser)</p>
     </header>
 
-    <div class="toolbar">
-      <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Stores: which storage backends to include; default none checked -->
-      <fieldset class="toolbar-group" aria-labelledby="stores-legend">
-        <legend id="stores-legend" class="group-legend">Stores</legend>
-        <div class="filters-row">
-          <label class="filter-checkbox">
-            <input type="checkbox" id="store-local" value="local" aria-label="Include Local store">
-            <span>Local (L)</span>
-          </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" id="store-file" value="file" aria-label="Include File store">
-            <span>File (F)</span>
-          </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" id="store-sync" value="sync" aria-label="Include Sync store">
-            <span>Sync (S)</span>
-          </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" id="store-browser" value="browser" aria-label="Include Browser store (native Chrome bookmarks)">
-            <span>Browser (B)</span>
-          </label>
-        </div>
-      </fieldset>
-      <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Show only: include by tags, to-read, private, time range; Clear resets to default -->
-      <fieldset class="toolbar-group" aria-labelledby="show-only-legend">
-        <legend id="show-only-legend" class="group-legend">Show only</legend>
-        <div class="filters-row">
-          <label for="filter-tags">Tags (comma-separated, include):</label>
-          <input type="text" id="filter-tags" class="filter-input" placeholder="e.g. work, dev" autocomplete="off">
-          <label class="filter-checkbox">
-            <input type="checkbox" id="filter-toread" value="1">
-            <span>To read only</span>
-          </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" id="filter-private" value="1">
-            <span>Private only</span>
-          </label>
-          <label for="filter-time-range-start">Time range Start:</label>
-          <input type="datetime-local" id="filter-time-range-start" class="filter-input filter-datetime" aria-label="Time range start (YYYY-MM-DD HH:mm)">
-          <label for="filter-time-range-end">End:</label>
-          <input type="datetime-local" id="filter-time-range-end" class="filter-input filter-datetime" aria-label="Time range end (YYYY-MM-DD HH:mm)">
-          <label for="filter-time-range-field">Time field:</label>
-          <select id="filter-time-range-field" class="filter-select" aria-label="Time field for range: create time or last updated">
-            <option value="time">Create time</option>
-            <option value="updated_at" selected>Last updated</option>
-          </select>
-          <button type="button" id="show-only-clear" class="btn btn-secondary btn-sm" title="Reset Show only to default" aria-label="Clear Show only filters">Clear</button>
-        </div>
-      </fieldset>
-      <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Hide: exclude by tags -->
-      <fieldset class="toolbar-group" aria-labelledby="hide-legend">
-        <legend id="hide-legend" class="group-legend">Hide</legend>
-        <div class="filters-row">
-          <label for="filter-tags-exclude">Tags (comma-separated, exclude):</label>
-          <input type="text" id="filter-tags-exclude" class="filter-input" placeholder="e.g. archive, done" autocomplete="off">
-        </div>
-      </fieldset>
-    </div>
-
-    <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Table Display: search and table controls, immediately above table -->
-    <fieldset class="toolbar-group table-display-above" aria-labelledby="table-display-legend">
-      <legend id="table-display-legend" class="group-legend">Table Display</legend>
-      <div class="filters-row">
-        <label for="search-input" class="sr-only">Search</label>
-        <input type="text" id="search-input" class="search-input" placeholder="Search title, URL, tags, notes…" autocomplete="off">
-        <button type="button" id="search-clear" class="btn btn-secondary btn-sm" title="Clear search" aria-label="Clear search">Clear</button>
-        <label for="time-column-source">Time column:</label>
-        <select id="time-column-source" class="filter-select" aria-label="Time column: create time or last updated">
-          <option value="time">Create time</option>
-          <option value="updated_at" selected>Last updated</option>
-        </select>
-        <label for="time-display-mode">Time format:</label>
-        <select id="time-display-mode" class="filter-select" aria-label="Time format: absolute or age">
-          <option value="absolute">Absolute</option>
-          <option value="age" selected>Age</option>
-        </select>
+    <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Fixed head control panel; one filter group is visible at a time. -->
+    <section class="index-head-controls" data-control-region="head" aria-label="Index filters">
+      <div class="control-tabs" role="tablist" aria-label="Index filters">
+        <button type="button" id="head-tab-stores" class="control-tab" role="tab" data-control-tab="head" data-control-group="stores" aria-controls="head-panel-stores" aria-selected="true">Stores</button>
+        <button type="button" id="head-tab-show-only" class="control-tab" role="tab" data-control-tab="head" data-control-group="show-only" aria-controls="head-panel-show-only" aria-selected="false" tabindex="-1">Show only</button>
+        <button type="button" id="head-tab-hide" class="control-tab" role="tab" data-control-tab="head" data-control-group="hide" aria-controls="head-panel-hide" aria-selected="false" tabindex="-1">Hide</button>
+        <button type="button" id="head-tab-table-display" class="control-tab" role="tab" data-control-tab="head" data-control-group="table-display" aria-controls="head-panel-table-display" aria-selected="false" tabindex="-1">Table Display</button>
       </div>
-    </fieldset>
+      <div class="control-panels">
+        <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Stores: which storage backends to include; default none checked -->
+        <fieldset id="head-panel-stores" class="toolbar-group control-panel" data-control-panel="head" data-control-group="stores" role="tabpanel" aria-labelledby="head-tab-stores">
+          <legend id="stores-legend" class="group-legend">Stores</legend>
+          <div class="filters-row">
+            <label class="filter-checkbox">
+              <input type="checkbox" id="store-local" value="local" aria-label="Include Local store">
+              <span>Local (L)</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="store-file" value="file" aria-label="Include File store">
+              <span>File (F)</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="store-sync" value="sync" aria-label="Include Sync store">
+              <span>Sync (S)</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="store-browser" value="browser" aria-label="Include Browser store (native Chrome bookmarks)">
+              <span>Browser (B)</span>
+            </label>
+          </div>
+        </fieldset>
+        <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Show only: include by tags, to-read, private, time range; Clear resets to default -->
+        <fieldset id="head-panel-show-only" class="toolbar-group control-panel" data-control-panel="head" data-control-group="show-only" role="tabpanel" aria-labelledby="head-tab-show-only" hidden>
+          <legend id="show-only-legend" class="group-legend">Show only</legend>
+          <div class="filters-row">
+            <label for="filter-tags">Tags (comma-separated, include):</label>
+            <input type="text" id="filter-tags" class="filter-input" placeholder="e.g. work, dev" autocomplete="off">
+            <label class="filter-checkbox">
+              <input type="checkbox" id="filter-toread" value="1">
+              <span>To read only</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="filter-private" value="1">
+              <span>Private only</span>
+            </label>
+            <label for="filter-time-range-start">Time range Start:</label>
+            <input type="datetime-local" id="filter-time-range-start" class="filter-input filter-datetime" aria-label="Time range start (YYYY-MM-DD HH:mm)">
+            <label for="filter-time-range-end">End:</label>
+            <input type="datetime-local" id="filter-time-range-end" class="filter-input filter-datetime" aria-label="Time range end (YYYY-MM-DD HH:mm)">
+            <label for="filter-time-range-field">Time field:</label>
+            <select id="filter-time-range-field" class="filter-select" aria-label="Time field for range: create time or last updated">
+              <option value="time">Create time</option>
+              <option value="updated_at" selected>Last updated</option>
+            </select>
+            <button type="button" id="show-only-clear" class="btn btn-secondary btn-sm" title="Reset Show only to default" aria-label="Clear Show only filters">Clear</button>
+          </div>
+        </fieldset>
+        <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Hide: exclude by tags -->
+        <fieldset id="head-panel-hide" class="toolbar-group control-panel" data-control-panel="head" data-control-group="hide" role="tabpanel" aria-labelledby="head-tab-hide" hidden>
+          <legend id="hide-legend" class="group-legend">Hide</legend>
+          <div class="filters-row">
+            <label for="filter-tags-exclude">Tags (comma-separated, exclude):</label>
+            <input type="text" id="filter-tags-exclude" class="filter-input" placeholder="e.g. archive, done" autocomplete="off">
+          </div>
+        </fieldset>
+        <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Table Display: search and table controls -->
+        <fieldset id="head-panel-table-display" class="toolbar-group control-panel" data-control-panel="head" data-control-group="table-display" role="tabpanel" aria-labelledby="head-tab-table-display" hidden>
+          <legend id="table-display-legend" class="group-legend">Table Display</legend>
+          <div class="filters-row">
+            <label for="search-input" class="sr-only">Search</label>
+            <input type="text" id="search-input" class="search-input" placeholder="Search title, URL, tags, notes…" autocomplete="off">
+            <button type="button" id="search-clear" class="btn btn-secondary btn-sm" title="Clear search" aria-label="Clear search">Clear</button>
+            <label for="time-column-source">Time column:</label>
+            <select id="time-column-source" class="filter-select" aria-label="Time column: create time or last updated">
+              <option value="time">Create time</option>
+              <option value="updated_at" selected>Last updated</option>
+            </select>
+            <label for="time-display-mode">Time format:</label>
+            <select id="time-display-mode" class="filter-select" aria-label="Time format: absolute or age">
+              <option value="absolute">Absolute</option>
+              <option value="age" selected>Age</option>
+            </select>
+          </div>
+        </fieldset>
+      </div>
+    </section>
 
     <div id="empty-state" class="empty-state hidden">
       <p id="empty-state-message">No local, file, sync, or browser bookmarks. This index shows bookmarks in Local/Sync storage, a File you chose, or native Browser bookmarks. Use Options to set Storage Mode and add bookmarks to see them here.</p>
@@ -132,9 +140,17 @@
       </table>
     </div>
 
-    <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Actions for selected: export, move, delete, tags, regex -->
-    <fieldset class="actions-below-table actions-group" aria-labelledby="actions-legend">
-      <legend id="actions-legend" class="group-legend">Actions for selected</legend>
+    <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Fixed footer control panel; one action group is visible at a time. -->
+    <div class="footer-spacer" aria-hidden="true"></div>
+    <section class="index-footer" data-control-region="footer" aria-label="Bookmark controls">
+      <div class="control-tabs" role="tablist" aria-label="Bookmark controls">
+        <button type="button" id="footer-tab-actions" class="control-tab" role="tab" data-control-tab="footer" data-control-group="actions" aria-controls="footer-panel-actions" aria-selected="true">Actions</button>
+        <button type="button" id="footer-tab-import" class="control-tab" role="tab" data-control-tab="footer" data-control-group="import" aria-controls="footer-panel-import" aria-selected="false" tabindex="-1">Import</button>
+        <button type="button" id="footer-tab-export" class="control-tab" role="tab" data-control-tab="footer" data-control-group="export" aria-controls="footer-panel-export" aria-selected="false" tabindex="-1">Export</button>
+      </div>
+      <div class="control-panels">
+    <fieldset id="footer-panel-actions" class="actions-below-table actions-group control-panel" data-control-panel="footer" data-control-group="actions" role="tabpanel" aria-labelledby="footer-tab-actions">
+      <legend id="actions-legend" class="group-legend">Actions</legend>
       <!-- [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Export below table -->
       <!-- [REQ-LOCAL_QUERY_API] Refresh aggregate-snapshot.json for Local Query API -->
       <div class="export-row">
@@ -155,11 +171,6 @@
           <option value="unknown">unknown</option>
         </select>
         <span id="link-health-result" class="help-text" aria-live="polite"></span>
-      </div>
-      <div class="export-row">
-        <button type="button" id="export-all" class="btn btn-secondary btn-sm" title="Export all bookmarks to CSV" aria-label="Export all bookmarks">Export all</button>
-        <button type="button" id="export-displayed" class="btn btn-secondary btn-sm" title="Export currently displayed (filtered) bookmarks to CSV" aria-label="Export displayed bookmarks">Export displayed</button>
-        <button type="button" id="export-selected" class="btn btn-secondary btn-sm" title="Export selected bookmarks to CSV" aria-label="Export selected bookmarks" disabled>Export selected</button>
       </div>
       <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Move selected bookmarks to another storage -->
       <div class="move-row">
@@ -202,7 +213,7 @@
     </fieldset>
 
     <!-- [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import control group: mode, Import to, Import last, result -->
-    <fieldset class="actions-below-table actions-group" aria-labelledby="import-legend">
+    <fieldset id="footer-panel-import" class="actions-below-table actions-group control-panel" data-control-panel="footer" data-control-group="import" role="tabpanel" aria-labelledby="footer-tab-import" hidden>
       <legend id="import-legend" class="group-legend">Import</legend>
       <div class="import-row">
         <input type="file" id="import-file" accept=".csv,.json" style="display: none;" aria-label="Choose Hoverboard CSV or JSON file to import (Title, URL, Tags, …)">
@@ -228,12 +239,21 @@
       </div>
     </fieldset>
 
-    <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Spacer grows to push footer to visual bottom when content is short -->
-    <div class="footer-spacer" aria-hidden="true"></div>
-    <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Bookmark count at bottom of page: footer-info must remain the last element in .container -->
-    <div class="footer-info">
-      <span id="row-count">0 bookmarks</span>
-    </div>
+    <!-- [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Export control group: all, displayed, and selected scopes -->
+    <fieldset id="footer-panel-export" class="actions-below-table actions-group control-panel" data-control-panel="footer" data-control-group="export" role="tabpanel" aria-labelledby="footer-tab-export" hidden>
+      <legend id="export-legend" class="group-legend">Export</legend>
+      <div class="export-row">
+        <button type="button" id="export-all" class="btn btn-secondary btn-sm" title="Export all bookmarks to CSV" aria-label="Export all bookmarks">Export all</button>
+        <button type="button" id="export-displayed" class="btn btn-secondary btn-sm" title="Export currently displayed (filtered) bookmarks to CSV" aria-label="Export displayed bookmarks">Export displayed</button>
+        <button type="button" id="export-selected" class="btn btn-secondary btn-sm" title="Export selected bookmarks to CSV" aria-label="Export selected bookmarks" disabled>Export selected</button>
+      </div>
+    </fieldset>
+      </div>
+      <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Bookmark count at bottom of page -->
+      <div class="footer-info">
+        <span id="row-count">0 bookmarks</span>
+      </div>
+    </section>
   </div>
 
   <script type="module" src="bookmarks-table.js"></script>

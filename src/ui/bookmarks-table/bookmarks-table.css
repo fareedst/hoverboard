@@ -1,6 +1,6 @@
 /* [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Local bookmarks index – shell: tool-page-shell.css */
 
-/* [IMPL-LOCAL_BOOKMARKS_INDEX] Full viewport height so .container flex + .footer-info margin-top:auto can push count to bottom [REQ-LOCAL_BOOKMARKS_INDEX] */
+/* [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Full viewport height lets the list flex between the fixed head and footer regions. */
 html {
   min-height: 100vh;
 }
@@ -11,7 +11,7 @@ body {
   flex-direction: column;
 }
 
-/* [IMPL-LOCAL_BOOKMARKS_INDEX] Compact layout: reduced padding to maximize table space. Flex column so footer stays at visual bottom when content is short [REQ-LOCAL_BOOKMARKS_INDEX]. */
+/* [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Compact flex-column layout leaves the remaining viewport for the bookmark list. */
 .container {
   flex: 1;
   display: flex;
@@ -23,11 +23,51 @@ body {
   margin-bottom: var(--space-2);
 }
 
-.toolbar {
-  margin-bottom: var(--space-2);
+/* [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Keep the selected head controls visible while the bookmark list scrolls. */
+.index-head-controls {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0 calc(var(--space-2) * -1) var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.control-tabs {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.control-tab {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-1-5) var(--space-3);
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.control-tab[aria-selected="true"] {
+  border-color: var(--color-interactive-primary);
+  background: var(--color-interactive-primary);
+  color: var(--color-background);
+}
+
+.control-tab:focus-visible {
+  outline: 2px solid var(--color-interactive-primary);
+  outline-offset: 2px;
+}
+
+.control-panels {
+  min-width: 0;
+}
+
+.control-panel[hidden] {
+  display: none !important;
 }
 
 /* [IMPL-LOCAL_BOOKMARKS_INDEX] Toolbar groups: Stores, Show only, Hide, Table Display */
@@ -45,19 +85,9 @@ body {
   padding: 0 var(--space-2);
 }
 
-/* [IMPL-LOCAL_BOOKMARKS_INDEX] Table Display group sits immediately above the table (outside main toolbar). [REQ-LOCAL_BOOKMARKS_INDEX] Sticky: remain at top when user scrolls past; table body scrolls underneath */
-.toolbar-group.table-display-above {
-  margin-top: 0;
-  margin-bottom: var(--space-2);
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background-color: var(--color-background);
-}
-
 .actions-group {
-  margin-top: var(--space-2);
   padding: var(--space-2);
+  margin: 0;
 }
 
 .actions-group .group-legend {
@@ -294,6 +324,7 @@ body {
 .table-wrapper {
   overflow-x: auto;
   margin-bottom: var(--space-2);
+  padding-bottom: var(--index-footer-sticky-height, 0px);
 }
 
 /* [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Export and Move UI below table */
@@ -323,16 +354,16 @@ body {
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   white-space: nowrap;
-  /* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Sticky thead: top 0 when Table Display visible; offset only when scrolled past (see .sticky-thead-offset) */
+  /* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Keep table headers at the table top until the list scrolls beneath the fixed head controls. */
   position: sticky;
   top: 0;
   z-index: 1;
   background-color: var(--color-background);
 }
 
-/* Apply thead offset only after user has scrolled past Table Display to avoid header painting as second row */
+/* [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Offset the sticky table headers below the fixed head controls only after the bookmark list has scrolled underneath them. */
 .container.sticky-thead-offset .bookmarks-table th {
-  top: var(--table-display-sticky-height, 0);
+  top: var(--index-head-sticky-height, 0px);
 }
 
 .bookmarks-table th.sortable {
@@ -427,19 +458,27 @@ body {
   text-overflow: ellipsis;
 }
 
-/* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Spacer grows to fill space above footer so count stays at visual bottom */
+/* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Spacer grows to fill space above the permanent footer on short pages. */
 .footer-spacer {
   flex: 1 1 0;
   min-height: 0;
 }
 
-/* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Bookmark count at bottom of page; sticky so it stays visible when scrolling long content */
-.footer-info {
+/* [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Keep the selected footer controls and row count visible while the bookmark list scrolls. */
+.index-footer {
   position: sticky;
   bottom: 0;
+  z-index: 5;
+  margin: 0 calc(var(--space-2) * -1);
+  padding: var(--space-2);
+  background: var(--color-background);
+  border-top: 1px solid var(--color-border);
+}
+
+/* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Bookmark count remains part of the permanent footer. */
+.footer-info {
   background-color: var(--color-background);
-  padding: var(--space-1) 0;
+  padding: var(--space-1) 0 0;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
-  z-index: 1;
 }
