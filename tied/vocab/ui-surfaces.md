@@ -37,6 +37,9 @@
 | **Save page archive** | archive capture | Explicit Quick Action for Local/File readable archive capture |
 | **archive association feedback** | archive result message | Popup/This Page feedback distinguishing “archive saved” from “bookmark and archive saved” |
 | **Save page screenshot** | screenshot capture | Explicit Quick Action for separate Local/File product screenshot capture |
+| **archive artifact status** | archive saved indicator | Selected-backend presence state for readable archive and screenshot artifact legs — [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| **saved-state indicator** | saved button color | Non-color and accessible state for each archive capture action — [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| **archive status description** | Reader disabled hint | Accessible explanation attached to unavailable Offline Reader state — [IMPL-PAGE_ARCHIVE_STATUS_UI] |
 
 ---
 
@@ -64,6 +67,9 @@
 | Archive association feedback | archive saved / bookmark and archive saved | — | `CAPTURE_PAGE_ARCHIVE` result | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
 | Open Offline Reader | Open offline Reader | — | `openOfflineReader` | `src/ui/reader/reader.html` |
 | Save page screenshot | Save page screenshot | — | `capturePageScreenshot` → `CAPTURE_PAGE_SCREENSHOT` | PopupController |
+| Archive artifact status | Saved state | — | `GET_PAGE_ARCHIVE` / `GET_PAGE_SCREENSHOTS` with `backend` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| Saved-state indicator | Saved state | — | `data-archive-saved` / `data-screenshot-saved` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| Archive status description | Reader unavailable explanation | — | `archiveStatusDescription` / `aria-describedby` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
 
 ### Overlay action IDs (`OVERLAY_ACTION_IDS`)
 
@@ -98,6 +104,9 @@
 - **Title/Notes Details** — Editable Title and Notes bound to `currentPin.description` / `currentPin.extended`; Notes disabled for Browser backend.
 - **Offline Reader** — Full-page tool surface that renders only stored sanitized archive content and presents screenshot artifacts separately.
 - **archive association feedback** — Popup/This Page result messaging for the archive action, including explicit cleanup failure rather than masked success.
+- **archive artifact status** — Selected-backend presence state for the readable archive and screenshot artifact legs on the current tab URL.
+- **saved-state indicator** — Independent visual and accessible state applied to the Save page archive and Save page screenshot actions.
+- **archive status description** — Live accessible explanation for why Offline Reader is unavailable until a readable archive is saved.
 
 ---
 
@@ -121,6 +130,8 @@
 | Open library search | `OPEN_LIBRARY_SEARCH` | [IMPL-LIBRARY_SEARCH_ENTRY](../implementation-decisions/IMPL-LIBRARY_SEARCH_ENTRY.yaml) |
 | Open Offline Reader | `OPEN_OFFLINE_READER` | [IMPL-OFFLINE_READER_MODE](../implementation-decisions/IMPL-OFFLINE_READER_MODE.yaml) |
 | Archive association feedback | `ARCHIVE_ASSOCIATION_RESULT_BOUNDARY` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
+| Normalize archive artifact status | `NORMALIZE_ARCHIVE_ARTIFACT_STATUS` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| Apply archive status UI | `APPLY_ARCHIVE_STATUS_UI` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
 
 ---
 
@@ -128,7 +139,9 @@
 
 | Term | Section |
 |------|---------|
+| archive artifact status | Preferred terms / Named concepts / Naming bridge |
 | archive association feedback | Preferred terms / Named concepts |
+| archive status description | Preferred terms / Named concepts / Naming bridge |
 | badge | Preferred terms |
 | CONTENT_MESSAGE_TYPES | Named concepts |
 | dark theme / light theme | Preferred terms |
@@ -149,6 +162,7 @@
 | Search Bookmarks | Preferred terms / Named concepts |
 | Save page archive | Preferred terms / Naming bridge |
 | Save page screenshot | Preferred terms / Naming bridge |
+| saved-state indicator | Preferred terms / Named concepts / Naming bridge |
 | Show Hover | Preferred terms |
 | Show on page load | Preferred terms |
 | SYNC_BOOKMARK_NOTES_FIELDS | Pseudo-code block names |

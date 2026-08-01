@@ -1,0 +1,81 @@
+IMPL-PAGE_ARCHIVE_STATUS_UI:
+  code_locations:
+    files:
+      - path: "src/ui/popup/archive-status.js"
+        description: "Pure selected-backend archive/screenshot response normalization"
+      - path: "src/ui/popup/UIManager.js"
+        description: "Scoped DOM state for artifact indicators and Reader availability"
+      - path: "src/ui/popup/PopupController.js"
+        description: "Context reset, status queries, and capture refresh orchestration"
+      - path: "src/ui/popup/popup.html"
+        description: "Popup status hooks"
+      - path: "src/ui/side-panel/side-panel.html"
+        description: "This Page scoped status hooks"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PAGE_ARCHIVE_STATUS_UI-pseudocode.md"
+  implementation_approach:
+    details:
+      - Failure behavior: "Unsupported backend, rejected message, malformed payload, empty screenshot result, or missing identity logs diagnostics and applies all-false state without blocking ordinary bookmark UI."
+      - Orchestration: "PopupController clears status on URL/backend changes, queries GET_PAGE_ARCHIVE and GET_PAGE_SCREENSHOTS with the selected backend after context resolution, and refreshes the relevant leg after successful capture."
+      - Scoped UI state: "UIManager resolves status elements through the existing popup document or data-popup-ref container and updates active/data attributes, accessible labels, Reader disabled state, and independent capture controls."
+      - Status normalizer: "normalizeArchiveArtifactStatus accepts archive and screenshot responses plus backend; only local/file and persisted artifact identities can produce positive state; stale archive remains readable."
+    summary: "Add a pure archive-status module for response normalization, extend UIManager with scoped artifact status state, and let PopupController own context reset, selected-backend querying, initial resolution, and post-capture refresh."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Align APPLY_ARCHIVE_STATUS_UI accessibility description and scoped root datasets with implementation"
+    last_validated:
+      date: "2026-08-01"
+      result: "pass: TIED consistency, structural pseudocode checklist, 1581 Jest tests, 8 archive Playwright E2E tests, lint, typecheck, and token validation"
+      validator: "AI Agent"
+  name: "Page Archive Status UI Implementation"
+  rationale:
+    benefits:
+      - "Defensive Offline Reader availability"
+      - "Fail-closed persisted status"
+      - "Independent recapture controls"
+      - "Scoped side-panel parity"
+    why: "A small pure boundary prevents optimistic or cross-backend indicators while the shared UI path keeps popup and This Page equivalent."
+  related_decisions:
+    composed_with:
+      - "IMPL-MOVE_BOOKMARK_UI"
+      - "IMPL-SIDE_PANEL_TABS"
+    depends_on:
+      - "IMPL-OFFLINE_READER_MODE"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+      - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+      - "IMPL-SIDE_PANEL_BOOKMARK"
+      - "IMPL-UIManager_SCOPED_ROOT"
+    see_also: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-OFFLINE_READER_MODE"
+      - "ARCH-PAGE_ARCHIVE_STATUS_UI"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+      - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+      - "ARCH-SIDE_PANEL_TABS"
+    code_annotations:
+      - "IMPL-PAGE_ARCHIVE_STATUS_UI"
+    code_locations:
+      - path: "src/ui/popup/archive-status.js"
+        description: "Pure selected-backend archive/screenshot response normalization"
+      - path: "src/ui/popup/UIManager.js"
+        description: "Scoped DOM state for artifact indicators and Reader availability"
+      - path: "src/ui/popup/PopupController.js"
+        description: "Context reset, status queries, and capture refresh orchestration"
+      - path: "src/ui/popup/popup.html"
+        description: "Popup status hooks"
+      - path: "src/ui/side-panel/side-panel.html"
+        description: "This Page scoped status hooks"
+    requirements:
+      - "REQ-OFFLINE_READER_MODE"
+      - "REQ-PAGE_ARCHIVE_STATUS_UI"
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+      - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    tests:
+      - "tests/integration/popup-archive-status-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/archive-status.test.js"
+      - "tests/unit/ui-manager-scoped-root.test.js"

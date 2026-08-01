@@ -1,0 +1,126 @@
+CITDP-REQ-PAGE_ARCHIVE_STATUS_UI:
+  change_definition:
+    completion_criteria:
+      current_behavior: "Popup and This Page exposed archive capture commands but did not show persisted selected-backend archive or screenshot state after reload/backend changes, and Offline Reader was not defensively gated by readable archive presence."
+      desired_behavior: "Shared UIManager applies independent selected-backend archiveSaved and screenshotSaved indicators; readerAvailable derives strictly from archiveSaved; PopupController resets on URL/backend context changes, queries Local/File with explicit backend in parallel, and refreshes after successful captures using the capture URL."
+      docs_updated:
+        - ".cursor/work/REQ-PAGE_ARCHIVE_STATUS_UI_20260801143800.yaml"
+        - "CHANGELOG.md"
+        - "tied/architecture-decisions/ARCH-PAGE_ARCHIVE_STATUS_UI.yaml"
+        - "tied/implementation-decisions/IMPL-PAGE_ARCHIVE_STATUS_UI-pseudocode.md"
+        - "tied/implementation-decisions/IMPL-PAGE_ARCHIVE_STATUS_UI.yaml"
+        - "tied/requirements/REQ-PAGE_ARCHIVE_STATUS_UI.yaml"
+        - "tied/vocab/page-archives.md"
+        - "tied/vocab/side-panel.md"
+        - "tied/vocab/ui-surfaces.md"
+      impact_analysis:
+        excluded_paths:
+          - "src/ui/side-panel/build-info.js (pre-existing staged timestamp; excluded from feature scope)"
+        generated_artifacts:
+          - "dist/src/ui/popup/popup.html"
+          - "dist/src/ui/popup/popup.js"
+          - "dist/src/ui/popup/PopupController.js"
+          - "dist/src/ui/popup/UIManager.js"
+        impl_inventory_notes: "Status normalizer, scoped UIManager DOM state, PopupController context/query/capture refresh orchestration, popup and This Page accessibility hooks, archive E2E coverage, and generated popup bundles were added without changing archive message handlers."
+        modules_or_boundaries:
+          - "src/ui/popup/archive-status.js"
+          - "src/ui/popup/popup.html"
+          - "src/ui/popup/PopupController.js"
+          - "src/ui/popup/UIManager.js"
+          - "src/ui/side-panel/side-panel.html"
+          - "tests/integration/popup-archive-status-composition.integration.test.js"
+          - "tests/playwright/extension-archive-features.spec.js"
+          - "tests/unit/archive-status.test.js"
+          - "tests/unit/ui-manager-scoped-root.test.js"
+        tied_tokens_affected:
+          - "ARCH-OFFLINE_READER_MODE"
+          - "ARCH-PAGE_ARCHIVE_STORAGE"
+          - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+          - "ARCH-SIDE_PANEL_TABS"
+          - "IMPL-OFFLINE_READER_MODE"
+          - "IMPL-PAGE_ARCHIVE_STORAGE"
+          - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+          - "IMPL-SIDE_PANEL_BOOKMARK"
+          - "REQ-OFFLINE_READER_MODE"
+          - "REQ-PAGE_ARCHIVE_STORAGE"
+          - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+          - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+        tied_tokens_new:
+          - "ARCH-PAGE_ARCHIVE_STATUS_UI"
+          - "IMPL-PAGE_ARCHIVE_STATUS_UI"
+          - "REQ-PAGE_ARCHIVE_STATUS_UI"
+      leap_feedback:
+        divergences_from_analysis: "The staged implementation initially described sequential archive-then-screenshot awaits while the independent production queries used Promise.all; the contract was corrected to document parallel dispatch. The normalizer effect was corrected from State to pure, readable archive content now requires non-empty sanitized HTML or text, and post-capture refresh now uses currentPin.url || currentTab.url to match capture handlers."
+        notes: "RED tests established normalization, scoped UI, parallel dispatch, race invalidation, capture refresh, URL parity, and Reader gating before GREEN implementation. Composition and E2E coverage now exercise the selected-backend boundary, stale archive state, screenshot-only independence, and scoped This Page state. The APPLY_ARCHIVE_STATUS_UI procedure was then synchronized with the implemented scoped-root datasets and archiveStatusDescription aria-describedby accessibility hook; this was an IMPL documentation alignment with no ARCH or REQ scope change."
+        record_status: "completed"
+        tied_stack_updates_required:
+          - "Keep archive status response identity rules synchronized with archive and screenshot storage schemas."
+          - "Keep scoped root status datasets and archive status description accessibility behavior synchronized with the IMPL procedure and vocabulary."
+          - "Keep the parallel-query and non-empty-content contract synchronized with source and test full-block comments."
+      non_goals:
+        - "Adding archive status UI to the Local Bookmarks Index or Options."
+        - "Aggregating archive presence across Local and File backends."
+        - "Changing GET_PAGE_ARCHIVE or GET_PAGE_SCREENSHOTS message handlers."
+        - "Disabling recapture controls on archive-capable backends."
+      record_identity:
+        change_request_id: "REQ-PAGE_ARCHIVE_STATUS_UI"
+        primary_tokens:
+          - "ARCH-PAGE_ARCHIVE_STATUS_UI"
+          - "IMPL-PAGE_ARCHIVE_STATUS_UI"
+          - "REQ-PAGE_ARCHIVE_STATUS_UI"
+        procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+        recorded_at: "2026-08-01"
+        title: "Selected-backend archive status controls"
+      risk_analysis:
+        risks:
+          - id: "RISK-STATUS-001"
+            description: "Status from one backend or tab could leak into another context."
+            mitigation: "Use URL/backend context keys, clear state before query, pass backend on every Local/File request, and discard stale responses."
+            residual: "low"
+            severity: "high"
+          - id: "RISK-STATUS-002"
+            description: "Malformed, empty, or metadata-only responses could create false saved indicators."
+            mitigation: "Require persisted artifact identity plus non-empty readable archive content or screenshot identity; normalize failures to false."
+            residual: "low"
+            severity: "high"
+          - id: "RISK-STATUS-003"
+            description: "Screenshot-only state could incorrectly enable Offline Reader."
+            mitigation: "Derive readerAvailable only from archiveSaved and guard DOM disabled state plus click handler."
+            residual: "low"
+            severity: "medium"
+          - id: "RISK-STATUS-004"
+            description: "Shared popup and scoped This Page surfaces could drift."
+            mitigation: "Reuse UIManager container path and cover scoped DOM refs in composition and E2E tests."
+            residual: "low"
+            severity: "medium"
+      success_criteria:
+        - "Identified screenshot artifact produces screenshotSaved independently."
+        - "Popup and This Page expose accessible status hooks while Local/File capture actions remain enabled."
+        - "Unsupported, failed, malformed, empty, and cross-backend responses fail closed."
+        - "URL/backend changes clear state before new query; capture success refreshes the relevant status."
+        - "Valid stale or available selected-backend archive produces archiveSaved and readerAvailable true."
+      tdd_sequence:
+        summary: "Token-commented pseudo-code and TIED validation; RED normalizer/UI tests; GREEN status module/UIManager; RED composition tests; GREEN PopupController orchestration; archive extension E2E; full verification."
+        tests:
+          - "tests/integration/popup-archive-status-composition.integration.test.js"
+          - "tests/playwright/extension-archive-features.spec.js"
+          - "tests/unit/archive-status.test.js"
+          - "tests/unit/ui-manager-scoped-root.test.js"
+      test_strategy:
+        matrix_notes: "Unit covers archive-only, screenshot-only, both, neither, stale, malformed, failed, empty, unsupported, identity, Reader derivation, scoped DOM attributes, accessible labels, and independent recapture controls. Composition covers explicit backend payloads, parallel dispatch, reset, stale context boundary, archive and screenshot post-capture refresh, capture URL parity, and defensive Reader gating. E2E covers real popup states, stale archive availability, unsupported backend, and live scoped This Page state."
+        security_mitigations:
+          - "Discard stale asynchronous results after URL/backend context changes."
+          - "Fail closed without changing archive message handlers or privacy boundaries."
+          - "Never aggregate backend presence or infer status from bookmark metadata."
+          - "Require persisted artifact identity and non-empty readable archive content before enabling Reader."
+        summary: "Strict RED-before-GREEN unit and composition coverage followed by real extension-host E2E."
+      unchanged_behavior:
+        - "Capture actions remain available for recapture."
+        - "GET_PAGE_ARCHIVE and GET_PAGE_SCREENSHOTS handlers remain unchanged."
+        - "Local/File remains the only archive-capable boundary."
+        - "Popup and This Page continue to share the UIManager/PopupController architecture."
+      validation_evidence:
+        composition: "PopupController status composition covers selected-backend query payloads, independent parallel dispatch, unsupported-backend fail-closed behavior, URL-context stale response discard, context reset, archive and screenshot post-capture refresh, capture URL parity, and defensive Reader gating."
+        e2e: "Archive extension E2E passed 8 tests, including neither/archive-only/screenshot-only/both, unsupported backend, stale archive Reader availability, and live scoped This Page status hooks."
+        focused_unit: "16 status normalizer and scoped UIManager tests passed; selected-backend status composition passed 7 tests."
+        verification_gate_notes: "Complete Jest suite passed 1581 tests with 1 skipped across 158 suites; archive extension E2E passed 8 tests; source lint, TypeScript typecheck, semantic token validation, and build-only dist generation passed; TIED consistency and pseudocode validation are recorded at close-out."

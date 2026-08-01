@@ -1643,6 +1643,19 @@ REQ-OVERLAY_SYSTEM:
   validation_criteria:
     - method: "Overlay display tests"
       coverage: "All activation scenarios"
+REQ-PAGE_ARCHIVE_STATUS_UI:
+  category: "Functional"
+  cross_references:
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-OFFLINE_READER_MODE"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  detail_file: "requirements/REQ-PAGE_ARCHIVE_STATUS_UI.yaml"
+  name: "Page Archive Status UI"
+  priority: "P1"
+  status: "Implemented"
+  summary: "Show selected-backend saved-state indicators for readable archive and screenshot artifacts in popup and This Page, and gate Offline Reader on readable archive availability."
 REQ-PAGE_ARCHIVE_STORAGE:
   category: "Functional"
   detail_file: "requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml"

@@ -1621,6 +1621,124 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION ===
  */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_STATUS_UI ===
+ * [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI] — Normalize and display selected-backend archive artifact status in shared popup/This Page UI; derive Offline Reader availability only from a readable archive.
+ *
+ * ## MAIN
+ *
+ * - [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI] How: Coordinate fail-closed normalization, backend-scoped queries, scoped DOM application, context resets, and capture refreshes without changing archive handlers.
+ * - Contract:
+ *   - INPUT: current tab URL, selected backend, archive/screenshot query responses, capture results, scoped UI root
+ *   - PRE: PopupController and UIManager are initialized; selected backend is resolved from the current bookmark/context
+ *   - OUTPUT: independent archiveSaved and screenshotSaved indicators plus readerAvailable = archiveSaved
+ *   - POST: positive state exists only when the selected backend returns a valid persisted artifact; stale readable archive remains available
+ *   - FAILURE_MODES: unsupported backend, rejected message, malformed response, missing artifact identity, stale context
+ *   - DATA: currentUrl, selectedBackend, archiveSaved, screenshotSaved, readerAvailable, statusContextKey
+ *   - DATA_TRANSITION: context changes clear all status before new query; successful query replaces only the matching status snapshot
+ *   - EFFECTS: Async, IO, State, DOM
+ *   - TERMINATION: total
+ *
+ * ## NORMALIZE_ARCHIVE_ARTIFACT_STATUS
+ *
+ * - [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI] How: Convert raw GET_PAGE_ARCHIVE and GET_PAGE_SCREENSHOTS results to a bounded all-false or positive status object; never infer persisted presence from metadata or defaults.
+ * - Contract:
+ *   - INPUT: artifactKind, backend, response
+ *   - PRE: artifactKind is archive or screenshot
+ *   - OUTPUT: { saved: boolean, readable: boolean, artifactId: string|null, backend: string|null }
+ *   - POST: saved is true only for an accepted selected-backend persisted artifact; archive stale status remains readable
+ *   - FAILURE_MODES: unsupported backend, success false, malformed payload, empty screenshot list, missing identity
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: NORMALIZE_ARCHIVE_ARTIFACT_STATUS
+ *   - IF backend is not local or file: RETURN all-false
+ *   - IF response is rejected, response.success is false, or response.data is malformed: RETURN all-false
+ *   - IF artifactKind is archive:
+ *   -   archive = response.data.archive OR response.archive OR response.data
+ *   -   IF archive lacks persisted identity or non-empty readable content: RETURN all-false
+ *   -   RETURN { saved: true, readable: true, artifactId: archive.id OR archive.archiveId, backend }
+ *   - IF artifactKind is screenshot:
+ *   -   screenshots = response.data.screenshots OR response.screenshots OR []
+ *   -   artifact = first screenshot with id OR artifactId OR hash
+ *   -   IF no artifact: RETURN all-false
+ *   -   RETURN { saved: true, readable: false, artifactId: artifact.id OR artifact.artifactId OR artifact.hash, backend }
+ *
+ * ## QUERY_SELECTED_BACKEND_ARTIFACT_STATUS
+ *
+ * - [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI] How: Query each artifact leg only for local/file and always pass the selected backend, then normalize independently.
+ * - Contract:
+ *   - INPUT: currentUrl, selectedBackend, sendMessage
+ *   - PRE: currentUrl is non-empty and status context is current
+ *   - OUTPUT: normalized archive and screenshot status
+ *   - POST: unsupported backend produces all-false without sending archive messages; query failures remain all-false
+ *   - FAILURE_MODES: unsupported backend, message rejection, stale response
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: QUERY_SELECTED_BACKEND_ARTIFACT_STATUS
+ *   - IF selectedBackend is not local or file: RETURN all-false
+ *   - archiveResponse, screenshotResponse = AWAIT IN PARALLEL:
+ *   -   sendMessage({ type: GET_PAGE_ARCHIVE, data: { url: currentUrl, backend: selectedBackend } })
+ *   -   sendMessage({ type: GET_PAGE_SCREENSHOTS, data: { url: currentUrl, backend: selectedBackend } })
+ *   - IF statusContextKey changed while awaiting: DISCARD both results
+ *   - RETURN NORMALIZE archiveResponse and screenshotResponse independently
+ *
+ * ## APPLY_ARCHIVE_STATUS_UI
+ *
+ * - [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI] How: Apply the normalized snapshot to the current popup or scoped This Page root with non-color accessibility cues and independent recapture controls.
+ * - Contract:
+ *   - INPUT: normalized status, UIManager element cache
+ *   - PRE: elements may be absent in optional contexts
+ *   - OUTPUT: DOM reflects archiveSaved, screenshotSaved, and readerAvailable
+ *   - POST: capture buttons remain enabled on archive-capable backends; Reader is visible but disabled with an explanation when unavailable
+ *   - FAILURE_MODES: absent optional element
+ *   - DATA_TRANSITION: set root archive/screenshot/Reader/backend datasets, set data-archive-saved/data-screenshot-saved and active classes independently, and synchronize the Reader status description visibility and aria-describedby hook
+ *   - EFFECTS: DOM, State
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_ARCHIVE_STATUS_UI
+ *   - archiveButton = elements.captureArchiveBtn; screenshotButton = elements.captureScreenshotBtn; readerButton = elements.openReaderBtn
+ *   - root = elements.mainInterface OR scoped container
+ *   - SET root data-archive-saved, data-screenshot-saved, data-reader-available, and data-archive-backend
+ *   - SET archiveButton active and aria-label/title from archiveSaved; preserve disabled = false for local/file recapture
+ *   - SET screenshotButton active and aria-label/title from screenshotSaved; preserve disabled = false for local/file recapture
+ *   - SET readerButton disabled = NOT readerAvailable; SET aria-disabled and explanatory title/label when unavailable
+ *   - SET archiveStatusDescription hidden = readerAvailable and text to the unavailable explanation when Reader is unavailable
+ *   - SET readerButton aria-describedby to archiveStatusDescription when that element has an id
+ *   - SET data attributes on each button and shared status state
+ *
+ * ## REFRESH_ARCHIVE_STATUS_AFTER_CAPTURE
+ *
+ * - [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI] How: Refresh only the successful capture leg after a successful archive or screenshot command, preserving the other leg.
+ * - Contract:
+ *   - INPUT: captureKind, currentUrl, selectedBackend, captureResult
+ *   - PRE: captureResult is successful and context is current
+ *   - OUTPUT: updated independent status snapshot
+ *   - POST: failed capture does not create a positive indicator
+ *   - FAILURE_MODES: capture failure, context change, status query failure
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: REFRESH_ARCHIVE_STATUS_AFTER_CAPTURE
+ *   - IF captureResult.success is not true: RETURN current status
+ *   - QUERY matching artifact leg with selected backend
+ *   - APPLY matching normalized status while preserving the other leg
+ *
+ * ## RESET_ARCHIVE_STATUS_ON_CONTEXT_CHANGE
+ *
+ * - [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI] How: Clear persisted status before any new URL or selected-backend context can display it, preventing cross-tab/backend leakage.
+ * - Contract:
+ *   - INPUT: nextUrl, nextBackend, previous status context
+ *   - PRE: context change is observable
+ *   - OUTPUT: cleared status snapshot and new statusContextKey
+ *   - POST: archiveSaved, screenshotSaved, and readerAvailable are false until the new context is queried
+ *   - EFFECTS: State, DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: RESET_ARCHIVE_STATUS_ON_CONTEXT_CHANGE
+ *   - IF `${nextUrl}|${nextBackend}` equals statusContextKey: RETURN unchanged
+ *   - SET statusContextKey = `${nextUrl}|${nextBackend}`
+ *   - APPLY all-false status immediately
+ *   - IF nextUrl is non-empty AND nextBackend is local or file: QUERY_SELECTED_BACKEND_ARTIFACT_STATUS
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_STATUS_UI ===
+ */
 import { UIManager } from './UIManager.js'
 import { StateManager } from './StateManager.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
@@ -1649,6 +1767,11 @@ import {
   isLinkHealthChecksEnabled,
   formatLinkHealthHint
 } from '../../shared/link-health.js'
+import {
+  EMPTY_ARCHIVE_ARTIFACT_STATUS,
+  isArchiveCapableBackend,
+  normalizeArchiveArtifactStatus
+} from './archive-status.js'
 
 /** [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] Extension-root path for scripting.executeScript files */
 const SUGGESTED_TAGS_MAIN_WORLD_FILE = 'src/features/tagging/suggested-tags-main-world-snippet.js'
@@ -1671,6 +1794,10 @@ export class PopupController {
     this.currentPin = null
     this.isInitialized = false
     this.isLoading = false
+    // [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+    // Keep artifact state separate from bookmark metadata so context changes can fail closed.
+    this._archiveArtifactStatus = { ...EMPTY_ARCHIVE_ARTIFACT_STATUS }
+    this._archiveStatusContextKey = ''
     // [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Optional test hooks
     this._onAction = null
     this._onStateChange = null
@@ -1954,6 +2081,15 @@ export class PopupController {
       this.uiManager.updateStorageBackendValue(backend)
       // [REQ-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI] Sync Title/Notes; disable notes for browser
       this._resolvedStorageBackend = backend
+      // [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+      // Query persisted artifact state only after the selected backend is resolved.
+      this.refreshArchiveArtifactStatus({
+        url: this.currentTab?.url,
+        backend,
+        force: true
+      }).catch(error => {
+        debugError('[IMPL-PAGE_ARCHIVE_STATUS_UI] Initial artifact status refresh failed:', error)
+      })
       this.uiManager.syncBookmarkNotesFields(this.currentPin, backend)
       this.uiManager.updateStorageLocalToggle(backend, hasRealBookmark)
       // [REQ-MOVE_BOOKMARK_STORAGE_UI] Disable Pinboard storage option when no API token configured
@@ -2408,6 +2544,10 @@ export class PopupController {
   async handleStorageBackendChange (targetBackend) {
     recordAction(POPUP_ACTION_IDS.storageBackendChange, { targetBackend }, 'popup')
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.storageBackendChange, payload: { targetBackend } })
+    // [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+    // Clear the old backend before any move result can leave stale indicators visible.
+    this._archiveStatusContextKey = `${this.currentTab?.url || this.currentPin?.url || ''}|${targetBackend || ''}`
+    this.resetArchiveArtifactStatus(targetBackend)
     // [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Use bookmark URL when available so move uses same key as storage.
     const url = this.currentPin?.url || this.currentTab?.url
     if (!url) return
@@ -2433,6 +2573,11 @@ export class PopupController {
         // [REQ-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI] Re-sync details after move (browser disables notes)
         this._resolvedStorageBackend = targetBackend
         this.uiManager.syncBookmarkNotesFields(this.currentPin, targetBackend)
+        await this.refreshArchiveArtifactStatus({
+          url: this.currentTab?.url || url,
+          backend: targetBackend,
+          force: true
+        })
       } else {
         this.uiManager.showError(result?.message || 'Move failed')
       }
@@ -3733,6 +3878,130 @@ export class PopupController {
   }
 
   /**
+   * [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+   * Clear status immediately when the current URL or selected backend changes.
+   */
+  resetArchiveArtifactStatus (backend = null) {
+    const normalizedBackend = typeof backend === 'string' ? backend.toLowerCase() : null
+    this._archiveArtifactStatus = {
+      ...EMPTY_ARCHIVE_ARTIFACT_STATUS,
+      backend: normalizedBackend
+    }
+    this.uiManager?.updateArchiveArtifactStatus?.(this._archiveArtifactStatus)
+  }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+   * Query both persisted artifact legs with an explicit selected backend.
+   */
+  async querySelectedBackendArtifactStatus (url, backend, contextKey) {
+    if (!url || !isArchiveCapableBackend(backend)) {
+      const status = normalizeArchiveArtifactStatus({ backend })
+      if (contextKey === this._archiveStatusContextKey) {
+        this._archiveArtifactStatus = status
+        this.uiManager?.updateArchiveArtifactStatus?.(status)
+      }
+      return status
+    }
+
+    const request = (type) => this.sendMessage({
+      type,
+      data: { url, backend }
+    }).catch(error => {
+      debugWarn('[IMPL-PAGE_ARCHIVE_STATUS_UI] Selected-backend artifact status query failed:', {
+        type,
+        url,
+        backend,
+        error: error?.message
+      })
+      return null
+    })
+    const [archiveResponse, screenshotResponse] = await Promise.all([
+      request('GET_PAGE_ARCHIVE'),
+      request('GET_PAGE_SCREENSHOTS')
+    ])
+
+    if (contextKey !== this._archiveStatusContextKey) {
+      debugLog('[IMPL-PAGE_ARCHIVE_STATUS_UI] Discarded stale artifact status response:', {
+        contextKey,
+        currentContextKey: this._archiveStatusContextKey
+      })
+      return this._archiveArtifactStatus
+    }
+
+    const status = normalizeArchiveArtifactStatus({
+      backend,
+      archiveResponse,
+      screenshotResponse
+    })
+    this._archiveArtifactStatus = status
+    this.uiManager?.updateArchiveArtifactStatus?.(status)
+    return status
+  }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+   * Reset, query, and apply status for the current URL/backend context.
+   */
+  async refreshArchiveArtifactStatus ({
+    url = this.currentTab?.url,
+    backend = this._resolvedStorageBackend || this.getSelectedStorageBackend(),
+    force = false
+  } = {}) {
+    const contextKey = `${url || ''}|${backend || ''}`
+    if (force || contextKey !== this._archiveStatusContextKey) {
+      this._archiveStatusContextKey = contextKey
+      this.resetArchiveArtifactStatus(backend)
+    }
+    return this.querySelectedBackendArtifactStatus(url, backend, contextKey)
+  }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+   * Refresh only the artifact leg affected by a successful capture.
+   */
+  async refreshArchiveStatusAfterCapture (captureKind) {
+    const url = this.currentPin?.url || this.currentTab?.url
+    const backend = this._resolvedStorageBackend || this.getSelectedStorageBackend()
+    const contextKey = `${url || ''}|${backend || ''}`
+    if (!url || !isArchiveCapableBackend(backend) || contextKey !== this._archiveStatusContextKey) return
+
+    const type = captureKind === 'screenshot' ? 'GET_PAGE_SCREENSHOTS' : 'GET_PAGE_ARCHIVE'
+    let response = null
+    try {
+      response = await this.sendMessage({ type, data: { url, backend } })
+    } catch (error) {
+      debugWarn('[IMPL-PAGE_ARCHIVE_STATUS_UI] Post-capture status query failed:', {
+        type,
+        url,
+        backend,
+        error: error?.message
+      })
+    }
+    if (contextKey !== this._archiveStatusContextKey) return
+
+    const next = normalizeArchiveArtifactStatus({
+      backend,
+      archiveResponse: captureKind === 'screenshot' ? null : response,
+      screenshotResponse: captureKind === 'screenshot' ? response : null
+    })
+    this._archiveArtifactStatus = {
+      ...this._archiveArtifactStatus,
+      ...(captureKind === 'screenshot'
+        ? {
+            screenshotSaved: next.screenshotSaved,
+            screenshotArtifactId: next.screenshotArtifactId
+          }
+        : {
+            archiveSaved: next.archiveSaved,
+            archiveArtifactId: next.archiveArtifactId,
+            readerAvailable: next.readerAvailable
+          })
+    }
+    this.uiManager?.updateArchiveArtifactStatus?.(this._archiveArtifactStatus)
+  }
+
+  /**
    * [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
    * Capture the current This Page explicitly; only Local/File storage can create durable archives and selected-backend bookmarks.
    */
@@ -3749,6 +4018,7 @@ export class PopupController {
         data: { tabId: this.currentTab?.id, url, preferredBackend: backend }
       })
       if (result?.success) {
+        await this.refreshArchiveStatusAfterCapture('archive')
         const message = result.bookmarkCreated
           ? 'Bookmark and page archive saved. Open Bookmarks Index → search scope Archived content.'
           : 'Page archive saved. Open Bookmarks Index → search scope Archived content.'
@@ -3780,8 +4050,10 @@ export class PopupController {
         type: 'CAPTURE_PAGE_SCREENSHOT',
         data: { tabId: this.currentTab?.id, url, backend, options: { format: 'png', fullPage: false } }
       })
-      if (result?.success) this.uiManager.showSuccess('Page screenshot saved')
-      else this.uiManager.showError(result?.error || result?.code || 'Page screenshot failed')
+      if (result?.success) {
+        await this.refreshArchiveStatusAfterCapture('screenshot')
+        this.uiManager.showSuccess('Page screenshot saved')
+      } else this.uiManager.showError(result?.error || result?.code || 'Page screenshot failed')
     } catch (error) {
       debugError('[IMPL-PAGE_SCREENSHOT_ARCHIVE] capture page screenshot failed:', error)
       this.uiManager.showError('Page screenshot failed')
@@ -3795,6 +4067,12 @@ export class PopupController {
   async handleOpenOfflineReader () {
     const url = this.currentPin?.url || this.currentTab?.url
     if (!url) return
+    // [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+    // Keep the click boundary defensive even if a stale DOM event bypasses disabled state.
+    if (this._archiveArtifactStatus.readerAvailable !== true || this.uiManager?.elements?.openReaderBtn?.disabled) {
+      this.uiManager?.showError?.('Offline Reader is unavailable until a readable page archive is saved.')
+      return
+    }
     const readerUrl = `${chrome.runtime.getURL('src/ui/reader/reader.html')}?url=${encodeURIComponent(url)}`
     await chrome.tabs.create({ url: readerUrl })
   }

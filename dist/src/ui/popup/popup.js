@@ -19619,6 +19619,8 @@ var UIManager = class {
       captureScreenshotBtn: get("captureScreenshotBtn"),
       // [REQ-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [IMPL-OFFLINE_READER_MODE]
       openReaderBtn: get("openReaderBtn"),
+      // [REQ-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [IMPL-PAGE_ARCHIVE_STATUS_UI]
+      archiveStatusDescription: get("archiveStatusDescription"),
       reloadBtn: get("reloadBtn"),
       optionsBtn: get("optionsBtn"),
       bookmarksIndexBtn: get("bookmarksIndexBtn"),
@@ -19980,7 +19982,11 @@ var UIManager = class {
     ];
     interactiveElements.forEach((element) => {
       if (element) {
-        element.disabled = isLoading;
+        if (element === this.elements.openReaderBtn && !isLoading) {
+          element.disabled = element.dataset.readerAvailable !== "true";
+        } else {
+          element.disabled = isLoading;
+        }
       }
     });
   }
@@ -20047,6 +20053,58 @@ var UIManager = class {
         } else {
           this.elements.readIcon.textContent = "\u{1F4CB}";
           this.elements.readStatus.textContent = "Not marked";
+        }
+      }
+    }
+  }
+  /**
+   * [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+   * Apply independent persisted artifact state to popup or scoped This Page controls.
+   * Capture buttons intentionally remain recapturable; only Reader availability is gated.
+   * @param {{ backend?: string|null, archiveSaved?: boolean, screenshotSaved?: boolean, readerAvailable?: boolean, archiveArtifactId?: string|null, screenshotArtifactId?: string|null }} status
+   */
+  updateArchiveArtifactStatus(status = {}) {
+    const archiveSaved = status.archiveSaved === true;
+    const screenshotSaved = status.screenshotSaved === true;
+    const readerAvailable = status.readerAvailable === true && archiveSaved;
+    const archiveButton = this.elements.captureArchiveBtn;
+    const screenshotButton = this.elements.captureScreenshotBtn;
+    const readerButton = this.elements.openReaderBtn;
+    const root = this.elements.mainInterface || this.container;
+    if (root) {
+      root.dataset.archiveSaved = String(archiveSaved);
+      root.dataset.screenshotSaved = String(screenshotSaved);
+      root.dataset.readerAvailable = String(readerAvailable);
+      root.dataset.archiveBackend = status.backend || "";
+    }
+    if (archiveButton) {
+      archiveButton.classList.toggle("active", archiveSaved);
+      archiveButton.dataset.archiveSaved = String(archiveSaved);
+      archiveButton.dataset.archiveArtifactId = status.archiveArtifactId || "";
+      const label = archiveSaved ? "Save page archive (saved)" : "Save page archive";
+      archiveButton.setAttribute("aria-label", label);
+      archiveButton.title = label;
+    }
+    if (screenshotButton) {
+      screenshotButton.classList.toggle("active", screenshotSaved);
+      screenshotButton.dataset.screenshotSaved = String(screenshotSaved);
+      screenshotButton.dataset.screenshotArtifactId = status.screenshotArtifactId || "";
+      const label = screenshotSaved ? "Save page screenshot (saved)" : "Save page screenshot";
+      screenshotButton.setAttribute("aria-label", label);
+      screenshotButton.title = label;
+    }
+    if (readerButton) {
+      readerButton.disabled = !readerAvailable;
+      readerButton.setAttribute("aria-disabled", String(!readerAvailable));
+      const label = readerAvailable ? "Open offline Reader" : "Open offline Reader (unavailable: save a page archive first)";
+      readerButton.setAttribute("aria-label", label);
+      readerButton.title = label;
+      readerButton.dataset.readerAvailable = String(readerAvailable);
+      if (this.elements.archiveStatusDescription) {
+        this.elements.archiveStatusDescription.hidden = readerAvailable;
+        this.elements.archiveStatusDescription.textContent = readerAvailable ? "" : "Offline Reader is unavailable until a readable page archive is saved for this backend.";
+        if (this.elements.archiveStatusDescription.id) {
+          readerButton.setAttribute("aria-describedby", this.elements.archiveStatusDescription.id);
         }
       }
     }
@@ -21618,6 +21676,77 @@ function formatTimeAge(value, nowMs = Date.now()) {
   return parts.join(" ");
 }
 
+// src/ui/popup/archive-status.js
+var ARCHIVE_CAPABLE_BACKENDS = Object.freeze(["local", "file"]);
+function isArchiveCapableBackend(backend) {
+  return ARCHIVE_CAPABLE_BACKENDS.includes(String(backend || "").toLowerCase());
+}
+function unwrapSuccessfulResponse(response) {
+  if (!response || response.success === false) return null;
+  if (response.success === true && response.data && !response.archive && !response.screenshots) {
+    return response.data;
+  }
+  return response;
+}
+function persistedIdentity(artifact) {
+  const value = artifact?.archiveId || artifact?.artifactId || artifact?.id || artifact?.hash;
+  return typeof value === "string" && value.trim() ? value : null;
+}
+function normalizeArchiveStatus(response) {
+  const payload = unwrapSuccessfulResponse(response);
+  const archive = payload?.archive || payload;
+  const archiveArtifactId = persistedIdentity(archive);
+  const readable = !!archiveArtifactId && (typeof archive?.sanitizedHtml === "string" && archive.sanitizedHtml.trim().length > 0 || typeof archive?.textContent === "string" && archive.textContent.trim().length > 0);
+  return {
+    saved: readable,
+    artifactId: readable ? archiveArtifactId : null
+  };
+}
+function normalizeScreenshotStatus(response) {
+  const payload = unwrapSuccessfulResponse(response);
+  const screenshots = Array.isArray(payload?.screenshots) ? payload.screenshots : Array.isArray(payload) ? payload : [];
+  const artifact = screenshots.find((item) => !!persistedIdentity(item));
+  return {
+    saved: !!artifact,
+    artifactId: artifact ? persistedIdentity(artifact) : null
+  };
+}
+function normalizeArchiveArtifactStatus({
+  backend = null,
+  archiveResponse = null,
+  screenshotResponse = null
+} = {}) {
+  const normalizedBackend = typeof backend === "string" ? backend.toLowerCase() : null;
+  if (!isArchiveCapableBackend(normalizedBackend)) {
+    return {
+      backend: normalizedBackend,
+      archiveSaved: false,
+      screenshotSaved: false,
+      readerAvailable: false,
+      archiveArtifactId: null,
+      screenshotArtifactId: null
+    };
+  }
+  const archiveStatus = normalizeArchiveStatus(archiveResponse);
+  const screenshotStatus = normalizeScreenshotStatus(screenshotResponse);
+  return {
+    backend: normalizedBackend,
+    archiveSaved: archiveStatus.saved,
+    screenshotSaved: screenshotStatus.saved,
+    readerAvailable: archiveStatus.saved,
+    archiveArtifactId: archiveStatus.artifactId,
+    screenshotArtifactId: screenshotStatus.artifactId
+  };
+}
+var EMPTY_ARCHIVE_ARTIFACT_STATUS = Object.freeze({
+  backend: null,
+  archiveSaved: false,
+  screenshotSaved: false,
+  readerAvailable: false,
+  archiveArtifactId: null,
+  screenshotArtifactId: null
+});
+
 // src/ui/popup/PopupController.js
 var SUGGESTED_TAGS_MAIN_WORLD_FILE = "src/features/tagging/suggested-tags-main-world-snippet.js";
 var PopupController = class {
@@ -21634,6 +21763,8 @@ var PopupController = class {
     this.currentPin = null;
     this.isInitialized = false;
     this.isLoading = false;
+    this._archiveArtifactStatus = { ...EMPTY_ARCHIVE_ARTIFACT_STATUS };
+    this._archiveStatusContextKey = "";
     this._onAction = null;
     this._onStateChange = null;
     const isTestEnv = typeof process !== "undefined" && process?.env?.JEST_WORKER_ID;
@@ -21840,6 +21971,13 @@ var PopupController = class {
       const backend = validBackends.includes(storageBackend) ? storageBackend : await this.configManager.getStorageMode() || "local";
       this.uiManager.updateStorageBackendValue(backend);
       this._resolvedStorageBackend = backend;
+      this.refreshArchiveArtifactStatus({
+        url: this.currentTab?.url,
+        backend,
+        force: true
+      }).catch((error48) => {
+        debugError("[IMPL-PAGE_ARCHIVE_STATUS_UI] Initial artifact status refresh failed:", error48);
+      });
       this.uiManager.syncBookmarkNotesFields(this.currentPin, backend);
       this.uiManager.updateStorageLocalToggle(backend, hasRealBookmark);
       const token = await this.configManager.getAuthToken();
@@ -22226,6 +22364,8 @@ var PopupController = class {
   async handleStorageBackendChange(targetBackend) {
     recordAction(POPUP_ACTION_IDS.storageBackendChange, { targetBackend }, "popup");
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.storageBackendChange, payload: { targetBackend } });
+    this._archiveStatusContextKey = `${this.currentTab?.url || this.currentPin?.url || ""}|${targetBackend || ""}`;
+    this.resetArchiveArtifactStatus(targetBackend);
     const url2 = this.currentPin?.url || this.currentTab?.url;
     if (!url2) return;
     try {
@@ -22248,6 +22388,11 @@ var PopupController = class {
         this.uiManager.updateCurrentTags(this.normalizeTags(this.currentPin?.tags));
         this._resolvedStorageBackend = targetBackend;
         this.uiManager.syncBookmarkNotesFields(this.currentPin, targetBackend);
+        await this.refreshArchiveArtifactStatus({
+          url: this.currentTab?.url || url2,
+          backend: targetBackend,
+          force: true
+        });
       } else {
         this.uiManager.showError(result?.message || "Move failed");
       }
@@ -23331,6 +23476,119 @@ var PopupController = class {
     }
   }
   /**
+   * [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+   * Clear status immediately when the current URL or selected backend changes.
+   */
+  resetArchiveArtifactStatus(backend = null) {
+    const normalizedBackend = typeof backend === "string" ? backend.toLowerCase() : null;
+    this._archiveArtifactStatus = {
+      ...EMPTY_ARCHIVE_ARTIFACT_STATUS,
+      backend: normalizedBackend
+    };
+    this.uiManager?.updateArchiveArtifactStatus?.(this._archiveArtifactStatus);
+  }
+  /**
+   * [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+   * Query both persisted artifact legs with an explicit selected backend.
+   */
+  async querySelectedBackendArtifactStatus(url2, backend, contextKey) {
+    if (!url2 || !isArchiveCapableBackend(backend)) {
+      const status2 = normalizeArchiveArtifactStatus({ backend });
+      if (contextKey === this._archiveStatusContextKey) {
+        this._archiveArtifactStatus = status2;
+        this.uiManager?.updateArchiveArtifactStatus?.(status2);
+      }
+      return status2;
+    }
+    const request = (type) => this.sendMessage({
+      type,
+      data: { url: url2, backend }
+    }).catch((error48) => {
+      debugWarn("[IMPL-PAGE_ARCHIVE_STATUS_UI] Selected-backend artifact status query failed:", {
+        type,
+        url: url2,
+        backend,
+        error: error48?.message
+      });
+      return null;
+    });
+    const [archiveResponse, screenshotResponse] = await Promise.all([
+      request("GET_PAGE_ARCHIVE"),
+      request("GET_PAGE_SCREENSHOTS")
+    ]);
+    if (contextKey !== this._archiveStatusContextKey) {
+      debugLog("[IMPL-PAGE_ARCHIVE_STATUS_UI] Discarded stale artifact status response:", {
+        contextKey,
+        currentContextKey: this._archiveStatusContextKey
+      });
+      return this._archiveArtifactStatus;
+    }
+    const status = normalizeArchiveArtifactStatus({
+      backend,
+      archiveResponse,
+      screenshotResponse
+    });
+    this._archiveArtifactStatus = status;
+    this.uiManager?.updateArchiveArtifactStatus?.(status);
+    return status;
+  }
+  /**
+   * [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+   * Reset, query, and apply status for the current URL/backend context.
+   */
+  async refreshArchiveArtifactStatus({
+    url: url2 = this.currentTab?.url,
+    backend = this._resolvedStorageBackend || this.getSelectedStorageBackend(),
+    force = false
+  } = {}) {
+    const contextKey = `${url2 || ""}|${backend || ""}`;
+    if (force || contextKey !== this._archiveStatusContextKey) {
+      this._archiveStatusContextKey = contextKey;
+      this.resetArchiveArtifactStatus(backend);
+    }
+    return this.querySelectedBackendArtifactStatus(url2, backend, contextKey);
+  }
+  /**
+   * [IMPL-PAGE_ARCHIVE_STATUS_UI] [ARCH-PAGE_ARCHIVE_STATUS_UI] [REQ-PAGE_ARCHIVE_STATUS_UI]
+   * Refresh only the artifact leg affected by a successful capture.
+   */
+  async refreshArchiveStatusAfterCapture(captureKind) {
+    const url2 = this.currentPin?.url || this.currentTab?.url;
+    const backend = this._resolvedStorageBackend || this.getSelectedStorageBackend();
+    const contextKey = `${url2 || ""}|${backend || ""}`;
+    if (!url2 || !isArchiveCapableBackend(backend) || contextKey !== this._archiveStatusContextKey) return;
+    const type = captureKind === "screenshot" ? "GET_PAGE_SCREENSHOTS" : "GET_PAGE_ARCHIVE";
+    let response = null;
+    try {
+      response = await this.sendMessage({ type, data: { url: url2, backend } });
+    } catch (error48) {
+      debugWarn("[IMPL-PAGE_ARCHIVE_STATUS_UI] Post-capture status query failed:", {
+        type,
+        url: url2,
+        backend,
+        error: error48?.message
+      });
+    }
+    if (contextKey !== this._archiveStatusContextKey) return;
+    const next = normalizeArchiveArtifactStatus({
+      backend,
+      archiveResponse: captureKind === "screenshot" ? null : response,
+      screenshotResponse: captureKind === "screenshot" ? response : null
+    });
+    this._archiveArtifactStatus = {
+      ...this._archiveArtifactStatus,
+      ...captureKind === "screenshot" ? {
+        screenshotSaved: next.screenshotSaved,
+        screenshotArtifactId: next.screenshotArtifactId
+      } : {
+        archiveSaved: next.archiveSaved,
+        archiveArtifactId: next.archiveArtifactId,
+        readerAvailable: next.readerAvailable
+      }
+    };
+    this.uiManager?.updateArchiveArtifactStatus?.(this._archiveArtifactStatus);
+  }
+  /**
    * [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
    * Capture the current This Page explicitly; only Local/File storage can create durable archives and selected-backend bookmarks.
    */
@@ -23347,6 +23605,7 @@ var PopupController = class {
         data: { tabId: this.currentTab?.id, url: url2, preferredBackend: backend }
       });
       if (result?.success) {
+        await this.refreshArchiveStatusAfterCapture("archive");
         const message = result.bookmarkCreated ? "Bookmark and page archive saved. Open Bookmarks Index \u2192 search scope Archived content." : "Page archive saved. Open Bookmarks Index \u2192 search scope Archived content.";
         this.uiManager.showSuccess(message);
       } else if (result?.cleanupFailed) {
@@ -23375,8 +23634,10 @@ var PopupController = class {
         type: "CAPTURE_PAGE_SCREENSHOT",
         data: { tabId: this.currentTab?.id, url: url2, backend, options: { format: "png", fullPage: false } }
       });
-      if (result?.success) this.uiManager.showSuccess("Page screenshot saved");
-      else this.uiManager.showError(result?.error || result?.code || "Page screenshot failed");
+      if (result?.success) {
+        await this.refreshArchiveStatusAfterCapture("screenshot");
+        this.uiManager.showSuccess("Page screenshot saved");
+      } else this.uiManager.showError(result?.error || result?.code || "Page screenshot failed");
     } catch (error48) {
       debugError("[IMPL-PAGE_SCREENSHOT_ARCHIVE] capture page screenshot failed:", error48);
       this.uiManager.showError("Page screenshot failed");
@@ -23389,6 +23650,10 @@ var PopupController = class {
   async handleOpenOfflineReader() {
     const url2 = this.currentPin?.url || this.currentTab?.url;
     if (!url2) return;
+    if (this._archiveArtifactStatus.readerAvailable !== true || this.uiManager?.elements?.openReaderBtn?.disabled) {
+      this.uiManager?.showError?.("Offline Reader is unavailable until a readable page archive is saved.");
+      return;
+    }
     const readerUrl = `${chrome.runtime.getURL("src/ui/reader/reader.html")}?url=${encodeURIComponent(url2)}`;
     await chrome.tabs.create({ url: readerUrl });
   }

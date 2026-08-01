@@ -2964,6 +2964,22 @@ IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION:
   name: "Page Archive Bookmark Association"
   status: "Active"
   summary: "Orchestrate selected-backend archive capture, bookmark preservation or minimal creation, and compensating cleanup."
+IMPL-PAGE_ARCHIVE_STATUS_UI:
+  cross_references:
+    - "ARCH-OFFLINE_READER_MODE"
+    - "ARCH-PAGE_ARCHIVE_STATUS_UI"
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    - "ARCH-SIDE_PANEL_TABS"
+    - "REQ-OFFLINE_READER_MODE"
+    - "REQ-PAGE_ARCHIVE_STATUS_UI"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  detail_file: "implementation-decisions/IMPL-PAGE_ARCHIVE_STATUS_UI.yaml"
+  name: "Page Archive Status UI Implementation"
+  status: "Active"
+  summary: "Normalize selected-backend archive and screenshot responses, apply scoped accessible UI state, and orchestrate reset/query/refresh through PopupController."
 IMPL-PAGE_ARCHIVE_STORAGE:
   code_locations:
     files:

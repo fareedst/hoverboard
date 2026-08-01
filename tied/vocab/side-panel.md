@@ -37,6 +37,7 @@
 | **Close tab** | ✕ close | Actually close the browser tab |
 | **importantTagSources** | Elements sources | Comma-separated DOM sources for Elements search |
 | **no-match UX** | empty search feedback | Border feedback; preserve scroll in side panel |
+| **archive status hooks** | archive saved indicator | Shared This Page controls resolved through `data-popup-ref`; mirrors popup status state — [REQ-PAGE_ARCHIVE_STATUS_UI] |
 | **to-read indicator** | read-later icon, toread badge | Per-row Tabs card marker when bookmark `toread` is yes (`.browser-tabs-card-toggle-toread`) |
 | **private indicator** | lock icon, shared=no badge | Per-row Tabs card marker when bookmark `shared` is no (`.browser-tabs-card-toggle-private`) |
 | **post-batch bookmark refresh** | reload bookmark flags | After Set/Clear to-read or Add tags, re-query `getCurrentBookmark` for all tabs (`refreshBookmarkDisplayForAllTabs`) |
@@ -80,6 +81,7 @@
 - **Visit History (page)** — Standalone page: **Most Visited**, **Recently Visited**, **Navigation Graph** (former Usage tab).
 - **bookmark search (Next/Previous)** — Search within side-panel bookmark lists.
 - **data-popup-ref** — Attribute bridging shared This Page / popup controls.
+- **archive status hooks** — Shared This Page archive/screenshot saved-state controls and Reader availability explanation resolved through `data-popup-ref`; the same UIManager path serves popup and This Page ([REQ-PAGE_ARCHIVE_STATUS_UI]).
 - **TabSearchService** — `searchAndNavigate` / `findNextTab` with circular wrap; `lastSearchText`, `searchHistory`.
 - **Restore** — Reopen a recently closed tab from the Tabs panel.
 - **to-read / private indicators** — Inline Tabs-row flags from bookmark state after `mergeBookmarkReplyIntoTab`.
@@ -120,6 +122,7 @@
 | Term | Section |
 |------|---------|
 | Browser Bookmarks (page) | Preferred terms |
+| archive status hooks | Preferred terms / Named concepts |
 | Brave native sidebar | Preferred terms / Named concepts |
 | Brave side-panel window arrange bug | Preferred terms / Named concepts |
 | By Tag | Preferred terms |

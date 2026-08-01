@@ -1,0 +1,64 @@
+REQ-PAGE_ARCHIVE_STATUS_UI:
+  category: "Functional"
+  description: "Popup and This Page expose fail-closed selected-backend status for the readable page archive and separate screenshot artifact, while Offline Reader is enabled only when a readable archive exists."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-01"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Finalize verified archive status UI requirement"
+    last_validated:
+      date: "2026-08-01"
+      result: "pass: 1581 Jest tests, 8 archive Playwright E2E tests, lint, typecheck, and token validation"
+      validator: "AI Agent"
+  name: "Page Archive Status UI"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Fail-closed privacy and backend behavior."
+      - "Independent archive and screenshot saved-state indicators."
+      - "Shared popup/This Page status behavior with accessible non-color cues."
+    problems_solved:
+      - "Capture actions provide feedback but do not show persisted artifact presence after reload or backend changes."
+      - "Offline Reader can be invoked without a readable archive and does not clearly communicate availability."
+      - "Popup and scoped This Page can drift if status logic is duplicated."
+    why: "Users need to know whether the current selected Local/File backend already has durable archive artifacts and whether Offline Reader can open stored content."
+  related_requirements:
+    depends_on:
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-OFFLINE_READER_MODE"
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+      - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    related_to: []
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Changing the active tab URL or Save to backend clears the prior status before querying the new context."
+    - criterion: "For the selected current-tab backend, a successful GET_PAGE_SCREENSHOTS response sets screenshotSaved true only when a returned artifact has a persisted identity."
+    - criterion: "For the selected current-tab backend, a valid GET_PAGE_ARCHIVE response sets archiveSaved true, including stale archives."
+    - criterion: "Popup and This Page use the same scoped UIManager status application path, including active/data hooks and accessible Reader disabled wording."
+    - criterion: "Queries send the selected backend and are made only for local or file; unsupported, missing, failed, malformed, or empty results fail closed without fallback lookup."
+    - criterion: "readerAvailable equals archiveSaved; screenshot-only state does not enable Offline Reader."
+    - criterion: "Successful Save page archive or Save page screenshot actions refresh their corresponding status while leaving recapture buttons enabled on Local/File."
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-PAGE_ARCHIVE_STATUS_UI"
+    code_annotations:
+      - "REQ-PAGE_ARCHIVE_STATUS_UI"
+    implementation:
+      - "IMPL-PAGE_ARCHIVE_STATUS_UI"
+    tests:
+      - "tests/integration/popup-archive-status-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/archive-status.test.js"
+      - "tests/unit/ui-manager-scoped-root.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Archive/screenshot response normalization and scoped UIManager DOM state."
+    - method: "Composition tests"
+      coverage: "PopupController reset, selected-backend queries, ordered load handoff, and post-capture refresh."
+    - method: "E2E tests"
+      coverage: "Popup and This Page states for neither, archive-only, screenshot-only, both, stale, and unsupported backends."

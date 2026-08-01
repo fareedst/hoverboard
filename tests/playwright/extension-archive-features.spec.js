@@ -60,6 +60,52 @@ async function seedArchiveState (page) {
   }, { archive, screenshot, archiveUrl })
 }
 
+async function seedStatusVariant (page, {
+  hasArchive = false,
+  hasScreenshot = false,
+  backend = 'local',
+  archiveStatus = archive.status
+} = {}) {
+  await page.evaluate(({ archive, screenshot, archiveUrl, hasArchive, hasScreenshot, backend, archiveStatus }) => {
+    return new Promise((resolve) => {
+      chrome.storage.local.set({
+        hoverboard_storage_mode: backend,
+        hoverboard_page_archives: {
+          version: 1,
+          archives: hasArchive ? { [archiveUrl]: { ...archive, status: archiveStatus } } : {},
+          screenshots: hasScreenshot ? { [screenshot.artifactId]: screenshot } : {}
+        },
+        hoverboard_local_bookmarks: backend === 'local'
+          ? {
+              [archiveUrl]: {
+                url: archiveUrl,
+                description: archive.title,
+                extended: '',
+                tags: [],
+                time: archive.capturedAt,
+                updated_at: archive.capturedAt,
+                shared: 'yes',
+                toread: 'no'
+              }
+            }
+          : {}
+      }, resolve)
+    })
+  }, { archive, screenshot, archiveUrl, hasArchive, hasScreenshot, backend, archiveStatus })
+}
+
+async function openStatusPopup (context, extensionId, options) {
+  const seedPage = await context.newPage()
+  await seedPage.goto(`chrome-extension://${extensionId}/src/ui/reader/reader.html`)
+  await seedStatusVariant(seedPage, options)
+  await seedPage.close()
+
+  const popup = await context.newPage()
+  await popup.goto(`chrome-extension://${extensionId}/src/ui/popup/popup.html?screenshot=1&url=${encodeURIComponent(archiveUrl)}&title=${encodeURIComponent(archive.title)}`)
+  await popup.locator('#mainInterface:not(.hidden)').waitFor({ state: 'visible', timeout: 15000 })
+  return popup
+}
+
 test.describe('[REQ-OFFLINE_READER_MODE] archive feature extension pages', () => {
   test('renders stored Reader content and screenshot without executing archived scripts', async ({ context }) => {
     const extensionId = await getExtensionId(context)
@@ -118,6 +164,74 @@ test.describe('[REQ-OFFLINE_READER_MODE] archive feature extension pages', () =>
 
     await popupPage.close()
     await contentPage.close()
+  })
+
+  test.describe('[REQ-PAGE_ARCHIVE_STATUS_UI] selected-backend artifact status controls', () => {
+    test('renders neither, archive-only, screenshot-only, and both states independently', async ({ context }) => {
+      const extensionId = await getExtensionId(context)
+      const cases = [
+        { name: 'neither', hasArchive: false, hasScreenshot: false, archiveSaved: 'false', screenshotSaved: 'false', readerDisabled: true },
+        { name: 'archive-only', hasArchive: true, hasScreenshot: false, archiveSaved: 'true', screenshotSaved: 'false', readerDisabled: false },
+        { name: 'screenshot-only', hasArchive: false, hasScreenshot: true, archiveSaved: 'false', screenshotSaved: 'true', readerDisabled: true },
+        { name: 'both', hasArchive: true, hasScreenshot: true, archiveSaved: 'true', screenshotSaved: 'true', readerDisabled: false }
+      ]
+
+      for (const statusCase of cases) {
+        const popup = await openStatusPopup(context, extensionId, statusCase)
+        await expect(popup.locator('#captureArchiveBtn')).toHaveAttribute('data-archive-saved', statusCase.archiveSaved)
+        await expect(popup.locator('#captureScreenshotBtn')).toHaveAttribute('data-screenshot-saved', statusCase.screenshotSaved)
+        if (statusCase.readerDisabled) {
+          await expect(popup.locator('#openReaderBtn')).toBeDisabled()
+        } else {
+          await expect(popup.locator('#openReaderBtn')).not.toBeDisabled()
+        }
+        await expect(popup.locator('#captureArchiveBtn')).not.toBeDisabled()
+        await expect(popup.locator('#captureScreenshotBtn')).not.toBeDisabled()
+        await popup.close()
+      }
+    })
+
+    test('fails closed for an unsupported selected backend', async ({ context }) => {
+      const extensionId = await getExtensionId(context)
+      const popup = await openStatusPopup(context, extensionId, { backend: 'sync' })
+      await expect(popup.locator('#captureArchiveBtn')).toHaveAttribute('data-archive-saved', 'false')
+      await expect(popup.locator('#captureScreenshotBtn')).toHaveAttribute('data-screenshot-saved', 'false')
+      await expect(popup.locator('#openReaderBtn')).toBeDisabled()
+      await expect(popup.locator('#archiveStatusDescription')).toContainText('unavailable')
+      await popup.close()
+    })
+
+    test('keeps a stale readable archive available to Offline Reader', async ({ context }) => {
+      const extensionId = await getExtensionId(context)
+      const popup = await openStatusPopup(context, extensionId, {
+        hasArchive: true,
+        archiveStatus: 'stale'
+      })
+      await expect(popup.locator('#captureArchiveBtn')).toHaveAttribute('data-archive-saved', 'true')
+      await expect(popup.locator('#openReaderBtn')).not.toBeDisabled()
+      await popup.close()
+    })
+
+    test('This Page exposes the same scoped status controls and accessible Reader explanation hook', async ({ context }) => {
+      const extensionId = await getExtensionId(context)
+      const sidePanel = await context.newPage()
+      await sidePanel.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+      const refs = await sidePanel.locator('#bookmarkPanel [data-popup-ref]').evaluateAll(elements => {
+        return elements
+          .map(element => element.getAttribute('data-popup-ref'))
+          .filter(value => ['captureArchiveBtn', 'captureScreenshotBtn', 'openReaderBtn', 'archiveStatusDescription'].includes(value))
+      })
+      expect(refs).toEqual(expect.arrayContaining([
+        'captureArchiveBtn',
+        'captureScreenshotBtn',
+        'openReaderBtn',
+        'archiveStatusDescription'
+      ]))
+      await expect(sidePanel.locator('#bookmarkPanel [data-popup-ref="archiveStatusDescription"]')).toHaveAttribute('aria-live', 'polite')
+      await expect(sidePanel.locator('#bookmarkPanel [data-popup-ref="captureArchiveBtn"]')).toHaveAttribute('data-archive-saved', 'false')
+      await expect(sidePanel.locator('#bookmarkPanel [data-popup-ref="captureScreenshotBtn"]')).toHaveAttribute('data-screenshot-saved', 'false')
+      await sidePanel.close()
+    })
   })
 })
 

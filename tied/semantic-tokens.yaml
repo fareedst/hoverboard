@@ -512,6 +512,16 @@ ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION:
   name: "Page Archive Bookmark Association Architecture"
   status: "Accepted"
   type: "ARCH"
+ARCH-PAGE_ARCHIVE_STATUS_UI:
+  cross_references:
+    - "IMPL-PAGE_ARCHIVE_STATUS_UI"
+    - "REQ-PAGE_ARCHIVE_STATUS_UI"
+  description: "Shared scoped UI and backend-explicit fail-closed artifact status architecture."
+  detail_file: "architecture-decisions/ARCH-PAGE_ARCHIVE_STATUS_UI.yaml"
+  name: "Page Archive Status UI Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Accepted"
+  type: "ARCH"
 ARCH-PAGE_ARCHIVE_STORAGE:
   cross_references:
     - "IMPL-PAGE_ARCHIVE_STORAGE"
@@ -1739,6 +1749,16 @@ IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION:
     - "REQ-PAGE_ARCHIVE_STORAGE"
   description: "Orchestrate selected-backend archive capture, bookmark preservation or minimal creation, and compensating cleanup."
   name: "Page Archive Bookmark Association"
+  status: "Active"
+  type: "IMPL"
+IMPL-PAGE_ARCHIVE_STATUS_UI:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STATUS_UI"
+    - "REQ-PAGE_ARCHIVE_STATUS_UI"
+  description: "Normalize and apply selected-backend archive artifact status across popup and This Page."
+  detail_file: "implementation-decisions/IMPL-PAGE_ARCHIVE_STATUS_UI.yaml"
+  name: "Page Archive Status UI Implementation"
+  source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
 IMPL-PAGE_ARCHIVE_STORAGE:
@@ -3204,6 +3224,16 @@ REQ-OVERLAY_SYSTEM:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Overlay System"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-PAGE_ARCHIVE_STATUS_UI:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STATUS_UI"
+    - "IMPL-PAGE_ARCHIVE_STATUS_UI"
+  description: "Selected-backend archive and screenshot saved-state indicators with fail-closed Offline Reader availability."
+  detail_file: "requirements/REQ-PAGE_ARCHIVE_STATUS_UI.yaml"
+  name: "Page Archive Status UI"
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"

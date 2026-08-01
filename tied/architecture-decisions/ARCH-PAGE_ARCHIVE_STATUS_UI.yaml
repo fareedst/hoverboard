@@ -1,0 +1,59 @@
+ARCH-PAGE_ARCHIVE_STATUS_UI:
+  constraints:
+    - "GET_PAGE_ARCHIVE stale status is still readable and counts as archiveSaved."
+    - "No Index or Options status UI."
+    - "Only local and file are archive-capable for this feature."
+    - "readerAvailable is derived only from archiveSaved."
+    - "Screenshot status requires a successful non-empty artifact result with an identity."
+  decision: "Use one pure status normalization contract and one shared UIManager application path. PopupController owns context reset, selected-backend status queries, and refresh orchestration; UIManager applies independent archive and screenshot saved-state hooks within the optional scoped root used by popup and This Page."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-01"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Finalize archive status UI architecture traceability"
+    last_validated:
+      date: "2026-08-01"
+      result: "pass: composition and archive extension E2E coverage, TIED consistency, lint, typecheck, and token validation"
+      validator: "AI Agent"
+  name: "Page Archive Status UI Architecture"
+  rationale:
+    alternatives_considered:
+      - name: "Infer saved state from capture feedback or bookmark metadata"
+        rejected_reason: "Feedback is transient and bookmark metadata does not prove an artifact exists in the selected backend."
+      - name: "Query all archive backends and aggregate the result"
+        rejected_reason: "Would leak status across Save to changes and violate the Local/File archive boundary."
+      - name: "Duplicate popup and side-panel status logic"
+        rejected_reason: "Scoped This Page already shares UIManager and duplication would allow surface drift."
+    consequences:
+      - "Capture buttons remain enabled so users can recapture existing artifacts."
+      - "HTML and CSS need stable status hooks in both markup variants."
+      - "Local/File status queries include backend on every request."
+      - "Unsupported backends and malformed responses disable Reader and remove saved indicators."
+    why: "Persisted artifact presence is backend-scoped state, not bookmark metadata and not an aggregate archive lookup. Keeping normalization separate from DOM mutation prevents malformed responses from becoming positive UI state."
+  related_decisions:
+    depends_on:
+      - "ARCH-OFFLINE_READER_MODE"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+      - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+      - "ARCH-SIDE_PANEL_TABS"
+    informs:
+      - "IMPL-PAGE_ARCHIVE_STATUS_UI"
+    see_also: []
+  status: "Accepted"
+  traceability:
+    code_annotations:
+      - "ARCH-PAGE_ARCHIVE_STATUS_UI"
+    implementation:
+      - "IMPL-PAGE_ARCHIVE_STATUS_UI"
+    requirements:
+      - "REQ-OFFLINE_READER_MODE"
+      - "REQ-PAGE_ARCHIVE_STATUS_UI"
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+      - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    tests:
+      - "tests/integration/popup-archive-status-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"

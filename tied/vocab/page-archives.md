@@ -25,9 +25,13 @@
 | **Offline Reader** | archive reader, offline page link | Standalone extension page rendering stored sanitized archive content without live-page fetch |
 | **Reader target** | archive link, offline page link | Extension URL that opens the stored archive in Offline Reader |
 | **Reader re-sanitization** | render trusted archive HTML | Defense-in-depth sanitization at the Reader render boundary |
+| **archive artifact status** | archive saved indicator | Selected-backend presence state for the readable archive and screenshot artifact legs |
+| **saved-state indicator** | saved button color | Non-command visual and accessible state for an archive capture action |
+| **Reader availability** | enabled Reader | Boolean derived strictly from readable archive presence; screenshot-only state does not enable Reader |
 | **screenshot artifact** | demo screenshot, page image | Durable product image with its own hash/version and Local/File lifecycle |
 | **screenshot presentation E2E** | screenshot capture E2E | E2E validation of seeded persisted screenshot rendering; capture binding is composition-tested |
 | **selected-backend lookup** | aggregate URL lookup | Bookmark existence query constrained to `preferredBackend`; it does not use aggregate 2C semantics |
+| **status context key** | cached status identity | URL/backend pair used to discard stale cross-tab or cross-backend status responses |
 
 ---
 
@@ -47,6 +51,9 @@
 | Reader target | Open stored archive | Reader extension URL | `readerTarget` | [REQ-ARCHIVED_CONTENT_SEARCH] |
 | Stale archive status | Archive status warning | `status: 'stale'` | `renderReaderArchive` | [IMPL-OFFLINE_READER_MODE] |
 | Reader re-sanitization | — | — | `sanitizeArchiveHtml` at render | [IMPL-OFFLINE_READER_MODE] |
+| Archive artifact status | Saved state | `GET_PAGE_ARCHIVE` / `GET_PAGE_SCREENSHOTS` with `backend` | `NORMALIZE_ARCHIVE_ARTIFACT_STATUS` / `APPLY_ARCHIVE_STATUS_UI` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| Saved-state indicator | Active capture action | `archiveSaved` / `screenshotSaved` | `APPLY_ARCHIVE_STATUS_UI` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| Reader availability | Open offline Reader | `readerAvailable = archiveSaved` | `APPLY_ARCHIVE_STATUS_UI` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
 | Screenshot artifact | Save page screenshot | archive `screenshots` collection | `PageScreenshotStore` / `SAVE_PAGE_SCREENSHOT` | [IMPL-PAGE_SCREENSHOT_ARCHIVE] |
 | Screenshot presentation E2E | — | seeded screenshot artifact | `extension-archive-features.spec.js` | [REQ-PAGE_SCREENSHOT_ARCHIVE] |
 | Screenshot capture boundary | — | `CAPTURE_PAGE_SCREENSHOT` | `captureProductScreenshot` | [ARCH-PAGE_SCREENSHOT_ARCHIVE] |
@@ -67,10 +74,14 @@
 - **Offline Reader** — Standalone extension surface that renders only stored sanitized content and exposes an explicit live URL action.
 - **Reader target** — URL returned with archive search results to open Offline Reader.
 - **Reader re-sanitization** — Defense-in-depth sanitization applied again immediately before inserting stored HTML into the Reader DOM.
+- **archive artifact status** — Selected-backend presence state for the readable archive and screenshot artifact legs on the current tab URL.
+- **saved-state indicator** — Non-command visual and accessibility state applied independently to the Save page archive and Save page screenshot actions.
+- **Reader availability** — Whether Open offline Reader is enabled; this is derived only from `archiveSaved`.
 - **screenshot artifact** — Separate binary image record with artifact ID, content hash, version, capture time, and storage backend.
 - **screenshot presentation E2E** — Browser-level validation of Reader presentation for a persisted screenshot fixture; popup capture is validated at unit/composition boundaries.
 - **capture source boundary** — The live service-worker scripting path supplies body HTML/text to the shared sanitization pipeline; the Readability document path remains a library/test boundary.
 - **selected-backend lookup** — Lookup through only the provider named by `preferredBackend`; any non-null stub counts as an existing bookmark.
+- **status context key** — Current URL/backend pair used to reject stale asynchronous status results.
 
 ---
 
@@ -94,6 +105,11 @@
 | Parse Reader query | `PARSE_READER_QUERY` | [IMPL-OFFLINE_READER_MODE] |
 | Load Reader archive | `LOAD_READER_ARCHIVE` | [IMPL-OFFLINE_READER_MODE] |
 | Render Reader state | `RENDER_READER_STATE` | [IMPL-OFFLINE_READER_MODE] |
+| Normalize archive artifact status | `NORMALIZE_ARCHIVE_ARTIFACT_STATUS` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| Query selected-backend artifact status | `QUERY_SELECTED_BACKEND_ARTIFACT_STATUS` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| Apply archive status UI | `APPLY_ARCHIVE_STATUS_UI` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| Refresh archive status after capture | `REFRESH_ARCHIVE_STATUS_AFTER_CAPTURE` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| Reset archive status on context change | `RESET_ARCHIVE_STATUS_ON_CONTEXT_CHANGE` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
 | Validate screenshot request | `VALIDATE_SCREENSHOT_REQUEST` | [IMPL-PAGE_SCREENSHOT_ARCHIVE] |
 | Capture page screenshot | `CAPTURE_PAGE_SCREENSHOT` | [IMPL-PAGE_SCREENSHOT_ARCHIVE] |
 | Save page screenshot | `SAVE_PAGE_SCREENSHOT` | [IMPL-PAGE_SCREENSHOT_ARCHIVE] |
@@ -110,6 +126,7 @@
 | archive privacy boundary | Preferred terms / Named concepts |
 | archive-capable backend | Preferred terms / Named concepts |
 | archive-bookmark association | Preferred terms / Named concepts |
+| archive artifact status | Preferred terms / Named concepts / Naming bridge |
 | archived-content scope | Preferred terms / Named concepts |
 | ARCHIVE_ASSOCIATION_RESULT_BOUNDARY | Pseudo-code block names |
 | ARCHIVE_PRIVACY_GATE | Pseudo-code block names |
@@ -130,12 +147,18 @@
 | REPLACE_ARCHIVED_CONTENT | Pseudo-code block names |
 | RENDER_READER_STATE | Pseudo-code block names |
 | Reader re-sanitization | Preferred terms / Named concepts |
+| RESET_ARCHIVE_STATUS_ON_CONTEXT_CHANGE | Pseudo-code block names |
 | RESOLVE_ARCHIVE_ADAPTER | Pseudo-code block names |
 | RESOLVE_ARCHIVE_BOOKMARK_CONTEXT | Pseudo-code block names |
+| QUERY_SELECTED_BACKEND_ARTIFACT_STATUS | Pseudo-code block names |
 | SAVE_PAGE_ARCHIVE | Pseudo-code block names |
 | SAVE_PAGE_SCREENSHOT | Pseudo-code block names |
+| saved-state indicator | Preferred terms / Named concepts / Naming bridge |
 | selected-backend lookup | Preferred terms / Named concepts |
 | screenshot artifact | Preferred terms / Named concepts |
 | screenshot presentation E2E | Preferred terms / Named concepts |
 | stale archive status | Preferred terms / Named concepts |
+| NORMALIZE_ARCHIVE_ARTIFACT_STATUS | Pseudo-code block names |
+| Reader availability | Preferred terms / Naming bridge / Named concepts |
+| status context key | Preferred terms / Named concepts |
 | VALIDATE_SCREENSHOT_REQUEST | Pseudo-code block names |

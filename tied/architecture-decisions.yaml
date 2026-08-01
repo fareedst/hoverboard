@@ -1816,6 +1816,17 @@ ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION:
   name: "Page Archive Bookmark Association Architecture"
   status: "Accepted"
   summary: "Associate each newly captured Local/File page archive with a selected-backend bookmark without merging archive artifacts into bookmark metadata."
+ARCH-PAGE_ARCHIVE_STATUS_UI:
+  cross_references:
+    - "REQ-OFFLINE_READER_MODE"
+    - "REQ-PAGE_ARCHIVE_STATUS_UI"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  detail_file: "architecture-decisions/ARCH-PAGE_ARCHIVE_STATUS_UI.yaml"
+  name: "Page Archive Status UI Architecture"
+  status: "Accepted"
+  summary: "Centralize selected-backend archive artifact status in shared popup/This Page UI, with explicit backend-scoped queries and fail-closed reader availability."
 ARCH-PAGE_ARCHIVE_STORAGE:
   cross_references:
     - "ARCH-FILE_BOOKMARK_PROVIDER"
