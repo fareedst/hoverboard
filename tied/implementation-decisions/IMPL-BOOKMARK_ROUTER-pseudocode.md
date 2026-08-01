@@ -158,3 +158,21 @@
   - 5. targetProvider.saveBookmark(bookmark)
   - 6. sourceProvider.deleteBookmark(url)
   - 7. storageIndex.setBackendForUrl(url, targetBackend)
+
+## GET_BOOKMARK_FOR_BACKEND
+
+- [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-PAGE_ARCHIVE_STORAGE] How: Query only the provider selected by the archive association request, normalize URL comparison, and treat every non-null record including a stub as existing.
+- Contract:
+  - INPUT: url, backend, optional title
+  - PRE: backend is one of pinboard|local|file|sync|browser; selected provider is wired
+  - OUTPUT: selected-backend bookmark | null
+  - POST:
+    - success => no other provider is queried and no aggregate 2C/storage-index choice is made
+  - FAILURE_MODES: InvalidBackend, ProviderQueryFailed
+  - EFFECTS: Async, IO
+  - TERMINATION: total
+- PROCEDURE: GET_BOOKMARK_FOR_BACKEND
+  - 1. IF backend is invalid: RETURN null
+  - 2. provider = providerMap[backend]
+  - 3. IF provider.getAllBookmarks exists: records = AWAIT provider.getAllBookmarks(); RETURN first record whose normalized URL equals normalized input
+  - 4. ELSE: RETURN provider.getBookmarkForUrl(url, title) OR null

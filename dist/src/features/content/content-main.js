@@ -22107,7 +22107,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   // node_modules/@mozilla/readability/Readability.js
   var require_Readability = __commonJS({
     "node_modules/@mozilla/readability/Readability.js"(exports2, module) {
-      function Readability2(doc, options) {
+      function Readability3(doc, options) {
         if (options && options.documentElement) {
           doc = options;
           options = arguments[2];
@@ -22172,7 +22172,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           };
         }
       }
-      Readability2.prototype = {
+      Readability3.prototype = {
         FLAG_STRIP_UNLIKELYS: 1,
         FLAG_WEIGHT_CLASSES: 2,
         FLAG_CLEAN_CONDITIONALLY: 4,
@@ -24085,7 +24085,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
       };
       if (typeof module === "object") {
-        module.exports = Readability2;
+        module.exports = Readability3;
       }
     }
   });
@@ -24154,10 +24154,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   // node_modules/@mozilla/readability/index.js
   var require_readability = __commonJS({
     "node_modules/@mozilla/readability/index.js"(exports2, module) {
-      var Readability2 = require_Readability();
+      var Readability3 = require_Readability();
       var isProbablyReaderable = require_Readability_readerable();
       module.exports = {
-        Readability: Readability2,
+        Readability: Readability3,
         isProbablyReaderable
       };
     }
@@ -27391,6 +27391,26 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     url: external_exports.string().optional().nullable()
   }).strict().optional();
 
+  // src/features/archive/page-capture.js
+  var import_readability = __toESM(require_readability(), 1);
+  var DEFAULT_ARCHIVE_LIMITS = Object.freeze({
+    maxTextLength: 2e5,
+    maxHtmlLength: 5e5
+  });
+
+  // src/features/archive/page-archive-store.js
+  var ARCHIVE_BACKENDS = Object.freeze(["local", "file"]);
+
+  // src/features/archive/page-archive-bookmark-association.js
+  init_utils();
+
+  // src/features/archive/page-screenshot-capture.js
+  var DEFAULT_SCREENSHOT_LIMITS = Object.freeze({
+    maxBytes: 8 * 1024 * 1024,
+    maxWidth: 4096,
+    maxHeight: 2e4
+  });
+
   // src/core/message-handler.js
   var MESSAGE_TYPES = {
     // Data retrieval
@@ -27459,6 +27479,16 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     ECHO: "echo",
     // [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] AI tagging
     GET_PAGE_CONTENT: "GET_PAGE_CONTENT",
+    // [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+    CAPTURE_PAGE_ARCHIVE: "CAPTURE_PAGE_ARCHIVE",
+    GET_PAGE_ARCHIVE: "GET_PAGE_ARCHIVE",
+    DELETE_PAGE_ARCHIVE: "DELETE_PAGE_ARCHIVE",
+    // [REQ-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [IMPL-ARCHIVED_CONTENT_SEARCH]
+    SEARCH_ARCHIVED_CONTENT: "SEARCH_ARCHIVED_CONTENT",
+    // [REQ-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [IMPL-PAGE_SCREENSHOT_ARCHIVE]
+    CAPTURE_PAGE_SCREENSHOT: "CAPTURE_PAGE_SCREENSHOT",
+    GET_PAGE_SCREENSHOTS: "GET_PAGE_SCREENSHOTS",
+    DELETE_PAGE_SCREENSHOTS: "DELETE_PAGE_SCREENSHOTS",
     GET_AI_TAGS: "GET_AI_TAGS",
     GET_SESSION_TAGS: "getSessionTags",
     RECORD_SESSION_TAGS: "recordSessionTags",
@@ -27476,7 +27506,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   };
 
   // src/features/ai/readability-extract.js
-  var import_readability = __toESM(require_readability(), 1);
+  var import_readability2 = __toESM(require_readability(), 1);
   var DEFAULT_MAX_LENGTH = 16e3;
   function extractPageContent(document2, options = {}) {
     const maxLength = options.maxLength ?? DEFAULT_MAX_LENGTH;
@@ -27487,7 +27517,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     let textContent = "";
     try {
       const clone2 = document2.cloneNode(true);
-      const reader = new import_readability.Readability(clone2);
+      const reader = new import_readability2.Readability(clone2);
       const article = reader.parse();
       if (article) {
         title = article.title && String(article.title).trim() || document2.title && String(document2.title).trim() || "";
@@ -27564,7 +27594,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         /** @type {{ success?: unknown, data?: unknown }} */
         response
       );
-      return envelope.success ? envelope.data : envelope;
+      if (!envelope.success) return envelope;
+      return envelope.data !== void 0 ? envelope.data : envelope;
     }
     return response;
   }

@@ -1,0 +1,89 @@
+IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION:
+  code_locations:
+    files:
+      - path: "src/features/archive/page-archive-bookmark-association.js"
+        description: "Selected-backend archive capture and bookmark association orchestrator"
+      - path: "src/core/message-handler.js"
+        description: "CAPTURE_PAGE_ARCHIVE request validation and orchestration boundary"
+      - path: "src/core/service-worker.js"
+        description: "Archive message routing and dependency wiring"
+      - path: "src/features/storage/bookmark-router.js"
+        description: "Narrow selected-backend bookmark lookup without changing aggregate semantics"
+      - path: "src/ui/popup/PopupController.js"
+        description: "preferredBackend request and archive/bookmark result feedback"
+      - path: "src/ui/popup/UIManager.js"
+        description: "Shared archive association action feedback"
+    functions:
+      - name: "captureArchiveAndAssociateBookmark"
+        description: "Capture, persist, preserve/create selected-backend bookmark, and compensate failures"
+        file: "src/features/archive/page-archive-bookmark-association.js"
+      - name: "getBookmarkForBackend"
+        description: "Lookup a bookmark only through the explicitly selected backend"
+        file: "src/features/storage/bookmark-router.js"
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION-pseudocode.md"
+  implementation_approach:
+    details:
+      - "Capture and persist the archive before creating a missing selected-backend bookmark."
+      - "Compensate bookmark-save failure by restoring the prior archive or removing only the new archive, exposing cleanup diagnostics."
+      - "Resolve selected-backend ownership with BookmarkRouter.getBookmarkForBackend; aggregate 2C lookup remains unchanged."
+      - "Return one stable association response boundary for message and UI callers."
+      - "Treat a non-null stub as existing and preserve its metadata."
+    summary: "Use an injected orchestrator so selected-backend lookup, capture, archive persistence, bookmark save, clock, and compensation are independently testable."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-01"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Correct nullable bookmark precondition and compensation contract"
+  name: "Page Archive Bookmark Association"
+  rationale:
+    benefits:
+      - "Deterministic backend ownership."
+      - "Explicit partial-failure diagnostics."
+      - "Idempotent recapture and metadata preservation."
+    problems_solved:
+      - "Aggregate URL lookup could suppress creation in the selected backend."
+      - "Archives previously had no bookmark creation or association result boundary."
+    why: "Bind archive ownership to the user-selected metadata backend without changing generic bookmark routing or embedding archive data."
+  related_decisions:
+    composed_with:
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+      - "IMPL-SIDE_PANEL_BOOKMARK"
+    depends_on:
+      - "IMPL-BOOKMARK_CREATE_UPDATE_TIMES"
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-DOM_UTILITIES"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    see_also:
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+      - "IMPL-OFFLINE_READER_MODE"
+    supersedes: []
+  status: "Active"
+  summary: "Orchestrate selected-backend archive capture, bookmark preservation or minimal creation, and compensating cleanup."
+  testability: "unit-and-composition"
+  traceability:
+    architecture:
+      - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+    code_annotations:
+      - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    requirements:
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+    tests:
+      - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
+      - "tests/integration/popup-archive-actions-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-archive-bookmark-association.test.js"
+      - "tests/unit/page-archive-store.test.js"
+      - "tests/unit/popup-archive-response.test.js"

@@ -207,6 +207,25 @@ body {
   margin-bottom: var(--spacing-lg);
 }
 
+/* Inline action feedback (archive/screenshot success, etc.) */
+.action-feedback {
+  margin: var(--spacing-sm) var(--spacing-lg) 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 6px;
+  text-align: center;
+  font-size: var(--font-size-sm);
+}
+
+.action-feedback p {
+  margin: 0;
+}
+
+.action-feedback.success {
+  background-color: rgba(76, 175, 80, 0.12);
+  color: #2e7d32;
+  border: 1px solid rgba(76, 175, 80, 0.35);
+}
+
 /* Main interface */
 .main-interface {
   padding: var(--spacing-lg);
@@ -276,9 +295,11 @@ section:last-child {
 }
 
 /* Quick actions */
+/* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BOOKMARK] Keep every Quick Action reachable when the side panel is narrower than the popup. */
 .action-grid {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   gap: var(--spacing-sm);
 }
 

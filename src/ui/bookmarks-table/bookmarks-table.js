@@ -846,6 +846,115 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
  */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-ARCHIVED_CONTENT_SEARCH ===
+ * Search extracted text from Local/File archives without changing metadata search.
+ *
+ * ## REPLACE_ARCHIVED_CONTENT
+ * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: synchronize one extracted-text entry with successful archive capture and remove it when text is empty.
+ * - Contract:
+ *   - INPUT: url, archive entry
+ *   - PRE: url is normalizable; entry may be absent or have empty text
+ *   - OUTPUT: none
+ *   - POST:
+ *     - non-empty entry => normalized URL maps to one normalized search entry
+ *     - missing/empty entry => normalized URL is absent from the index
+ *   - DATA: ArchiveTextIndex
+ *   - DATA_TRANSITION: replace updates one URL; empty input removes one URL
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: REPLACE_ARCHIVED_CONTENT
+ *   - IF entry is missing or text is empty: REMOVE_ARCHIVED_CONTENT(url); RETURN
+ *   - index[normalize(url)] = normalizeEntry(entry)
+ *
+ * ## REMOVE_ARCHIVED_CONTENT
+ * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: remove derived search state when an archive is deleted or compensation removes the current archive.
+ * - Contract:
+ *   - INPUT: url
+ *   - PRE: url is normalizable
+ *   - OUTPUT: none
+ *   - POST: normalized URL is absent from ArchiveTextIndex
+ *   - DATA: ArchiveTextIndex
+ *   - DATA_TRANSITION: one normalized URL is deleted
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: REMOVE_ARCHIVED_CONTENT
+ *   - DELETE index[normalize(url)]
+ *
+ * ## QUERY_ARCHIVED_CONTENT
+ * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: return bounded deterministic snippets for explicit non-empty archive-content queries without mutating metadata or the index.
+ * - Contract:
+ *   - INPUT: query (string), ArchiveTextIndex
+ *   - PRE: index entries came from successful archive captures
+ *   - OUTPUT: list of { url, title, snippet, archiveStatus, readerTarget }
+ *   - POST:
+ *     - success => each result has a bounded snippet and deterministic order
+ *     - empty query => empty list; index remains unchanged
+ *   - DATA: ArchiveTextIndex
+ *   - DATA_TRANSITION: query is read-only
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: QUERY_ARCHIVED_CONTENT
+ *   - needle = normalizeQuery(query)
+ *   - IF needle is empty: RETURN []
+ *   - results = []
+ *   - FOR each entry IN index:
+ *     - position = findCaseInsensitive(entry.text, needle)
+ *     - IF position >= 0: append result with bounded snippet and Reader target
+ *   - SORT results BY position ASCENDING, capturedAt DESCENDING, url ASCENDING
+ *   - RETURN results
+ *
+ * ## APPLY_ARCHIVE_CONTENT_SCOPE
+ * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: keep archive browse/search independent from metadata filtering and rebuild derived entries from persisted artifacts before reading.
+ * - Contract:
+ *   - INPUT: scope ('metadata' | 'archive'), query, archiveStore, archiveSearch
+ *   - PRE: scope is explicit; archiveStore and archiveSearch are available
+ *   - OUTPUT: metadata filter result | archive result list
+ *   - POST:
+ *     - metadata scope => archive text is not queried
+ *     - archive scope => metadata rows and metadata actions are not mutated
+ *     - empty archive query => deterministic browse rows
+ *   - FAILURE_MODES: StorageFailed, SearchFailed
+ *   - DATA: persisted archives, ArchiveTextIndex, metadata rows
+ *   - DATA_TRANSITION: archive scope rebuilds derived entries; metadata state remains unchanged
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_ARCHIVE_CONTENT_SCOPE
+ *   - IF scope is not archive: RETURN APPLY_METADATA_SEARCH(query)
+ *   - archives = AWAIT archiveStore.listArchives()
+ *   - AWAIT archiveSearch.seed(archives)
+ *   - IF normalizeQuery(query) is empty: RETURN BROWSE_ARCHIVED_CONTENT(archives, archiveSearch)
+ *   - RETURN QUERY_ARCHIVED_CONTENT(query)
+ *
+ * ## BROWSE_ARCHIVED_CONTENT
+ * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: map persisted archives to deterministic browse rows with bounded snippets and extension-resolvable Reader targets.
+ * - Contract:
+ *   - INPUT: persisted archive list, archiveSearch
+ *   - PRE: archiveSearch is available; each archive has a URL or is discarded
+ *   - OUTPUT: deterministic rows with title, snippet, status, storage, capturedAt, readerTarget
+ *   - POST: each readerTarget resolves to the extension Reader page
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: BROWSE_ARCHIVED_CONTENT
+ *   - rows = archiveSearch.browseArchivedContent(archives)
+ *   - FOR each row IN rows:
+ *     - row.readerTarget = extensionRuntimeUrl('src/ui/reader/reader.html', { url: row.url })
+ *   - RETURN rows
+ *
+ * ## OPEN_READER_FROM_ARCHIVE_RESULT
+ * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: open a stored archive result in Offline Reader rather than the live page.
+ * - Contract:
+ *   - INPUT: archive search result with readerTarget
+ *   - PRE: readerTarget is non-empty and generated by BROWSE_ARCHIVED_CONTENT or QUERY_ARCHIVED_CONTENT
+ *   - OUTPUT: extension navigation target
+ *   - POST: target opens Reader with URL/archiveId query and performs no live-page fetch
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: OPEN_READER_FROM_ARCHIVE_RESULT
+ *   - RETURN result.readerTarget
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-ARCHIVED_CONTENT_SEARCH ===
+ */
 import { initToolPageVersion } from '../styles/tool-page-version.js'
 import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
@@ -855,6 +964,8 @@ import { runBulkDelete } from './bookmarks-table-bulk-delete.js'
 import { prefillSearchFromQuery } from './bookmarks-table-library-search.js'
 import { runCheckLinkHealth, formatHealthCellLabel } from './bookmarks-table-link-health.js'
 import { runRefreshApiSnapshot } from './bookmarks-table-api-snapshot.js'
+import { buildArchiveSearchMessage, mapArchiveSearchResults } from './bookmarks-table-archive-search.js'
+import { isArchiveScopeValue } from './bookmarks-table-archive-scope.js'
 import { createControlTabState, selectControlGroup } from './bookmarks-table-controls.js'
 import { filterBookmarksByHealth, isLinkHealthChecksEnabled, applyLinkHealthControlsGate } from '../../shared/link-health.js'
 import {
@@ -878,6 +989,8 @@ let sortAsc = false
 let timeColumnSource = 'updated_at'
 /** [REQ-LOCAL_BOOKMARKS_INDEX] Time column display: 'absolute' (YYYY-MM-DD HH:mm:ss) or 'age' (e.g. N days O hours). Default: age at page load. */
 let timeDisplayMode = 'age'
+/** [REQ-ARCHIVED_CONTENT_SEARCH] Explicit search scope; metadata remains the default. */
+let archiveSearchRequestId = 0
 /** [REQ-LOCAL_BOOKMARKS_INDEX] Selected bookmark URLs for bulk operations (e.g. move to storage). */
 const selectedUrls = new Set()
 /** [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] url -> health record */
@@ -885,8 +998,13 @@ let linkHealthMap = {}
 /** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Independent active head/footer control groups. */
 let controlTabState = createControlTabState()
 
+function isArchiveScope () {
+  return isArchiveScopeValue(elements.searchScope?.value)
+}
+
 const elements = {
   searchInput: document.getElementById('search-input'),
+  searchScope: document.getElementById('search-scope'),
   searchClear: document.getElementById('search-clear'),
   storeLocal: document.getElementById('store-local'),
   storeFile: document.getElementById('store-file'),
@@ -1007,6 +1125,11 @@ function matchExcludeTags (bookmark) {
 }
 
 function applySearchAndFilter () {
+  // [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] APPLY_ARCHIVE_CONTENT_SCOPE keeps archive browse/search independent from metadata filtering.
+  if (isArchiveScope()) {
+    loadArchiveSearchResults(elements.searchInput?.value || '')
+    return
+  }
   const allowedStores = getAllowedStores()
   let list = allBookmarks.filter(b => matchStoresFilter(b, allowedStores))
   const q = elements.searchInput.value.trim()
@@ -1020,6 +1143,33 @@ function applySearchAndFilter () {
   updateRowCount()
   toggleEmptyState()
   updateExportButtonState()
+}
+
+/**
+ * [REQ-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [IMPL-ARCHIVED_CONTENT_SEARCH]
+ * APPLY_ARCHIVE_CONTENT_SCOPE: query only extracted archive text and map bounded results into the existing table renderer.
+ */
+async function loadArchiveSearchResults (query) {
+  const requestId = ++archiveSearchRequestId
+  try {
+    const response = await chrome.runtime.sendMessage(buildArchiveSearchMessage(query))
+    if (requestId !== archiveSearchRequestId) return
+    const results = Array.isArray(response?.results)
+      ? response.results
+      : (Array.isArray(response?.data?.results) ? response.data.results : [])
+    filteredBookmarks = mapArchiveSearchResults(results)
+    renderTableBody()
+    updateRowCount()
+    toggleEmptyState()
+    updateMoveControlsState()
+  } catch (error) {
+    console.warn('[IMPL-ARCHIVED_CONTENT_SEARCH] archive query failed:', error)
+    filteredBookmarks = []
+    renderTableBody()
+    updateRowCount()
+    toggleEmptyState()
+    updateMoveControlsState()
+  }
 }
 
 function compare (a, b) {
@@ -1065,11 +1215,18 @@ function sortTable () {
 
 function renderTableBody () {
   elements.tableBody.innerHTML = ''
+  const archiveScope = isArchiveScope()
   for (const b of filteredBookmarks) {
     const tr = document.createElement('tr')
     const url = b.url || ''
-    const checked = selectedUrls.has(url) ? ' checked' : ''
+    const checked = !archiveScope && selectedUrls.has(url) ? ' checked' : ''
     const title = escapeHtml(b.description || '(no title)')
+    const archiveTitle = b.readerTarget
+      ? `<a href="${escapeHtml(b.readerTarget)}" class="archive-reader-link" title="Open stored archive">${title}</a>`
+      : title
+    const archiveSnippet = b.archiveSnippet
+      ? `<div class="archive-snippet">${escapeHtml(b.archiveSnippet)}</div>`
+      : ''
     const urlEsc = escapeHtml(url)
     const tagsStr = Array.isArray(b.tags) ? b.tags.join(', ') : String(b.tags || '')
     const tagsEsc = escapeHtml(tagsStr)
@@ -1097,8 +1254,8 @@ function renderTableBody () {
       ? `<a href="${escapeHtml(b.url)}" target="_blank" rel="noopener" class="url-link" title="Opens in new tab">${urlEsc}<span class="url-external-icon" aria-hidden="true">↗</span></a>`
       : urlEsc
     tr.innerHTML = `
-      <td class="col-select"><label><input type="checkbox" class="row-select" data-url="${escapeHtml(url)}" aria-label="Select bookmark"${checked}></label></td>
-      <td class="col-title">${title}</td>
+      <td class="col-select">${archiveScope ? '' : `<label><input type="checkbox" class="row-select" data-url="${escapeHtml(url)}" aria-label="Select bookmark"${checked}></label>`}</td>
+      <td class="col-title">${archiveTitle}${archiveSnippet}</td>
       <td class="col-url">${urlLink}</td>
       <td class="col-tags">${tagsEsc}</td>
       <td class="col-time">${time}</td>
@@ -1116,6 +1273,7 @@ function renderTableBody () {
 
 /** [REQ-LOCAL_BOOKMARKS_INDEX] Toggle selection for one row; call after checkbox change. */
 function onRowSelectChange (url, checked) {
+  if (isArchiveScope()) return
   if (checked) selectedUrls.add(url)
   else selectedUrls.delete(url)
   updateMoveControlsState()
@@ -1124,6 +1282,12 @@ function onRowSelectChange (url, checked) {
 /** [REQ-LOCAL_BOOKMARKS_INDEX] Update header "select all" checkbox to reflect current visible selection. */
 function updateSelectAllState () {
   if (!elements.selectAll) return
+  if (isArchiveScope()) {
+    elements.selectAll.checked = false
+    elements.selectAll.indeterminate = false
+    elements.selectAll.disabled = true
+    return
+  }
   const visible = filteredBookmarks.map(b => b.url).filter(Boolean)
   const none = visible.length === 0
   const allSelected = !none && visible.every(u => selectedUrls.has(u))
@@ -1135,7 +1299,7 @@ function updateSelectAllState () {
 
 /** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Enable/disable move, delete, add-tags, and regex-replace controls based on selection. [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] */
 function updateMoveControlsState () {
-  const hasSelection = selectedUrls.size > 0
+  const hasSelection = !isArchiveScope() && selectedUrls.size > 0
   if (elements.moveTargetSelect) elements.moveTargetSelect.disabled = !hasSelection
   if (elements.moveButton) elements.moveButton.disabled = !hasSelection
   if (elements.deleteSelectedBtn) elements.deleteSelectedBtn.disabled = !hasSelection
@@ -1152,6 +1316,7 @@ function updateMoveControlsState () {
  * Uses existing moveBookmarkToStorage message per URL; then refreshes table and clears selection.
  */
 async function moveSelectedToStorage () {
+  if (isArchiveScope()) return
   const target = elements.moveTargetSelect && elements.moveTargetSelect.value
   if (!target || selectedUrls.size === 0) return
   const urls = Array.from(selectedUrls)
@@ -1180,6 +1345,7 @@ async function moveSelectedToStorage () {
  * Sends preferredBackend from row Storage column so File/Sync imports delete from the correct provider.
  */
 async function deleteSelectedBookmarks () {
+  if (isArchiveScope()) return
   if (selectedUrls.size === 0) return
   const urls = Array.from(selectedUrls)
   const byUrl = new Map(filteredBookmarks.filter(b => b.url).map(b => [b.url, b]))
@@ -1203,6 +1369,7 @@ async function deleteSelectedBookmarks () {
  * Add parsed tags from input to all selected bookmarks; merge with existing (case-insensitive dedupe); save via saveBookmark with preferredBackend; refresh; retain selection for still-visible rows.
  */
 async function addTagsToSelected () {
+  if (isArchiveScope()) return
   const newTags = parseTagsInput(elements.addTagsInput && elements.addTagsInput.value)
   if (newTags.length === 0) return
   if (selectedUrls.size === 0) return
@@ -1242,6 +1409,7 @@ async function addTagsToSelected () {
  * Remove parsed tags from input from all selected bookmarks; save via saveBookmark with reduced tags and preferredBackend; refresh; retain selection for still-visible rows.
  */
 async function deleteTagsFromSelected () {
+  if (isArchiveScope()) return
   const tagsToRemove = parseTagsInput(elements.addTagsInput && elements.addTagsInput.value)
   if (tagsToRemove.length === 0) return
   if (selectedUrls.size === 0) return
@@ -1281,6 +1449,7 @@ async function deleteTagsFromSelected () {
  * Run regex find-and-replace on selected bookmarks for checked fields (Title, URL, Tags, Notes); save via saveBookmark; refresh; retain selection for still-visible rows.
  */
 async function regexReplaceSelected () {
+  if (isArchiveScope()) return
   const patternStr = elements.regexReplaceInput && (elements.regexReplaceInput.value || '').trim()
   if (!patternStr || selectedUrls.size === 0) return
   const replacementStr = elements.regexReplacementInput ? (elements.regexReplacementInput.value || '') : ''
@@ -1355,6 +1524,19 @@ function updateRowCount () {
 
 /** [IMPL-LOCAL_BOOKMARKS_INDEX] Empty state: when no store checked show "Select at least one store…"; when no data show default message. */
 function toggleEmptyState () {
+  const isArchiveScope = elements.searchScope?.value === 'archive'
+  if (isArchiveScope) {
+    const showEmpty = filteredBookmarks.length === 0
+    if (elements.emptyStateMessage) {
+      elements.emptyStateMessage.textContent = showEmpty
+        ? 'No saved page archives yet. Use Save page archive on a Local or File page, then return here with search scope Archived content.'
+        : elements.emptyStateMessage.textContent
+    }
+    elements.emptyState.classList.toggle('hidden', !showEmpty)
+    elements.tableWrapper.classList.toggle('hidden', showEmpty)
+    syncStickyTableHeaderOffset()
+    return
+  }
   const noStoreChecked = getAllowedStores().size === 0
   const noData = allBookmarks.length === 0
   const showEmpty = noStoreChecked || noData
@@ -1366,6 +1548,15 @@ function toggleEmptyState () {
   elements.emptyState.classList.toggle('hidden', !showEmpty)
   elements.tableWrapper.classList.toggle('hidden', showEmpty)
   syncStickyTableHeaderOffset()
+}
+
+function updateSearchScopeUi () {
+  const isArchiveScope = elements.searchScope?.value === 'archive'
+  if (elements.searchInput) {
+    elements.searchInput.placeholder = isArchiveScope
+      ? 'Filter archived pages (leave empty to list all)…'
+      : 'Search title, URL, tags, notes…'
+  }
 }
 
 function setSort (key) {
@@ -1411,6 +1602,7 @@ function downloadBlob (blob, filename) {
  * Export bookmarks to CSV. scope: 'all' | 'displayed' | 'selected'.
  */
 function exportBookmarks (scope) {
+  if (isArchiveScope()) return
   let list
   if (scope === 'all') list = allBookmarks
   else if (scope === 'displayed') list = filteredBookmarks
@@ -1429,6 +1621,12 @@ function exportBookmarks (scope) {
  * Enable/disable export buttons; Export selected enabled only when at least one bookmark is selected.
  */
 function updateExportButtonState () {
+  if (isArchiveScope()) {
+    if (elements.exportAll) elements.exportAll.disabled = true
+    if (elements.exportDisplayed) elements.exportDisplayed.disabled = true
+    if (elements.exportSelected) elements.exportSelected.disabled = true
+    return
+  }
   if (elements.exportAll) elements.exportAll.disabled = allBookmarks.length === 0
   if (elements.exportDisplayed) elements.exportDisplayed.disabled = filteredBookmarks.length === 0
   if (elements.exportSelected) elements.exportSelected.disabled = selectedUrls.size === 0
@@ -1655,6 +1853,11 @@ function init () {
   initToolPageVersion()
   initControlTabs()
   elements.searchInput.addEventListener('input', applySearchAndFilter)
+  elements.searchScope?.addEventListener('change', () => {
+    if (isArchiveScope()) selectedUrls.clear()
+    updateSearchScopeUi()
+    applySearchAndFilter()
+  })
   elements.searchClear.addEventListener('click', () => {
     elements.searchInput.value = ''
     applySearchAndFilter()
@@ -1812,6 +2015,7 @@ function init () {
 
   loadBookmarks()
   updateMoveControlsState()
+  updateSearchScopeUi()
 }
 
 init()

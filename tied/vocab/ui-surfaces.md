@@ -4,7 +4,7 @@
 
 **Excludes:** Side-panel tab interiors (see [`side-panel.md`](side-panel.md)); Options site-management and AI keys (see [`config-and-privacy.md`](config-and-privacy.md)); pin field semantics (see [`bookmarks.md`](bookmarks.md)).
 
-**Traceability:** [REQ-OVERLAY_SYSTEM](../requirements/REQ-OVERLAY_SYSTEM.yaml) · [REQ-OVERLAY_AUTO_SHOW_CONTROL](../requirements/REQ-OVERLAY_AUTO_SHOW_CONTROL.yaml) · [REQ-OVERLAY_CONTROL_LAYOUT](../requirements/REQ-OVERLAY_CONTROL_LAYOUT.yaml) · [REQ-OVERLAY_REFRESH_ACTION](../requirements/REQ-OVERLAY_REFRESH_ACTION.yaml) · [REQ-POPUP_PERSISTENT_SESSION](../requirements/REQ-POPUP_PERSISTENT_SESSION.yaml) · [REQ-DARK_THEME](../requirements/REQ-DARK_THEME.yaml) · [REQ-BADGE_INDICATORS](../requirements/REQ-BADGE_INDICATORS.yaml) · [REQ-QUICK_ACCESS_ENTRY](../requirements/REQ-QUICK_ACCESS_ENTRY.yaml) · [REQ-ICON_CLICK_BEHAVIOR](../requirements/REQ-ICON_CLICK_BEHAVIOR.yaml) · [ARCH-OVERLAY](../architecture-decisions/ARCH-OVERLAY.yaml) · [ARCH-POPUP_SESSION](../architecture-decisions/ARCH-POPUP_SESSION.yaml) · [ARCH-THEME](../architecture-decisions/ARCH-THEME.yaml) · [ARCH-QUICK_ACCESS_ENTRY](../architecture-decisions/ARCH-QUICK_ACCESS_ENTRY.yaml) · [IMPL-OVERLAY](../implementation-decisions/IMPL-OVERLAY.yaml) · [IMPL-POPUP_SESSION](../implementation-decisions/IMPL-POPUP_SESSION.yaml) · [IMPL-THEME](../implementation-decisions/IMPL-THEME.yaml) · [IMPL-ICON_CLICK_BEHAVIOR](../implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml) · [IMPL-UI_ACTION_CONTRACT](../implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml)
+**Traceability:** [REQ-OVERLAY_SYSTEM](../requirements/REQ-OVERLAY_SYSTEM.yaml) · [REQ-OVERLAY_AUTO_SHOW_CONTROL](../requirements/REQ-OVERLAY_AUTO_SHOW_CONTROL.yaml) · [REQ-OVERLAY_CONTROL_LAYOUT](../requirements/REQ-OVERLAY_CONTROL_LAYOUT.yaml) · [REQ-OVERLAY_REFRESH_ACTION](../requirements/REQ-OVERLAY_REFRESH_ACTION.yaml) · [REQ-POPUP_PERSISTENT_SESSION](../requirements/REQ-POPUP_PERSISTENT_SESSION.yaml) · [REQ-DARK_THEME](../requirements/REQ-DARK_THEME.yaml) · [REQ-BADGE_INDICATORS](../requirements/REQ-BADGE_INDICATORS.yaml) · [REQ-QUICK_ACCESS_ENTRY](../requirements/REQ-QUICK_ACCESS_ENTRY.yaml) · [REQ-ICON_CLICK_BEHAVIOR](../requirements/REQ-ICON_CLICK_BEHAVIOR.yaml) · [REQ-PAGE_ARCHIVE_STORAGE](../requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml) · [ARCH-OVERLAY](../architecture-decisions/ARCH-OVERLAY.yaml) · [ARCH-POPUP_SESSION](../architecture-decisions/ARCH-POPUP_SESSION.yaml) · [ARCH-THEME](../architecture-decisions/ARCH-THEME.yaml) · [ARCH-QUICK_ACCESS_ENTRY](../architecture-decisions/ARCH-QUICK_ACCESS_ENTRY.yaml) · [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION](../architecture-decisions/ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml) · [IMPL-OVERLAY](../implementation-decisions/IMPL-OVERLAY.yaml) · [IMPL-POPUP_SESSION](../implementation-decisions/IMPL-POPUP_SESSION.yaml) · [IMPL-THEME](../implementation-decisions/IMPL-THEME.yaml) · [IMPL-ICON_CLICK_BEHAVIOR](../implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml) · [IMPL-UI_ACTION_CONTRACT](../implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml) · [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION](../implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml)
 
 **See also:** [`side-panel.md`](side-panel.md) · [`bookmarks.md`](bookmarks.md) · [`tags.md`](tags.md) · [`ipc-messaging.md`](ipc-messaging.md) · [`config-and-privacy.md`](config-and-privacy.md) · [`domain-references.md`](domain-references.md)
 
@@ -33,6 +33,10 @@
 | **Search Bookmarks** | library search, search library | Capture UI control opening Local Bookmarks Index with `?q=`; **not** Search tabs (`search` / `SEARCH_TABS`) — [REQ-LIBRARY_SEARCH_ENTRY] |
 | **Title/Notes Details** | details section | Popup/This Page Title (`description`) + Notes (`extended`) editors — [REQ-BOOKMARK_NOTES_UI] |
 | **link health hint** | health status line | Compact This Page/popup “Health: …” from stored map when **linkHealthChecksEnabled** — [REQ-LINK_HEALTH] |
+| **Offline Reader** | archive reader | Dedicated extension page rendering stored sanitized archive content |
+| **Save page archive** | archive capture | Explicit Quick Action for Local/File readable archive capture |
+| **archive association feedback** | archive result message | Popup/This Page feedback distinguishing “archive saved” from “bookmark and archive saved” |
+| **Save page screenshot** | screenshot capture | Explicit Quick Action for separate Local/File product screenshot capture |
 
 ---
 
@@ -56,6 +60,10 @@
 | linkHealthChecksEnabled | Enable link health checks | `linkHealthChecksEnabled` | — | ConfigManager / Options |
 | link health hint | (Details help text) | — | `GET_LINK_HEALTH` | `formatLinkHealthHint` / `refreshLinkHealthHint` |
 | Open import | Browser bookmark import | — | `openBrowserBookmarkImport` | chrome.tabs.create |
+| Save page archive | Save page archive | — | `capturePageArchive` → `CAPTURE_PAGE_ARCHIVE` | PopupController |
+| Archive association feedback | archive saved / bookmark and archive saved | — | `CAPTURE_PAGE_ARCHIVE` result | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
+| Open Offline Reader | Open offline Reader | — | `openOfflineReader` | `src/ui/reader/reader.html` |
+| Save page screenshot | Save page screenshot | — | `capturePageScreenshot` → `CAPTURE_PAGE_SCREENSHOT` | PopupController |
 
 ### Overlay action IDs (`OVERLAY_ACTION_IDS`)
 
@@ -88,6 +96,8 @@
 - **injectionOutcome** — Structured inspector action (`phase`, `trigger`, `reason`: `missing_url` \| `restricted_scheme` \| `extensions_gallery` \| `ok`).
 - **Search Bookmarks** — Popup/This Page library-search entry; opens Index with encoded query; does not replace Search tabs.
 - **Title/Notes Details** — Editable Title and Notes bound to `currentPin.description` / `currentPin.extended`; Notes disabled for Browser backend.
+- **Offline Reader** — Full-page tool surface that renders only stored sanitized archive content and presents screenshot artifacts separately.
+- **archive association feedback** — Popup/This Page result messaging for the archive action, including explicit cleanup failure rather than masked success.
 
 ---
 
@@ -109,6 +119,8 @@
 | Sync Title/Notes fields | `SYNC_BOOKMARK_NOTES_FIELDS` | [IMPL-BOOKMARK_NOTES_UI](../implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml) |
 | Persist Title/Notes | `SAVE_BOOKMARK_DETAILS` | [IMPL-BOOKMARK_NOTES_UI](../implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml) |
 | Open library search | `OPEN_LIBRARY_SEARCH` | [IMPL-LIBRARY_SEARCH_ENTRY](../implementation-decisions/IMPL-LIBRARY_SEARCH_ENTRY.yaml) |
+| Open Offline Reader | `OPEN_OFFLINE_READER` | [IMPL-OFFLINE_READER_MODE](../implementation-decisions/IMPL-OFFLINE_READER_MODE.yaml) |
+| Archive association feedback | `ARCHIVE_ASSOCIATION_RESULT_BOUNDARY` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
 
 ---
 
@@ -116,6 +128,7 @@
 
 | Term | Section |
 |------|---------|
+| archive association feedback | Preferred terms / Named concepts |
 | badge | Preferred terms |
 | CONTENT_MESSAGE_TYPES | Named concepts |
 | dark theme / light theme | Preferred terms |
@@ -124,6 +137,7 @@
 | icon click opens side panel | Preferred terms |
 | injectionOutcome | Preferred terms |
 | non-scriptable URL | Preferred terms |
+| Offline Reader | Preferred terms / Named concepts |
 | overlay | Preferred terms |
 | OVERLAY_ACTION_IDS | Naming bridge |
 | persistent popup session | Named concepts |
@@ -133,6 +147,8 @@
 | quick access | Preferred terms |
 | SAVE_BOOKMARK_DETAILS | Pseudo-code block names |
 | Search Bookmarks | Preferred terms / Named concepts |
+| Save page archive | Preferred terms / Naming bridge |
+| Save page screenshot | Preferred terms / Naming bridge |
 | Show Hover | Preferred terms |
 | Show on page load | Preferred terms |
 | SYNC_BOOKMARK_NOTES_FIELDS | Pseudo-code block names |

@@ -285,7 +285,9 @@ export function unwrapMessageResponse (response) {
   if (isMissingMessageResponse(response)) return null
   if (typeof response === 'object' && 'success' in /** @type {object} */ (response)) {
     const envelope = /** @type {{ success?: unknown, data?: unknown }} */ (response)
-    return envelope.success ? envelope.data : envelope
+    if (!envelope.success) return envelope
+    // Handlers may return { success, data } or { success, archive } without a data wrapper.
+    return envelope.data !== undefined ? envelope.data : envelope
   }
   return response
 }

@@ -224,4 +224,36 @@ export class NativeHostFileBookmarkAdapter extends FileBookmarkStorageAdapter {
     }
     throw new Error('Invalid native host response for writeBookmarksFile')
   }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Read the sibling hoverboard-page-archives.json file through the native host.
+   */
+  async readArchiveFile () {
+    const path = await getPathFromStorage()
+    const response = await chrome.runtime.sendNativeMessage(NATIVE_HOST_NAME, { type: 'readArchiveFile', path })
+    if (!response) throw new Error(chrome.runtime.lastError?.message || 'Native host did not respond')
+    if (response.type === 'error') throw new Error(response.message || 'Native host error')
+    if (response.type === 'readArchiveFile' && response.data) {
+      return {
+        version: response.data.version ?? 1,
+        archives: response.data.archives ?? {},
+        screenshots: response.data.screenshots ?? {}
+      }
+    }
+    throw new Error('Invalid native host response for readArchiveFile')
+  }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Write the sibling archive artifact file through the native host.
+   */
+  async writeArchiveFile (data) {
+    const path = await getPathFromStorage()
+    const response = await chrome.runtime.sendNativeMessage(NATIVE_HOST_NAME, { type: 'writeArchiveFile', path, data })
+    if (!response) throw new Error(chrome.runtime.lastError?.message || 'Native host did not respond')
+    if (response.type === 'error') throw new Error(response.message || 'Native host error')
+    if (response.type === 'writeArchiveFile' && response.success) return
+    throw new Error('Invalid native host response for writeArchiveFile')
+  }
 }

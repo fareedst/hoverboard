@@ -359,3 +359,25 @@ describe('[IMPL-FILE_BOOKMARK_SERVICE] Offscreen unknown type', () => {
     expect(sendResponse).not.toHaveBeenCalled()
   })
 })
+
+describe('[IMPL-PAGE_ARCHIVE_STORAGE] Offscreen page archive file contract', () => {
+  test('reads and writes the sibling archive artifact file', (done) => {
+    const readFile = jest.fn().mockResolvedValue({ version: 1, archives: { 'https://example.com': { textContent: 'x' } }, screenshots: {} })
+    const writeFile = jest.fn().mockResolvedValue(undefined)
+    const io = {
+      getDirectoryHandle: () => Promise.resolve({}),
+      readFile,
+      writeFile
+    }
+    handleOffscreenMessage({ type: 'READ_FILE_ARCHIVES' }, (response) => {
+      expect(response.error).toBe(null)
+      expect(response.data.archives['https://example.com']).toBeDefined()
+      expect(readFile).toHaveBeenCalledWith({}, expect.any(String))
+      handleOffscreenMessage({ type: 'WRITE_FILE_ARCHIVES', data: { version: 1, archives: {}, screenshots: {} } }, (writeResponse) => {
+        expect(writeResponse).toEqual({ error: null, success: true })
+        expect(writeFile).toHaveBeenCalledWith({}, expect.any(Object), expect.any(String))
+        done()
+      }, io)
+    }, io)
+  })
+})

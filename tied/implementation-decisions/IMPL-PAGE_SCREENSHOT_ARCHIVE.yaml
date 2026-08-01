@@ -1,0 +1,81 @@
+IMPL-PAGE_SCREENSHOT_ARCHIVE:
+  code_locations:
+    files:
+      - path: "src/features/archive/browser-screenshot-capture.js"
+        description: "Dedicated viewport/full-page product browser capture boundary"
+      - path: "src/features/archive/page-screenshot-capture.js"
+        description: "Screenshot artifact validation and normalization"
+      - path: "src/features/archive/page-screenshot-store.js"
+        description: "Separate screenshot artifact persistence"
+      - path: "src/core/message-handler.js"
+        description: "Screenshot capture/read/delete message handlers"
+      - path: "src/ui/reader/reader.js"
+        description: "Screenshot artifact presentation entry"
+    functions:
+      - name: "captureProductScreenshot"
+        description: "Capture viewport or delegated full-page product screenshot"
+        file: "src/features/archive/browser-screenshot-capture.js"
+      - name: "normalizeScreenshotArtifact"
+        description: "Validate and normalize screenshot artifact metadata"
+        file: "src/features/archive/page-screenshot-capture.js"
+      - name: "saveScreenshot"
+        description: "Persist screenshot artifact through Local/File adapter"
+        file: "src/features/archive/page-screenshot-store.js"
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    - "IMPL-OFFLINE_READER_MODE"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "REQ-OFFLINE_READER_MODE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  detail_file: "implementation-decisions/IMPL-PAGE_SCREENSHOT_ARCHIVE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PAGE_SCREENSHOT_ARCHIVE-pseudocode.md"
+  implementation_approach:
+    details:
+      - "Capture accepts tabId and explicit viewport/full-page options, validates HTTP(S) target, and bounds image dimensions/bytes before persistence."
+      - "Deletion and recapture use the archive lifecycle contract and remove obsolete artifacts after successful replacement."
+      - "Screenshot artifact metadata includes URL, capturedAt, format, dimensions, contentHash, version, and storage reference; binary data is not placed in bookmark metadata."
+      - "Screenshot storage replaces every prior artifact for the normalized URL, increments its current version, supports URL-filtered listing for Reader, and reports unavailable backend/storage outcomes explicitly."
+      - "The product flow uses dedicated messages and UI; scripts/screenshots-placeholder.js and IMPL-SCREENSHOT_MODE remain unchanged."
+    summary: "Add browser screenshot capture, artifact normalization, Local/File persistence, and a separate product presentation path."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Make pre-capture validation and adapter replacement boundary explicit"
+  name: "Page Screenshot Archive Implementation"
+  rationale:
+    benefits:
+      - "Explicit options, limits, and failure states."
+      - "Mockable capture/storage boundaries."
+    problems_solved:
+      - "Demo screenshot mode cannot represent a user page archive."
+      - "No product screenshot artifact lifecycle exists."
+    why: "A dedicated browser-capture adapter isolates platform capture behavior from archive storage and demo screenshot tooling."
+  related_decisions:
+    depends_on:
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    see_also:
+      - "IMPL-SCREENSHOT_MODE"
+    supersedes: []
+  status: "Active"
+  testability: "integration"
+  traceability:
+    architecture:
+      - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    code_annotations:
+      - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+      - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+      - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+    requirements:
+      - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+    tests:
+      - "tests/integration/popup-archive-actions-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-screenshot-archive.test.js"
+      - "tests/unit/reader.test.js"
+      - "tests/unit/ui-manager-action-feedback.test.js"

@@ -1,0 +1,42 @@
+ARCH-OFFLINE_READER_MODE:
+  decision: "Reader is a standalone extension tool page addressed by archive identifier or normalized URL. It loads stored archive data through the archive message boundary, injects only sanitized HTML into a constrained container, and exposes capture status plus an explicit live URL action."
+  detail_file: "architecture-decisions/ARCH-OFFLINE_READER_MODE.yaml"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Record Reader lookup/render and screenshot presentation evidence"
+  name: "Offline Reader Mode Architecture"
+  rationale:
+    alternatives_considered:
+      - name: "Render archives inside the popup"
+        rejected_reason: "Popup lifetime and layout are unsuitable for long-form content."
+      - name: "Refetch live HTML in Reader"
+        rejected_reason: "Violates offline behavior and reintroduces untrusted live-page content."
+    consequences:
+      - "Reader page and archive lookup messages must be composition-tested."
+      - "Sanitization becomes a storage boundary, not just a UI concern."
+    why: "A dedicated page isolates rendering and makes offline behavior testable without coupling it to popup or side-panel lifecycle."
+  related_decisions:
+    depends_on:
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+    informs:
+      - "IMPL-OFFLINE_READER_MODE"
+    see_also:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+  status: "Accepted"
+  summary: "Render sanitized archive HTML in a dedicated extension page without live-page fetches or script execution."
+  traceability:
+    code_annotations:
+      - "ARCH-OFFLINE_READER_MODE"
+    implementation:
+      - "IMPL-OFFLINE_READER_MODE"
+    requirements:
+      - "REQ-OFFLINE_READER_MODE"
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/reader.test.js"

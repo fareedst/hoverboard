@@ -1,9 +1,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-MESSAGE_HANDLING ===
  * [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] — Central message allowlist + validation + handler dispatch; recent-tag message types delegate to [IMPL-TAG_SYSTEM] TagService and SW recentTagsMemory policy per ARCH-TAG_SYSTEM. Contract: Promise result or reject on validation; recent handlers return safe shapes on internal failure.
- * 
+ *
  * ## SEND
- * 
+ *
  * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] How: client-side validate type/payload; dispatch to background; return Promise (path for popup/content/offscreen callers).
  * - Contract:
  *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
@@ -22,9 +22,9 @@
  *   - ROUTE to handler for message.type
  *   - handler(message) -> result; RETURN Promise.resolve(result)
  *   - ON error: RETURN Promise.reject; optional log
- * 
+ *
  * ## UNWRAP_MESSAGE_RESPONSE
- * 
+ *
  * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-UI_INSPECTION] How: shared null-tolerant unwrap for runtime replies (src/shared/message-response.js), because any extension context can win the response-channel race and answer null (Chrome 144+ promise-returning listeners / observer listeners that return promises). Callers must not dereference response.success. Observer BOOKMARK_UPDATED paths are IMPL-BOOKMARK_STATE_SYNC OBSERVER_BOOKMARK_UPDATED_APPLY_EXTERNAL and IMPL-POPUP_SESSION OBSERVER_BOOKMARK_UPDATED_FULL_REFRESH.
  * - Contract:
  *   - INPUT: response from runtime.sendMessage — { success, data } wrapper, plain payload, or null/undefined missing response; optional type + surface for readMessageResponse
@@ -45,9 +45,9 @@
  *   - 1. CALLER: actual = readMessageResponse(response, type[, surface])
  *   - 2.   # readMessageResponse = unwrap + IF missing: recordAction messageResponseMissing; debugWarn
  *   - 3.   IF actual == null: KEEP defaults; RETURN
- * 
+ *
  * ## HANDLE_GET_RECENT_BOOKMARKS
- * 
+ *
  * - How: SW entry resolves handler by message.type; missing handler → reject or structured error per router; AWAIT handler(data, senderUrl); optional BOOKMARK_UPDATED broadcast after mutating handlers ([REQ-BOOKMARK_STATE_SYNCHRONIZATION]).
  * - Contract:
  *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
@@ -65,9 +65,9 @@
  *   - recentTags = AWAIT tagService.getUserRecentTagsExcludingCurrent(data?.currentTags OR [])
  *   - RETURN { ...data, recentTags }
  *   - How (sub-block): How: addTagToRecent — validate tagName + currentSiteUrl; tagService.addTagToUserRecentList; structured { success } / error (same REQ/ARCH/IMPL cross-IMPL set as handleGetRecentBookmarks).
- * 
+ *
  * ## HANDLE_ADD_TAG_TO_RECENT
- * 
+ *
  * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] How: Implements handleAddTagToRecent(data) behavior for IMPL-MESSAGE_HANDLING.
  * - Contract:
  *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
@@ -85,9 +85,9 @@
  *   - success = AWAIT tagService.addTagToUserRecentList(tagName, currentSiteUrl)
  *   - RETURN { success } OR { success: false, error: message }
  *   - How (sub-block): How: getUserRecentTags message — raw policy list for diagnostics/tools; TRY/CATCH → { recentTags: [], error } on failure.
- * 
+ *
  * ## HANDLE_GET_USER_RECENT_TAGS
- * 
+ *
  * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] How: Implements handleGetUserRecentTags(data) behavior for IMPL-MESSAGE_HANDLING.
  * - Contract:
  *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
@@ -103,9 +103,9 @@
  * - PROCEDURE: HANDLE_GET_USER_RECENT_TAGS
  *   - TRY: RETURN { recentTags: AWAIT tagService.getUserRecentTags() }
  *   - CATCH: LOG; RETURN { recentTags: [], error }
- * 
+ *
  * ## BLOCK_5
- * 
+ *
  * - --- Composition: composed_with [IMPL-POPUP_MESSAGE_TIMEOUT] [IMPL-BOOKMARK_STATE_SYNC] --- How: Ordering: client send may apply timeout/retry () before this IMPL’s send completes. Post successful bookmark mutations,  may broadcast; recent-tag handlers are read/mutation for user-recent only unless caller chains. Shared DATA: single MessageHandler TagService reference; no second recentTagsMemory writer.
  * - Contract:
  *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
@@ -120,15 +120,15 @@
  *   - TERMINATION: total
  * - PROCEDURE: BLOCK_5
  *   - How (sub-block): --- Cross-IMPL ---
- * 
+ *
  * === END IMPL-FULL-BLOCK: IMPL-MESSAGE_HANDLING ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BROWSER_TABS ===
  * [IMPL-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_BROWSER_TABS] — This block defines the browser tabs panel: data fetch, search scope, filter, UI, copy URLs, close with confirm. Implements REQ by listing tabs with title/URL/referrer and optional pageText/importantTags; scope-aware filter; implements ARCH by chrome.tabs + scripting and visible-list actions.
- * 
+ *
  * ## FILTER_BROWSER_TABS
- * 
+ *
  * - [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: Data fetch: panel queries chrome.tabs; windowScope selects query. Referrer via GET_TAB_REFERRERS (SW executeScript per tab). When searchScope is pageText or importantTags, panel sends GET_TABS_PAGE_TEXT or GET_TABS_IMPORTANT_TAGS with tab list; SW executeScript per tab returns tabId→string map; panel merges into allTabs. Show loading state during pageText/importantTags fetch. Implements "list from current or all windows", "collect referrer", "search in page text or important tags". filterBrowserTabs(tabs, query, scope): pure function. Empty query returns all. scope tabInfo → match title, url, referrer; scope pageText → match tab.pageText; scope importantTags → match tab.importantTags. Case-insensitive substring. Implements "filter by search term" and "search in selected scope".
  * - Contract:
  *   - INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
@@ -146,9 +146,9 @@
  *   - IF scope === 'pageText': RETURN tabs WHERE (t.pageText??'').toLowerCase().includes(q)
  *   - IF scope === 'importantTags': RETURN tabs WHERE (t.importantTags??'').toLowerCase().includes(q)
  *   - RETURN tabs
- * 
+ *
  * ## MERGE_BOOKMARK_REPLY_INTO_TAB
- * 
+ *
  * - [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: UI: window scope toggle; search-scope control (Tab info | Page text | Elements, default Tab info); control groups with very narrow margins; Title/URL/Block above filter textbox; on searchScope change, if pageText or importantTags fetch that data and merge; search input; on input visibleTabs = filterBrowserTabs(allTabs, searchQuery, searchScope); re-render. Multi-row card per tab. Implements "search scope selection", "filter by selected scope". List display mode: user chooses what each list item shows (title only, URL only, or full block). Default block. In non-block mode text is clickable to focus window/tab; remove icon after text. Implements "choose how each tab is shown" and "clickable text in title/url mode". Remove from display: session-scoped hidden set; remove icon in all modes (after text in title/url, before Tags in block). Refresh clears. Implements "remove from displayed list". Close single tab: per-row close-tab button before window id (block: before ids line; title/url: before focus link). Remove button unchanged (after tab id / after link). ON click (data-action=closeTab): chrome.tabs.remove(tabId); then remove from allTabs and re-render or loadTabs(). Focus on click: in block mode ids line (.browser-tabs-card-ids-link); in title/url mode the text (.browser-tabs-card-focus-link). Both have data-window-id and data-tab-id. On click (delegated): read ids; if valid, chrome.windows.update(windowId, { focused: true }); chrome.tabs.update(tabId, { active: true }). Bookmark tags + row flags: after allTabs built (referrers merged), FOR each tab WHERE url is http(s): reply = getCurrentBookmark({ url, title }); mergeBookmarkReplyIntoTab(tab, reply). In RENDER show "Tags: " + join(tab.bookmarkTags) or "—" plus to-read/private indicators when flags are true. How: apply getCurrentBookmark reply to a tab row — tags array plus boolean bookmarkToread / bookmarkPrivate from toread/shared (trim + case-insensitive; defaults toread=no, shared=yes). Clear all three when reply missing, unsuccessful, or blocked.
  * - Contract:
  *   - INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
@@ -168,9 +168,9 @@
  *   - exists = !!d.exists
  *   - tab.bookmarkToread = exists AND (trim+lower(d.toread ?? 'no') === 'yes')
  *   - tab.bookmarkPrivate = exists AND (trim+lower(d.shared ?? 'yes') === 'no')
- * 
+ *
  * ## BUILD_BOOKMARK_TOGGLES_MARKUP
- * 
+ *
  * - [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: render inline to-read indicator and private indicator when tab.bookmarkToread / tab.bookmarkPrivate are true (classes browser-tabs-card-toggle-toread / -private inside .browser-tabs-card-toggles).
  * - Contract:
  *   - INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
@@ -188,9 +188,9 @@
  *   - IF parts empty: RETURN ''
  *   - RETURN span.browser-tabs-card-toggles wrapping parts
  *   - 1. RENDER (per card, with tags): include buildBookmarkTogglesMarkup(tab) near Tags line
- * 
+ *
  * ## REFRESH_BOOKMARK_DISPLAY_FOR_ALL_TABS
- * 
+ *
  * - [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: post-batch bookmark refresh — after Set/Clear to-read or Add tags, re-query getCurrentBookmark for every tab in allTabs and mergeBookmarkReplyIntoTab so tags and indicators match storage; then applyFilter().
  * - Contract:
  *   - INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
@@ -209,9 +209,9 @@
  *   - reply = AWAIT getCurrentBookmark({ url: tab.url, title: tab.title })
  *   - mergeBookmarkReplyIntoTab(tab, reply)  // on error: merge with { success: false }
  *   - applyFilter()
- * 
+ *
  * ## BLOCK_5
- * 
+ *
  * - [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: Copy URLs / Copy Records / Close: unchanged; act on visibleTabs. Close tabs with tag(s): from visibleTabs take those with Array.isArray(tab.bookmarkTags) && tab.bookmarkTags.length > 0; confirm; chrome.tabs.remove each; then loadTabs(). Close tabs without tags: from visibleTabs take those with !tab.bookmarkTags || !Array.isArray(tab.bookmarkTags) || tab.bookmarkTags.length === 0; confirm; remove each; then loadTabs(). Refresh: clear hidden set then loadTabs() so list repopulates and all tabs can reappear. Batch bookmark actions: Set to-read (fetch then merge to preserve tags; create if missing), Clear to-read (skip if no bookmark), Add tags (create if missing; use reply.data.url). Only http(s) URLs. After each batch, AWAIT refreshBookmarkDisplayForAllTabs() so row tags and to-read/private indicators match storage. SW returns handler response as-is; handler getCurrentBookmark returns plain dataOut. Panel structure: same scroll behavior as Tags tree. Panel (#browserTabsPanel) is the scroll container. First child .browser-tabs-above-list (flex: none): header, window scope, search scope, filter, message, stats line (#browserTabsStats), batch bookmark, actions. Second child .browser-tabs-list-section (min-height: 100%, overflow-y: auto): Title/URL/Block control row immediately above #browserTabsList. Above block scrolls off; list section fills visible height and scrolls list. Implements "Title/URL/Block above list" and "stats line above Tags". Stats line: above batch bookmark (Tags) section, element #browserTabsStats. Display counts from getDisplayedTabs(): displayWindows = unique windowIds in getDisplayedTabs(), displayTabs = getDisplayedTabs().length. Totals from loadTabs: totalWindows = (await chrome.windows.getAll()).length, totalTabs = (await chrome.tabs.query({})).length. Update stats on renderList() and after loadTabs(). Format e.g. "Windows: displayWindows / totalWindows · Tabs: displayTabs / totalTabs". When APIs unavailable (e.g. tests) use 0 or fallback. Implements "stats line showing display group vs all open". Sections and tooltips: controls grouped into sections (Scope, Filter & display, Batch bookmark, List actions, Window actions). Stats line above Batch bookmark. Title/URL/Block in list section above #browserTabsList. Every control has title and where helpful aria-label. Implements "sections for UI controls" and "tooltips on controls". Favicon: allTabs preserve favIconUrl from chrome.tabs. RENDER: each card shows img.browser-tabs-card-favicon with src=tab.favIconUrl (fallback when empty to avoid broken img). Block mode: favicon before title; title/url mode: favicon before the clickable text. Elements: label + textbox only; always use textbox value (parseImportantTagSources); when empty use default list. Textbox persisted in chrome.storage.local on blur; on load populate from storage or default. Control groups: narrow margins (browser-tabs-control-group). Gather: move displayed tabs into current window. currentWindowId = (await chrome.windows.getCurrent()).id; FOR each tab in getDisplayedTabs(): IF tab.windowId !== currentWindowId THEN chrome.tabs.move(tab.id, { windowId: currentWindowId, index: -1 }); show "Gathered N tabs" or "All visible tabs already in this window"; loadTabs(). Distribute: each displayed tab in its own window; skip if already only tab in window. FOR each tab in getDisplayedTabs(): tabsInWindow = await chrome.tabs.query({ windowId: tab.windowId }); IF tabsInWindow.length > 1: chrome.windows.create({ tabId: tab.id }); show "Distributed N tabs"; loadTabs().
  * - Contract:
  *   - INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
@@ -244,9 +244,9 @@
  *   - 18. ON GET_TABS_IMPORTANT_TAGS: data.tabs; data.importantTagSources = parseImportantTagSources(textboxValue); IF empty THEN default list (DEFAULT_IMPORTANT_TAG_SOURCES)
  *   - 19. ON Gather button click: displayed = getDisplayedTabs(); currentWin = await chrome.windows.getCurrent(); moved = 0; FOR each tab in displayed: IF tab.windowId !== currentWin.id: await chrome.tabs.move(tab.id, { windowId: currentWin.id, index: -1 }); moved++; show message; loadTabs()
  *   - 20. ON Distribute button click: displayed = getDisplayedTabs(); distributed = 0; FOR each tab in displayed: list = await chrome.tabs.query({ windowId: tab.windowId }); IF list.length > 1: await chrome.windows.create({ tabId: tab.id }); distributed++; show message; loadTabs()
- * 
+ *
  * ## TABS_CREATE_PREFERRED_BACKEND
- * 
+ *
  * - [IMPL-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_BROWSER_TABS] How: Product rule — batch/create from Tabs panel uses preferredBackend local (not Options defaultStorageMode); changing this needs dedicated CITDP.
  * - Contract:
  *   - INPUT: create payload for missing bookmark from tab URL
@@ -260,15 +260,15 @@
  * - PROCEDURE: TABS_CREATE_PREFERRED_BACKEND
  *   - 1. WHEN creating a bookmark because none exists for tab URL: SET preferredBackend = 'local'
  *   - 2. WHEN updating an existing bookmark (exists): preserve existing backend via saveBookmark merge (no preferredBackend override required)
- * 
+ *
  * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BROWSER_TABS ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS ===
  * [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] — Tab source toggle and recently closed tabs integration. Extends IMPL-SIDE_PANEL_BROWSER_TABS with open | recentlyClosed | both.
- * 
+ *
  * ## NORMALIZE_CLOSED_SESSIONS
- * 
+ *
  * - [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] How: normalizeClosedSessions(sessions): pure. Flatten Session[] from getRecentlyClosed; each tab: id=sessionId, sessionId, title, url, lastModified, isClosed=true, referrer='', pageText='', importantTags=''. Window sessions: recurse into tabs.
  * - Contract:
  *   - INPUT: context / caller args
@@ -281,9 +281,9 @@
  *   - TERMINATION: total
  * - PROCEDURE: NORMALIZE_CLOSED_SESSIONS
  *   - result = []; FOR each s in sessions: IF s.tab: result.push({ id: s.tab.sessionId, sessionId: s.tab.sessionId, title: s.tab.title??'', url: s.tab.url??'', lastModified: s.lastModified, isClosed: true, referrer: '', pageText: '', importantTags: '' }); IF s.window && s.window.tabs: FOR each t in s.window.tabs: result.push({ id: t.sessionId, sessionId: t.sessionId, title: t.title??'', url: t.url??'', lastModified: s.lastModified, isClosed: true, referrer: '', pageText: '', importantTags: '' }); RETURN result
- * 
+ *
  * ## BLOCK_2
- * 
+ *
  * - [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] How: GET_RECENTLY_CLOSED_TABS (SW): sessions = chrome.sessions.getRecentlyClosed({ maxResults: 25 }); tabs = normalizeClosedSessions(sessions); RETURN { success: true, data: tabs } loadTabs: when tabSource=open: existing chrome.tabs path. When recentlyClosed: sendMessage GET_RECENTLY_CLOSED_TABS; allTabs = response.data. When both: openTabs = chrome.tabs.query; closedTabs = GET_RECENTLY_CLOSED_TABS; allTabs = openTabs.concat(closedTabs). Scope restriction: when tabSource includes recentlyClosed, searchScope forced to tabInfo; Page text and Elements disabled with note. Restore: closed tab card has data-action=restoreTab data-session-id. ON click: chrome.sessions.restore(sessionId); loadTabs(). Open tab keeps data-action=closeTab. buildRecordsYamlForCopy: for closed tabs include sessionId and lastModified; id may be sessionId string. hiddenTabIds: use tab.id (numeric for open, sessionId string for closed). getDisplayedTabs filters by !hiddenTabIds.has(t.id). Sessions API check: if !chrome.sessions: hide tab source options recentlyClosed and both; show only Open. Gather/Distribute: when tabSource=recentlyClosed or all displayed are closed, hide or disable Gather and Distribute. Close: only for open tabs. toClose = visibleTabs.filter(t => !t.isClosed); confirm; chrome.tabs.remove each; loadTabs()
  * - Contract:
  *   - INPUT: context / caller args
@@ -305,15 +305,15 @@
  *   - 7. IF !chrome.sessions: tabSourceOptions = ['open'] only
  *   - 8. IF tabSource === 'recentlyClosed' OR (tabSource === 'both' AND getDisplayedTabs().every(t => t.isClosed)): hide Gather, Distribute
  *   - 9. ON Close: toClose = visibleTabs.filter(t => !t.isClosed); confirm; FOR each in toClose: chrome.tabs.remove(t.id); loadTabs()
- * 
+ *
  * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-EXT_IDENTITY ===
  * [IMPL-EXT_IDENTITY] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] — How: present Hoverboard as a Chromium extension with content-script injection and Pinboard-compatible UX surfaces.
- * 
+ *
  * ## BOOTSTRAP_EXTENSION
- * 
+ *
  * - [IMPL-EXT_IDENTITY] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] How: MV3 entry points register once; content script bootstraps page UI when URL allowed.
  * - Contract:
  *   - INPUT: extension install/load; manifest entry points (service worker, content scripts, popup, options, side panel)
@@ -329,15 +329,15 @@
  *   - ON content script load: IF URL not inhibited THEN init overlay/hover surface
  *   - EXPOSE popup / side panel / options as user-facing surfaces
  *   - RETURN
- * 
+ *
  * === END IMPL-FULL-BLOCK: IMPL-EXT_IDENTITY ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-MV3_MIGRATION ===
  * [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] — How: keep store-compatible Manifest V3: service worker replaces background page; preserve messaging and APIs.
- * 
+ *
  * ## MV3_BACKGROUND_RUNTIME
- * 
+ *
  * - [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] How: service worker owns listeners; async message replies use return true / Promise patterns.
  * - Contract:
  *   - INPUT: extension lifecycle events; chrome.runtime / chrome.storage / chrome.action calls
@@ -353,15 +353,15 @@
  *   - ON message: DELEGATE to MessageHandler; KEEP channel alive until AWAIT completes
  *   - ON alarm/idle as needed: wake worker for deferred work
  *   - RETURN
- * 
+ *
  * === END IMPL-FULL-BLOCK: IMPL-MV3_MIGRATION ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-SERVICE_WORKER ===
  * [IMPL-SERVICE_WORKER] [ARCH-SERVICE_WORKER] [REQ-MANIFEST_V3_MIGRATION] — How: MV3 service worker owns messaging, badge, recent-tags memory, and lifecycle wake/sleep.
- * 
+ *
  * ## SERVICE_WORKER_MAIN
- * 
+ *
  * - [IMPL-SERVICE_WORKER] [ARCH-SERVICE_WORKER] [REQ-MANIFEST_V3_MIGRATION] How: wire listeners once; delegate business logic to validated modules.
  * - Contract:
  *   - INPUT: chrome.runtime.onMessage; install/activate; alarms; port connections
@@ -381,9 +381,9 @@
  *   - ON alarm: AWAIT runDeferredTasks()
  *   - RETURN
  *   - How (sub-block): How: after processMessage success for bookmark/tag mutations, refresh badge.
- * 
+ *
  * ## HANDLE_MESSAGE
- * 
+ *
  * - [IMPL-SERVICE_WORKER] [ARCH-SERVICE_WORKER] [REQ-MANIFEST_V3_MIGRATION] How: Implements handleMessage(msg, sender) behavior for IMPL-SERVICE_WORKER.
  * - Contract:
  *   - INPUT: chrome.runtime.onMessage; install/activate; alarms; port connections
@@ -399,7 +399,7 @@
  *   - result = AWAIT messageHandler.processMessage(msg, sender)
  *   - IF result.ok AND isMutation(msg.type): AWAIT updateBadgeForTab(resolveTab(sender, msg))
  *   - RETURN result
- * 
+ *
  * === END IMPL-FULL-BLOCK: IMPL-SERVICE_WORKER ===
  */
 import { HoverboardServiceWorker } from '../../src/core/service-worker.js'
@@ -492,6 +492,26 @@ describe('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] SW handleMessage routi
     const result = await sw.handleMessage({ type: MESSAGE_TYPES.GET_OPTIONS }, {})
 
     expect(result).toEqual({ success: false, error: 'handler failed' })
+  })
+
+  test('service-worker runtime listener dispatches archive messages through handleMessage [REQ-PAGE_ARCHIVE_STORAGE]', async () => {
+    global.chrome.runtime.onMessage.addListener.mockClear()
+    const sw = new HoverboardServiceWorker()
+    sw.handleMessage = jest.fn().mockResolvedValue({ success: true, archive: { url: 'https://example.com' } })
+    const listener = global.chrome.runtime.onMessage.addListener.mock.calls.at(-1)[0]
+    const sendResponse = jest.fn()
+
+    expect(listener({
+      type: MESSAGE_TYPES.GET_PAGE_ARCHIVE,
+      data: { url: 'https://example.com' }
+    }, { tab: { id: 4 } }, sendResponse)).toBe(true)
+    await Promise.resolve()
+
+    expect(sw.handleMessage).toHaveBeenCalledWith({
+      type: MESSAGE_TYPES.GET_PAGE_ARCHIVE,
+      data: { url: 'https://example.com' }
+    }, { tab: { id: 4 } })
+    expect(sendResponse).toHaveBeenCalledWith({ success: true, archive: { url: 'https://example.com' } })
   })
 
   // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]

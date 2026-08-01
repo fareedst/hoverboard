@@ -1,0 +1,108 @@
+change_definition:
+  current_behavior: "CAPTURE_PAGE_ARCHIVE captures and stores a Local/File archive but does not create a missing bookmark, does not report bookmark association state, and resolves backend from the request/index/default path rather than requiring the selected backend."
+  desired_behavior: "CAPTURE_PAGE_ARCHIVE requires an explicit preferredBackend of local or file, checks existence only in that backend, preserves any existing bookmark including an empty/stub record, and creates one minimal bookmark after successful archive capture when no selected-backend record exists. Association failures return stable compensation diagnostics."
+  non_goals:
+    - "Changing aggregate BookmarkRouter.getBookmarkForUrl 2C semantics."
+    - "Changing ordinary saveBookmark, deleteBookmark, moveBookmarkToStorage, or bookmark metadata shape."
+    - "Associating archives with Pinboard, Sync, or Browser backends."
+    - "Migrating or repairing pre-existing orphan archives."
+    - "Embedding archive content or a large archive body in bookmark metadata."
+  unchanged_behavior:
+    - "Archive artifacts remain separate from bookmark metadata."
+    - "Local/File-only archive capability, URL privacy gates, sanitizer, size limits, archive search, Reader, screenshot artifacts, and bookmark deletion cleanup remain in force."
+    - "The popup remains a persistent session and retains its Local/File capability guard."
+  success_criteria:
+    - "Invalid, missing, or unsupported preferredBackend fails before browser capture and never falls back to an index/default backend."
+    - "A non-null selected-backend bookmark, including an empty/stub record, is preserved and yields bookmarkCreated: false."
+    - "A missing selected-backend bookmark yields one minimal bookmark with captured title, empty tags/notes, selected backend, and normal timestamps."
+    - "Recapture replaces the archive while preserving existing bookmark metadata."
+    - "Bookmark-save failure restores the prior archive or removes only the new archive version; cleanup failure is explicit and never reported as success."
+    - "Message and popup/This Page boundaries surface bookmarkCreated, archiveRetained, priorArchiveRestored, cleanupFailed, and compensationError consistently."
+impact_analysis:
+  impl_inventory_notes: "Existing archive capture/store modules and CAPTURE_PAGE_ARCHIVE handler are the base. Add a narrow association orchestrator, selected-backend BookmarkRouter lookup, service-worker/message dependency wiring, popup feedback, and focused unit/composition/E2E coverage."
+  modules_or_boundaries:
+    - "Archive association orchestrator: selected-backend context, capture ordering, minimal bookmark creation, compensation, result boundary."
+    - "BookmarkRouter: selected-backend lookup that bypasses aggregate 2C lookup."
+    - "MessageHandler/service worker: preferredBackend validation and orchestrator response wiring."
+    - "PopupController/UIManager: archive-only versus bookmark-and-archive success and cleanup diagnostics."
+    - "Local/File bookmark providers: existing save and timestamp normalization contracts, unchanged."
+    - "Archive store: read/restore/delete-current seams for compensation."
+  tied_tokens_affected:
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "IMPL-BOOKMARK_ROUTER"
+  tied_tokens_new:
+    - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+  traceability_gaps_to_close:
+    - "Add association unit test path and message/popup response paths to REQ/ARCH/IMPL traceability."
+    - "Replace proposed vocabulary labels with accepted archive-bookmark association, compensation outcome, selected-backend lookup, and bookmark creation result terms."
+leap_feedback:
+  record_status: "pre_implementation_analysis_complete"
+  divergences_from_analysis: "Existing archive pseudocode had unbound adapter/storage variables; repaired before RED tests by resolving the adapter in SAVE_PAGE_ARCHIVE and passing storage explicitly through CAPTURE_PAGE_SCREENSHOT."
+  tied_stack_updates_required:
+    - "Extend REQ-PAGE_ARCHIVE_STORAGE and ARCH-PAGE_ARCHIVE_STORAGE with association criteria."
+    - "Add ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION and IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION."
+    - "Register new semantic tokens and reconcile four domain vocabulary glossaries."
+    - "Keep the new association sidecar as the authoritative logic source."
+record_identity:
+  change_request_id: "REQ-PAGE_ARCHIVE_STORAGE"
+  recorded_at: "2026-08-01"
+  title: "Selected-backend archive-bookmark association"
+risk_analysis:
+  risks:
+    - id: "RISK-ASSOC-001"
+      description: "A missing bookmark could be created in the wrong backend or an existing bookmark in another backend could suppress creation."
+      severity: "high"
+      mitigation: "Require preferredBackend local/file, perform selected-backend lookup only, and add a regression test for cross-backend records."
+      residual: "low"
+    - id: "RISK-ASSOC-002"
+      description: "Bookmark-save failure after archive replacement can leave an archive without its requested bookmark."
+      severity: "high"
+      mitigation: "Capture first, retain the prior archive, compensate with restore/delete-current, and return archiveRetained, priorArchiveRestored, cleanupFailed, and compensationError."
+      residual: "medium"
+    - id: "RISK-ASSOC-003"
+      description: "A stub bookmark can be overwritten or duplicated if existence is inferred from metadata completeness."
+      severity: "medium"
+      mitigation: "Treat every non-null lookup result as existing and test empty/stub preservation."
+      residual: "low"
+    - id: "RISK-ASSOC-004"
+      description: "Archive HTML/privacy boundaries could be weakened while adding the association flow."
+      severity: "high"
+      mitigation: "Keep HTTP(S), inhibit, sanitizer, bounded artifact, and Local/File checks before capture; test restricted/inhibited/unsupported requests."
+      residual: "low"
+    - id: "RISK-ASSOC-005"
+      description: "UI could report success when compensation failed or hide the distinction between recapture and bookmark creation."
+      severity: "medium"
+      mitigation: "Use one stable response boundary and composition tests for popup feedback, persistent session, and cleanup-failure wording."
+      residual: "low"
+tdd_sequence:
+  summary: "Validate pseudo-code and TIED consistency first; write focused association RED tests; implement orchestrator GREEN; add selected-backend router and message/service-worker composition tests; update popup feedback; run one justified extension-host E2E; verify and close the TIED loop."
+  unit_order:
+    - "Request/privacy/backend gates and selected-backend lookup."
+    - "Stub existence and existing metadata preservation."
+    - "Minimal bookmark fields, timestamp defaults, and one-time creation."
+    - "Recapture, capture/storage failures, bookmark-save failure, prior restoration, new-version deletion, cleanup diagnostics."
+  composition_order:
+    - "BookmarkRouter selected-backend lookup binding."
+    - "MessageHandler/service-worker CAPTURE_PAGE_ARCHIVE preferredBackend and response boundary."
+    - "PopupController/UIManager feedback and persistent session."
+  e2e_justification: "Only the real extension-host journey requires browser scripting, service-worker wiring, and selected-backend persistence together; algorithmic and response assertions remain at unit/composition levels."
+test_strategy:
+  matrix_notes: "Unit tests cover every association sidecar block and failure branch. Composition tests cover router lookup, message dispatch, service-worker initialization, response fields, and popup feedback. E2E covers saving an archive from an unbookmarked HTTP(S) page and verifying the archive plus selected-backend bookmark."
+  security_mitigations:
+    - "Reject non-HTTP(S), inhibited, missing, invalid, or unsupported backend requests before capture."
+    - "Never use aggregate lookup as an authorization or ownership decision for the selected backend."
+    - "Preserve existing bookmark metadata rather than replacing it with archive-derived defaults."
+    - "Keep archive content sanitized, bounded, and outside bookmark metadata."
+    - "Expose compensation uncertainty instead of masking partial state."
+  expected_tests:
+    - "tests/unit/page-archive-bookmark-association.test.js"
+    - "tests/unit/message-handler-archive.test.js"
+    - "tests/unit/popup-archive-response.test.js"
+    - "tests/unit/bookmark-router.test.js"
+    - "tests/playwright/extension-archive-features.spec.js"
+out_of_scope_followups:
+  - "A future decision may define migration/association repair for archives already saved before this contract; no mutation is made in this change."
+  - "A future decision may extend durable archive association to non-Local/File providers; current architecture deliberately rejects those backends."

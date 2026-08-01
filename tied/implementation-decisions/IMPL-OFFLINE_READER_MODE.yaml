@@ -1,0 +1,73 @@
+IMPL-OFFLINE_READER_MODE:
+  code_locations:
+    files:
+      - path: "src/ui/reader/reader.html"
+        description: "Standalone offline Reader markup"
+      - path: "src/ui/reader/reader.js"
+        description: "Archive lookup, status, and rendering orchestration"
+      - path: "src/ui/reader/reader.css"
+        description: "Reader layout and content styles"
+      - path: "src/core/message-handler.js"
+        description: "GET_PAGE_ARCHIVE lookup handler"
+    functions:
+      - name: "loadReaderArchive"
+        description: "Load archive and render status/content"
+        file: "src/ui/reader/reader.js"
+      - name: "renderReaderArchive"
+        description: "Render safe archive content and metadata"
+        file: "src/ui/reader/reader.js"
+  cross_references:
+    - "ARCH-OFFLINE_READER_MODE"
+    - "IMPL-ARCHIVED_CONTENT_SEARCH"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    - "REQ-OFFLINE_READER_MODE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  detail_file: "implementation-decisions/IMPL-OFFLINE_READER_MODE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-OFFLINE_READER_MODE-pseudocode.md"
+  implementation_approach:
+    details:
+      - "After archive lookup, Reader requests only persisted product screenshots for the resolved URL and renders validated image data URLs; demo screenshot assets are never queried."
+      - "Missing, stale, unsupported, and storage-error states render as accessible status panels."
+      - "Only sanitizedHtml from the archive store is assigned to a constrained reader container; scripts, inline event handlers, and unsafe URLs are removed at capture time and blocked by page policy."
+      - "Reader parses archive identifier or normalized URL from query parameters and requests archive data through a dedicated message."
+      - "The live URL action is explicit and never part of archive loading."
+    summary: "Add a Reader tool page, message/API lookup handler, safe HTML container, and status renderer."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Define explicit freshness handoff and persisted screenshot presentation"
+  name: "Offline Reader Mode Implementation"
+  rationale:
+    benefits:
+      - "Explicit status and live-page fallback affordance."
+      - "Long-form content surface with deterministic lookup."
+    problems_solved:
+      - "No offline reading surface exists."
+      - "Untrusted archived markup must not execute in extension UI."
+    why: "A thin standalone page can safely render stored content and expose clear archive state without live-page coupling."
+  related_decisions:
+    depends_on:
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    see_also: []
+    supersedes: []
+  status: "Active"
+  testability: "integration"
+  traceability:
+    architecture:
+      - "ARCH-OFFLINE_READER_MODE"
+    code_annotations:
+      - "ARCH-OFFLINE_READER_MODE"
+      - "IMPL-OFFLINE_READER_MODE"
+      - "REQ-OFFLINE_READER_MODE"
+    requirements:
+      - "REQ-OFFLINE_READER_MODE"
+    tests:
+      - "tests/integration/popup-archive-actions-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/reader.test.js"

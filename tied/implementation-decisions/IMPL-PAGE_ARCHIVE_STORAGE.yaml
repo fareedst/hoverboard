@@ -1,0 +1,95 @@
+IMPL-PAGE_ARCHIVE_STORAGE:
+  code_locations:
+    files:
+      - path: "src/features/archive/page-archive-store.js"
+        description: "Archive record normalization, capability resolution, and lifecycle orchestration"
+      - path: "src/features/archive/page-archive-storage-adapter.js"
+        description: "Local/File archive adapter contract and test doubles"
+      - path: "src/features/archive/page-capture.js"
+        description: "Readable HTML/text capture and sanitization"
+      - path: "src/features/archive/archive-sanitizer.js"
+        description: "Standalone archive sanitizer shared by capture and Reader"
+      - path: "src/features/archive/page-archive-bookmark-association.js"
+        description: "Selected-backend archive capture and bookmark association orchestrator"
+      - path: "src/core/message-handler.js"
+        description: "Archive capture/read/delete message handlers"
+      - path: "src/features/storage/bookmark-router.js"
+        description: "Backend capability and lifecycle delegation"
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  detail_file: "implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE-pseudocode.md"
+  implementation_approach:
+    details:
+      - "All adapter writes are atomic from the caller perspective and return explicit success/error outcomes."
+      - "Archive record contains url, archiveId, version, capturedAt, sourceTitle, contentHash, sanitizedHtml, textContent, status, and artifact references."
+      - "Association failure restores the prior archive or removes the new archive version and returns cleanup diagnostics."
+      - "Capture uses Readability extraction plus sanitized HTML; AI tagging retains its 16000-character payload cap as a separate option."
+      - "CAPTURE_PAGE_ARCHIVE passes an explicit preferredBackend to the selected-backend association orchestrator; archive persistence precedes missing-bookmark creation and preserves existing bookmark metadata."
+      - "Local persistence uses a quota-appropriate archive adapter separate from hoverboard_local_bookmarks; File persistence uses a versioned archive file/directory separate from hoverboard-bookmarks.json."
+      - "Only Local and File backend values resolve to archive adapters; an unconfigured File archive adapter returns UnsupportedBackend instead of silently using memory."
+      - "Reader lookup/list/delete paths operate on persisted archive records and synchronize derived archive search state."
+    summary: "Capture, sanitize, persist, retrieve, and delete Local/File page archive artifacts through mockable adapters, then associate successful capture with selected-backend bookmark ownership."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Align archive adapter contracts, screenshot lifecycle, and lookup/list boundaries"
+  name: "Page Archive Storage Implementation"
+  rationale:
+    benefits:
+      - "Mockable adapters and deterministic lifecycle."
+      - "Sanitized HTML and extracted text can serve Reader and search."
+    problems_solved:
+      - "Capture, recapture, deletion, and search need stable archive identity."
+      - "Durable page content has no storage boundary."
+    why: "Keep large archive content out of bookmark metadata while sharing one lifecycle contract across Local and File storage."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "IMPL-STORAGE_INDEX"
+    depends_on:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+      - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    see_also:
+      - "IMPL-AI_TAGGING_READABILITY"
+      - "IMPL-LOCAL_QUERY_API"
+    supersedes: []
+  status: "Active"
+  testability: "integration"
+  traceability:
+    architecture:
+      - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+    code_annotations:
+      - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+      - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+    requirements:
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+    tests:
+      - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
+      - "tests/integration/popup-archive-actions-composition.integration.test.js"
+      - "tests/integration/service-worker-archive-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-archive-bookmark-association.test.js"
+      - "tests/unit/page-archive-store.test.js"
+      - "tests/unit/page-capture.test.js"
+      - "tests/unit/service-worker-messaging-routing.test.js"
+      - "tests/unit/ui-manager-action-feedback.test.js"

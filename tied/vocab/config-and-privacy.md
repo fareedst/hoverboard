@@ -27,6 +27,7 @@
 | **config migration** | settings upgrade | Schema/key migrations across versions |
 | **Pinboard API Token** | auth token (UI) | `username:XXXXXXXX`; key `hoverboard_auth_token` |
 | **AI API key** | provider secret | `aiApiKey`; empty disables AI tagging |
+| **archive privacy boundary** | archive cache | Explicit capture only; inhibited URLs and unsupported backends are not archived |
 
 ---
 
@@ -64,6 +65,7 @@
 - **backup / restore** — Portable config export/import ([REQ-CONFIG_PORTABILITY](../requirements/REQ-CONFIG_PORTABILITY.yaml)).
 - **config migration** — Upgrades older key shapes to current schema.
 - **Test API key** — Options control validating AI credentials without tagging a page.
+- **archive privacy boundary** — Page archives and screenshot artifacts stay Local/File-only and honor the existing inhibit URL list.
 
 ---
 
@@ -75,6 +77,7 @@
 | Backup/restore | `(proposed) CONFIG_BACKUP_RESTORE` | [IMPL-CONFIG_BACKUP_RESTORE](../implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml) |
 | Migration | `(proposed) CONFIG_MIGRATE` | [IMPL-CONFIG_MIGRATION](../implementation-decisions/IMPL-CONFIG_MIGRATION.yaml) |
 | Inhibit URL | `(proposed) INHIBIT_URL_APPLY` | [IMPL-URL_INHIBITION](../implementation-decisions/IMPL-URL_INHIBITION.yaml) |
+| Archive privacy gate | `ARCHIVE_PRIVACY_GATE` | [IMPL-PAGE_ARCHIVE_STORAGE](../implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE.yaml) |
 
 ---
 
@@ -95,3 +98,4 @@
 | storage mode | Preferred terms |
 | Test API key | Named concepts |
 | URL inhibition | Preferred terms |
+| archive privacy boundary | Preferred terms / Named concepts |

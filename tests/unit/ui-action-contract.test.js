@@ -24,4 +24,10 @@ describe('[IMPL-UI_ACTION_CONTRACT] static contract exports', () => {
       MESSAGE_TYPES.MOVE_BOOKMARK_TO_STORAGE
     )
   })
+
+  test('maps archive popup actions to dedicated messages [REQ-PAGE_ARCHIVE_STORAGE]', () => {
+    expect(POPUP_ACTION_TO_MESSAGE[POPUP_ACTION_IDS.capturePageArchive]).toBe(MESSAGE_TYPES.CAPTURE_PAGE_ARCHIVE)
+    expect(POPUP_ACTION_TO_MESSAGE[POPUP_ACTION_IDS.capturePageScreenshot]).toBe(MESSAGE_TYPES.CAPTURE_PAGE_SCREENSHOT)
+    expect(POPUP_ACTION_TO_MESSAGE[POPUP_ACTION_IDS.openOfflineReader]).toBeNull()
+  })
 })

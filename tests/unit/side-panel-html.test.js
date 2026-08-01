@@ -254,4 +254,13 @@ describe('[REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TABS] Side panel HT
   test('This Page panel has no popup-footer toolbar', () => {
     expect(html).not.toMatch(/class="popup-footer"/)
   })
+
+  // [REQ-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_SCREENSHOT_ARCHIVE] [REQ-OFFLINE_READER_MODE]
+  // [ARCH-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [ARCH-OFFLINE_READER_MODE]
+  // [IMPL-PAGE_ARCHIVE_STORAGE] [IMPL-PAGE_SCREENSHOT_ARCHIVE] [IMPL-OFFLINE_READER_MODE]
+  test('This Page action row exposes archive, screenshot, and Reader controls', () => {
+    expect(html).toMatch(/data-popup-ref="captureArchiveBtn"/)
+    expect(html).toMatch(/data-popup-ref="captureScreenshotBtn"/)
+    expect(html).toMatch(/data-popup-ref="openReaderBtn"/)
+  })
 })

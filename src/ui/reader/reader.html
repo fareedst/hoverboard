@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none';">
+  <title>Reader – Hoverboard</title>
+  <link rel="stylesheet" href="../styles/design-tokens.css">
+  <link rel="stylesheet" href="../styles/tool-page-shell.css">
+  <link rel="stylesheet" href="reader.css">
+</head>
+<body>
+  <!-- [REQ-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [IMPL-OFFLINE_READER_MODE] -->
+  <main class="reader-shell">
+    <header class="reader-header">
+      <a class="reader-back" href="#" id="reader-back">← Bookmarks</a>
+      <p class="reader-kicker">Offline Reader</p>
+      <h1 id="reader-title">Loading archive…</h1>
+      <p id="reader-meta" class="reader-meta" aria-live="polite"></p>
+      <p id="reader-status" class="reader-status" role="status" aria-live="polite"></p>
+      <a id="reader-live-link" class="reader-live-link" target="_blank" rel="noopener noreferrer" hidden>Open live page ↗</a>
+    </header>
+    <article id="reader-content" class="reader-content" aria-label="Archived page content"></article>
+    <section id="reader-screenshots" class="reader-screenshots" aria-label="Archived screenshots" hidden>
+      <h2>Archived screenshots</h2>
+      <div id="reader-screenshot-list" class="reader-screenshot-list"></div>
+    </section>
+  </main>
+  <script type="module" src="reader.js"></script>
+</body>
+</html>

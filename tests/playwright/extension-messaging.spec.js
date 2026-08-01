@@ -579,8 +579,8 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
     await sidePanelPage.close()
   })
 
-  // [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [PROC-DEMO_RECORDING] Panel opens on Bookmarks tab when storage is set (demo script starts with Bookmarks visible).
-  test('side panel opens with Bookmarks tab visible when hoverboard_sidepanel_active_tab is set to browserBookmarks', async ({ context }) => {
+  // [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [PROC-DEMO_RECORDING] Browser Bookmarks is standalone; the legacy side-panel key must not expose a removed panel.
+  test('legacy browserBookmarks side-panel state does not expose a removed panel', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const optionsPage = await context.newPage()
     await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded' })
@@ -601,7 +601,7 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
       const panel = document.getElementById('browserBookmarksPanel')
       return panel ? panel.hidden : true
     })
-    expect(bookmarksPanelHidden).toBe(false)
+    expect(bookmarksPanelHidden).toBe(true)
     await sidePanelPage.close()
   })
 

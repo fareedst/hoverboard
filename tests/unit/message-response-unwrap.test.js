@@ -283,6 +283,11 @@ describe('[IMPL-MESSAGE_HANDLING] unwrapMessageResponse', () => {
     expect(unwrapMessageResponse({ success: true, data: { tabId: 7 } })).toEqual({ tabId: 7 })
   })
 
+  test('success wrapper without data returns full envelope (e.g. archive handlers)', () => {
+    const archiveEnvelope = { success: true, archive: { url: 'https://example.com' } }
+    expect(unwrapMessageResponse(archiveEnvelope)).toBe(archiveEnvelope)
+  })
+
   test('failure wrapper returns the wrapper so the caller can read error', () => {
     const failure = { success: false, error: 'boom' }
     expect(unwrapMessageResponse(failure)).toBe(failure)

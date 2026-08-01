@@ -1,0 +1,53 @@
+REQ-OFFLINE_READER_MODE:
+  category: "Functional"
+  description: "Users can open a captured archive from a bookmark and read it without requesting the live page."
+  detail_file: "requirements/REQ-OFFLINE_READER_MODE.yaml"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Close Reader lookup/render and screenshot presentation evidence"
+  name: "Offline Reader Mode"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Clear handling for missing, stale, or failed archive artifacts."
+      - "Safe, deterministic offline reading."
+    problems_solved:
+      - "Live URLs are not reliable offline sources."
+      - "No safe surface exists for reading stored page content."
+    why: "Make captured content useful when the network, source page, or authentication state is unavailable."
+  related_requirements:
+    depends_on:
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+    related_to:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Only sanitized stored HTML is rendered; archived scripts and unsafe navigation are not executable."
+    - criterion: "Reader displays capture time, archive status, and clear missing/stale/error states."
+    - criterion: "Reader opens a stored archive by bookmark URL or archive identifier without fetching the live URL."
+    - criterion: "Reader works for Local and File archives and preserves the bookmark/live URL as an explicit optional action."
+  status: "Implemented"
+  summary: "Render sanitized stored page archives in a dedicated offline Reader surface."
+  traceability:
+    architecture:
+      - "ARCH-OFFLINE_READER_MODE"
+    code_annotations:
+      - "REQ-OFFLINE_READER_MODE"
+    implementation:
+      - "IMPL-OFFLINE_READER_MODE"
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/reader.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Archive lookup, status model, safe reader URL construction, and missing/stale handling."
+    - method: "Composition tests"
+      coverage: "Reader entry points and message/API lookup wiring."
+    - method: "E2E tests"
+      coverage: "Open a captured archive and verify offline rendering with script execution blocked."

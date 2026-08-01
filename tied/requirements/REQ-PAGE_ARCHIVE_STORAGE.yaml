@@ -1,0 +1,63 @@
+REQ-PAGE_ARCHIVE_STORAGE:
+  category: "Functional"
+  description: "Users can explicitly capture an HTTP(S) bookmark into a durable local or file-backed archive containing sanitized readable HTML and extracted text, with screenshots stored as separate artifacts."
+  detail_file: "requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Close archive lifecycle, selected backend, and validation evidence"
+  name: "Page Archive Storage"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Explicit local/file scope limits privacy and backend compatibility risk."
+      - "Offline-capable content foundation for Reader and archive search."
+    problems_solved:
+      - "Large archive data does not belong in the bookmark metadata map."
+      - "Saved bookmarks currently lose page content when a page changes or becomes unavailable."
+    why: "Reopen durable page archives while preserving the metadata-first model for Pinboard, Sync, and Browser backends."
+  related_requirements:
+    depends_on:
+      - "REQ-FILE_BOOKMARK_STORAGE"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    related_to:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_QUERY_API"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "A screenshot is a separate artifact linked to the bookmark archive and follows the same Local/File lifecycle."
+    - criterion: "An archive stores capture metadata, content hash/version, sanitized readable HTML, and extracted text outside the bookmark metadata map."
+    - criterion: "Bookmark-association failure returns bookmarkCreated false with explicit archive-retention and cleanup diagnostics and compensates the archive mutation when possible."
+    - criterion: "Capture is explicit and supports only HTTP(S) pages mapped to Local or File bookmark storage."
+    - criterion: "Capture validates an explicit preferredBackend of local or file, checks existence only in that selected backend, preserves an existing bookmark, and creates one minimal bookmark after a successful archive capture when none exists."
+    - criterion: "Deleting a Local or File bookmark removes its archive artifacts and search entries."
+    - criterion: "Recapture, deletion, storage failure, size limits, restricted URLs, and sensitive/inhibited pages return observable states without partial success."
+  status: "Implemented"
+  summary: "Capture and persist sanitized readable page archives and separate screenshot artifacts for Local and File bookmarks only, associating each archive with the explicitly selected backend bookmark."
+  traceability:
+    architecture:
+      - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+    code_annotations:
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+    implementation:
+      - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    tests:
+      - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-archive-bookmark-association.test.js"
+      - "tests/unit/page-archive-store.test.js"
+      - "tests/unit/page-capture.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Archive normalization, sanitization boundary, hashing, size limits, lifecycle, and mock Local/File adapters."
+    - method: "Composition tests"
+      coverage: "Capture command, service-worker routing, adapter selection, and bookmark deletion cleanup."
+    - method: "E2E tests"
+      coverage: "Explicit capture from a supported web page and resulting archive availability."

@@ -44,8 +44,8 @@
 # 
 # === END IMPL-FULL-BLOCK: IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE ===
 # [REQ-NATIVE_HOST_WRAPPER] [IMPL-NATIVE_HOST_WRAPPER] [IMPL-FILE_STORAGE_TYPED_PATH] [IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE]
-# Read JSON from stdin; handle readBookmarksFile/writeBookmarksFile with path; else echo back.
-# Path: directory (we use path/hoverboard-bookmarks.json) or full path if ends with .json.
+# Read JSON from stdin; handle bookmark and page-archive files with path; else echo back.
+# Path: directory (we use sibling hoverboard JSON files) or full path if ends with .json.
 # Expands ~ to $HOME.
 
 set -e
@@ -68,6 +68,14 @@ resolve_file() {
   case "$expanded" in
     *\.json) echo "$expanded" ;;
     *)       echo "${expanded%/}/hoverboard-bookmarks.json" ;;
+  esac
+}
+
+resolve_archive_file() {
+  expanded=$(expand_tilde "$1")
+  case "$expanded" in
+    *\.json) echo "$expanded" ;;
+    *)       echo "${expanded%/}/hoverboard-page-archives.json" ;;
   esac
 }
 
@@ -106,6 +114,37 @@ if command -v jq >/dev/null 2>&1; then
         exit 0
       fi
       echo "{\"type\":\"writeBookmarksFile\",\"success\":true}"
+      ;;
+    readArchiveFile)
+      PATH_ARG=$(echo "$INPUT" | jq -r '.path // empty')
+      if [ -z "$PATH_ARG" ]; then
+        echo "{\"type\":\"error\",\"message\":\"readArchiveFile: path required\"}"
+        exit 0
+      fi
+      FILE=$(resolve_archive_file "$PATH_ARG")
+      if [ ! -f "$FILE" ]; then
+        echo "{\"type\":\"readArchiveFile\",\"data\":{\"version\":1,\"archives\":{},\"screenshots\":{}}}"
+        exit 0
+      fi
+      DATA=$(cat "$FILE" | jq -c . 2>/dev/null || echo '{"version":1,"archives":{},"screenshots":{}}')
+      echo "$DATA" | jq -c '{type: "readArchiveFile", data: .}'
+      ;;
+    writeArchiveFile)
+      PATH_ARG=$(echo "$INPUT" | jq -r '.path // empty')
+      if [ -z "$PATH_ARG" ]; then
+        echo "{\"type\":\"error\",\"message\":\"writeArchiveFile: path required\"}"
+        exit 0
+      fi
+      FILE=$(resolve_archive_file "$PATH_ARG")
+      DIR=$(dirname "$FILE")
+      mkdir -p "$DIR"
+      DATA=$(echo "$INPUT" | jq -c '.data // {version:1, archives:{}, screenshots:{}}')
+      echo "$DATA" > "$FILE"
+      if [ ! -f "$FILE" ] || [ ! -s "$FILE" ]; then
+        echo "{\"type\":\"error\",\"message\":\"writeArchiveFile: failed to write file\"}"
+        exit 0
+      fi
+      echo "{\"type\":\"writeArchiveFile\",\"success\":true}"
       ;;
     *)
       echo "$INPUT" | jq -c 'if .type then . else {type: "echo", payload: .} end'

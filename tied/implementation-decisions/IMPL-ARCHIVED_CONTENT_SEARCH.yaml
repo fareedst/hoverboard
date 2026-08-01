@@ -1,0 +1,85 @@
+IMPL-ARCHIVED_CONTENT_SEARCH:
+  code_locations:
+    files:
+      - path: "src/features/archive/archive-content-search.js"
+        description: "Archive text index, query, snippets, and lifecycle synchronization"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "Explicit archive-content search scope and result composition"
+      - path: "src/ui/bookmarks-table/bookmarks-table.html"
+        description: "Archive content search control"
+    functions:
+      - name: "queryArchivedContent"
+        description: "Return bounded archive search results"
+        file: "src/features/archive/archive-content-search.js"
+      - name: "replaceArchivedContent"
+        description: "Replace one URL index entry"
+        file: "src/features/archive/archive-content-search.js"
+      - name: "removeArchivedContent"
+        description: "Remove one URL index entry"
+        file: "src/features/archive/archive-content-search.js"
+  cross_references:
+    - "ARCH-ARCHIVED_CONTENT_SEARCH"
+    - "ARCH-OFFLINE_READER_MODE"
+    - "IMPL-LIBRARY_SEARCH_ENTRY"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX"
+    - "IMPL-OFFLINE_READER_MODE"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "REQ-ARCHIVED_CONTENT_SEARCH"
+    - "REQ-OFFLINE_READER_MODE"
+  detail_file: "implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH-pseudocode.md"
+  implementation_approach:
+    details:
+      - "Archive browse/search scope rebuilds from persisted archives and maps results to extension-resolvable Reader targets before table rendering."
+      - "Capture/recapture calls replace; deletion calls remove; missing archives do not appear as successful content matches."
+      - "Index entries are keyed by normalized URL and contain extracted text plus archive metadata, not sanitized HTML."
+      - "Local Query API aggregate snapshots remain metadata-only in this phase."
+      - "Metadata search remains the default and existing matchSearch behavior is unchanged."
+      - "Query normalization is case-insensitive substring matching with bounded context snippets; result ordering is deterministic by match position then capture time."
+    summary: "Add an archive text index/query module and compose it with the Local Bookmarks Index through an explicit content scope."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Define empty-query browse and Reader target handoff"
+  name: "Archived Content Search Implementation"
+  rationale:
+    benefits:
+      - "Explicit scope and bounded result payloads."
+      - "Incremental replace/remove synchronization with archive storage."
+    problems_solved:
+      - "Archive lifecycle can otherwise leave stale search results."
+      - "No query path exists for extracted archive text."
+    why: "A small deterministic module can provide testable archive search without changing existing metadata filtering or exposing archive bodies through the Local Query API."
+  related_decisions:
+    composed_with:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    depends_on:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    see_also:
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+      - "IMPL-LOCAL_QUERY_API"
+    supersedes: []
+  status: "Active"
+  testability: "integration"
+  traceability:
+    architecture:
+      - "ARCH-ARCHIVED_CONTENT_SEARCH"
+    code_annotations:
+      - "ARCH-ARCHIVED_CONTENT_SEARCH"
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+      - "REQ-ARCHIVED_CONTENT_SEARCH"
+    requirements:
+      - "REQ-ARCHIVED_CONTENT_SEARCH"
+    tests:
+      - "tests/integration/bookmarks-table-archive-scope-composition.integration.test.js"
+      - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/archive-content-search.test.js"
+      - "tests/unit/bookmarks-table-archive-search.test.js"
+      - "tests/unit/message-handler-archive.test.js"

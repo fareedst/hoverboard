@@ -92,6 +92,12 @@
           <div class="filters-row">
             <label for="search-input" class="sr-only">Search</label>
             <input type="text" id="search-input" class="search-input" placeholder="Search title, URL, tags, notes…" autocomplete="off">
+            <!-- [REQ-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [IMPL-ARCHIVED_CONTENT_SEARCH] Explicit scope keeps metadata search unchanged. -->
+            <label for="search-scope" class="sr-only">Search scope</label>
+            <select id="search-scope" class="filter-select" aria-label="Search scope">
+              <option value="metadata" selected>Metadata</option>
+              <option value="archive">Archived content</option>
+            </select>
             <button type="button" id="search-clear" class="btn btn-secondary btn-sm" title="Clear search" aria-label="Clear search">Clear</button>
             <label for="time-column-source">Time column:</label>
             <select id="time-column-source" class="filter-select" aria-label="Time column: create time or last updated">

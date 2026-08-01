@@ -4,7 +4,7 @@
 
 **Excludes:** Pinboard-shaped pin field names (see [`bookmarks.md`](bookmarks.md)); Local Bookmarks Index UI (see [`bookmarks-index.md`](bookmarks-index.md)); overlay/popup chrome (see [`ui-surfaces.md`](ui-surfaces.md)).
 
-**Traceability:** [REQ-PER_BOOKMARK_STORAGE_BACKEND](../requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml) · [REQ-BROWSER_BOOKMARK_STORAGE](../requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml) · [REQ-STORAGE_MODE_DEFAULT](../requirements/REQ-STORAGE_MODE_DEFAULT.yaml) · [REQ-MOVE_BOOKMARK_STORAGE_UI](../requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml) · [REQ-FILE_BOOKMARK_STORAGE](../requirements/REQ-FILE_BOOKMARK_STORAGE.yaml) · [REQ-NATIVE_HOST_WRAPPER](../requirements/REQ-NATIVE_HOST_WRAPPER.yaml) · [ARCH-STORAGE_INDEX_AND_ROUTER](../architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml) · [ARCH-BROWSER_BOOKMARK_PROVIDER](../architecture-decisions/ARCH-BROWSER_BOOKMARK_PROVIDER.yaml) · [ARCH-FILE_BOOKMARK_PROVIDER](../architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.yaml) · [ARCH-NATIVE_HOST](../architecture-decisions/ARCH-NATIVE_HOST.yaml) · [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) · [IMPL-BROWSER_BOOKMARK_SERVICE](../implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE.yaml) · [IMPL-STORAGE_INDEX](../implementation-decisions/IMPL-STORAGE_INDEX.yaml) · [IMPL-NATIVE_HOST_WRAPPER](../implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml) · [IMPL-FILE_STORAGE_TYPED_PATH](../implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml)
+**Traceability:** [REQ-PER_BOOKMARK_STORAGE_BACKEND](../requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml) · [REQ-BROWSER_BOOKMARK_STORAGE](../requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml) · [REQ-STORAGE_MODE_DEFAULT](../requirements/REQ-STORAGE_MODE_DEFAULT.yaml) · [REQ-MOVE_BOOKMARK_STORAGE_UI](../requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml) · [REQ-FILE_BOOKMARK_STORAGE](../requirements/REQ-FILE_BOOKMARK_STORAGE.yaml) · [REQ-NATIVE_HOST_WRAPPER](../requirements/REQ-NATIVE_HOST_WRAPPER.yaml) · [REQ-PAGE_ARCHIVE_STORAGE](../requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml) · [ARCH-STORAGE_INDEX_AND_ROUTER](../architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml) · [ARCH-BROWSER_BOOKMARK_PROVIDER](../architecture-decisions/ARCH-BROWSER_BOOKMARK_PROVIDER.yaml) · [ARCH-FILE_BOOKMARK_PROVIDER](../architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.yaml) · [ARCH-NATIVE_HOST](../architecture-decisions/ARCH-NATIVE_HOST.yaml) · [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION](../architecture-decisions/ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml) · [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) · [IMPL-BROWSER_BOOKMARK_SERVICE](../implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE.yaml) · [IMPL-STORAGE_INDEX](../implementation-decisions/IMPL-STORAGE_INDEX.yaml) · [IMPL-NATIVE_HOST_WRAPPER](../implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml) · [IMPL-FILE_STORAGE_TYPED_PATH](../implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml) · [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION](../implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml)
 
 **See also:** [`bookmarks.md`](bookmarks.md) · [`bookmarks-index.md`](bookmarks-index.md) · [`ipc-messaging.md`](ipc-messaging.md) · [`config-and-privacy.md`](config-and-privacy.md) · [`domain-references.md`](domain-references.md)
 
@@ -26,6 +26,12 @@
 | **move bookmark to storage** | migrate bookmark, copy backend | Copy to target, delete source, update index |
 | **native host** | native messaging host, helper process | Local process for File storage I/O |
 | **File storage** | cloud-sync folder (Options marketing) | Backend `file`; path under `~/.hoverboard` by default |
+| **archive artifact** | saved page copy, cached page | Durable readable HTML/text or screenshot linked to a Local/File bookmark; separate from bookmark metadata |
+| **archive-bookmark association** | archive-to-bookmark link | Association boundary between an archive artifact and a bookmark record; owned by `CAPTURE_PAGE_ARCHIVE` |
+| **compensation outcome** | cleanup result | Diagnostic state describing archive cleanup or prior-version restoration after association failure |
+| **selected-backend lookup** | aggregate URL lookup | Bookmark existence query constrained to the explicit `preferredBackend`; it does not use 2C aggregate semantics |
+| **screenshot artifact** | demo screenshot, page image | Durable product capture with its own hash/version and Local/File lifecycle |
+| **archive-capable backend** | archive storage method | Only `local` and `file` support durable page archives in the current product scope |
 | **Local storage (backend)** | local bookmarks (alone) | Backend `local` in `chrome.storage.local` — **not** Local Bookmarks Index |
 | **Sync storage (backend)** | browser sync (alone) | Backend `sync` in `chrome.storage.sync` (~100 KB) — **not** bookmark state sync |
 | **2C (browser race exclusion)** | browser best-of, race includes browser | `getBookmarkForUrl` races pinboard/local/file/sync only; consult **Browser storage (backend)** via preferred/index/default or when other providers are empty |
@@ -49,6 +55,10 @@
 | Browser sync | Sync | `hoverboard_sync_bookmarks` | provider `sync` | [IMPL-SYNC_BOOKMARK_SERVICE](../implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE.yaml) |
 | Native Chrome bookmarks | Browser | `chrome.bookmarks` API | provider `browser` | [IMPL-BROWSER_BOOKMARK_SERVICE](../implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE.yaml) |
 | File directory | File path | `hoverboard_file_storage_path` (default `~/.hoverboard`) | typed path normalize | [IMPL-FILE_STORAGE_TYPED_PATH](../implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml) |
+| Page archive store | Save page archive | `hoverboard_page_archives` / `hoverboard-page-archives.json` | `PageArchiveStore` | [IMPL-PAGE_ARCHIVE_STORAGE](../implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE.yaml) |
+| Screenshot artifact store | Save page screenshot | same archive artifact container, separate `screenshots` collection | `PageScreenshotStore` | [IMPL-PAGE_SCREENSHOT_ARCHIVE](../implementation-decisions/IMPL-PAGE_SCREENSHOT_ARCHIVE.yaml) |
+| Archive-bookmark association | Save page archive | — | `CAPTURE_PAGE_ARCHIVE` result | [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
+| Compensation outcome | Save page archive | — | `archiveRetained`, `cleanupFailed` diagnostics | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
 | Native ping | Native Host (Options) | — | `NATIVE_PING` | [REQ-NATIVE_HOST_WRAPPER](../requirements/REQ-NATIVE_HOST_WRAPPER.yaml) |
 
 ---
@@ -70,6 +80,12 @@
 - **aggregate-snapshot.json** — Extension-written snapshot of Local+File+Sync+Browser for Local Query API GET (Phase 2).
 - **Refresh API snapshot** — UI/Options/Index action that sends `REFRESH_API_SNAPSHOT`; SW aggregates providers and writes `aggregate-snapshot.json` via native host File path.
 - **offscreen file I/O** — Offscreen document handles `READ_FILE_BOOKMARKS` / `WRITE_FILE_BOOKMARKS` for File backend.
+- **archive artifact** — Large sanitized page HTML/text or product screenshot kept outside bookmark metadata.
+- **archive-bookmark association** — Orchestration boundary connecting an archive artifact to a bookmark record without moving archive content into bookmark metadata.
+- **compensation outcome** — Explicit result state for archive cleanup or restoration after a bookmark-association failure.
+- **selected-backend lookup** — Bookmark lookup through only the explicitly selected Local or File provider; a non-null empty/stub bookmark counts as existing.
+- **screenshot artifact** — Independently addressable image capture associated with a bookmark URL and archive lifecycle.
+- **archive-capable backend** — Local or File; Pinboard, Sync, and Browser remain metadata-only.
 - **aggregated bookmarks** — Union across providers for Local Bookmarks Index (`getAggregatedBookmarksForIndex`); includes **Browser storage (backend)** with `storage: 'browser'`.
 - **2C (browser race exclusion)** — Router rule for `getBookmarkForUrl`: exclude browser from the parallel non-empty best-of race; still reachable via `preferredBackend` / storage index / `defaultStorageMode`, or when no other provider returns a non-empty pin ([REQ-BROWSER_BOOKMARK_STORAGE]).
 - **collapseByUrl** — Provider helper: one logical bookmark per cleaned URL across duplicate Chrome nodes; merge tags; keep earliest time.
@@ -100,6 +116,14 @@
 | Filter Local Query API list | `FILTER_BOOKMARKS` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
 | Build aggregate snapshot payload | `BUILD_AGGREGATE_SNAPSHOT_PAYLOAD` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
 | Refresh API snapshot (SW) | `REFRESH_API_SNAPSHOT` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
+| Resolve archive capability | `RESOLVE_ARCHIVE_ADAPTER` | [IMPL-PAGE_ARCHIVE_STORAGE](../implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE.yaml) |
+| Save page archive | `SAVE_PAGE_ARCHIVE` | [IMPL-PAGE_ARCHIVE_STORAGE](../implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE.yaml) |
+| Selected-backend bookmark lookup | `getBookmarkForBackend` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
+| Resolve archive-bookmark context | `RESOLVE_ARCHIVE_BOOKMARK_CONTEXT` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
+| Capture archive and associate bookmark | `CAPTURE_ARCHIVE_AND_ASSOCIATE_BOOKMARK` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
+| Create minimal bookmark if absent | `CREATE_MINIMAL_BOOKMARK_IF_ABSENT` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
+| Compensate association failure | `COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
+| Save page screenshot | `SAVE_PAGE_SCREENSHOT` | [IMPL-PAGE_SCREENSHOT_ARCHIVE](../implementation-decisions/IMPL-PAGE_SCREENSHOT_ARCHIVE.yaml) |
 
 ---
 
@@ -109,10 +133,17 @@
 |------|---------|
 | 2C (browser race exclusion) | Named concepts |
 | aggregate-snapshot.json | Named concepts |
+| archive artifact | Preferred terms / Named concepts |
+| archive-bookmark association | Preferred terms / Named concepts |
+| archive-capable backend | Preferred terms / Named concepts |
 | BookmarkRouter | Named concepts |
 | Browser storage (backend) | Preferred terms |
 | BUILD_AGGREGATE_SNAPSHOT_PAYLOAD | Pseudo-code block names |
+| CAPTURE_ARCHIVE_AND_ASSOCIATE_BOOKMARK | Pseudo-code block names |
 | collapseByUrl | Named concepts |
+| COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE | Pseudo-code block names |
+| compensation outcome | Preferred terms / Named concepts |
+| CREATE_MINIMAL_BOOKMARK_IF_ABSENT | Pseudo-code block names |
 | default storage mode | Preferred terms |
 | Delete with preferred backend | Pseudo-code block names |
 | ENSURE_TAG_FOLDERS | Pseudo-code block names |
@@ -130,9 +161,12 @@
 | preferredBackend | Naming bridge |
 | Refresh API snapshot | Named concepts |
 | REFRESH_API_SNAPSHOT | Pseudo-code block names |
+| RESOLVE_ARCHIVE_BOOKMARK_CONTEXT | Pseudo-code block names |
 | resolveProvider | Pseudo-code block names |
 | Save to | Preferred terms |
 | storage backend | Preferred terms |
 | storage index | Naming bridge |
 | stripChromeRootSegments | Named concepts |
+| screenshot artifact | Preferred terms / Named concepts |
+| selected-backend lookup | Preferred terms / Named concepts / Pseudo-code block names |
 | Sync storage (backend) | Preferred terms |

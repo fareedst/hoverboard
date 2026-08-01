@@ -42,6 +42,11 @@
       <button id="retryBtn" class="button secondary">Retry</button>
     </div>
 
+    <!-- Action feedback for quick actions (success without hiding main UI) -->
+    <div id="actionFeedback" class="action-feedback hidden" role="status" aria-live="polite">
+      <p id="actionFeedbackMessage"></p>
+    </div>
+
     <!-- Main Interface -->
     <div id="mainInterface" class="main-interface hidden">
       <!-- Quick Actions -->
@@ -72,6 +77,18 @@
           
           <button id="deleteBtn" class="action-icon-button danger" title="Delete Bookmark" aria-label="Delete bookmark">
             <span class="action-icon">🗑️</span>
+          </button>
+          <!-- [REQ-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [IMPL-PAGE_ARCHIVE_STORAGE] Explicit This Page capture for Local/File bookmarks. -->
+          <button id="captureArchiveBtn" class="action-icon-button" title="Save page archive" aria-label="Save page archive">
+            <span class="action-icon">📚</span>
+          </button>
+          <!-- [REQ-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [IMPL-PAGE_SCREENSHOT_ARCHIVE] Dedicated product capture, separate from demo screenshot mode. -->
+          <button id="captureScreenshotBtn" class="action-icon-button" title="Save page screenshot" aria-label="Save page screenshot">
+            <span class="action-icon">📸</span>
+          </button>
+          <!-- [REQ-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [IMPL-OFFLINE_READER_MODE] -->
+          <button id="openReaderBtn" class="action-icon-button" title="Open offline Reader" aria-label="Open offline Reader">
+            <span class="action-icon">📖</span>
           </button>
         </div>
       </section>

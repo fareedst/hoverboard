@@ -1,0 +1,42 @@
+ARCH-PAGE_SCREENSHOT_ARCHIVE:
+  decision: "Product screenshots use a dedicated capture command and browser API boundary, with explicit viewport/full-page options and bounded image output. The resulting artifact is stored separately from readable HTML/text and is not connected to demo screenshot seed tooling."
+  detail_file: "architecture-decisions/ARCH-PAGE_SCREENSHOT_ARCHIVE.yaml"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Record screenshot replacement, listing/deletion, and Reader presentation evidence"
+  name: "Page Screenshot Archive Architecture"
+  rationale:
+    alternatives_considered:
+      - name: "Treat screenshot as HTML archive content"
+        rejected_reason: "Binary image lifecycle and browser capture semantics differ from HTML/text."
+      - name: "Reuse screenshot demo mode"
+        rejected_reason: "Demo mode uses seeded fake tabs and documentation capture, not user archive lifecycle."
+    consequences:
+      - "Browser capture must be composition-tested independently from storage."
+      - "Reader/gallery UI needs a separate artifact presentation path."
+    why: "Visual artifacts have different capture permissions, size limits, and presentation needs from readable content."
+  related_decisions:
+    depends_on:
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+    informs:
+      - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    see_also: []
+  status: "Accepted"
+  summary: "Capture screenshots through a dedicated browser-capture boundary and persist them as separate Local/File artifacts."
+  traceability:
+    code_annotations:
+      - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    implementation:
+      - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    requirements:
+      - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-screenshot-archive.test.js"
+      - "tests/unit/reader.test.js"

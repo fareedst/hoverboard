@@ -1302,6 +1302,471 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LINK_HEALTH ===
  */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_STORAGE ===
+ * Capture and persist sanitized readable page archives and separate artifacts for Local/File bookmarks.
+ *
+ * ## RESOLVE_ARCHIVE_ADAPTER
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: resolve only Local/File archive adapters and report unsupported or unavailable storage before capture.
+ * - Contract:
+ *   - INPUT: backend (string), adapters (map)
+ *   - PRE: backend is supplied as a string; adapters may omit an unconfigured File adapter
+ *   - OUTPUT: adapter | { error: UnsupportedBackend | StorageUnavailable }
+ *   - POST:
+ *     - success => adapter is the adapter registered for local or file
+ *     - error => no capture or state transition occurs
+ *   - FAILURE_MODES: UnsupportedBackend, StorageUnavailable
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: RESOLVE_ARCHIVE_ADAPTER
+ *   - backend = lowercase(String(backend))
+ *   - IF backend is not local or file: RETURN { error: UnsupportedBackend }
+ *   - adapter = adapters[backend]
+ *   - IF adapter is absent: RETURN { error: StorageUnavailable }
+ *   - RETURN adapter
+ *
+ * ## ARCHIVE_PRIVACY_GATE
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: enforce HTTP(S), inhibit-list, explicit-capture, and Local/File boundaries before page content or screenshot capture.
+ * - Contract:
+ *   - INPUT: bookmark { url, storage }, isUrlAllowed (function), captureExplicit (boolean)
+ *   - PRE: bookmark is present; isUrlAllowed is callable
+ *   - OUTPUT: allowed | { error: RestrictedUrl | InhibitedUrl | UnsupportedBackend | InvalidRequest }
+ *   - POST:
+ *     - success => browser capture may proceed
+ *     - error => browser capture is not attempted
+ *   - FAILURE_MODES: InvalidRequest, UnsupportedBackend, RestrictedUrl, InhibitedUrl
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: ARCHIVE_PRIVACY_GATE
+ *   - IF captureExplicit is false: RETURN { error: InvalidRequest }
+ *   - IF bookmark.url is not HTTP(S): RETURN { error: RestrictedUrl }
+ *   - IF bookmark.storage is not local or file: RETURN { error: UnsupportedBackend }
+ *   - IF isUrlAllowed(bookmark.url) is false: RETURN { error: InhibitedUrl }
+ *   - RETURN allowed
+ *
+ * ## CAPTURE_AND_VALIDATE
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: capture and normalize the readable artifact only after the archive privacy gate succeeds.
+ * - Contract:
+ *   - INPUT: bookmark, capture options, capturePageContent (function)
+ *   - PRE: bookmark passed ARCHIVE_PRIVACY_GATE; capturePageContent is callable
+ *   - OUTPUT: archive | { error: CaptureFailed | TooLarge | RestrictedUrl | InhibitedUrl | UnsupportedBackend }
+ *   - POST:
+ *     - success => archive has sanitizedHtml, textContent, contentHash, version, capturedAt
+ *     - error => no archive is persisted
+ *   - FAILURE_MODES: CaptureFailed, TooLarge, RestrictedUrl, InhibitedUrl, UnsupportedBackend
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: CAPTURE_AND_VALIDATE
+ *   - gate = AWAIT ARCHIVE_PRIVACY_GATE(bookmark)
+ *   - IF gate is error: RETURN gate
+ *   - captured = AWAIT capturePageContent(bookmark.url, options)
+ *   - IF captured fails: RETURN { error: CaptureFailed }
+ *   - archive = NORMALIZE_ARCHIVE(captured)
+ *   - IF archive exceeds limits: RETURN { error: TooLarge }
+ *   - RETURN archive
+ *
+ * ## SAVE_PAGE_ARCHIVE
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: preserve the prior archive, write the new artifact, and update derived archive search only after storage succeeds.
+ * - Contract:
+ *   - INPUT: bookmark { url, storage }, capture options, adapters, archiveSearch
+ *   - PRE: capture is explicit; bookmark.url is HTTP(S); archiveSearch may be absent
+ *   - OUTPUT: { success: true, archive } | { success: false, code, previous? }
+ *   - POST:
+ *     - success => one current archive version and matching derived text entry exist
+ *     - StorageFailed => prior archive remains available when the adapter supports atomic failure
+ *   - FAILURE_MODES: InvalidRequest, UnsupportedBackend, StorageUnavailable, RestrictedUrl, InhibitedUrl, CaptureFailed, TooLarge, StorageFailed
+ *   - DATA: archive collections and derived ArchiveTextIndex
+ *   - DATA_TRANSITION: successful write replaces one URL version; failure does not claim a new archive
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SAVE_PAGE_ARCHIVE
+ *   - adapter = RESOLVE_ARCHIVE_ADAPTER(bookmark.storage, adapters)
+ *   - IF adapter is error: RETURN { success: false, code: adapter.error }
+ *   - archive = AWAIT CAPTURE_AND_VALIDATE(bookmark, options, capturePageContent)
+ *   - IF archive is error: RETURN { success: false, code: archive.error }
+ *   - previous = AWAIT adapter.readArchiveFile(bookmark.url)
+ *   - result = AWAIT adapter.writeArchiveFile(bookmark.url, archive)
+ *   - IF result fails: RETURN { success: false, code: StorageFailed, previous }
+ *   - IF archiveSearch exists: AWAIT archiveSearch.replaceArchivedContent(bookmark.url, archive)
+ *   - RETURN { success: true, archive }
+ *
+ * ## DELETE_PAGE_ARCHIVE
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE] How: delete the selected backend's readable archive, screenshot artifacts, and derived search state together.
+ * - Contract:
+ *   - INPUT: bookmark { url, storage }, optional selected backend, adapters, archiveSearch
+ *   - PRE: bookmark.url is normalized or normalizable
+ *   - OUTPUT: { success: true } | { success: false, code: InvalidUrl | UnsupportedBackend | StorageUnavailable | StorageFailed }
+ *   - POST:
+ *     - success => readable archive, screenshot artifacts, and selected-backend search entry are absent
+ *     - error => unrelated URLs and backends are unchanged
+ *   - FAILURE_MODES: InvalidUrl, UnsupportedBackend, StorageUnavailable, StorageFailed
+ *   - DATA: archive and screenshot collections, ArchiveTextIndex
+ *   - DATA_TRANSITION: only the requested URL is removed
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: DELETE_PAGE_ARCHIVE
+ *   - adapter = RESOLVE_ARCHIVE_ADAPTER(bookmark.storage, adapters)
+ *   - IF adapter is error: RETURN { success: false, code: adapter.error }
+ *   - REMOVE readable archive and matching screenshot records for bookmark.url
+ *   - IF archiveSearch exists: AWAIT archiveSearch.removeArchivedContent(bookmark.url)
+ *   - RETURN { success: true }
+ *
+ * ## LOOKUP_PAGE_ARCHIVE
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: resolve the explicitly selected adapter before reading a URL or archive identifier and never fetch the live page.
+ * - Contract:
+ *   - INPUT: identifier (URL or archiveId), optional backend, adapters
+ *   - PRE: identifier is present; backend is local or file when supplied
+ *   - OUTPUT: archive | { error: MissingArchive | UnsupportedBackend | StorageUnavailable | StorageFailed }
+ *   - POST:
+ *     - success => returned archive is persisted sanitized data; no network request occurs
+ *     - error => no network request occurs
+ *   - FAILURE_MODES: MissingArchive, UnsupportedBackend, StorageUnavailable, StorageFailed
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LOOKUP_PAGE_ARCHIVE
+ *   - candidates = backend is supplied ? [backend] : [local, file]
+ *   - FOR candidate IN candidates:
+ *     - adapter = RESOLVE_ARCHIVE_ADAPTER(candidate, adapters)
+ *     - IF adapter is error and backend is supplied: RETURN { error: adapter.error }
+ *     - IF adapter is error: CONTINUE
+ *     - IF identifier is an archiveId: archive = AWAIT adapter.getArchiveById(identifier)
+ *     - ELSE: archive = AWAIT adapter.getArchive(normalizeUrl(identifier))
+ *     - IF archive exists: RETURN archive
+ *   - RETURN { error: MissingArchive }
+ *
+ * ## LIST_PAGE_ARCHIVES
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: enumerate persisted Local/File artifacts through resolved adapters for explicit browse and search-scope wiring.
+ * - Contract:
+ *   - INPUT: optional backend, adapters
+ *   - PRE: backend is local or file when supplied
+ *   - OUTPUT: archives | { error: UnsupportedBackend | StorageUnavailable | StorageFailed }
+ *   - POST:
+ *     - success => archives contain only persisted records in deterministic order
+ *   - FAILURE_MODES: UnsupportedBackend, StorageUnavailable, StorageFailed
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LIST_PAGE_ARCHIVES
+ *   - candidates = backend is supplied ? [backend] : [local, file]
+ *   - FOR candidate IN candidates:
+ *     - adapter = RESOLVE_ARCHIVE_ADAPTER(candidate, adapters)
+ *     - IF adapter is error and backend is supplied: RETURN { error: adapter.error }
+ *     - IF adapter is error: CONTINUE
+ *     - archives = archives CONCAT AWAIT adapter.listArchives()
+ *   - RETURN SORT archives BY capturedAt DESCENDING, url ASCENDING
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_STORAGE ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION ===
+ * Associate a captured Local/File archive with a selected-backend bookmark while preserving metadata and compensating partial failure.
+ *
+ * ## RESOLVE_ARCHIVE_BOOKMARK_CONTEXT
+ * - [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: resolve explicit backend ownership without aggregate URL lookup and retain the prior archive for compensation.
+ * - Contract:
+ *   - INPUT: request { url, preferredBackend }, selectedBackendLookup, archiveStore, isUrlAllowed
+ *   - PRE: request exists; selectedBackendLookup, archiveStore, and isUrlAllowed are callable
+ *   - OUTPUT: context { url, backend, existingBookmark, previousArchive } | { success: false, code }
+ *   - POST:
+ *     - success => existingBookmark may be null or any non-null record, including a stub
+ *     - error => no page capture or bookmark mutation occurs
+ *   - FAILURE_MODES: InvalidRequest, UnsupportedBackend, RestrictedUrl, InhibitedUrl, LookupFailed
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: RESOLVE_ARCHIVE_BOOKMARK_CONTEXT
+ *   - IF url is absent: RETURN InvalidRequest
+ *   - IF url is not HTTP(S): RETURN RestrictedUrl
+ *   - IF preferredBackend is not local or file: RETURN UnsupportedBackend
+ *   - IF isUrlAllowed(url) is false: RETURN InhibitedUrl
+ *   - existingBookmark = AWAIT selectedBackendLookup(url, preferredBackend)
+ *   - previousArchive = AWAIT archiveStore.read(url, preferredBackend)
+ *   - RETURN context
+ *
+ * ## CAPTURE_ARCHIVE_AND_ASSOCIATE_BOOKMARK
+ * - [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: capture and persist the archive before preserving or creating selected-backend bookmark ownership.
+ * - Contract:
+ *   - INPUT: context, captureContext, captureArchive, archiveStore
+ *   - PRE: context passed RESOLVE_ARCHIVE_BOOKMARK_CONTEXT; archiveStore writes the selected backend
+ *   - OUTPUT: current archive plus association state | { success: false, code, bookmarkCreated: false }
+ *   - POST:
+ *     - success => archive is current; existingBookmark is never rewritten
+ *     - capture/storage error => bookmarkCreated is false and prior archive retention is reported
+ *   - FAILURE_MODES: CaptureFailed, StorageFailed
+ *   - DATA: previousArchive, currentArchive
+ *   - DATA_TRANSITION: archive is written before missing-bookmark creation
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: CAPTURE_ARCHIVE_AND_ASSOCIATE_BOOKMARK
+ *   - captured = AWAIT captureArchive(context.url, captureContext)
+ *   - IF captured fails: RETURN stable failure with archiveRetained = previousArchive exists
+ *   - saved = AWAIT archiveStore.saveArchive(context.url, context.backend, captured.archive)
+ *   - IF saved fails: RETURN StorageFailed with archiveRetained = previousArchive exists
+ *   - RETURN current archive plus previousArchive and existingBookmark
+ *
+ * ## CREATE_MINIMAL_BOOKMARK_IF_ABSENT
+ * - [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-DOM_UTILITIES] How: preserve any non-null selected-backend bookmark and create exactly one default-shaped bookmark only when lookup returned null.
+ * - Contract:
+ *   - INPUT: current archive, context, existingBookmark (nullable), createMinimalBookmark, saveBookmark, clock
+ *   - PRE: archive write succeeded; selected backend is local or file; existingBookmark may be null or non-null
+ *   - OUTPUT: { success: true, bookmark, bookmarkCreated } | { success: false, code: BookmarkSaveFailed }
+ *   - POST:
+ *     - existingBookmark non-null => no save occurs and bookmarkCreated is false
+ *     - existingBookmark null and save succeeds => one bookmark uses archive URL/title, empty tags/notes, selected backend, and normal timestamps
+ *   - FAILURE_MODES: BookmarkSaveFailed
+ *   - DATA_TRANSITION: create one missing-bookmark record; never update a non-null existing record
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: CREATE_MINIMAL_BOOKMARK_IF_ABSENT
+ *   - IF existingBookmark is non-null: RETURN { success: true, bookmark: existingBookmark, bookmarkCreated: false }
+ *   - now = clock()
+ *   - minimal = createMinimalBookmark({ url: context.url, description: archive.sourceTitle, tags: [], notes: '', preferredBackend: context.backend, time: now, updated_at: now })
+ *   - saved = AWAIT saveBookmark(minimal)
+ *   - IF saved fails: RETURN BookmarkSaveFailed
+ *   - RETURN { success: true, bookmark: saved.bookmark OR minimal, bookmarkCreated: true }
+ *
+ * ## COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE
+ * - [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: restore the prior archive or remove only the new archive after bookmark association failure and expose uncertainty.
+ * - Contract:
+ *   - INPUT: context, previousArchive (nullable), archiveStore
+ *   - PRE: current archive write succeeded and bookmark creation failed
+ *   - OUTPUT: { archiveRetained, priorArchiveRestored, cleanupFailed, compensationError? }
+ *   - POST:
+ *     - previousArchive exists => restore is attempted
+ *     - no previousArchive => only the new archive is removed
+ *     - cleanup failure => cleanupFailed is true and the error remains visible
+ *   - FAILURE_MODES: CompensationFailed
+ *   - DATA_TRANSITION: current archive becomes previous archive or is deleted
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE
+ *   - IF previousArchive exists: result = AWAIT archiveStore.restore(context.url, context.backend, previousArchive)
+ *   - ELSE: result = AWAIT archiveStore.removeCurrent(context.url, context.backend)
+ *   - IF result fails: RETURN archiveRetained = true, priorArchiveRestored = false, cleanupFailed = true, compensationError
+ *   - IF previousArchive exists: RETURN archiveRetained = true, priorArchiveRestored = true, cleanupFailed = false
+ *   - RETURN archiveRetained = false, priorArchiveRestored = false, cleanupFailed = false
+ *
+ * ## ARCHIVE_ASSOCIATION_RESULT_BOUNDARY
+ * - [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: expose one stable response shape to message and popup/This Page callers.
+ * - Contract:
+ *   - INPUT: context result, archive result, bookmark result, compensation result
+ *   - PRE: failed paths carry a stable code; bookmarkCreated defaults false
+ *   - OUTPUT: success or failure response with association and compensation diagnostics
+ *   - POST:
+ *     - success => archive persistence and required bookmark association succeeded
+ *     - failure => bookmarkCreated is false and CompensationFailed remains visible
+ *   - FAILURE_MODES: delegated failure modes, CompensationFailed
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: ARCHIVE_ASSOCIATION_RESULT_BOUNDARY
+ *   - IF context, capture, or archive write failed: RETURN failure with bookmarkCreated false and retention diagnostics
+ *   - IF existingBookmark is non-null: RETURN success with bookmarkCreated false, archiveRetained true, cleanupFailed false
+ *   - IF minimal bookmark save succeeds: RETURN success with bookmarkCreated true, archiveRetained true, cleanupFailed false
+ *   - IF minimal bookmark save fails: RETURN failure merged with COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-OFFLINE_READER_MODE ===
+ * Render persisted sanitized archive content in a dedicated Offline Reader without fetching the live page.
+ *
+ * ## LOAD_READER_ARCHIVE
+ * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: parse URL/archiveId query, request only persisted archive state, and use an explicit freshness handoff.
+ * - Contract:
+ *   - INPUT: location { search }, sendMessage, elements, staleAfterMs option
+ *   - PRE: Reader is an extension page; sendMessage reads persisted state only
+ *   - OUTPUT: rendered Reader state
+ *   - POST:
+ *     - URL/archiveId query => one GET_PAGE_ARCHIVE request includes `staleAfterMs`
+ *     - no query => no storage request and missing state is rendered
+ *     - archive success => screenshot lookup uses the persisted archive URL
+ *   - FAILURE_MODES: MissingArchive, StorageFailed, InvalidArchive
+ *   - DATA: URLSearchParams, PageArchiveStore response, PageScreenshotStore response
+ *   - DATA_TRANSITION: storage response becomes DOM state; no live page data enters Reader
+ *   - EFFECTS: DOM, Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LOAD_READER_ARCHIVE
+ *   - query = PARSE_QUERY(location)
+ *   - IF query.url and query.archiveId are absent: RENDER_READER_ARCHIVE(null); RETURN MissingArchive
+ *   - staleAfterMs = options.staleAfterMs OR DEFAULT_READER_STALE_AFTER_MS (default 0, meaning no age-based override)
+ *   - archiveResponse = AWAIT sendMessage(GET_PAGE_ARCHIVE, { url: query.url, archiveId: query.archiveId, staleAfterMs })
+ *   - IF archiveResponse is missing or failed: RENDER_READER_ARCHIVE(null); RETURN MissingArchive
+ *   - RENDER_READER_ARCHIVE(archiveResponse.archive)
+ *   - screenshotResponse = AWAIT sendMessage(GET_PAGE_SCREENSHOTS, { url: archiveResponse.archive.url })
+ *   - RENDER_READER_SCREENSHOTS(screenshotResponse.screenshots)
+ *   - RETURN success
+ *
+ * ## RENDER_READER_ARCHIVE
+ * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: render only sanitized stored HTML/text and show freshness state without loading live HTML.
+ * - Contract:
+ *   - INPUT: archive (nullable), Reader DOM elements
+ *   - PRE: archive content came from persisted storage; sanitizer is available
+ *   - OUTPUT: { success: true, archive } | { success: false, code: MissingArchive }
+ *   - POST:
+ *     - archive absent => content is empty, missing state is visible, live link is hidden
+ *     - archive present => only sanitized HTML is inserted
+ *     - stale archive => warning remains visible while content remains readable
+ *   - FAILURE_MODES: MissingArchive, InvalidArchive
+ *   - DATA_TRANSITION: archive fields become text/DOM state; no live HTML is inserted
+ *   - EFFECTS: DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: RENDER_READER_ARCHIVE
+ *   - IF archive is absent:
+ *     - clear content
+ *     - show Archive unavailable
+ *     - hide live link
+ *     - RETURN MissingArchive
+ *   - title = archive.sourceTitle OR archive.title OR archive.url
+ *   - content.innerHTML = SANITIZE_ARCHIVE_HTML(archive.sanitizedHtml OR '')
+ *   - status = archive.status == stale ? stale warning : available message
+ *   - live link is optional and explicit; never auto-fetched
+ *   - RETURN success
+ *
+ * ## RENDER_READER_SCREENSHOTS
+ * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE] How: present only persisted safe screenshot artifacts alongside Reader content.
+ * - Contract:
+ *   - INPUT: screenshots (list), screenshot DOM elements
+ *   - PRE: screenshot response is untrusted data
+ *   - OUTPUT: rendered screenshot list
+ *   - POST:
+ *     - only data:image png/jpeg/webp base64 values create img elements
+ *     - empty safe list hides the screenshot section
+ *   - FAILURE_MODES: InvalidArchive
+ *   - EFFECTS: DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: RENDER_READER_SCREENSHOTS
+ *   - clear screenshot list
+ *   - FOR each screenshot with valid data:image/*;base64 data:
+ *     - append img with data URL and captured timestamp alt text
+ *   - hide screenshot section when list is empty
+ *
+ * ## OPEN_LIVE_PAGE
+ * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: expose explicit live-page navigation without coupling it to archive rendering or fetching it automatically.
+ * - Contract:
+ *   - INPUT: archive.url, live-link element
+ *   - PRE: archive.url is HTTP(S)
+ *   - OUTPUT: configured link
+ *   - POST: user activation may navigate to the live URL; Reader performs no fetch
+ *   - EFFECTS: DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: OPEN_LIVE_PAGE
+ *   - set live link href to archive.url only when URL is HTTP(S)
+ *   - user activation opens the link; Reader does not fetch it
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-OFFLINE_READER_MODE ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-PAGE_SCREENSHOT_ARCHIVE ===
+ * Capture and persist a bounded product screenshot as a separate Local/File artifact.
+ *
+ * ## VALIDATE_SCREENSHOT_REQUEST
+ * - [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE] How: validate backend, URL, privacy, and requested dimensions before invoking browser capture.
+ * - Contract:
+ *   - INPUT: url, storage, options, limits, isUrlAllowed
+ *   - PRE: request is explicit; isUrlAllowed is callable
+ *   - OUTPUT: valid | { error: UnsupportedBackend | RestrictedUrl | InhibitedUrl | TooLarge }
+ *   - POST:
+ *     - valid => browser capture may be called
+ *     - error => browser capture is not called
+ *   - FAILURE_MODES: UnsupportedBackend, RestrictedUrl, InhibitedUrl, TooLarge
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: VALIDATE_SCREENSHOT_REQUEST
+ *   - IF storage is not local or file: RETURN UnsupportedBackend
+ *   - IF url is not HTTP(S): RETURN RestrictedUrl
+ *   - IF isUrlAllowed(url) is false: RETURN InhibitedUrl
+ *   - IF requested dimensions exceed limits: RETURN TooLarge
+ *   - RETURN valid
+ *
+ * ## CAPTURE_PAGE_SCREENSHOT
+ * - [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE] How: perform pre-capture validation, capture through the dedicated browser boundary, then normalize and size-check the output.
+ * - Contract:
+ *   - INPUT: tabId, url, options, storage, limits, isUrlAllowed, dedicatedBrowserCapture
+ *   - PRE: capture request is explicit; validation dependencies are available
+ *   - OUTPUT: artifact | { success: false, code }
+ *   - POST:
+ *     - success => artifact has data URL, dimensions, format, contentHash, capturedAt
+ *     - validation error => browser capture was not invoked
+ *   - FAILURE_MODES: UnsupportedBackend, RestrictedUrl, InhibitedUrl, FullPageCaptureUnavailable, CaptureFailed, TooLarge
+ *   - EFFECTS: Browser IO, Async
+ *   - TERMINATION: total
+ * - PROCEDURE: CAPTURE_PAGE_SCREENSHOT
+ *   - validation = AWAIT VALIDATE_SCREENSHOT_REQUEST(url, storage, options, limits, isUrlAllowed)
+ *   - IF validation fails: RETURN { success: false, code: validation }
+ *   - IF options.fullPage and full-page capability is unavailable: RETURN FullPageCaptureUnavailable
+ *   - binary = AWAIT dedicatedBrowserCapture(tabId, options)
+ *   - IF binary fails: RETURN CaptureFailed
+ *   - artifact = NORMALIZE_SCREENSHOT(binary, options)
+ *   - IF artifact exceeds limits: RETURN TooLarge
+ *   - RETURN artifact
+ *
+ * ## SAVE_PAGE_SCREENSHOT
+ * - [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE] How: persist a validated screenshot through the explicit adapter/store boundary only after capture succeeds.
+ * - Contract:
+ *   - INPUT: bookmark { url, storage }, tab, options, screenshotStore
+ *   - PRE: screenshotStore is configured for the selected backend
+ *   - OUTPUT: { success: true, artifact } | { success: false, code }
+ *   - POST:
+ *     - success => one current screenshot artifact exists for URL
+ *     - failure => prior screenshot remains unchanged
+ *   - FAILURE_MODES: delegated capture failures, UnsupportedBackend, StorageFailed
+ *   - DATA_TRANSITION: successful recapture replaces current artifact after write
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SAVE_PAGE_SCREENSHOT
+ *   - artifact = AWAIT CAPTURE_PAGE_SCREENSHOT(tab, options, bookmark.storage)
+ *   - IF artifact is error: RETURN artifact
+ *   - result = AWAIT screenshotStore.saveScreenshot(bookmark.url, bookmark.storage, artifact)
+ *   - IF result fails: RETURN StorageFailed
+ *   - RETURN { success: true, artifact: result.artifact }
+ *
+ * ## REPLACE_CURRENT_SCREENSHOT
+ * - [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE] How: use one explicit adapter write to replace every prior artifact for the normalized URL while preserving unrelated archive data.
+ * - Contract:
+ *   - INPUT: normalized URL, selected backend, validated screenshot artifact, adapter
+ *   - PRE: backend is local or file; artifact passed validation and normalization
+ *   - OUTPUT: { success: true, artifact } | { success: false, code: UnsupportedBackend | StorageFailed }
+ *   - POST:
+ *     - success => exactly one current screenshot artifact for URL remains
+ *     - write failure => prior screenshot map remains unchanged
+ *   - FAILURE_MODES: InvalidUrl, UnsupportedBackend, StorageFailed
+ *   - DATA_TRANSITION: replacement data is prepared before one adapter write
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: REPLACE_CURRENT_SCREENSHOT
+ *   - data = AWAIT readArchiveMap(adapter)
+ *   - remove every data.screenshots entry whose artifact.url == normalize(url)
+ *   - data.screenshots[artifact.artifactId] = artifact with version incremented from current URL artifact or 1
+ *   - AWAIT adapter.writeArchiveFile(data)
+ *   - RETURN { success: true, artifact: data.screenshots[artifact.artifactId] }
+ *
+ * ## LIST_PAGE_SCREENSHOTS
+ * - [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE] How: enumerate only durable product screenshot records through the selected adapter in deterministic order.
+ * - Contract:
+ *   - INPUT: optional selected backend, URL, adapters
+ *   - PRE: backend is local or file when supplied
+ *   - OUTPUT: deterministic screenshot artifact list
+ *   - POST: list contains only durable screenshot records, ordered newest first
+ *   - FAILURE_MODES: UnsupportedBackend, StorageUnavailable, StorageFailed
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LIST_PAGE_SCREENSHOTS
+ *   - RETURN screenshotStore.listScreenshots(backend, url)
+ *
+ * ## DELETE_PAGE_SCREENSHOTS
+ * - [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE] How: delete screenshot artifacts for one URL without changing readable archive content.
+ * - Contract:
+ *   - INPUT: URL, optional selected backend, adapters
+ *   - PRE: URL is normalizable
+ *   - OUTPUT: { success: true } | { success: false, code: InvalidUrl | UnsupportedBackend | StorageFailed }
+ *   - POST: matching screenshot artifacts are absent; readable archive remains unless DELETE_PAGE_ARCHIVE runs
+ *   - FAILURE_MODES: InvalidUrl, UnsupportedBackend, StorageFailed
+ *   - DATA_TRANSITION: only matching screenshot records are removed
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: DELETE_PAGE_SCREENSHOTS
+ *   - RETURN screenshotStore.deleteScreenshots(url, backend)
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-PAGE_SCREENSHOT_ARCHIVE ===
+ */
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
 
 /** @typedef {import('../shared/message-types').MessageEnvelope} MessageEnvelope */
@@ -1316,6 +1781,12 @@ import { getSessionTags, recordSessionTags } from '../features/ai/session-tags.j
 import { requestAiTags } from '../features/ai/ai-tagging-provider.js'
 import { debugLog, debugError, browser } from '../shared/utils.js'
 import { validateMessageEnvelope, validateMessageData } from '../shared/message-schemas.js'
+import { capturePageContentFromSource } from '../features/archive/page-capture.js'
+import { PageArchiveStore } from '../features/archive/page-archive-store.js'
+import { captureArchiveAndAssociateBookmark } from '../features/archive/page-archive-bookmark-association.js'
+import { ArchiveContentSearch } from '../features/archive/archive-content-search.js'
+import { normalizeScreenshotArtifact, validateScreenshotRequest } from '../features/archive/page-screenshot-capture.js'
+import { captureProductScreenshot } from '../features/archive/browser-screenshot-capture.js'
 
 // Message type constants - migrated from config.js
 export const MESSAGE_TYPES = {
@@ -1393,6 +1864,16 @@ export const MESSAGE_TYPES = {
 
   // [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] AI tagging
   GET_PAGE_CONTENT: 'GET_PAGE_CONTENT',
+  // [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+  CAPTURE_PAGE_ARCHIVE: 'CAPTURE_PAGE_ARCHIVE',
+  GET_PAGE_ARCHIVE: 'GET_PAGE_ARCHIVE',
+  DELETE_PAGE_ARCHIVE: 'DELETE_PAGE_ARCHIVE',
+  // [REQ-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [IMPL-ARCHIVED_CONTENT_SEARCH]
+  SEARCH_ARCHIVED_CONTENT: 'SEARCH_ARCHIVED_CONTENT',
+  // [REQ-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [IMPL-PAGE_SCREENSHOT_ARCHIVE]
+  CAPTURE_PAGE_SCREENSHOT: 'CAPTURE_PAGE_SCREENSHOT',
+  GET_PAGE_SCREENSHOTS: 'GET_PAGE_SCREENSHOTS',
+  DELETE_PAGE_SCREENSHOTS: 'DELETE_PAGE_SCREENSHOTS',
   GET_AI_TAGS: 'GET_AI_TAGS',
   GET_SESSION_TAGS: 'getSessionTags',
   RECORD_SESSION_TAGS: 'recordSessionTags',
@@ -1411,11 +1892,14 @@ export const MESSAGE_TYPES = {
 }
 
 export class MessageHandler {
-  constructor (bookmarkProvider = null, tagService = null) {
+  constructor (bookmarkProvider = null, tagService = null, archiveStore = null, screenshotStore = null) {
     // [ARCH-LOCAL_STORAGE_PROVIDER] Use active bookmark provider (PinboardService or LocalBookmarkService)
     this.bookmarkProvider = bookmarkProvider || new PinboardService()
     this.tagService = tagService || new TagService(this.bookmarkProvider)
     this.configManager = new ConfigManager()
+    this.archiveSearch = new ArchiveContentSearch()
+    this.archiveStore = archiveStore || new PageArchiveStore({ archiveSearch: this.archiveSearch })
+    this.screenshotStore = screenshotStore || null
 
     // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Initialize tab search service
     this.tabSearchService = new TabSearchService()
@@ -1428,6 +1912,17 @@ export class MessageHandler {
   setBookmarkProvider (provider) {
     this.bookmarkProvider = provider
     this.tagService.pinboardService = provider
+  }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Wire the service worker's configured Local/File archive adapters after provider initialization.
+   */
+  setArchiveServices (archiveStore, screenshotStore = null, archiveSearch = this.archiveSearch) {
+    this.archiveSearch = archiveSearch || this.archiveSearch
+    this.archiveStore = archiveStore || this.archiveStore
+    this.screenshotStore = screenshotStore || this.screenshotStore
+    if (this.archiveStore) this.archiveStore.archiveSearch = this.archiveSearch
   }
 
   /**
@@ -1611,6 +2106,27 @@ export class MessageHandler {
           break
         case MESSAGE_TYPES.GET_PAGE_CONTENT:
           response = await this.handleGetPageContent(data)
+          break
+        case MESSAGE_TYPES.CAPTURE_PAGE_ARCHIVE:
+          response = await this.handleCapturePageArchive({ ...data, tabId: data?.tabId ?? tabId, url: data?.url || url })
+          break
+        case MESSAGE_TYPES.GET_PAGE_ARCHIVE:
+          response = await this.handleGetPageArchive(data)
+          break
+        case MESSAGE_TYPES.DELETE_PAGE_ARCHIVE:
+          response = await this.handleDeletePageArchive(data)
+          break
+        case MESSAGE_TYPES.SEARCH_ARCHIVED_CONTENT:
+          response = await this.handleSearchArchivedContent(data)
+          break
+        case MESSAGE_TYPES.CAPTURE_PAGE_SCREENSHOT:
+          response = await this.handleCapturePageScreenshot({ ...data, tabId: data?.tabId ?? tabId, url: data?.url || url })
+          break
+        case MESSAGE_TYPES.GET_PAGE_SCREENSHOTS:
+          response = await this.handleGetPageScreenshots(data)
+          break
+        case MESSAGE_TYPES.DELETE_PAGE_SCREENSHOTS:
+          response = await this.handleDeletePageScreenshots(data)
           break
         case MESSAGE_TYPES.GET_AI_TAGS:
           response = await this.handleGetAiTags(data)
@@ -1935,6 +2451,164 @@ export class MessageHandler {
   }
 
   /**
+   * [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Capture live page source through scripting, then associate the saved archive with selected-backend bookmark ownership.
+   */
+  async handleCapturePageArchive (data) {
+    const tabId = data?.tabId
+    const url = data?.url
+    if (tabId == null || !url) return { success: false, code: 'InvalidRequest', error: 'tabId and url required', bookmarkCreated: false }
+
+    const captureArchive = async (captureUrl, captureContext = {}) => {
+      const scripting = (typeof chrome !== 'undefined' && chrome.scripting)
+        ? chrome.scripting
+        : (typeof browser !== 'undefined' && browser.scripting) ? browser.scripting : null
+      if (!scripting) return { success: false, code: 'CaptureFailed', error: 'Page capture API unavailable' }
+      try {
+        const results = await scripting.executeScript({
+          target: { tabId: captureContext.tabId },
+          func: () => ({
+            title: document.title || '',
+            html: document.body?.innerHTML || document.documentElement?.innerHTML || '',
+            textContent: document.body?.innerText || document.body?.textContent || ''
+          })
+        })
+        const source = results?.[0]?.result
+        return capturePageContentFromSource({ ...source, url: captureUrl }, data)
+      } catch (error) {
+        debugError('[IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] CAPTURE_PAGE_ARCHIVE failed:', error)
+        return { success: false, code: 'CaptureFailed', error: error.message }
+      }
+    }
+
+    const selectedBackendLookup = async (lookupUrl, backend) => {
+      if (typeof this.bookmarkProvider.getBookmarkForBackend === 'function') {
+        return this.bookmarkProvider.getBookmarkForBackend(lookupUrl, backend)
+      }
+      return null
+    }
+
+    const saveBookmark = bookmark => this.bookmarkProvider.saveBookmark({
+      ...bookmark,
+      preferredBackend: data.preferredBackend
+    })
+
+    return captureArchiveAndAssociateBookmark({
+      url,
+      preferredBackend: data.preferredBackend,
+      captureContext: { tabId }
+    }, {
+      selectedBackendLookup,
+      captureArchive,
+      archiveStore: this.archiveStore,
+      saveBookmark,
+      isUrlAllowed: this.configManager.isUrlAllowed.bind(this.configManager)
+    })
+  }
+
+  /**
+   * [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE]
+   * Read only stored archive data; no live URL fetch is performed.
+   */
+  async handleGetPageArchive (data) {
+    const archive = data?.archiveId
+      ? await this.archiveStore.getArchiveById?.(data.archiveId, data?.backend || data?.storage)
+      : await this.archiveStore.getArchive(data?.url, data?.backend || data?.storage)
+    if (!archive) return { success: false, code: 'MissingArchive', archive: null }
+    const staleAfterMs = Number(data?.staleAfterMs || 0)
+    const isStale = staleAfterMs > 0 && Date.now() - Date.parse(archive.capturedAt) > staleAfterMs
+    return { success: true, archive: { ...archive, status: isStale ? 'stale' : archive.status } }
+  }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Delete readable archive and all screenshot artifacts for the selected bookmark backend.
+   */
+  async handleDeletePageArchive (data) {
+    return this.archiveStore.deleteArchive(data?.url, data?.backend || data?.storage)
+  }
+
+  /**
+   * [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH]
+   * Rebuild the deterministic text view from current Local/File artifacts before every explicit query.
+   */
+  async handleSearchArchivedContent (data) {
+    const archives = await this.archiveStore.listArchives(data?.backend || data?.storage)
+    this.archiveSearch.seed(archives)
+    const query = String(data?.query || '').trim()
+    const results = query
+      ? this.archiveSearch.queryArchivedContent(query)
+      : this.archiveSearch.browseArchivedContent(archives)
+    return {
+      success: true,
+      query: String(data?.query || ''),
+      results
+    }
+  }
+
+  /**
+   * [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE]
+   * Capture a product screenshot through the browser API boundary; demo screenshot mode is untouched.
+   */
+  async handleCapturePageScreenshot (data) {
+    if (!this.screenshotStore) return { success: false, code: 'StorageUnavailable' }
+    const tabId = data?.tabId
+    const url = data?.url
+    const backend = String(data.backend || data.storage || await this.bookmarkProvider.getStorageBackendForUrl?.(url) || 'local').toLowerCase()
+    // [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE] Validate backend, URL, and dimensions before invoking the browser capture boundary.
+    const validation = validateScreenshotRequest({
+      url,
+      storage: backend,
+      options: data.options
+    })
+    if (!validation.valid) return { success: false, code: validation.code }
+    if (!(await this.configManager.isUrlAllowed(url))) {
+      console.debug('[IMPL-PAGE_SCREENSHOT_ARCHIVE] Screenshot capture skipped for inhibited URL:', url)
+      return { success: false, code: 'InhibitedUrl' }
+    }
+    const tabs = (typeof chrome !== 'undefined' && chrome.tabs) ? chrome.tabs : browser.tabs
+    if (tabId == null) return { success: false, code: 'CaptureFailed' }
+    try {
+      const captureResult = await captureProductScreenshot({
+        tabs,
+        windowId: data.windowId,
+        options: data.options,
+        captureFullPage: data.captureFullPage
+      })
+      if (!captureResult.success) return captureResult
+      const artifactResult = normalizeScreenshotArtifact({
+        url,
+        storage: backend,
+        dataUrl: captureResult.dataUrl,
+        options: captureResult.options
+      })
+      if (!artifactResult.success) return artifactResult
+      return this.screenshotStore.saveScreenshot(url, backend, artifactResult.artifact)
+    } catch (error) {
+      debugError('[IMPL-PAGE_SCREENSHOT_ARCHIVE] CAPTURE_PAGE_SCREENSHOT failed:', error)
+      return { success: false, code: 'CaptureFailed', error: error.message }
+    }
+  }
+
+  /**
+   * [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE]
+   * List only persisted product screenshot artifacts.
+   */
+  async handleGetPageScreenshots (data) {
+    if (!this.screenshotStore) return { success: true, screenshots: [] }
+    return { success: true, screenshots: await this.screenshotStore.listScreenshots(data?.backend || data?.storage, data?.url) }
+  }
+
+  /**
+   * [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE]
+   * Remove screenshot artifacts independently or as part of bookmark lifecycle deletion.
+   */
+  async handleDeletePageScreenshots (data) {
+    if (!this.screenshotStore) return { success: true }
+    return this.screenshotStore.deleteScreenshots(data?.url, data?.backend || data?.storage)
+  }
+
+  /**
    * [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] [IMPL-AI_TAGGING_PROVIDER]
    * Call AI provider for tags; uses config aiApiKey, aiProvider, aiTagLimit and TagService.sanitizeTag.
    */
@@ -2023,7 +2697,15 @@ export class MessageHandler {
    * [IMPL-BOOKMARK_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX] Pass full data so preferredBackend reaches BookmarkRouter.
    */
   async handleDeleteBookmark (data) {
-    return this.bookmarkProvider.deleteBookmark(data)
+    const result = await this.bookmarkProvider.deleteBookmark(data)
+    if (result?.success && (data?.preferredBackend === 'local' || data?.preferredBackend === 'file' || !data?.preferredBackend)) {
+      const cleanup = await this.archiveStore.deleteArchive(data?.url, data?.preferredBackend)
+      if (!cleanup.success) {
+        console.warn('[IMPL-PAGE_ARCHIVE_STORAGE] Bookmark deleted but archive cleanup failed:', cleanup)
+        return { ...result, archiveCleanup: cleanup }
+      }
+    }
+    return result
   }
 
   async handleSaveTag (data) {

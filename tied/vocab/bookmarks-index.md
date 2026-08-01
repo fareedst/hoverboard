@@ -27,6 +27,9 @@
 | **regex find-and-replace** | bulk replace | Title / URL / Tags / Notes fields on selection |
 | **index-open dismisses side panel** | close sidebar on index | On Local Bookmarks Index **tab create** (popup / command / context menu) only; broadcast `REQUEST_SIDE_PANEL_CLOSE`. Not on index page refresh. Toolbar icon may reopen the **side panel**. |
 | **Search Bookmarks** | library search (alone) | Capture UI control that opens Index with `?q=`; **not** Search tabs ([REQ-LIBRARY_SEARCH_ENTRY]) |
+| **archive-content scope** | content search, full-text mode | Explicit Local Bookmarks Index scope for extracted text; metadata search remains the default |
+| **Reader target** | archive link, offline page link | Extension Reader URL returned with archive search results |
+| **archive snippet** | content preview | Bounded extracted-text context shown in an archive-content result |
 | **link health** | dead-link check, uptime | Batch HTTP HEAD→GET status for Index URLs with inhibit skip + AbortController timeout; gated by **linkHealthChecksEnabled** (default off); side table `hoverboard_link_health` ([REQ-LINK_HEALTH]) |
 | **linkHealthChecksEnabled** | enable link checks | Options **Enable link health checks**; ConfigManager default `false` |
 | **Health column** | status column | Index column + optional filter over last link-health result |
@@ -58,6 +61,8 @@
 | Delete status | `#delete-result` | — | pending `Deleting…` / final `Deleted N…` | `bookmarks-table-delete-status` |
 | Export CSV | Export all / displayed / selected | — | CSV columns Title←`description`, Notes←`extended` | `bookmarks-table-csv` |
 | Import CSV/JSON | Import (control group) | — | preferredBackend on save; pending/final in `#import-result` | bookmarks-table import |
+| Archive-content search | Archived content | `SEARCH_ARCHIVED_CONTENT` | extracted text outside metadata snapshot | `ArchiveContentSearch` / `loadArchiveSearchResults` |
+| Reader result | Open offline Reader | — | `reader.html?url=…` | `readerTarget` |
 
 | Browser HTML import | Browser Bookmark Import | — | Netscape HTML | `browser-bookmark-import` |
 | Folder in HTML | Folder | `<H3>` + nested `<DL>` | — | BOOKMARK_HTML_FORMAT |
@@ -89,6 +94,9 @@
 - **link health** — SW fetch HEAD then GET with AbortController timeout; skip URLs matching **inhibit URL** list (`hoverboard_inhibit_urls`); gated by **linkHealthChecksEnabled** (Options, default off); results in `chrome.storage.local` key `hoverboard_link_health`; Index **Health column** and status filter; optional This Page/popup **link health hint**.
 - **Refresh API snapshot** — Writes multi-backend `aggregate-snapshot.json` under the File storage directory for Local Query API GET preference (Phase 2).
 - **Index orchestrators** — Composition-testable Index UI helpers: `prefillSearchFromQuery` (`bookmarks-table-library-search.js`), `runCheckLinkHealth` / `formatHealthCellLabel` (`bookmarks-table-link-health.js`), `runRefreshApiSnapshot` (`bookmarks-table-api-snapshot.js`). Wired thinly from `bookmarks-table.js` init / button handlers.
+- **archive-content scope** — Explicit search scope that queries extracted archive text; selecting it does not alter metadata matching.
+- **archive snippet** — Bounded text context returned by archive search for row display.
+- **Reader target** — Stored archive destination in `src/ui/reader/reader.html`; it never refetches the live URL.
 
 ---
 
@@ -126,6 +134,8 @@
 | Import records | `(proposed) IMPORT_BOOKMARKS_INDEX` | [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml) |
 | Regex replace | `(proposed) REGEX_REPLACE_BOOKMARK_FIELDS` | [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml) |
 | Browser import conflict | Skip / Overwrite / Merge handlers | [IMPL-BROWSER_BOOKMARK_IMPORT](../implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml) |
+| Query archive content | `QUERY_ARCHIVED_CONTENT` | [IMPL-ARCHIVED_CONTENT_SEARCH](../implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH.yaml) |
+| Apply archive-content scope | `APPLY_ARCHIVE_CONTENT_SCOPE` | [IMPL-ARCHIVED_CONTENT_SEARCH](../implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH.yaml) |
 
 ---
 
@@ -134,6 +144,8 @@
 | Term | Section |
 |------|---------|
 | Add tags / Delete tags | Named concepts |
+| archive-content scope | Preferred terms / Named concepts |
+| archive snippet | Preferred terms / Named concepts |
 | Bulk Delete | Pseudo-code block names / Naming bridge |
 | delete result pending / final | Named concepts |
 | Browser Bookmark Import | Preferred terms |
@@ -178,6 +190,7 @@
 | Netscape Bookmark File Format | Named concepts |
 | PROVIDER_INIT_MUTEX | Pseudo-code block names |
 | regex find-and-replace | Preferred terms |
+| Reader target | Preferred terms / Named concepts |
 | Skip / Overwrite / Merge tags | Named concepts |
 | Storage column | Preferred terms |
 | Stores (L / F / S / B) | Preferred terms |

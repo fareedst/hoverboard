@@ -1,0 +1,57 @@
+REQ-ARCHIVED_CONTENT_SEARCH:
+  category: "Functional"
+  description: "Users can search extracted text from stored page archives using an explicit archive-content scope while existing metadata search remains unchanged."
+  detail_file: "requirements/REQ-ARCHIVED_CONTENT_SEARCH.yaml"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Close archive scope, Reader navigation, and E2E evidence"
+  name: "Archived Content Search"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Backward-compatible metadata search and URL-query entry points."
+      - "Deterministic local/file search with Reader destinations."
+    problems_solved:
+      - "Archived content cannot currently be found after capture."
+      - "Metadata-only search cannot answer content queries."
+    why: "Make archived page bodies discoverable without conflating them with Pinboard-shaped metadata search."
+  related_requirements:
+    depends_on:
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+    related_to:
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_QUERY_API"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Archive-content search is an explicit scope separate from title, URL, tags, and notes search."
+    - criterion: "Existing metadata search behavior and its tests remain unchanged."
+    - criterion: "Index updates on capture, recapture, and deletion; missing or stale archives are represented consistently."
+    - criterion: "Queries search extracted text from Local and File archives and return bookmark identity, snippet, capture status, and Reader target."
+    - criterion: "Search behavior defines case normalization, substring matching, result ordering, and bounded snippets."
+  status: "Implemented"
+  summary: "Search extracted text in Local and File page archives with snippets and Reader links."
+  traceability:
+    architecture:
+      - "ARCH-ARCHIVED_CONTENT_SEARCH"
+    code_annotations:
+      - "REQ-ARCHIVED_CONTENT_SEARCH"
+    implementation:
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/archive-content-search.test.js"
+      - "tests/unit/bookmarks-table-archive-search.test.js"
+      - "tests/unit/message-handler-archive.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Tokenization/query matching, ranking/order, snippets, updates, deletion, and mixed archive states."
+    - method: "Integration tests"
+      coverage: "Local/File archive sources and Index query integration."
+    - method: "E2E tests"
+      coverage: "Explicit archive-content search and opening a Reader result."

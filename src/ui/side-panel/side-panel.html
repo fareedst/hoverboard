@@ -36,6 +36,9 @@
       <p data-popup-ref="errorMessage">Unable to load bookmark information.</p>
       <button type="button" data-popup-ref="retryBtn" class="button secondary">Retry</button>
     </div>
+    <div data-popup-ref="actionFeedback" class="action-feedback hidden" role="status" aria-live="polite">
+      <p data-popup-ref="actionFeedbackMessage"></p>
+    </div>
     <span data-popup-ref="bookmarkStatus" class="hidden" aria-hidden="true"></span>
     <div data-popup-ref="mainInterface" class="main-interface hidden">
       <section class="quick-actions">
@@ -54,6 +57,12 @@
           <button type="button" data-popup-ref="togglePrivateBtn" class="action-icon-button" title="Toggle Privacy" aria-label="Toggle privacy"><span class="action-icon" data-popup-ref="privateIcon" aria-hidden="true">&#x1F512;</span></button>
           <button type="button" data-popup-ref="toggleReadBtn" class="action-icon-button" title="Toggle Read Later" aria-label="Toggle read later"><span class="action-icon" data-popup-ref="readIcon" aria-hidden="true">&#x1F4CB;</span></button>
           <button type="button" data-popup-ref="deleteBtn" class="action-icon-button danger" title="Delete Bookmark" aria-label="Delete bookmark"><span class="action-icon" aria-hidden="true">&#x1F5D1;&#xFE0F;</span></button>
+          <!-- [REQ-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [IMPL-PAGE_ARCHIVE_STORAGE] Explicit This Page capture for Local/File bookmarks. -->
+          <button type="button" data-popup-ref="captureArchiveBtn" class="action-icon-button" title="Save page archive" aria-label="Save page archive"><span class="action-icon" aria-hidden="true">&#x1F4DA;</span></button>
+          <!-- [REQ-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [IMPL-PAGE_SCREENSHOT_ARCHIVE] Dedicated product capture, separate from demo screenshot mode. -->
+          <button type="button" data-popup-ref="captureScreenshotBtn" class="action-icon-button" title="Save page screenshot" aria-label="Save page screenshot"><span class="action-icon" aria-hidden="true">&#x1F4F8;</span></button>
+          <!-- [REQ-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [IMPL-OFFLINE_READER_MODE] -->
+          <button type="button" data-popup-ref="openReaderBtn" class="action-icon-button" title="Open offline Reader" aria-label="Open offline Reader"><span class="action-icon" aria-hidden="true">&#x1F4D6;</span></button>
         </div>
       </section>
       <section class="storage-section">

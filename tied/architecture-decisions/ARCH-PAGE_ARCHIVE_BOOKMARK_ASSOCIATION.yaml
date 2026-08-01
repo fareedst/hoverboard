@@ -1,0 +1,52 @@
+ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION:
+  decision: "The capture boundary validates an explicit preferredBackend of local or file, queries only that backend for URL existence, saves the archive before creating a missing minimal bookmark, and preserves existing bookmark records. A bookmark-save failure compensates the archive mutation by restoring the prior archive or deleting only the newly written archive version; the response exposes stable retention and cleanup diagnostics."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-01"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Define selected-backend archive-bookmark association and compensation boundary"
+  name: "Page Archive Bookmark Association Architecture"
+  rationale:
+    alternatives_considered:
+      - name: "Use aggregate getBookmarkForUrl"
+        rejected_reason: "2C aggregate semantics can find a record in a different backend and would violate selected-backend ownership."
+      - name: "Create the bookmark before capture"
+        rejected_reason: "A failed or restricted capture would leave a metadata-only bookmark that the user did not request."
+    benefits:
+      - "Makes partial failure observable and recoverable."
+      - "Preserves user metadata during recapture."
+      - "Prevents cross-backend records from suppressing a selected-backend bookmark."
+    consequences:
+      - "CAPTURE_PAGE_ARCHIVE must reject missing or unsupported preferredBackend before page capture."
+      - "Ordinary bookmark save, move, and deletion contracts remain unchanged."
+      - "The orchestrator requires selected-backend lookup and archive compensation seams."
+    why: "Archive artifacts remain separate while the bookmark provides the navigable ownership record and selected storage context."
+  related_decisions:
+    depends_on:
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    informs:
+      - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    see_also:
+      - "IMPL-BOOKMARK_CREATE_UPDATE_TIMES"
+      - "IMPL-BOOKMARK_ROUTER"
+  status: "Accepted"
+  summary: "Associate each newly captured Local/File page archive with a selected-backend bookmark without merging archive artifacts into bookmark metadata."
+  traceability:
+    code_annotations:
+      - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    implementation:
+      - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    requirements:
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+    tests:
+      - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-archive-bookmark-association.test.js"
+      - "tests/unit/popup-archive-response.test.js"

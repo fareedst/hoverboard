@@ -96,6 +96,15 @@ ARCH-AI_TAGGING_FLOW:
       - "IMPL-SESSION_TAGS"
     requirements:
       - "REQ-AI_TAGGING_POPUP"
+ARCH-ARCHIVED_CONTENT_SEARCH:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "ARCH-SEARCH"
+    - "REQ-ARCHIVED_CONTENT_SEARCH"
+  detail_file: "architecture-decisions/ARCH-ARCHIVED_CONTENT_SEARCH.yaml"
+  name: "Archived Content Search Architecture"
+  status: "Accepted"
+  summary: "Query extracted archive text through an explicit Index archive-content scope with bounded snippets and Reader targets."
 ARCH-BADGE:
   alternatives_considered:
     - name: "No badges"
@@ -1613,6 +1622,14 @@ ARCH-NON_WEB_TOOLS_TOOLBAR:
       reason: "Five launchers including Visit History"
   name: "Non-web tools toolbar architecture"
   status: "Active"
+ARCH-OFFLINE_READER_MODE:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "REQ-OFFLINE_READER_MODE"
+  detail_file: "architecture-decisions/ARCH-OFFLINE_READER_MODE.yaml"
+  name: "Offline Reader Mode Architecture"
+  status: "Accepted"
+  summary: "Render sanitized archive HTML in a dedicated extension page without live-page fetches or script execution."
 ARCH-OVERLAY:
   alternatives_considered:
     - name: "Modal dialogs"
@@ -1790,6 +1807,33 @@ ARCH-OVERLAY_TESTABILITY:
       - "REQ-OVERLAY_SYSTEM"
     tests:
       - "All overlay tests"
+ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+  detail_file: "architecture-decisions/ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml"
+  name: "Page Archive Bookmark Association Architecture"
+  status: "Accepted"
+  summary: "Associate each newly captured Local/File page archive with a selected-backend bookmark without merging archive artifacts into bookmark metadata."
+ARCH-PAGE_ARCHIVE_STORAGE:
+  cross_references:
+    - "ARCH-FILE_BOOKMARK_PROVIDER"
+    - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+  detail_file: "architecture-decisions/ARCH-PAGE_ARCHIVE_STORAGE.yaml"
+  name: "Page Archive Storage Architecture"
+  status: "Accepted"
+  summary: "Use separate Local/File archive artifacts and associate successful captures with the explicitly selected backend bookmark while preserving metadata-only routing elsewhere."
+ARCH-PAGE_SCREENSHOT_ARCHIVE:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  detail_file: "architecture-decisions/ARCH-PAGE_SCREENSHOT_ARCHIVE.yaml"
+  name: "Page Screenshot Archive Architecture"
+  status: "Accepted"
+  summary: "Capture screenshots through a dedicated browser-capture boundary and persist them as separate Local/File artifacts."
 ARCH-PINBOARD_API:
   alternatives_considered:
     - name: "OAuth"

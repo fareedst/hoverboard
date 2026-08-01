@@ -143,6 +143,22 @@ export class FileBookmarkStorageAdapter {
   async writeBookmarksFile (_data) {
     throw new Error('writeBookmarksFile must be implemented')
   }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Optional sibling archive file contract. Bookmark providers remain compatible when unsupported.
+   */
+  async readArchiveFile () {
+    throw new Error('readArchiveFile must be implemented by archive-capable file adapters')
+  }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Optional sibling archive file contract for readable and screenshot artifacts.
+   */
+  async writeArchiveFile (_data) {
+    throw new Error('writeArchiveFile must be implemented by archive-capable file adapters')
+  }
 }
 
 /**
@@ -153,6 +169,9 @@ export class InMemoryFileBookmarkAdapter extends FileBookmarkStorageAdapter {
   constructor () {
     super()
     this._data = DEFAULT_FILE_DATA()
+    // [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+    // Test/default File provider keeps archive artifacts in a separate in-memory collection.
+    this._archiveData = { version: 1, archives: {}, screenshots: {} }
   }
 
   async readBookmarksFile () {
@@ -163,6 +182,18 @@ export class InMemoryFileBookmarkAdapter extends FileBookmarkStorageAdapter {
     if (data && typeof data.version === 'number' && typeof data.bookmarks === 'object') {
       this._data = { version: data.version, bookmarks: { ...data.bookmarks } }
     }
+  }
+
+  async readArchiveFile () {
+    return JSON.parse(JSON.stringify(this._archiveData))
+  }
+
+  async writeArchiveFile (data) {
+    this._archiveData = JSON.parse(JSON.stringify({
+      version: data?.version || 1,
+      archives: data?.archives || {},
+      screenshots: data?.screenshots || {}
+    }))
   }
 }
 

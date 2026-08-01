@@ -244,6 +244,32 @@ IMPL-AI_TAGGING_READABILITY:
     tests:
       - "tests/unit/readability-extract.test.js (with jsdom or fixture HTML)"
       - "tests/unit/readability-extract.test.js"
+IMPL-ARCHIVED_CONTENT_SEARCH:
+  cross_references:
+    - "ARCH-ARCHIVED_CONTENT_SEARCH"
+    - "ARCH-OFFLINE_READER_MODE"
+    - "IMPL-LIBRARY_SEARCH_ENTRY"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX"
+    - "IMPL-OFFLINE_READER_MODE"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "REQ-ARCHIVED_CONTENT_SEARCH"
+    - "REQ-OFFLINE_READER_MODE"
+  detail_file: "implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH-pseudocode.md"
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-31"
+      reason: "Synchronize archive-search Index integration and E2E coverage"
+  name: "Archived Content Search Implementation"
+  status: "Active"
+  summary: "Maintain a deterministic extracted-text archive index and expose explicit archive-content search results to the Index."
+  traceability:
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/archive-content-search.test.js"
+      - "tests/unit/bookmarks-table-archive-search.test.js"
+      - "tests/unit/message-handler-archive.test.js"
 IMPL-ARRAY_OBJECT_UTILITIES:
   code_locations:
     files:
@@ -444,10 +470,15 @@ IMPL-BOOKMARK_ROUTER:
         description: "BookmarkRouter implementation"
   cross_references:
     - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+    - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
     - "REQ-BROWSER_BOOKMARK_STORAGE"
     - "REQ-LOCAL_BOOKMARKS_INDEX"
     - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml"
@@ -2722,6 +2753,29 @@ IMPL-NON_WEB_TOOLS_TOOLBAR:
       reason: "Visit History launcher"
   name: "Non-web tools toolbar implementation"
   status: "Active"
+IMPL-OFFLINE_READER_MODE:
+  cross_references:
+    - "ARCH-OFFLINE_READER_MODE"
+    - "IMPL-ARCHIVED_CONTENT_SEARCH"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    - "REQ-OFFLINE_READER_MODE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  detail_file: "implementation-decisions/IMPL-OFFLINE_READER_MODE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-OFFLINE_READER_MODE-pseudocode.md"
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-31"
+      reason: "Synchronize Reader E2E and message-boundary coverage"
+  name: "Offline Reader Mode Implementation"
+  status: "Active"
+  summary: "Load a stored archive through extension messaging and render sanitized HTML in a dedicated Reader page."
+  traceability:
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/reader.test.js"
 IMPL-OVERLAY:
   code_locations:
     files:
@@ -2898,6 +2952,113 @@ IMPL-OVERLAY_TEST_HARNESS:
       - "tests/unit/overlay-test-debug.test.js"
       - "tests/utils/mock-dom.js"
       - "tests/utils/overlay-test-harness.js"
+IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+  detail_file: "implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION-pseudocode.md"
+  name: "Page Archive Bookmark Association"
+  status: "Active"
+  summary: "Orchestrate selected-backend archive capture, bookmark preservation or minimal creation, and compensating cleanup."
+IMPL-PAGE_ARCHIVE_STORAGE:
+  code_locations:
+    files:
+      - path: "src/features/archive/page-archive-store.js"
+        description: "Archive record normalization, capability resolution, and lifecycle orchestration"
+      - path: "src/features/archive/page-archive-storage-adapter.js"
+        description: "Local/File archive adapter contract and test doubles"
+      - path: "src/features/archive/page-capture.js"
+        description: "Readable HTML/text capture and sanitization"
+      - path: "src/features/archive/archive-sanitizer.js"
+        description: "Standalone archive sanitizer shared by capture and Reader"
+      - path: "src/core/message-handler.js"
+        description: "Archive capture/read/delete message handlers"
+      - path: "src/features/storage/bookmark-router.js"
+        description: "Backend capability and lifecycle delegation"
+    functions:
+      - name: "capturePageContentFromSource"
+        description: "Capture and normalize sanitized readable HTML and text"
+        file: "src/features/archive/page-capture.js"
+      - name: "saveArchive"
+        description: "Persist a versioned archive through the resolved Local/File adapter"
+        file: "src/features/archive/page-archive-store.js"
+      - name: "deleteArchive"
+        description: "Delete all artifacts and index entries for a bookmark"
+        file: "src/features/archive/page-archive-store.js"
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  detail_file: "implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE-pseudocode.md"
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-31"
+      reason: "Synchronize archive sanitizer, privacy gate, and validated test traceability"
+  name: "Page Archive Storage Implementation"
+  status: "Active"
+  summary: "Capture, sanitize, persist, retrieve, and delete Local/File archive artifacts, then associate successful captures with selected-backend bookmark ownership."
+  traceability:
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-archive-store.test.js"
+      - "tests/unit/page-capture.test.js"
+IMPL-PAGE_SCREENSHOT_ARCHIVE:
+  code_locations:
+    files:
+      - path: "src/features/archive/browser-screenshot-capture.js"
+        description: "Dedicated viewport/full-page product browser capture boundary"
+      - path: "src/features/archive/page-screenshot-capture.js"
+        description: "Screenshot artifact validation and normalization"
+      - path: "src/features/archive/page-screenshot-store.js"
+        description: "Separate screenshot artifact persistence"
+      - path: "src/core/message-handler.js"
+        description: "Screenshot capture/read/delete message handlers"
+      - path: "src/ui/reader/reader.js"
+        description: "Screenshot artifact presentation entry"
+    functions:
+      - name: "captureProductScreenshot"
+        description: "Capture viewport or delegated full-page product screenshot"
+        file: "src/features/archive/browser-screenshot-capture.js"
+      - name: "normalizeScreenshotArtifact"
+        description: "Validate and normalize screenshot artifact metadata"
+        file: "src/features/archive/page-screenshot-capture.js"
+      - name: "saveScreenshot"
+        description: "Persist screenshot artifact through Local/File adapter"
+        file: "src/features/archive/page-screenshot-store.js"
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    - "IMPL-OFFLINE_READER_MODE"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "REQ-OFFLINE_READER_MODE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  detail_file: "implementation-decisions/IMPL-PAGE_SCREENSHOT_ARCHIVE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PAGE_SCREENSHOT_ARCHIVE-pseudocode.md"
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-31"
+      reason: "Add dedicated browser capture boundary and validated lifecycle traceability"
+  name: "Page Screenshot Archive Implementation"
+  status: "Active"
+  summary: "Capture bounded product screenshots through browser APIs and persist separate Local/File screenshot artifacts."
+  traceability:
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-screenshot-archive.test.js"
 IMPL-PINBOARD_API:
   code_locations:
     files:

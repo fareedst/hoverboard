@@ -105,6 +105,19 @@ REQ-AI_TAGGING_POPUP:
       coverage: "Split logic (in-session vs suggested), default preferredBackend, Readability extraction, provider request/parse"
     - method: "Manual verification"
       coverage: "Popup button flow end-to-end"
+REQ-ARCHIVED_CONTENT_SEARCH:
+  category: "Functional"
+  detail_file: "requirements/REQ-ARCHIVED_CONTENT_SEARCH.yaml"
+  name: "Archived Content Search"
+  priority: "P1"
+  status: "Implemented"
+  summary: "Search extracted text in Local and File page archives with snippets and Reader links."
+  traceability:
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/archive-content-search.test.js"
+      - "tests/unit/bookmarks-table-archive-search.test.js"
+      - "tests/unit/message-handler-archive.test.js"
 REQ-BADGE_INDICATORS:
   category: "Functional"
   detail_file: "requirements/REQ-BADGE_INDICATORS.yaml"
@@ -1430,6 +1443,18 @@ REQ-NON_WEB_TOOLS_TOOLBAR:
   name: "Non-web tools toolbar"
   priority: "P1"
   status: "Implemented"
+REQ-OFFLINE_READER_MODE:
+  category: "Functional"
+  detail_file: "requirements/REQ-OFFLINE_READER_MODE.yaml"
+  name: "Offline Reader Mode"
+  priority: "P1"
+  status: "Implemented"
+  summary: "Render sanitized stored page archives in a dedicated offline Reader surface."
+  traceability:
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/reader.test.js"
 REQ-OVERLAY_AUTO_SHOW_CONTROL:
   category: "Functional"
   detail_file: "requirements/REQ-OVERLAY_AUTO_SHOW_CONTROL.yaml"
@@ -1618,6 +1643,40 @@ REQ-OVERLAY_SYSTEM:
   validation_criteria:
     - method: "Overlay display tests"
       coverage: "All activation scenarios"
+REQ-PAGE_ARCHIVE_STORAGE:
+  category: "Functional"
+  detail_file: "requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml"
+  name: "Page Archive Storage"
+  priority: "P1"
+  status: "Implemented"
+  summary: "Capture and persist sanitized readable page archives and separate screenshot artifacts for Local and File bookmarks only, associating each archive with the explicitly selected backend bookmark."
+  traceability:
+    architecture:
+      - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+    implementation:
+      - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    tests:
+      - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-archive-bookmark-association.test.js"
+      - "tests/unit/page-archive-store.test.js"
+      - "tests/unit/page-capture.test.js"
+REQ-PAGE_SCREENSHOT_ARCHIVE:
+  category: "Functional"
+  detail_file: "requirements/REQ-PAGE_SCREENSHOT_ARCHIVE.yaml"
+  name: "Page Screenshot Archive"
+  priority: "P2"
+  status: "Implemented"
+  summary: "Capture and persist product screenshot artifacts for Local and File bookmarks."
+  traceability:
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-screenshot-archive.test.js"
+      - "tests/unit/reader.test.js"
 REQ-PER_BOOKMARK_STORAGE_BACKEND:
   category: "Functional"
   detail_file: "requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml"

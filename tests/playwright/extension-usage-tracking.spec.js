@@ -170,7 +170,7 @@ test.describe('[IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] This Page p
     await expect(panel.locator('[data-popup-ref="suggestedTags"]')).toBeAttached()
     await expect(panel.locator('[data-popup-ref="suggestedTagsContainer"]')).toBeAttached()
 
-    await expect(panel.locator('.search-section')).toBeAttached()
+    await expect(panel.locator('.search-section:not(.library-search-section)')).toBeAttached()
     await expect(panel.locator('[data-popup-ref="searchInput"]')).toBeAttached()
     await expect(panel.locator('[data-popup-ref="searchBtn"]')).toBeAttached()
 

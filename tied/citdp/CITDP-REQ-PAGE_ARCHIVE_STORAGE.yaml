@@ -1,0 +1,116 @@
+CITDP-REQ-PAGE_ARCHIVE_STORAGE:
+  change_definition:
+    completion_criteria:
+      docs_updated:
+        - "tied/architecture-decisions/ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml"
+        - "tied/architecture-decisions/ARCH-PAGE_ARCHIVE_STORAGE.yaml"
+        - "tied/implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION-pseudocode.md"
+        - "tied/implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml"
+        - "tied/implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE-pseudocode.md"
+        - "tied/implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE.yaml"
+        - "tied/requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml"
+        - "tied/vocab/bookmarks.md"
+        - "tied/vocab/ipc-messaging.md"
+        - "tied/vocab/page-archives.md"
+        - "tied/vocab/storage-backends.md"
+        - "tied/vocab/ui-surfaces.md"
+      validation_evidence:
+        association: "Selected-backend lookup, stub preservation, recapture, bookmark-save compensation, and cleanup diagnostics are covered by tests/unit/page-archive-bookmark-association.test.js and tests/unit/page-archive-store.test.js."
+        composition: "Message dispatch and adapter lifecycle are covered by tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js and tests/unit/message-handler-archive.test.js; popup action binding, service-worker runtime listener, and archive-scope isolation are covered by tests/integration/popup-archive-actions-composition.integration.test.js, tests/integration/service-worker-archive-dispatch-composition.integration.test.js, and tests/integration/bookmarks-table-archive-scope-composition.integration.test.js."
+        focused_unit: "77 archive unit and composition tests passed across storage, screenshot, search, Reader, routing, UI feedback, dispatch, and scope suites on 2026-08-01; full Jest passed 1562 tests with 1 skipped across 156 suites."
+        verification_gate_notes: "YAML index validation, TIED consistency with pseudocode, source lint, typecheck, manifest, token, security, full Jest, full extension E2E, and archive-targeted extension E2E all passed."
+    current_behavior: "CAPTURE_PAGE_ARCHIVE stored a Local/File archive but did not create a missing bookmark, report bookmark association state, or require the explicitly selected backend."
+    desired_behavior: "CAPTURE_PAGE_ARCHIVE requires preferredBackend local/file, checks only that backend, preserves existing records including stubs, creates a minimal bookmark after successful capture when absent, and returns explicit compensation diagnostics on association failure."
+    impact_analysis:
+      impl_inventory_notes: "Association orchestrator, PageArchiveStore compensation seams, selected-backend BookmarkRouter lookup, MessageHandler/service worker wiring, PopupController/UIManager feedback, and archive E2E path were implemented over the existing Local/File archive foundation."
+      modules_or_boundaries:
+        - "src/core/message-handler.js"
+        - "src/core/service-worker.js"
+        - "src/features/archive/page-archive-bookmark-association.js"
+        - "src/features/archive/page-archive-store.js"
+        - "src/features/storage/bookmark-router.js"
+        - "src/ui/popup/PopupController.js"
+        - "src/ui/popup/UIManager.js"
+      tied_tokens_affected:
+        - "ARCH-PAGE_ARCHIVE_STORAGE"
+        - "IMPL-BOOKMARK_ROUTER"
+        - "IMPL-PAGE_ARCHIVE_STORAGE"
+        - "REQ-PAGE_ARCHIVE_STORAGE"
+      tied_tokens_new:
+        - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+        - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    leap_feedback:
+      divergences_from_analysis: "Pseudo-code adapter/storage binding defects were corrected before RED tests. The implementation added selected-provider getAllBookmarks lookup and archive-store read/restore/removeCurrent seams to make the documented association and compensation contracts executable; File archive fallback now reports unavailable storage explicitly. Generated dist output, pre-capture screenshot validation, Reader freshness handoff, archive-scope mutation guards, and their composition coverage were synchronized with source."
+      notes: "Tests and production comments retain the association block leads; IMPL sidecar links, screenshot-delete token coverage, stale Reader warning semantics, generated artifacts, vocabulary, and final validation evidence close the TIED loop without changing unrelated bookmark routing."
+      record_status: "completed"
+      tied_stack_updates_required:
+        - "Keep REQ/ARCH/IMPL association criteria and response diagnostics synchronized if future backend scope changes."
+    non_goals:
+      - "Changing aggregate BookmarkRouter.getBookmarkForUrl 2C semantics."
+      - "Changing ordinary saveBookmark, deleteBookmark, moveBookmarkToStorage, or bookmark metadata shape."
+      - "Embedding archive content in bookmark metadata."
+      - "Migrating pre-existing orphan archives."
+      - "Supporting Pinboard, Sync, or Browser archive association."
+    record_identity:
+      change_request_id: "REQ-PAGE_ARCHIVE_STORAGE"
+      primary_tokens:
+        - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+        - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+        - "REQ-PAGE_ARCHIVE_STORAGE"
+      procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+      recorded_at: "2026-08-01"
+      title: "Selected-backend archive-bookmark association"
+    risk_analysis:
+      risks:
+        - id: "RISK-ASSOC-001"
+          description: "Association could use the wrong backend or aggregate lookup."
+          mitigation: "Require preferredBackend local/file and use selected provider normalized getAllBookmarks lookup; test cross-backend and stub cases."
+          residual: "low"
+          severity: "high"
+        - id: "RISK-ASSOC-002"
+          description: "Bookmark-save failure could leave a replaced archive without ownership."
+          mitigation: "Retain prior archive and restore it, or remove only the new readable archive; expose cleanup diagnostics."
+          residual: "medium"
+          severity: "high"
+        - id: "RISK-ASSOC-003"
+          description: "Archive capture could weaken privacy or sanitizer boundaries."
+          mitigation: "Run HTTP(S), inhibit, Local/File, sanitizer, and size gates before capture; preserve separate artifact storage."
+          residual: "low"
+          severity: "high"
+        - id: "RISK-ASSOC-004"
+          description: "UI could mask partial association failure."
+          mitigation: "Stable response fields and popup feedback tests distinguish archive-only, bookmark-and-archive, and cleanup failure."
+          residual: "low"
+          severity: "medium"
+    success_criteria:
+      - "Bookmark-save failure restores the prior archive or removes only the new archive version and exposes cleanup failure."
+      - "Invalid or unsupported preferredBackend fails before capture with no fallback."
+      - "Message and popup boundaries expose association and compensation diagnostics."
+      - "Missing selected-backend bookmark is created once with captured title, empty tags/notes, selected backend, and normal timestamps."
+      - "Recapture replaces archive while preserving bookmark metadata."
+      - "Selected-backend non-null bookmark is preserved and returns bookmarkCreated false."
+    tdd_sequence:
+      summary: "Pseudo-code/TIED gate; RED orchestrator and router tests; GREEN orchestrator, store seams, router lookup, handler wiring, popup feedback; composition integration; justified extension E2E; verification and consistency closeout."
+      tests:
+        - "tests/integration/bookmarks-table-archive-scope-composition.integration.test.js"
+        - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
+        - "tests/integration/popup-archive-actions-composition.integration.test.js"
+        - "tests/integration/service-worker-archive-dispatch-composition.integration.test.js"
+        - "tests/playwright/extension-archive-features.spec.js"
+        - "tests/unit/bookmark-router.test.js"
+        - "tests/unit/message-handler-archive.test.js"
+        - "tests/unit/page-archive-bookmark-association.test.js"
+        - "tests/unit/page-archive-store.test.js"
+        - "tests/unit/popup-archive-response.test.js"
+    test_strategy:
+      matrix_notes: "Unit covers backend/privacy gates, selected lookup, stub preservation, metadata preservation, minimal creation, timestamp defaults, recapture, capture/storage/bookmark failures, prior restoration, new-version removal, and cleanup diagnostics. Composition covers MessageHandler dispatch, service-worker runtime dispatch, PopupController action registration, archive-scope mutation isolation, and real Local bookmark/archive stores. E2E covers click Save page archive on an unbookmarked HTTP(S) page and verifies selected-backend persistence."
+      security_mitigations:
+        - "Avoid aggregate lookup for ownership decisions."
+        - "Keep sanitized bounded archive content outside bookmark metadata."
+        - "Never report success when compensation cleanup fails."
+        - "Reject invalid/missing/unsupported backend, restricted, and inhibited URLs before page capture."
+      summary: "Strict unit-first TDD followed by composition and one UI-host E2E boundary."
+    unchanged_behavior:
+      - "Archive artifacts remain separate from bookmark metadata."
+      - "Local/File capability, privacy gates, sanitizer, size limits, search, Reader, screenshots, and deletion cleanup remain in force."
+      - "Persistent popup and This Page feedback behavior remains intact outside archive association."

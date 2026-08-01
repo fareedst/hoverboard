@@ -189,4 +189,33 @@ export class MessageFileBookmarkAdapter extends FileBookmarkStorageAdapter {
       })
     })
   }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Read the sibling archive artifact file through the existing offscreen File System Access boundary.
+   */
+  async readArchiveFile () {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({ type: 'READ_FILE_ARCHIVES' }, (response) => {
+        if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message))
+        if (response?.error) return reject(new Error(response.error))
+        resolve(response?.data ?? { version: 1, archives: {}, screenshots: {} })
+      })
+    })
+  }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Write the sibling archive artifact file and require an explicit durable success response.
+   */
+  async writeArchiveFile (data) {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({ type: 'WRITE_FILE_ARCHIVES', data }, (response) => {
+        if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message))
+        if (response?.error) return reject(new Error(response.error))
+        if (!response || response.success !== true) return reject(new Error('WRITE_FILE_ARCHIVES did not return success'))
+        resolve()
+      })
+    })
+  }
 }

@@ -1,0 +1,54 @@
+REQ-PAGE_SCREENSHOT_ARCHIVE:
+  category: "Functional"
+  description: "Users can explicitly capture a durable screenshot of a supported bookmarked page as a separate archive artifact, with configurable viewport/full-page behavior and Local/File lifecycle handling."
+  detail_file: "requirements/REQ-PAGE_SCREENSHOT_ARCHIVE.yaml"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Close screenshot lifecycle and Reader presentation evidence"
+  name: "Page Screenshot Archive"
+  priority: "P2"
+  rationale:
+    benefits:
+      - "Clear separation between product data and deterministic demo captures."
+      - "Independent visual archive for supported pages."
+    problems_solved:
+      - "Page appearance can change even when a bookmark is retained."
+      - "The existing screenshot mode captures documentation media, not user bookmark artifacts."
+    why: "Preserve a visual record of a page independently from readable HTML/text archives and demo screenshot tooling."
+  related_requirements:
+    depends_on:
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+    related_to:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Product capture does not reuse or alter IMPL-SCREENSHOT_MODE demo seed/capture behavior."
+    - criterion: "Screenshot artifacts are stored separately from readable HTML/text and linked to the bookmark archive using a content hash/version."
+    - criterion: "Screenshot capture is explicit, targets supported HTTP(S) pages, and supports defined viewport/full-page and image format limits."
+    - criterion: "Screenshot recapture, deletion, size limits, restricted pages, and unavailable storage produce explicit outcomes."
+  status: "Implemented"
+  summary: "Capture and persist product screenshot artifacts for Local and File bookmarks."
+  traceability:
+    architecture:
+      - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    code_annotations:
+      - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+    implementation:
+      - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-screenshot-archive.test.js"
+      - "tests/unit/reader.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Capture options, artifact metadata, size/format validation, hashing, and lifecycle adapter behavior."
+    - method: "Composition tests"
+      coverage: "Capture command, browser-capture API routing, storage selection, and deletion cleanup."
+    - method: "E2E tests"
+      coverage: "Persisted screenshot presentation in Offline Reader is covered by extension E2E; popup capture binding is covered by unit and composition tests."

@@ -4,7 +4,7 @@
 
 **Excludes:** Which backend stores a pin (see [`storage-backends.md`](storage-backends.md)); Local Bookmarks Index / Netscape import UI (see [`bookmarks-index.md`](bookmarks-index.md)); tag chip systems (see [`tags.md`](tags.md)); Visit History page chrome (see [`side-panel.md`](side-panel.md)).
 
-**Traceability:** [REQ-PINBOARD_COMPATIBILITY](../requirements/REQ-PINBOARD_COMPATIBILITY.yaml) · [REQ-BOOKMARK_CREATE_UPDATE_TIMES](../requirements/REQ-BOOKMARK_CREATE_UPDATE_TIMES.yaml) · [REQ-BOOKMARK_STATE_SYNCHRONIZATION](../requirements/REQ-BOOKMARK_STATE_SYNCHRONIZATION.yaml) · [REQ-BADGE_INDICATORS](../requirements/REQ-BADGE_INDICATORS.yaml) · [REQ-BOOKMARK_USAGE_TRACKING](../requirements/REQ-BOOKMARK_USAGE_TRACKING.yaml) · [REQ-SMART_BOOKMARKING](../requirements/REQ-SMART_BOOKMARKING.yaml) · [ARCH-PINBOARD_API](../architecture-decisions/ARCH-PINBOARD_API.yaml) · [ARCH-BADGE](../architecture-decisions/ARCH-BADGE.yaml) · [IMPL-PINBOARD_API](../implementation-decisions/IMPL-PINBOARD_API.yaml) · [IMPL-BOOKMARK_CREATE_UPDATE_TIMES](../implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml) · [IMPL-BOOKMARK_STATE_SYNC](../implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.yaml) · [IMPL-BADGE](../implementation-decisions/IMPL-BADGE.yaml) · [IMPL-BOOKMARK_USAGE_TRACKING](../implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING.yaml)
+**Traceability:** [REQ-PINBOARD_COMPATIBILITY](../requirements/REQ-PINBOARD_COMPATIBILITY.yaml) · [REQ-BOOKMARK_CREATE_UPDATE_TIMES](../requirements/REQ-BOOKMARK_CREATE_UPDATE_TIMES.yaml) · [REQ-BOOKMARK_STATE_SYNCHRONIZATION](../requirements/REQ-BOOKMARK_STATE_SYNCHRONIZATION.yaml) · [REQ-BADGE_INDICATORS](../requirements/REQ-BADGE_INDICATORS.yaml) · [REQ-BOOKMARK_USAGE_TRACKING](../requirements/REQ-BOOKMARK_USAGE_TRACKING.yaml) · [REQ-SMART_BOOKMARKING](../requirements/REQ-SMART_BOOKMARKING.yaml) · [REQ-PAGE_ARCHIVE_STORAGE](../requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml) · [ARCH-PINBOARD_API](../architecture-decisions/ARCH-PINBOARD_API.yaml) · [ARCH-BADGE](../architecture-decisions/ARCH-BADGE.yaml) · [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION](../architecture-decisions/ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml) · [IMPL-PINBOARD_API](../implementation-decisions/IMPL-PINBOARD_API.yaml) · [IMPL-BOOKMARK_CREATE_UPDATE_TIMES](../implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml) · [IMPL-BOOKMARK_STATE_SYNC](../implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.yaml) · [IMPL-BADGE](../implementation-decisions/IMPL-BADGE.yaml) · [IMPL-BOOKMARK_USAGE_TRACKING](../implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING.yaml) · [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION](../implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml)
 
 **See also:** [`storage-backends.md`](storage-backends.md) · [`tags.md`](tags.md) · [`side-panel.md`](side-panel.md) · [`ui-surfaces.md`](ui-surfaces.md) · [`domain-references.md`](domain-references.md) · `docs/development/ai-development/PINBOARD_TERMINOLOGY_COMPLETION_SUMMARY.md`
 
@@ -27,6 +27,8 @@
 | **bookmark state synchronization** | live sync | Propagating pin/tag changes across popup/overlay/SW — **not** Sync backend |
 | **usage tracking** | analytics (alone) | Local visit counts and nav edges for bookmarks |
 | **empty / stub bookmark** | incomplete pin | Missing time, tags, and description |
+| **archive-bookmark association** | archive link | Bookmark-side association with a separately stored archive artifact |
+| **bookmark creation result** | bookmark saved status | Boolean result key `bookmarkCreated` indicating whether the archive action created a bookmark |
 
 ---
 
@@ -44,6 +46,7 @@
 | Auth for Pinboard API | Pinboard API Token | — | `hoverboard_auth_token` | `hasAuthToken` |
 | Visit count | Visits / Most Visited | — | `hoverboard_bookmark_usage` | usage tracker |
 | Nav edge | Navigation Graph / referrer | — | `hoverboard_bookmark_nav_edges` | usage tracker |
+| Bookmark creation result | Bookmark and archive saved | `bookmarkCreated` | archive action response | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
 | Not bookmarked badge | Badge not bookmarked | — | `badgeTextIfNotBookmarked` (default `-`) | BadgeManager |
 | No tags badge | Badge no tags | — | `badgeTextIfBookmarkedNoTags` (default `0`) | BadgeManager |
 | Private badge | Badge private | — | `badgeTextIfPrivate` (default `*`) | BadgeManager |
@@ -54,6 +57,8 @@
 ## Named concepts
 
 - **pin** — Record from `newPin` / `minEmpty`: `url`, `description`, `extended`, `tags`, `dt`, `hash`, `meta`, `others`, `shared`, `toread`.
+- **archive-bookmark association** — Association between a bookmark record and a separately stored archive artifact.
+- **bookmark creation result** — Boolean response field `bookmarkCreated`; it distinguishes archive recapture from creation of a missing bookmark.
 - **currentPin** — In-memory pin for the active tab in popup / This Page.
 - **Pinboard API endpoints** — `/posts/get`, `/posts/add`, `/posts/delete`, `/posts/recent` (v1).
 - **BOOKMARK_UPDATED** — Message broadcasting pin changes for cross-surface sync.
@@ -70,6 +75,7 @@
 |--------------------------|------------------------------|-------------|
 | Create pin shape | `newPin` / `minEmpty` (code; `(proposed) NEW_PIN`) | [IMPL-DOM_UTILITIES](../implementation-decisions/IMPL-DOM_UTILITIES.yaml) |
 | Create/update times | `(proposed) ENSURE_BOOKMARK_TIMES` | [IMPL-BOOKMARK_CREATE_UPDATE_TIMES](../implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml) |
+| Associate archive with bookmark | `CAPTURE_ARCHIVE_AND_ASSOCIATE_BOOKMARK` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
 | State sync broadcast | handlers for `BOOKMARK_UPDATED` | [IMPL-BOOKMARK_STATE_SYNC](../implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.yaml) |
 | Badge value | `getBadgeDisplayValue` | [IMPL-URL_TAGS_DISPLAY](../implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml) / [IMPL-BADGE](../implementation-decisions/IMPL-BADGE.yaml) |
 | Record visit / edges | `(proposed) RECORD_BOOKMARK_USAGE` | [IMPL-BOOKMARK_USAGE_TRACKING](../implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING.yaml) |
@@ -80,8 +86,10 @@
 
 | Term | Section |
 |------|---------|
+| archive-bookmark association | Preferred terms / Named concepts |
 | badge display value | Naming bridge |
 | bookmark | Preferred terms |
+| bookmark creation result | Preferred terms / Named concepts |
 | bookmark state synchronization | Preferred terms |
 | BOOKMARK_UPDATED | Named concepts |
 | currentPin | Named concepts |

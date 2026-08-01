@@ -1,0 +1,50 @@
+ARCH-PAGE_ARCHIVE_STORAGE:
+  decision: "Page archives are separate artifacts keyed by normalized bookmark URL and archive version. Local uses a quota-appropriate browser archive store; File uses a versioned archive directory and adapter alongside the existing bookmark JSON. Pinboard, Sync, and Browser storage remain metadata-only until separately designed. The capture boundary associates a saved archive with a bookmark in the explicitly selected Local or File backend, preserving existing bookmark metadata and compensating a failed bookmark creation."
+  detail_file: "architecture-decisions/ARCH-PAGE_ARCHIVE_STORAGE.yaml"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Record archive lifecycle lookup/delete and explicit unavailable File storage evidence"
+  name: "Page Archive Storage Architecture"
+  rationale:
+    alternatives_considered:
+      - name: "Embed archives in bookmark metadata"
+        rejected_reason: "Causes large rewrites, quota pressure, and backend contract drift."
+      - name: "Support all five backends immediately"
+        rejected_reason: "Pinboard, Sync, and Browser providers do not have compatible durable artifact contracts."
+    consequences:
+      - "Archive content stays outside the current aggregate metadata snapshot by default."
+      - "Capture and deletion need an archive-capability resolver tied to the bookmark storage backend."
+      - "Local and File adapters must expose the same mockable artifact contract."
+    why: "Large HTML/text/image data should not be embedded in Pinboard-shaped bookmark records or sent through unsupported backends."
+  related_decisions:
+    depends_on:
+      - "ARCH-FILE_BOOKMARK_PROVIDER"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    informs:
+      - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+      - "IMPL-OFFLINE_READER_MODE"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+      - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    see_also:
+      - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+  status: "Accepted"
+  summary: "Use a separate archive artifact store with Local and File adapters; retain metadata-only routing for other backends."
+  traceability:
+    code_annotations:
+      - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+    implementation:
+      - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    requirements:
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+    tests:
+      - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
+      - "tests/unit/message-handler-archive.test.js"
+      - "tests/unit/page-archive-store.test.js"

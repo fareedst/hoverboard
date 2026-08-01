@@ -1,0 +1,258 @@
+/**
+ * === IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_STORAGE ===
+ * Capture and persist sanitized readable page archives and separate artifacts for Local/File bookmarks.
+ *
+ * ## RESOLVE_ARCHIVE_ADAPTER
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: resolve only Local/File archive adapters and report unsupported or unavailable storage before capture.
+ * - Contract:
+ *   - INPUT: backend (string), adapters (map)
+ *   - PRE: backend is supplied as a string; adapters may omit an unconfigured File adapter
+ *   - OUTPUT: adapter | { error: UnsupportedBackend | StorageUnavailable }
+ *   - POST:
+ *     - success => adapter is the adapter registered for local or file
+ *     - error => no capture or state transition occurs
+ *   - FAILURE_MODES: UnsupportedBackend, StorageUnavailable
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: RESOLVE_ARCHIVE_ADAPTER
+ *   - backend = lowercase(String(backend))
+ *   - IF backend is not local or file: RETURN { error: UnsupportedBackend }
+ *   - adapter = adapters[backend]
+ *   - IF adapter is absent: RETURN { error: StorageUnavailable }
+ *   - RETURN adapter
+ *
+ * ## ARCHIVE_PRIVACY_GATE
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: enforce HTTP(S), inhibit-list, explicit-capture, and Local/File boundaries before page content or screenshot capture.
+ * - Contract:
+ *   - INPUT: bookmark { url, storage }, isUrlAllowed (function), captureExplicit (boolean)
+ *   - PRE: bookmark is present; isUrlAllowed is callable
+ *   - OUTPUT: allowed | { error: RestrictedUrl | InhibitedUrl | UnsupportedBackend | InvalidRequest }
+ *   - POST:
+ *     - success => browser capture may proceed
+ *     - error => browser capture is not attempted
+ *   - FAILURE_MODES: InvalidRequest, UnsupportedBackend, RestrictedUrl, InhibitedUrl
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: ARCHIVE_PRIVACY_GATE
+ *   - IF captureExplicit is false: RETURN { error: InvalidRequest }
+ *   - IF bookmark.url is not HTTP(S): RETURN { error: RestrictedUrl }
+ *   - IF bookmark.storage is not local or file: RETURN { error: UnsupportedBackend }
+ *   - IF isUrlAllowed(bookmark.url) is false: RETURN { error: InhibitedUrl }
+ *   - RETURN allowed
+ *
+ * ## CAPTURE_AND_VALIDATE
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: capture and normalize the readable artifact only after the archive privacy gate succeeds.
+ * - Contract:
+ *   - INPUT: bookmark, capture options, capturePageContent (function)
+ *   - PRE: bookmark passed ARCHIVE_PRIVACY_GATE; capturePageContent is callable
+ *   - OUTPUT: archive | { error: CaptureFailed | TooLarge | RestrictedUrl | InhibitedUrl | UnsupportedBackend }
+ *   - POST:
+ *     - success => archive has sanitizedHtml, textContent, contentHash, version, capturedAt
+ *     - error => no archive is persisted
+ *   - FAILURE_MODES: CaptureFailed, TooLarge, RestrictedUrl, InhibitedUrl, UnsupportedBackend
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: CAPTURE_AND_VALIDATE
+ *   - gate = AWAIT ARCHIVE_PRIVACY_GATE(bookmark)
+ *   - IF gate is error: RETURN gate
+ *   - captured = AWAIT capturePageContent(bookmark.url, options)
+ *   - IF captured fails: RETURN { error: CaptureFailed }
+ *   - archive = NORMALIZE_ARCHIVE(captured)
+ *   - IF archive exceeds limits: RETURN { error: TooLarge }
+ *   - RETURN archive
+ *
+ * ## SAVE_PAGE_ARCHIVE
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: preserve the prior archive, write the new artifact, and update derived archive search only after storage succeeds.
+ * - Contract:
+ *   - INPUT: bookmark { url, storage }, capture options, adapters, archiveSearch
+ *   - PRE: capture is explicit; bookmark.url is HTTP(S); archiveSearch may be absent
+ *   - OUTPUT: { success: true, archive } | { success: false, code, previous? }
+ *   - POST:
+ *     - success => one current archive version and matching derived text entry exist
+ *     - StorageFailed => prior archive remains available when the adapter supports atomic failure
+ *   - FAILURE_MODES: InvalidRequest, UnsupportedBackend, StorageUnavailable, RestrictedUrl, InhibitedUrl, CaptureFailed, TooLarge, StorageFailed
+ *   - DATA: archive collections and derived ArchiveTextIndex
+ *   - DATA_TRANSITION: successful write replaces one URL version; failure does not claim a new archive
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SAVE_PAGE_ARCHIVE
+ *   - adapter = RESOLVE_ARCHIVE_ADAPTER(bookmark.storage, adapters)
+ *   - IF adapter is error: RETURN { success: false, code: adapter.error }
+ *   - archive = AWAIT CAPTURE_AND_VALIDATE(bookmark, options, capturePageContent)
+ *   - IF archive is error: RETURN { success: false, code: archive.error }
+ *   - previous = AWAIT adapter.readArchiveFile(bookmark.url)
+ *   - result = AWAIT adapter.writeArchiveFile(bookmark.url, archive)
+ *   - IF result fails: RETURN { success: false, code: StorageFailed, previous }
+ *   - IF archiveSearch exists: AWAIT archiveSearch.replaceArchivedContent(bookmark.url, archive)
+ *   - RETURN { success: true, archive }
+ *
+ * ## DELETE_PAGE_ARCHIVE
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] [IMPL-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [REQ-PAGE_SCREENSHOT_ARCHIVE] How: delete the selected backend's readable archive, screenshot artifacts, and derived search state together.
+ * - Contract:
+ *   - INPUT: bookmark { url, storage }, optional selected backend, adapters, archiveSearch
+ *   - PRE: bookmark.url is normalized or normalizable
+ *   - OUTPUT: { success: true } | { success: false, code: InvalidUrl | UnsupportedBackend | StorageUnavailable | StorageFailed }
+ *   - POST:
+ *     - success => readable archive, screenshot artifacts, and selected-backend search entry are absent
+ *     - error => unrelated URLs and backends are unchanged
+ *   - FAILURE_MODES: InvalidUrl, UnsupportedBackend, StorageUnavailable, StorageFailed
+ *   - DATA: archive and screenshot collections, ArchiveTextIndex
+ *   - DATA_TRANSITION: only the requested URL is removed
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: DELETE_PAGE_ARCHIVE
+ *   - adapter = RESOLVE_ARCHIVE_ADAPTER(bookmark.storage, adapters)
+ *   - IF adapter is error: RETURN { success: false, code: adapter.error }
+ *   - REMOVE readable archive and matching screenshot records for bookmark.url
+ *   - IF archiveSearch exists: AWAIT archiveSearch.removeArchivedContent(bookmark.url)
+ *   - RETURN { success: true }
+ *
+ * ## LOOKUP_PAGE_ARCHIVE
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: resolve the explicitly selected adapter before reading a URL or archive identifier and never fetch the live page.
+ * - Contract:
+ *   - INPUT: identifier (URL or archiveId), optional backend, adapters
+ *   - PRE: identifier is present; backend is local or file when supplied
+ *   - OUTPUT: archive | { error: MissingArchive | UnsupportedBackend | StorageUnavailable | StorageFailed }
+ *   - POST:
+ *     - success => returned archive is persisted sanitized data; no network request occurs
+ *     - error => no network request occurs
+ *   - FAILURE_MODES: MissingArchive, UnsupportedBackend, StorageUnavailable, StorageFailed
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LOOKUP_PAGE_ARCHIVE
+ *   - candidates = backend is supplied ? [backend] : [local, file]
+ *   - FOR candidate IN candidates:
+ *     - adapter = RESOLVE_ARCHIVE_ADAPTER(candidate, adapters)
+ *     - IF adapter is error and backend is supplied: RETURN { error: adapter.error }
+ *     - IF adapter is error: CONTINUE
+ *     - IF identifier is an archiveId: archive = AWAIT adapter.getArchiveById(identifier)
+ *     - ELSE: archive = AWAIT adapter.getArchive(normalizeUrl(identifier))
+ *     - IF archive exists: RETURN archive
+ *   - RETURN { error: MissingArchive }
+ *
+ * ## LIST_PAGE_ARCHIVES
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: enumerate persisted Local/File artifacts through resolved adapters for explicit browse and search-scope wiring.
+ * - Contract:
+ *   - INPUT: optional backend, adapters
+ *   - PRE: backend is local or file when supplied
+ *   - OUTPUT: archives | { error: UnsupportedBackend | StorageUnavailable | StorageFailed }
+ *   - POST:
+ *     - success => archives contain only persisted records in deterministic order
+ *   - FAILURE_MODES: UnsupportedBackend, StorageUnavailable, StorageFailed
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LIST_PAGE_ARCHIVES
+ *   - candidates = backend is supplied ? [backend] : [local, file]
+ *   - FOR candidate IN candidates:
+ *     - adapter = RESOLVE_ARCHIVE_ADAPTER(candidate, adapters)
+ *     - IF adapter is error and backend is supplied: RETURN { error: adapter.error }
+ *     - IF adapter is error: CONTINUE
+ *     - archives = archives CONCAT AWAIT adapter.listArchives()
+ *   - RETURN SORT archives BY capturedAt DESCENDING, url ASCENDING
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_STORAGE ===
+ */
+import { normalizeArchiveUrl } from './page-capture.js'
+
+export const ARCHIVE_FILE_FORMAT_VERSION = 1
+export const ARCHIVE_STORAGE_KEY = 'hoverboard_page_archives'
+
+function emptyData () {
+  return { version: ARCHIVE_FILE_FORMAT_VERSION, archives: {}, screenshots: {} }
+}
+
+function cloneData (data) {
+  return JSON.parse(JSON.stringify(data))
+}
+
+export class PageArchiveStorageAdapter {
+  async readArchiveFile () {
+    throw new Error('readArchiveFile must be implemented')
+  }
+
+  async writeArchiveFile (_data) {
+    throw new Error('writeArchiveFile must be implemented')
+  }
+}
+
+/**
+ * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+ * In-memory adapter for unit tests and environments without configured File storage.
+ */
+export class InMemoryPageArchiveStorageAdapter extends PageArchiveStorageAdapter {
+  constructor (initialData = emptyData()) {
+    super()
+    this.data = {
+      ...emptyData(),
+      ...cloneData(initialData),
+      archives: { ...(initialData.archives || {}) },
+      screenshots: { ...(initialData.screenshots || {}) }
+    }
+  }
+
+  async readArchiveFile () {
+    return cloneData(this.data)
+  }
+
+  async writeArchiveFile (data) {
+    this.data = {
+      ...emptyData(),
+      ...cloneData(data),
+      archives: { ...(data?.archives || {}) },
+      screenshots: { ...(data?.screenshots || {}) }
+    }
+  }
+}
+
+/**
+ * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+ * Local browser storage adapter keeps large archive data separate from hoverboard_local_bookmarks.
+ */
+export class ChromeStoragePageArchiveAdapter extends PageArchiveStorageAdapter {
+  constructor (storage = globalThis.chrome?.storage?.local) {
+    super()
+    this.storage = storage
+  }
+
+  async readArchiveFile () {
+    if (!this.storage?.get) return emptyData()
+    const result = await this.storage.get(ARCHIVE_STORAGE_KEY)
+    const data = result?.[ARCHIVE_STORAGE_KEY]
+    if (!data || typeof data !== 'object') return emptyData()
+    return {
+      version: data.version || ARCHIVE_FILE_FORMAT_VERSION,
+      archives: data.archives && typeof data.archives === 'object' ? data.archives : {},
+      screenshots: data.screenshots && typeof data.screenshots === 'object' ? data.screenshots : {}
+    }
+  }
+
+  async writeArchiveFile (data) {
+    if (!this.storage?.set) throw new Error('Local archive storage unavailable')
+    await this.storage.set({
+      [ARCHIVE_STORAGE_KEY]: {
+        version: ARCHIVE_FILE_FORMAT_VERSION,
+        archives: data?.archives || {},
+        screenshots: data?.screenshots || {}
+      }
+    })
+  }
+}
+
+/**
+ * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+ * Store one normalized archive and preserve unrelated screenshot artifacts.
+ */
+export async function readArchiveMap (adapter) {
+  const data = await adapter.readArchiveFile()
+  return {
+    version: data?.version || ARCHIVE_FILE_FORMAT_VERSION,
+    archives: data?.archives && typeof data.archives === 'object' ? data.archives : {},
+    screenshots: data?.screenshots && typeof data.screenshots === 'object' ? data.screenshots : {}
+  }
+}
+
+export function archiveKey (url) {
+  return normalizeArchiveUrl(url)
+}
+
+export { emptyData }

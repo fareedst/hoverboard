@@ -23,6 +23,16 @@ ARCH-AI_TAGGING_FLOW:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-ARCHIVED_CONTENT_SEARCH:
+  cross_references:
+    - "IMPL-ARCHIVED_CONTENT_SEARCH"
+    - "REQ-ARCHIVED_CONTENT_SEARCH"
+  description: "Explicit archive-content search over extracted text."
+  detail_file: "architecture-decisions/ARCH-ARCHIVED_CONTENT_SEARCH.yaml"
+  name: "Archived Content Search Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Accepted"
+  type: "ARCH"
 ARCH-BADGE:
   cross_references:
     - "REQ-BADGE_INDICATORS"
@@ -442,6 +452,16 @@ ARCH-NATIVE_HOST:
 ARCH-NON_WEB_TOOLS_TOOLBAR:
   description: "Non-web tools toolbar architecture"
   type: "architecture"
+ARCH-OFFLINE_READER_MODE:
+  cross_references:
+    - "IMPL-OFFLINE_READER_MODE"
+    - "REQ-OFFLINE_READER_MODE"
+  description: "Safe standalone Reader rendering stored sanitized archives."
+  detail_file: "architecture-decisions/ARCH-OFFLINE_READER_MODE.yaml"
+  name: "Offline Reader Mode Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Accepted"
+  type: "ARCH"
 ARCH-OVERLAY:
   cross_references:
     - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
@@ -482,6 +502,35 @@ ARCH-OVERLAY_TESTABILITY:
   name: "Overlay Test Harness Architecture"
   source_index: "architecture-decisions.yaml"
   status: "Active"
+  type: "ARCH"
+ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+  description: "Selected-backend bookmark ownership, preservation, and compensating cleanup for page archives."
+  name: "Page Archive Bookmark Association Architecture"
+  status: "Accepted"
+  type: "ARCH"
+ARCH-PAGE_ARCHIVE_STORAGE:
+  cross_references:
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+  description: "Separate Local/File archive artifact stores."
+  detail_file: "architecture-decisions/ARCH-PAGE_ARCHIVE_STORAGE.yaml"
+  name: "Page Archive Storage Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Accepted"
+  type: "ARCH"
+ARCH-PAGE_SCREENSHOT_ARCHIVE:
+  cross_references:
+    - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  description: "Dedicated product screenshot capture and artifact storage."
+  detail_file: "architecture-decisions/ARCH-PAGE_SCREENSHOT_ARCHIVE.yaml"
+  name: "Page Screenshot Archive Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Accepted"
   type: "ARCH"
 ARCH-PINBOARD_API:
   cross_references:
@@ -938,6 +987,16 @@ IMPL-AI_TAGGING_READABILITY:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Page Content via Readability"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-ARCHIVED_CONTENT_SEARCH:
+  cross_references:
+    - "ARCH-ARCHIVED_CONTENT_SEARCH"
+    - "REQ-ARCHIVED_CONTENT_SEARCH"
+  description: "Deterministic extracted-text index and archive-content query integration."
+  detail_file: "implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH.yaml"
+  name: "Archived Content Search Implementation"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -1624,6 +1683,16 @@ IMPL-NATIVE_HOST_WRAPPER:
 IMPL-NON_WEB_TOOLS_TOOLBAR:
   description: "Non-web tools toolbar implementation"
   type: "implementation"
+IMPL-OFFLINE_READER_MODE:
+  cross_references:
+    - "ARCH-OFFLINE_READER_MODE"
+    - "REQ-OFFLINE_READER_MODE"
+  description: "Load and safely render stored archive content offline."
+  detail_file: "implementation-decisions/IMPL-OFFLINE_READER_MODE.yaml"
+  name: "Offline Reader Mode Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-OVERLAY:
   cross_references:
     - "ARCH-OVERLAY"
@@ -1660,6 +1729,35 @@ IMPL-OVERLAY_TEST_HARNESS:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Overlay Test Harness Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+  description: "Orchestrate selected-backend archive capture, bookmark preservation or minimal creation, and compensating cleanup."
+  name: "Page Archive Bookmark Association"
+  status: "Active"
+  type: "IMPL"
+IMPL-PAGE_ARCHIVE_STORAGE:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+  description: "Capture and persist Local/File readable page archives and artifact lifecycle."
+  detail_file: "implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE.yaml"
+  name: "Page Archive Storage Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-PAGE_SCREENSHOT_ARCHIVE:
+  cross_references:
+    - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  description: "Dedicated browser screenshot capture and Local/File artifact persistence."
+  detail_file: "implementation-decisions/IMPL-PAGE_SCREENSHOT_ARCHIVE.yaml"
+  name: "Page Screenshot Archive Implementation"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -2588,6 +2686,16 @@ REQ-AI_TAGGING_POPUP:
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"
+REQ-ARCHIVED_CONTENT_SEARCH:
+  cross_references:
+    - "ARCH-ARCHIVED_CONTENT_SEARCH"
+    - "IMPL-ARCHIVED_CONTENT_SEARCH"
+  description: "Search extracted text from Local/File archives."
+  detail_file: "requirements/REQ-ARCHIVED_CONTENT_SEARCH.yaml"
+  name: "Archived Content Search"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
 REQ-BADGE_INDICATORS:
   cross_references:
     - "ARCH-BADGE"
@@ -3037,6 +3145,16 @@ REQ-NATIVE_HOST_WRAPPER:
 REQ-NON_WEB_TOOLS_TOOLBAR:
   description: "Non-web close side panel; badge tools toolbar"
   type: "requirement"
+REQ-OFFLINE_READER_MODE:
+  cross_references:
+    - "ARCH-OFFLINE_READER_MODE"
+    - "IMPL-OFFLINE_READER_MODE"
+  description: "Render sanitized stored archives offline."
+  detail_file: "requirements/REQ-OFFLINE_READER_MODE.yaml"
+  name: "Offline Reader Mode"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
 REQ-OVERLAY_AUTO_SHOW_CONTROL:
   cross_references:
     - "ARCH-OVERLAY"
@@ -3086,6 +3204,26 @@ REQ-OVERLAY_SYSTEM:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Overlay System"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-PAGE_ARCHIVE_STORAGE:
+  cross_references:
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+  description: "Capture and persist Local/File page archive artifacts."
+  detail_file: "requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml"
+  name: "Page Archive Storage"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-PAGE_SCREENSHOT_ARCHIVE:
+  cross_references:
+    - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+  description: "Capture durable Local/File screenshot artifacts."
+  detail_file: "requirements/REQ-PAGE_SCREENSHOT_ARCHIVE.yaml"
+  name: "Page Screenshot Archive"
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"

@@ -6,17 +6,24 @@ IMPL-BOOKMARK_ROUTER:
     functions: []
   cross_references:
     - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+    - "ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
     - "REQ-BROWSER_BOOKMARK_STORAGE"
     - "REQ-LOCAL_BOOKMARKS_INDEX"
     - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_ROUTER-pseudocode.md"
   implementation_approach:
     details:
+      - "Archive association uses selected-backend lookup and treats any non-null provider record, including a stub, as existing."
       - "getAllBookmarksForIndex aggregates local+file+sync+browser with storage field"
+      - "getBookmarkForBackend is a narrow selected-provider normalized-URL lookup for archive association and does not alter aggregate getBookmarkForUrl 2C semantics."
       - "getBookmarkForUrl: 2C race pinboard/local/file/sync only; consult browser via resolve or when no other non-empty candidate"
       - "moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index; targetBackend may be browser"
       - "Resolve provider: (valid data.preferredBackend) || getBackendForUrl(url) || defaultStorageMode; map to one of five providers (pinboard, local, file, sync, browser)"
@@ -27,8 +34,8 @@ IMPL-BOOKMARK_ROUTER:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "LEAP close-loop: five-provider summaries and rationale"
+      date: "2026-08-01"
+      reason: "Align selected-backend lookup with archive association"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -77,4 +84,5 @@ IMPL-BOOKMARK_ROUTER:
       - "REQ-STORAGE_MODE_DEFAULT"
     tests:
       - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
       - "tests/unit/bookmark-router.test.js"

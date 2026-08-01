@@ -958,6 +958,114 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
  */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION ===
+ * Associate a captured Local/File archive with a selected-backend bookmark while preserving metadata and compensating partial failure.
+ *
+ * ## RESOLVE_ARCHIVE_BOOKMARK_CONTEXT
+ * - [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: resolve explicit backend ownership without aggregate URL lookup and retain the prior archive for compensation.
+ * - Contract:
+ *   - INPUT: request { url, preferredBackend }, selectedBackendLookup, archiveStore, isUrlAllowed
+ *   - PRE: request exists; selectedBackendLookup, archiveStore, and isUrlAllowed are callable
+ *   - OUTPUT: context { url, backend, existingBookmark, previousArchive } | { success: false, code }
+ *   - POST:
+ *     - success => existingBookmark may be null or any non-null record, including a stub
+ *     - error => no page capture or bookmark mutation occurs
+ *   - FAILURE_MODES: InvalidRequest, UnsupportedBackend, RestrictedUrl, InhibitedUrl, LookupFailed
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: RESOLVE_ARCHIVE_BOOKMARK_CONTEXT
+ *   - IF url is absent: RETURN InvalidRequest
+ *   - IF url is not HTTP(S): RETURN RestrictedUrl
+ *   - IF preferredBackend is not local or file: RETURN UnsupportedBackend
+ *   - IF isUrlAllowed(url) is false: RETURN InhibitedUrl
+ *   - existingBookmark = AWAIT selectedBackendLookup(url, preferredBackend)
+ *   - previousArchive = AWAIT archiveStore.read(url, preferredBackend)
+ *   - RETURN context
+ *
+ * ## CAPTURE_ARCHIVE_AND_ASSOCIATE_BOOKMARK
+ * - [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: capture and persist the archive before preserving or creating selected-backend bookmark ownership.
+ * - Contract:
+ *   - INPUT: context, captureContext, captureArchive, archiveStore
+ *   - PRE: context passed RESOLVE_ARCHIVE_BOOKMARK_CONTEXT; archiveStore writes the selected backend
+ *   - OUTPUT: current archive plus association state | { success: false, code, bookmarkCreated: false }
+ *   - POST:
+ *     - success => archive is current; existingBookmark is never rewritten
+ *     - capture/storage error => bookmarkCreated is false and prior archive retention is reported
+ *   - FAILURE_MODES: CaptureFailed, StorageFailed
+ *   - DATA: previousArchive, currentArchive
+ *   - DATA_TRANSITION: archive is written before missing-bookmark creation
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: CAPTURE_ARCHIVE_AND_ASSOCIATE_BOOKMARK
+ *   - captured = AWAIT captureArchive(context.url, captureContext)
+ *   - IF captured fails: RETURN stable failure with archiveRetained = previousArchive exists
+ *   - saved = AWAIT archiveStore.saveArchive(context.url, context.backend, captured.archive)
+ *   - IF saved fails: RETURN StorageFailed with archiveRetained = previousArchive exists
+ *   - RETURN current archive plus previousArchive and existingBookmark
+ *
+ * ## CREATE_MINIMAL_BOOKMARK_IF_ABSENT
+ * - [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-DOM_UTILITIES] How: preserve any non-null selected-backend bookmark and create exactly one default-shaped bookmark only when lookup returned null.
+ * - Contract:
+ *   - INPUT: current archive, context, existingBookmark (nullable), createMinimalBookmark, saveBookmark, clock
+ *   - PRE: archive write succeeded; selected backend is local or file; existingBookmark may be null or non-null
+ *   - OUTPUT: { success: true, bookmark, bookmarkCreated } | { success: false, code: BookmarkSaveFailed }
+ *   - POST:
+ *     - existingBookmark non-null => no save occurs and bookmarkCreated is false
+ *     - existingBookmark null and save succeeds => one bookmark uses archive URL/title, empty tags/notes, selected backend, and normal timestamps
+ *   - FAILURE_MODES: BookmarkSaveFailed
+ *   - DATA_TRANSITION: create one missing-bookmark record; never update a non-null existing record
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: CREATE_MINIMAL_BOOKMARK_IF_ABSENT
+ *   - IF existingBookmark is non-null: RETURN { success: true, bookmark: existingBookmark, bookmarkCreated: false }
+ *   - now = clock()
+ *   - minimal = createMinimalBookmark({ url: context.url, description: archive.sourceTitle, tags: [], notes: '', preferredBackend: context.backend, time: now, updated_at: now })
+ *   - saved = AWAIT saveBookmark(minimal)
+ *   - IF saved fails: RETURN BookmarkSaveFailed
+ *   - RETURN { success: true, bookmark: saved.bookmark OR minimal, bookmarkCreated: true }
+ *
+ * ## COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE
+ * - [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: restore the prior archive or remove only the new archive after bookmark association failure and expose uncertainty.
+ * - Contract:
+ *   - INPUT: context, previousArchive (nullable), archiveStore
+ *   - PRE: current archive write succeeded and bookmark creation failed
+ *   - OUTPUT: { archiveRetained, priorArchiveRestored, cleanupFailed, compensationError? }
+ *   - POST:
+ *     - previousArchive exists => restore is attempted
+ *     - no previousArchive => only the new archive is removed
+ *     - cleanup failure => cleanupFailed is true and the error remains visible
+ *   - FAILURE_MODES: CompensationFailed
+ *   - DATA_TRANSITION: current archive becomes previous archive or is deleted
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE
+ *   - IF previousArchive exists: result = AWAIT archiveStore.restore(context.url, context.backend, previousArchive)
+ *   - ELSE: result = AWAIT archiveStore.removeCurrent(context.url, context.backend)
+ *   - IF result fails: RETURN archiveRetained = true, priorArchiveRestored = false, cleanupFailed = true, compensationError
+ *   - IF previousArchive exists: RETURN archiveRetained = true, priorArchiveRestored = true, cleanupFailed = false
+ *   - RETURN archiveRetained = false, priorArchiveRestored = false, cleanupFailed = false
+ *
+ * ## ARCHIVE_ASSOCIATION_RESULT_BOUNDARY
+ * - [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: expose one stable response shape to message and popup/This Page callers.
+ * - Contract:
+ *   - INPUT: context result, archive result, bookmark result, compensation result
+ *   - PRE: failed paths carry a stable code; bookmarkCreated defaults false
+ *   - OUTPUT: success or failure response with association and compensation diagnostics
+ *   - POST:
+ *     - success => archive persistence and required bookmark association succeeded
+ *     - failure => bookmarkCreated is false and CompensationFailed remains visible
+ *   - FAILURE_MODES: delegated failure modes, CompensationFailed
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: ARCHIVE_ASSOCIATION_RESULT_BOUNDARY
+ *   - IF context, capture, or archive write failed: RETURN failure with bookmarkCreated false and retention diagnostics
+ *   - IF existingBookmark is non-null: RETURN success with bookmarkCreated false, archiveRetained true, cleanupFailed false
+ *   - IF minimal bookmark save succeeds: RETURN success with bookmarkCreated true, archiveRetained true, cleanupFailed false
+ *   - IF minimal bookmark save fails: RETURN failure merged with COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION ===
+ */
 import {
   currentTagDisplayLabel,
   isEmptyOrWhitespaceOnlyTag,
@@ -991,6 +1099,8 @@ export class UIManager {
     this.tagFrequencyMap = {}
     /** @type {boolean} */
     this._tagSortUiEnabled = false
+    /** @type {ReturnType<typeof setTimeout> | null} */
+    this._actionFeedbackTimer = null
     /** @type {{ current: string[], recent: string[], suggested: Array<{ tag: string, relevance: number, inPageFrequency: number }> }} */
     this._tagChipSourceCache = { current: [], recent: [], suggested: [] }
 
@@ -1079,6 +1189,8 @@ export class UIManager {
       errorState: get('errorState'),
       errorMessage: get('errorMessage'),
       retryBtn: get('retryBtn'),
+      actionFeedback: get('actionFeedback'),
+      actionFeedbackMessage: get('actionFeedbackMessage'),
 
       // Status elements
       bookmarkStatus: get('bookmarkStatus'),
@@ -1089,6 +1201,12 @@ export class UIManager {
       togglePrivateBtn: get('togglePrivateBtn'),
       toggleReadBtn: get('toggleReadBtn'),
       deleteBtn: get('deleteBtn'),
+      // [REQ-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [IMPL-PAGE_ARCHIVE_STORAGE]
+      captureArchiveBtn: get('captureArchiveBtn'),
+      // [REQ-PAGE_SCREENSHOT_ARCHIVE] [ARCH-PAGE_SCREENSHOT_ARCHIVE] [IMPL-PAGE_SCREENSHOT_ARCHIVE]
+      captureScreenshotBtn: get('captureScreenshotBtn'),
+      // [REQ-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [IMPL-OFFLINE_READER_MODE]
+      openReaderBtn: get('openReaderBtn'),
       reloadBtn: get('reloadBtn'),
       optionsBtn: get('optionsBtn'),
       bookmarksIndexBtn: get('bookmarksIndexBtn'),
@@ -1166,6 +1284,12 @@ export class UIManager {
     this.elements.deleteBtn?.addEventListener('click', () => {
       this.emit('deletePin')
     })
+
+    // [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] Forward archive association action to PopupController while preserving the persistent popup session.
+    this.elements.captureArchiveBtn?.addEventListener('click', () => this.emit('capturePageArchive'))
+    this.elements.captureScreenshotBtn?.addEventListener('click', () => this.emit('capturePageScreenshot'))
+    // [REQ-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [IMPL-OFFLINE_READER_MODE]
+    this.elements.openReaderBtn?.addEventListener('click', () => this.emit('openOfflineReader'))
 
     this.elements.reloadBtn?.addEventListener('click', () => {
       // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Emit refreshData event for manual refresh
@@ -1506,6 +1630,9 @@ export class UIManager {
       this.elements.togglePrivateBtn,
       this.elements.toggleReadBtn,
       this.elements.deleteBtn,
+      this.elements.captureArchiveBtn,
+      this.elements.captureScreenshotBtn,
+      this.elements.openReaderBtn,
       this.elements.addTagBtn,
       this.elements.newTagInput,
       this.elements.searchBtn,
@@ -1928,10 +2055,29 @@ export class UIManager {
    */
   showError (message) {
     if (this.elements.errorState && this.elements.errorMessage) {
+      const title = this.elements.errorState.querySelector('h3')
+      if (title) title.textContent = 'Error Loading Data'
       this.elements.errorMessage.textContent = message
       this.elements.errorState.classList.remove('hidden')
       this.elements.loadingState?.classList.add('hidden')
       this.elements.mainInterface?.classList.add('hidden')
+      if (this.elements.retryBtn) this.elements.retryBtn.classList.remove('hidden')
+    }
+  }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Show archive association failure without replacing the loaded This Page interface with the initial-load error screen.
+   */
+  showActionError (message) {
+    if (this.elements.errorState && this.elements.errorMessage) {
+      const title = this.elements.errorState.querySelector('h3')
+      if (title) title.textContent = 'Action Failed'
+      this.elements.errorMessage.textContent = message
+      this.elements.errorState.classList.remove('hidden')
+      this.elements.loadingState?.classList.add('hidden')
+      this.elements.mainInterface?.classList.remove('hidden')
+      if (this.elements.retryBtn) this.elements.retryBtn.classList.add('hidden')
     }
   }
 
@@ -1941,19 +2087,52 @@ export class UIManager {
   hideError () {
     if (this.elements.errorState) {
       this.elements.errorState.classList.add('hidden')
+      const title = this.elements.errorState.querySelector('h3')
+      if (title) title.textContent = 'Error Loading Data'
+      if (this.elements.retryBtn) this.elements.retryBtn.classList.remove('hidden')
     }
+  }
+
+  /**
+   * [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
+   * Show archive association success feedback for quick actions without hiding the loaded This Page interface.
+   */
+  showActionSuccess (message) {
+    this._showActionFeedback(message, 'success')
+  }
+
+  /**
+   * @param {string} message
+   * @param {'success'} variant
+   */
+  _showActionFeedback (message, variant) {
+    const el = this.elements.actionFeedback
+    const msgEl = this.elements.actionFeedbackMessage
+    if (!el || !msgEl) {
+      console.log('Success:', message)
+      this.hideError()
+      return
+    }
+    el.classList.remove('hidden', 'success', 'error')
+    el.classList.add(variant)
+    msgEl.textContent = message
+    this.hideError()
+    if (this._actionFeedbackTimer) clearTimeout(this._actionFeedbackTimer)
+    this._actionFeedbackTimer = setTimeout(() => {
+      el.classList.add('hidden')
+    }, 4000)
   }
 
   /**
    * Show success message
    */
   showSuccess (message) {
-    // For now, we'll just log success messages
-    // In a full implementation, you might want a success toast
+    if (this.elements.actionFeedback && this.elements.actionFeedbackMessage) {
+      this.showActionSuccess(message)
+      return
+    }
     console.log('Success:', message)
-
-    // Could implement success toast similar to error toast
-    // or use a notification system
+    this.hideError()
   }
 
   /**

@@ -1,0 +1,45 @@
+ARCH-ARCHIVED_CONTENT_SEARCH:
+  decision: "Archive search is a deterministic module over extracted text from Local and File archive adapters. It is composed with, but does not replace, metadata search; the Index exposes an explicit archive-content scope and returns bounded snippets plus Reader targets."
+  detail_file: "architecture-decisions/ARCH-ARCHIVED_CONTENT_SEARCH.yaml"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-31"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Record archive scope wiring and Reader target resolution evidence"
+  name: "Archived Content Search Architecture"
+  rationale:
+    alternatives_considered:
+      - name: "Replace metadata search with one shared engine"
+        rejected_reason: "Existing ARCH-SEARCH intentionally keeps per-surface metadata search independent."
+      - name: "Expose full archive bodies in the metadata snapshot"
+        rejected_reason: "Increases privacy and payload risk for Local Query API consumers."
+    consequences:
+      - "Archive search needs update/delete synchronization with archive lifecycle."
+      - "Local Query API remains metadata-only unless a later requirement expands it."
+      - "Query ranking and snippet limits must be specified and tested."
+    why: "Separating archive queries from metadata preserves existing search contracts while allowing a future indexed implementation."
+  related_decisions:
+    depends_on:
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+      - "ARCH-SEARCH"
+    informs:
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+    see_also:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+  status: "Accepted"
+  summary: "Query extracted archive text through an explicit Index archive-content scope with bounded snippets and Reader targets."
+  traceability:
+    code_annotations:
+      - "ARCH-ARCHIVED_CONTENT_SEARCH"
+    implementation:
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+    requirements:
+      - "REQ-ARCHIVED_CONTENT_SEARCH"
+    tests:
+      - "tests/playwright/extension-archive-features.spec.js"
+      - "tests/unit/archive-content-search.test.js"
+      - "tests/unit/bookmarks-table-archive-search.test.js"
+      - "tests/unit/message-handler-archive.test.js"
