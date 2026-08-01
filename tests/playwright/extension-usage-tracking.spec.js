@@ -1,34 +1,30 @@
 /**
  * [IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
- * E2E: Usage tracking UX – side panel Usage tab, bookmarks index Visits/Last Visited columns, This Page usage section.
+ * E2E: Usage tracking UX – Visit History page, bookmarks index Visits/Last Visited columns, This Page usage section.
  * Run with: npm run test:e2e:extension
  */
 
 import { test, expect, getExtensionId } from './extension-fixture.js'
 
-test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Side panel Usage tab', () => {
-  test('load side panel, switch to Usage tab, assert Most Visited / Recently Visited / Navigation Graph sections and Refresh button', async ({ context }) => {
+test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Visit History page', () => {
+  test('load Visit History page, assert Most Visited / Recently Visited / Navigation Graph sections and Refresh button', async ({ context }) => {
     const extensionId = await getExtensionId(context)
-    const sidePanelPage = await context.newPage()
-    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
-    await sidePanelPage.waitForLoadState('domcontentloaded')
-    await sidePanelPage.waitForTimeout(1500)
+    const page = await context.newPage()
+    await page.goto(`chrome-extension://${extensionId}/src/ui/visit-history/visit-history.html`)
+    await page.waitForLoadState('domcontentloaded')
+    await page.waitForTimeout(1500)
 
-    await expect(sidePanelPage.locator('.side-panel-tab[data-tab="usage"]')).toBeVisible()
-    await sidePanelPage.locator('.side-panel-tab[data-tab="usage"]').click()
-    await sidePanelPage.waitForTimeout(2000)
+    await expect(page.locator('#visitHistoryPanel')).toBeVisible()
+    await expect(page.locator('.visit-history-title')).toHaveText('Visit History')
+    await expect(page.locator('#usage-most-visited-heading')).toHaveText('Most Visited')
+    await expect(page.locator('#usage-recently-visited-heading')).toHaveText('Recently Visited')
+    await expect(page.locator('#usage-graph-heading')).toHaveText('Navigation Graph')
+    await expect(page.locator('[data-usage-refresh]')).toBeVisible()
 
-    await expect(sidePanelPage.locator('#usagePanel')).toBeVisible()
-    await expect(sidePanelPage.locator('#usage-most-visited-heading')).toHaveText('Most Visited')
-    await expect(sidePanelPage.locator('#usage-recently-visited-heading')).toHaveText('Recently Visited')
-    await expect(sidePanelPage.locator('#usage-graph-heading')).toHaveText('Navigation Graph')
-    await expect(sidePanelPage.locator('[data-usage-refresh]')).toBeVisible()
-
-    await sidePanelPage.close()
+    await page.close()
   })
 
-  // [IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] [PROC-DEMO_RECORDING] Panel opens on Usage tab when storage set (demo script relies on this).
-  test('side panel opens with Usage tab visible when hoverboard_sidepanel_active_tab is set to usage', async ({ context }) => {
+  test('side panel has no Usage tab; legacy usage storage falls back to This Page', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const optionsPage = await context.newPage()
     await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded' })
@@ -44,11 +40,67 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-BOOKMARK_USAGE_TRACKING] [IM
     await sidePanelPage.waitForLoadState('domcontentloaded')
     await sidePanelPage.waitForTimeout(2000)
 
-    await expect(sidePanelPage.locator('#usagePanel:not([hidden])')).toBeVisible()
-    await expect(sidePanelPage.locator('#usage-most-visited-heading')).toHaveText('Most Visited')
-    await expect(sidePanelPage.locator('[data-usage-refresh]')).toBeVisible()
+    await expect(sidePanelPage.locator('.side-panel-tab[data-tab="usage"]')).toHaveCount(0)
+    await expect(sidePanelPage.locator('#usagePanel')).toHaveCount(0)
+    await expect(sidePanelPage.locator('#bookmarkPanel:not([hidden])')).toBeVisible()
 
     await sidePanelPage.close()
+  })
+})
+
+// [REQ-NON_WEB_TOOLS_TOOLBAR] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] Standalone Browser Bookmarks page;
+// gesture-bound action.openPopup / sidePanel.open deferred when fixture cannot invoke toolbar click.
+test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-NON_WEB_TOOLS_TOOLBAR] Browser Bookmarks page', () => {
+  test('load Browser Bookmarks page and assert panel chrome', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const page = await context.newPage()
+    await page.goto(`chrome-extension://${extensionId}/src/ui/browser-bookmarks/browser-bookmarks.html`)
+    await page.waitForLoadState('domcontentloaded')
+    await page.waitForTimeout(1500)
+
+    await expect(page.locator('#browserBookmarksPanel')).toBeVisible()
+    await expect(page.locator('#browserBookmarksSearchInput')).toBeVisible()
+    await expect(page.locator('#browserBookmarksList')).toBeAttached()
+
+    await page.close()
+  })
+
+  test('side panel has no Bookmarks tab; legacy browserBookmarks storage falls back to This Page', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const optionsPage = await context.newPage()
+    await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded' })
+    await optionsPage.evaluate(() => {
+      return new Promise((resolve) => {
+        chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'browserBookmarks' }, () => resolve())
+      })
+    })
+    await optionsPage.close()
+
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(2000)
+
+    await expect(sidePanelPage.locator('.side-panel-tab[data-tab="browserBookmarks"]')).toHaveCount(0)
+    await expect(sidePanelPage.locator('#browserBookmarksPanel')).toHaveCount(0)
+    await expect(sidePanelPage.locator('#bookmarkPanel:not([hidden])')).toBeVisible()
+
+    await sidePanelPage.close()
+  })
+
+  test('tools-toolbar.html exposes five launchers including Browser Bookmarks and Visit History', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const page = await context.newPage()
+    await page.goto(`chrome-extension://${extensionId}/src/ui/tools-toolbar/tools-toolbar.html`)
+    await page.waitForLoadState('domcontentloaded')
+
+    await expect(page.locator('#btn-bookmarks-index')).toBeVisible()
+    await expect(page.locator('#btn-browser-import')).toBeVisible()
+    await expect(page.locator('#btn-options')).toBeVisible()
+    await expect(page.locator('#btn-browser-bookmarks')).toBeVisible()
+    await expect(page.locator('#btn-visit-history')).toBeVisible()
+
+    await page.close()
   })
 })
 
@@ -89,9 +141,9 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-BOOKMARK_USAGE_TRACKING] [IM
   })
 })
 
-// [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] Smoke: This Page panel has Quick Actions, Save to, tags, Search Tabs, footer (demo script relies on these).
+// [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] Smoke: This Page panel has Quick Actions, Save to, tags, Search Tabs (no footer in side panel).
 test.describe('[IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] This Page panel sections', () => {
-  test('bookmark panel has Quick Actions, Storage (Save to), tag sections, Search Tabs, footer', async ({ context }) => {
+  test('bookmark panel has Quick Actions, Storage (Save to), tag sections, Search Tabs; no footer', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const sidePanelPage = await context.newPage()
     await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
@@ -122,10 +174,7 @@ test.describe('[IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] This Page p
     await expect(panel.locator('[data-popup-ref="searchInput"]')).toBeAttached()
     await expect(panel.locator('[data-popup-ref="searchBtn"]')).toBeAttached()
 
-    await expect(panel.locator('.popup-footer')).toBeAttached()
-    await expect(panel.locator('[data-popup-ref="reloadBtn"]')).toBeAttached()
-    await expect(panel.locator('[data-popup-ref="optionsBtn"]')).toBeAttached()
-    await expect(panel.locator('[data-popup-ref="bookmarksIndexBtn"]')).toBeAttached()
+    await expect(panel.locator('.popup-footer')).toHaveCount(0)
 
     await sidePanelPage.close()
   })

@@ -1,0 +1,5 @@
+# [IMPL-TESTING] Bun native test runner config.
+# Project CI/default harness remains Jest (`bun run test` / `npm test`) with jsdom.
+# This preload restores tests/setup.js chrome mocks for ad-hoc `bun test` runs.
+[test]
+preload = ["./tests/setup.js"]

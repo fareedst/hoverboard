@@ -23,13 +23,14 @@ alias b.='bkpdir .'
 # Hoverboard
 
 # Install dependencies
-alias ni='bun install'
+alias ni='echo_exec bun install'
 
 # Build the extension
-alias nb='bun run build:dev'
+alias nb='echo_exec bun run build:dev'
 
-# Run tests
-alias nt='bun test'
+# Run tests (Jest harness via package.json "test"; not bare `bun test` runner)
+alias nt='echo_exec bun run test'
+alias nj='echo_exec npx jest --no-coverage'
 
 # Start development mode with hot reload
-alias nr='bun run dev'
+alias nr='echo_exec bun run dev'

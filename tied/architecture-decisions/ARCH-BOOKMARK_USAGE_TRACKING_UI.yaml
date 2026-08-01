@@ -2,22 +2,22 @@ ARCH-BOOKMARK_USAGE_TRACKING_UI:
   cross_references:
     - "ARCH-BOOKMARK_USAGE_TRACKING"
     - "REQ-BOOKMARK_USAGE_TRACKING"
-  decision: "Three surfaces – This Page inline section, Index table columns (Visits, Last Visited), Usage side-panel tab (Most Visited, Recently Visited, Navigation Graph). Data via existing getBookmarkUsage / getBookmarkUsageStats / getBookmarkNavigationGraph messages."
+  decision: "Three surfaces – This Page inline section, Index table columns (Visits, Last Visited), and Visit History standalone page (Most Visited, Recently Visited, Navigation Graph). Data via existing getBookmarkUsage / getBookmarkUsageStats / getBookmarkNavigationGraph messages. Visit History is opened via tools toolbar (tabs.create), not a side-panel tab."
   detail_file: "architecture-decisions/ARCH-BOOKMARK_USAGE_TRACKING_UI.yaml"
   implementation_approach:
     details:
-      - Surface 1: "section in" #bookmarkPanel; data-popup-ref for usage stats; refresh with bookmark tab
+      - Surface 1: "section in This Page / popup"
       - Surface 2: "two new th/td; fetch getBookmarkUsage (no url) after getAggregatedBookmarksForIndex; merge by url; sort keys visits, lastVisited"
-      - Surface 3: "TAB_USAGE in side-panel-tab-state;" #usagePanel; initUsageTab fetches getBookmarkUsageStats and getBookmarkNavigationGraph; render three sections
-    summary: "Three surfaces. (1) This Page tab – Usage section after Storage, visible when visitCount > 0; getBookmarkUsage + getInboundLinks for current URL. (2) Bookmarks Index – Visits and Last Visited columns; merge getAllUsage into table data; sortable. (3) Usage tab – fifth side-panel tab; Most Visited (getMostFrequent), Recently Visited (getMostRecent), Navigation Graph (getNavigationGraph); Refresh button."
+      - Surface 3: "standalone visit-history page; initVisitHistoryPage; tools toolbar btn-visit-history"
+    summary: "Three surfaces. (1) This Page – Usage section after Storage, visible when visitCount > 0; getBookmarkUsage + getInboundLinks for current URL. (2) Bookmarks Index – Visits and Last Visited columns; merge getAllUsage into table data; sortable. (3) Visit History standalone page (visit-history.html) – Most Visited (getMostFrequent), Recently Visited (getMostRecent), Navigation Graph (getNavigationGraph); Refresh button; launched from tools toolbar."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-03-03"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-03"
-      reason: "Initial creation for usage tracking UX"
+      date: "2026-07-31"
+      reason: "LEAP: Surface 3 moved from Usage side-panel tab to Visit History standalone page"
     last_validated:
       date: "2026-03-03"
       result: "pass"
@@ -25,7 +25,7 @@ ARCH-BOOKMARK_USAGE_TRACKING_UI:
   name: "Bookmark Usage Tracking UI Architecture"
   rationale:
     benefits:
-      - "Inline stats on This Page for immediate context; Index columns for bulk analysis; dedicated Usage tab for rankings and graph"
+      - "Inline stats on This Page for immediate context; Index columns for bulk analysis; dedicated Visit History page for rankings and graph"
     problems_solved:
       - "How to present the referrer graph"
       - "How to support sorting/filtering by visits and last-visited"

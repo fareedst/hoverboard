@@ -296,9 +296,11 @@ export class MessageClient {
   }
 }
 
-// Set up cleanup on page unload
-window.addEventListener('beforeunload', () => {
-  if (window.hoverboardMessageClient) {
-    window.hoverboardMessageClient.cleanup()
-  }
-})
+// Set up cleanup on page unload (skip when no DOM — e.g. Bun native test runner without jsdom)
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener('beforeunload', () => {
+    if (window.hoverboardMessageClient) {
+      window.hoverboardMessageClient.cleanup()
+    }
+  })
+}

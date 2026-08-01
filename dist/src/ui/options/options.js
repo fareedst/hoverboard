@@ -22075,6 +22075,14 @@ var init_pinboard_service = __esm({
   }
 });
 
+// src/ui/styles/tool-page-version.js
+function initToolPageVersion(root = document, version2) {
+  const el = root.querySelector?.("[data-extension-version]");
+  if (!el) return;
+  const v = version2 ?? (typeof chrome !== "undefined" && chrome.runtime?.getManifest?.()?.version) ?? "";
+  el.textContent = v ? `v${v}` : "";
+}
+
 // src/ui/options/options.js
 init_config_manager();
 init_pinboard_service();
@@ -22700,13 +22708,15 @@ var OptionsController = class {
     }
   }
 };
-var isJest = typeof process !== "undefined" && process.env?.JEST_WORKER_ID != null;
-if (!isJest) {
+var isUnitTest = typeof process !== "undefined" && (process.env?.JEST_WORKER_ID != null || process.env?.BUN_TEST === "1");
+if (!isUnitTest && typeof document !== "undefined") {
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
+      initToolPageVersion();
       new OptionsController();
     });
   } else {
+    initToolPageVersion();
     new OptionsController();
   }
 }

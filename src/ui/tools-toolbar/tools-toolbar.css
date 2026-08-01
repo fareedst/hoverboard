@@ -1,0 +1,53 @@
+/* [REQ-NON_WEB_TOOLS_TOOLBAR] [IMPL-NON_WEB_TOOLS_TOOLBAR] Compact tools toolbar popup */
+html, body {
+  margin: 0;
+  padding: 0;
+  min-width: 220px;
+  font-family: system-ui, sans-serif;
+  background: var(--hb-bg-primary, #1a1a1a);
+  color: var(--hb-text-primary, #eee);
+}
+
+.tools-toolbar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem 0.25rem;
+}
+
+.tools-toolbar-header h1 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.tools-toolbar-note {
+  margin: 0;
+  padding: 0.25rem 0.75rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--hb-text-secondary, #999);
+}
+
+.tools-toolbar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0 0.75rem 0.75rem;
+}
+
+.tools-toolbar-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--hb-border-color, #333);
+  border-radius: 4px;
+  background: var(--hb-bg-secondary, #2a2a2a);
+  color: inherit;
+  cursor: pointer;
+}
+
+.tools-toolbar-btn:hover {
+  border-color: var(--hb-accent, #5a9);
+}

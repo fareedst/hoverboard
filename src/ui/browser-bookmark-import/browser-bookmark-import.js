@@ -32,6 +32,7 @@
  * === END IMPL-FULL-BLOCK: IMPL-BROWSER_BOOKMARK_IMPORT ===
  */
 import { sanitizeTag, folderPathToTags, parseExtraTags, flattenTree } from './browser-bookmark-import-utils.js'
+import { initToolPageVersion } from '../styles/tool-page-version.js'
 
 const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
 const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
@@ -364,6 +365,7 @@ function populateFolderFilter () {
 }
 
 function init () {
+  initToolPageVersion()
   elements.searchInput.addEventListener('input', applySearchAndFilter)
   elements.searchClear.addEventListener('click', () => {
     elements.searchInput.value = ''

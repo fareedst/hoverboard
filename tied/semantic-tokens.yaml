@@ -439,6 +439,9 @@ ARCH-NATIVE_HOST:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-NON_WEB_TOOLS_TOOLBAR:
+  description: "Non-web tools toolbar architecture"
+  type: "architecture"
 ARCH-OVERLAY:
   cross_references:
     - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
@@ -1618,6 +1621,9 @@ IMPL-NATIVE_HOST_WRAPPER:
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
+IMPL-NON_WEB_TOOLS_TOOLBAR:
+  description: "Non-web tools toolbar implementation"
+  type: "implementation"
 IMPL-OVERLAY:
   cross_references:
     - "ARCH-OVERLAY"
@@ -3028,6 +3034,9 @@ REQ-NATIVE_HOST_WRAPPER:
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"
+REQ-NON_WEB_TOOLS_TOOLBAR:
+  description: "Non-web close side panel; badge tools toolbar"
+  type: "requirement"
 REQ-OVERLAY_AUTO_SHOW_CONTROL:
   cross_references:
     - "ARCH-OVERLAY"

@@ -1,0 +1,83 @@
+IMPL-NON_WEB_TOOLS_TOOLBAR:
+  category: "UI"
+  code_locations:
+    files:
+      - path: "src/shared/web-protocol.js"
+        description: "isWebProtocolUrl allowlist"
+      - path: "src/core/service-worker.js"
+        description: "_dismissSidePanelIfNonWeb, _syncActionPopupForTab, _openToolsToolbar, _openSidePanelOrToolsToolbar, _openBrowserBookmarksPage, handleActionClick non-web"
+      - path: "src/ui/tools-toolbar/tools-toolbar.html"
+        description: "Five-launcher tools toolbar popup"
+      - path: "src/ui/tools-toolbar/tools-toolbar.js"
+        description: "Launcher wiring without message-handler import"
+      - path: "src/ui/browser-bookmarks/browser-bookmarks.html"
+        description: "Standalone Browser Bookmarks page"
+      - path: "src/ui/visit-history/visit-history.html"
+        description: "Standalone Visit History page"
+      - path: "src/ui/side-panel/side-panel.html"
+        description: "No Bookmarks/Usage tab buttons"
+      - path: "src/ui/side-panel/side-panel-tab-state.js"
+        description: "TAB_IDS exclude browserBookmarks/usage; legacy fallback"
+      - path: "manifest.json"
+        description: "web_accessible / command paths for tools pages"
+    functions:
+      - name: "isWebProtocolUrl"
+        description: "http/https allowlist"
+        file: "src/shared/web-protocol.js"
+      - name: "_dismissSidePanelIfNonWeb"
+        description: "REQUEST_SIDE_PANEL_CLOSE on non-web"
+        file: "src/core/service-worker.js"
+      - name: "_syncActionPopupForTab"
+        description: "setPopup tools-toolbar or clear/popup.html"
+        file: "src/core/service-worker.js"
+      - name: "_openToolsToolbar"
+        description: "Sync popup and openPopup"
+        file: "src/core/service-worker.js"
+      - name: "_openBrowserBookmarksPage"
+        description: "tabs.create browser-bookmarks.html"
+        file: "src/core/service-worker.js"
+  description: "Shared isWebProtocolUrl; SW dismiss panel + setPopup sync; tools-toolbar page with five launchers; Browser Bookmarks and Visit History standalone pages."
+  essence_pseudocode_path: "implementation-decisions/IMPL-NON_WEB_TOOLS_TOOLBAR-pseudocode.md"
+  implementation_approach:
+    - "browser-bookmarks.html and visit-history.html standalone"
+    - "Command open-side-panel-browser-bookmarks -> tabs.create browser-bookmarks.html"
+    - "Pure isWebProtocolUrl in src/shared/web-protocol.js"
+    - "SW handleTabActivated/Updated call dismiss+sync"
+    - "tools-toolbar.html five buttons including Visit History"
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-31"
+      reason: "Three-way: full-block comments in SW/web-protocol; TOOLS_TOOLBAR PRE aligned"
+  name: "Non-web tools toolbar implementation"
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_USAGE_TRACKING_UI"
+      - "IMPL-ICON_CLICK_BEHAVIOR"
+      - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+    depends_on:
+      - "ARCH-NON_WEB_TOOLS_TOOLBAR"
+      - "REQ-NON_WEB_TOOLS_TOOLBAR"
+    see_also:
+      - "IMPL-EXTENSION_COMMANDS"
+      - "IMPL-SIDE_PANEL_TABS"
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-NON_WEB_TOOLS_TOOLBAR"
+    code_annotations:
+      - "IMPL-NON_WEB_TOOLS_TOOLBAR"
+      - "REQ-NON_WEB_TOOLS_TOOLBAR"
+    requirements:
+      - "REQ-NON_WEB_TOOLS_TOOLBAR"
+    tests:
+      - "tests/integration/non-web-tools-toolbar-composition.integration.test.js"
+      - "tests/integration/standalone-tool-pages-composition.integration.test.js"
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      - "tests/playwright/extension-usage-tracking.spec.js"
+      - "tests/unit/non-web-tools-toolbar.test.js"
+      - "tests/unit/service-worker-quick-access.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/side-panel-tabs.test.js"
+      - "tests/unit/tool-page-version.test.js"
+      - "tests/unit/web-protocol.test.js"

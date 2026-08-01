@@ -180,9 +180,22 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
       }
     }
 
-    // Mock window.close
-    global.window = {
-      close: jest.fn()
+    // Mock window.close without replacing a full Window (Bun has no jsdom; keep addEventListener for setupAutoRefresh)
+    if (typeof global.window === 'undefined' || typeof global.window.addEventListener !== 'function') {
+      global.window = {
+        ...(typeof global.window === 'object' && global.window ? global.window : {}),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn()
+      }
+    }
+    global.window.close = jest.fn()
+    if (typeof global.document === 'undefined' || typeof global.document.addEventListener !== 'function') {
+      global.document = {
+        ...(typeof global.document === 'object' && global.document ? global.document : {}),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        visibilityState: 'visible'
+      }
     }
 
     popupController = new PopupController({
@@ -431,9 +444,13 @@ describe('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSIO
       setAttribute: jest.fn()
     }
 
-    // Mock document.getElementById
+    // Mock document.getElementById; keep documentElement for applyFontSizeConfig (Bun has no jsdom)
     global.document = {
-      getElementById: jest.fn().mockReturnValue(mockShowHoverBtn)
+      getElementById: jest.fn().mockReturnValue(mockShowHoverBtn),
+      documentElement: {
+        style: { setProperty: jest.fn() }
+      },
+      querySelectorAll: jest.fn().mockReturnValue([])
     }
 
     uiManager = new UIManager({

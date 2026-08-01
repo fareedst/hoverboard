@@ -1,0 +1,63 @@
+CITDP-REQ-NON_WEB_TOOLS_TOOLBAR:
+  change_definition:
+    in_scope:
+      - "action.setPopup tools-toolbar"
+      - "INIT_VISIT_HISTORY_PAGE H2 in IMPL-BOOKMARK_USAGE_TRACKING_UI"
+      - "isWebProtocolUrl allowlist"
+      - "remove Bookmarks and Usage side-panel tabs"
+      - "REQUEST_SIDE_PANEL_CLOSE on non-web activate/navigate"
+      - "standalone browser-bookmarks.html"
+      - "standalone visit-history.html"
+      - "tool page shell + initToolPageVersion"
+      - "tools toolbar five launchers including Visit History"
+    intent: "Non-http(s) tabs must not keep the page-bound side panel open; badge click launches full-page tools instead."
+    out_of_scope:
+      - "extra URL schemes"
+      - "extract By Tag/Tabs to standalone pages"
+      - "gesture-bound openPopup/sidePanel.open E2E when fixture cannot invoke toolbar click"
+  change_id: "CITDP-REQ-NON_WEB_TOOLS_TOOLBAR"
+  impact:
+    modules:
+      - "browser-bookmarks"
+      - "service-worker"
+      - "side-panel"
+      - "tool-page-shell"
+      - "tools-toolbar"
+      - "visit-history"
+      - "web-protocol"
+    tokens:
+      - "ARCH-BOOKMARK_USAGE_TRACKING_UI"
+      - "ARCH-NON_WEB_TOOLS_TOOLBAR"
+      - "ARCH-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "IMPL-BOOKMARK_USAGE_TRACKING_UI"
+      - "IMPL-ICON_CLICK_BEHAVIOR"
+      - "IMPL-NON_WEB_TOOLS_TOOLBAR"
+      - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "IMPL-SIDE_PANEL_SNAPSHOT"
+      - "IMPL-SIDE_PANEL_TABS"
+      - "REQ-BOOKMARK_USAGE_TRACKING"
+      - "REQ-NON_WEB_TOOLS_TOOLBAR"
+      - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+  requirement: "REQ-NON_WEB_TOOLS_TOOLBAR"
+  risk_assessment:
+    - risk: "setPopup races with onClicked"
+      mitigation: "Sync popup on every activate/update; handleActionClick non-web path opens tools toolbar"
+    - risk: "Bookmarks/Usage tab deep links"
+      mitigation: "Legacy storage browserBookmarks/usage falls back to default tab; command opens standalone Browser Bookmarks page; Visit History via tools toolbar"
+  status: "applied"
+  summary: "Close side panel on non-web tab switch; badge opens five-button tools toolbar; Browser Bookmarks and Visit History extracted to standalone pages with tool page shell + version."
+  test_strategy:
+    composition:
+      - "tests/integration/non-web-tools-toolbar-composition.integration.test.js"
+      - "tests/integration/standalone-tool-pages-composition.integration.test.js"
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+    e2e: "tests/playwright/extension-usage-tracking.spec.js (Visit History + Browser Bookmarks pages + tools toolbar HTML + no Usage/Bookmarks side-panel tabs); gesture-bound openPopup/sidePanel.open deferred when fixture cannot invoke toolbar click"
+    unit:
+      - "tests/unit/browser-bookmarks-panel.test.js"
+      - "tests/unit/non-web-tools-toolbar.test.js"
+      - "tests/unit/service-worker-quick-access.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/side-panel-tabs.test.js"
+      - "tests/unit/tool-page-version.test.js"
+      - "tests/unit/usage-panel.test.js"
+      - "tests/unit/web-protocol.test.js"

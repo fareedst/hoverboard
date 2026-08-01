@@ -15,7 +15,7 @@
 | Preferred | Avoid / demote | Notes |
 |-----------|----------------|-------|
 | **storage backend** | storage method, provider name (alone) | One of `pinboard` \| `local` \| `file` \| `sync` \| `browser` |
-| **Browser storage (backend)** / **Store B** | Chrome bookmarks (as backend), native bookmarks store | Backend `browser` via BookmarkRouter / [ARCH-BROWSER_BOOKMARK_PROVIDER](../architecture-decisions/ARCH-BROWSER_BOOKMARK_PROVIDER.yaml) — **not** Local storage (`chrome.storage.local`) and **not** side-panel **Bookmarks** panel (direct `chrome.bookmarks` tree UX / [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS](../architecture-decisions/ARCH-SIDE_PANEL_BROWSER_BOOKMARKS.yaml)) |
+| **Browser storage (backend)** / **Store B** | Chrome bookmarks (as backend), native bookmarks store | Backend `browser` via BookmarkRouter / [ARCH-BROWSER_BOOKMARK_PROVIDER](../architecture-decisions/ARCH-BROWSER_BOOKMARK_PROVIDER.yaml) — **not** Local storage (`chrome.storage.local`) and **not** **Browser Bookmarks (page)** (standalone Chrome tree UX / [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS](../architecture-decisions/ARCH-SIDE_PANEL_BROWSER_BOOKMARKS.yaml); legacy token name) |
 | **Chrome storage settings** | ARCH-STORAGE as bookmark backends | Settings/portability via [ARCH-STORAGE](../architecture-decisions/ARCH-STORAGE.yaml) — distinct from this glossary’s five bookmark backends |
 | **storage index** | backend map, URL→backend table | Key `hoverboard_storage_index`; maps URL → backend |
 | **BookmarkRouter** | storage router, aggregator (alone) | Delegates get/save/delete/tag/move across providers |

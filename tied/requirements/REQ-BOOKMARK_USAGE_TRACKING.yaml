@@ -7,8 +7,8 @@ REQ-BOOKMARK_USAGE_TRACKING:
       date: "2026-03-03"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-03"
-      reason: "Initial creation for bookmark usage and referrer graph tracking"
+      date: "2026-07-31"
+      reason: "LEAP: Surface 3 is Visit History page, not Usage side-panel tab"
     last_validated:
       date: "2026-03-03"
       result: "pass"
@@ -33,7 +33,7 @@ REQ-BOOKMARK_USAGE_TRACKING:
   satisfaction_criteria:
     - criterion: "Navigation edges (sourceUrl → targetUrl with count and timestamps) are stored for referrer-based graph."
     - criterion: "UI can query usage and graph via messages (getBookmarkUsage, getBookmarkUsageStats, getBookmarkNavigationGraph)."
-    - criterion: "UI displays usage on three surfaces – This Page inline section (visit count, last visited, top referrer), Bookmarks Index table columns (Visits, Last Visited sortable), and Usage side-panel tab (Most Visited, Recently Visited, Navigation Graph)."
+    - criterion: "UI displays usage on three surfaces – This Page inline section (visit count, last visited, top referrer), Bookmarks Index table columns (Visits, Last Visited sortable), and Visit History standalone page (Most Visited, Recently Visited, Navigation Graph)."
     - criterion: "Usage data (visitCount, lastVisitedAt, firstVisitedAt, recentVisits) is stored per URL in chrome.storage.local."
     - criterion: "Visits are debounced per URL (e.g. 60s) to avoid inflating counts from rapid tab switches."
     - criterion: "When a user visits a bookmarked URL (tab activated or loaded), a visit is recorded with optional referrer."

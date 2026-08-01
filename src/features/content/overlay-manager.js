@@ -349,7 +349,7 @@ import { browser } from '../../shared/utils' // [SAFARI-EXT-SHIM-001]
 
 // Debug logging utility
 const debugLog = (message, data = null) => {
-  if (window.HOVERBOARD_DEBUG) {
+  if (typeof window !== 'undefined' && window.HOVERBOARD_DEBUG) {
     if (data) {
       console.log(`[Hoverboard Overlay Debug] ${message}`, data)
     } else {
@@ -360,7 +360,7 @@ const debugLog = (message, data = null) => {
 
 // Debug error utility
 const debugError = (message, error = null) => {
-  if (window.HOVERBOARD_DEBUG) {
+  if (typeof window !== 'undefined' && window.HOVERBOARD_DEBUG) {
     if (error) {
       console.error(`[Hoverboard Overlay Debug] ${message}`, error)
     } else {

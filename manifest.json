@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Hoverboard",
-  "version": "3.1.2",
+  "version": "3.1.5",
   "author": "Fareed Stevenson",
   "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
   "background": {
@@ -36,7 +36,7 @@
       "description": "Open browser bookmark import"
     },
     "open-side-panel-browser-bookmarks": {
-      "description": "Open side panel on Bookmarks tab"
+      "description": "Open Browser Bookmarks page"
     }
   },
   "content_scripts": [

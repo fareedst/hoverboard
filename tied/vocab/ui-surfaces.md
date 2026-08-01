@@ -25,6 +25,8 @@
 | **badge** | toolbar badge | Icon badge text/indicators |
 | **quick access** | shortcuts entry | Commands + context menu openers |
 | **icon click opens side panel** | action click | Config `iconClickOpensSidePanel` (default true) |
+| **tools toolbar** | non-web tools popup | Badge `action` popup on non-**web protocol** tabs (`tools-toolbar.html`); see [`side-panel.md`](side-panel.md) ([REQ-NON_WEB_TOOLS_TOOLBAR]) |
+| **tool page shell** | standalone tool chrome | Shared full-page chrome for Index / Import / Options / Browser Bookmarks / Visit History; see [`side-panel.md`](side-panel.md) |
 | **Quick Actions** | action row | Show Hover, Toggle Privacy, Read Later, Delete |
 | **non-scriptable URL** | cannot inject (alone) | Browser-forbidden scripting target (restricted schemes + extensions gallery); see [`side-panel.md`](side-panel.md); not user **inhibit URL** |
 | **injectionOutcome** | inject log (alone) | UI inspector `recordAction` id for precheck/skip/fail of content or suggested-tags scripting |
@@ -47,6 +49,7 @@
 | Theme | Dark / Light | `defaultVisibilityTheme` (`light-on-dark` \| `dark-on-light`) | — | theme CSS |
 | Transparency | Opacity | `defaultTransparencyEnabled`, `defaultBackgroundOpacity` | `updateOverlayTransparency` | overlay |
 | Icon → side panel | Extension icon option | `iconClickOpensSidePanel` | `OPEN_SIDE_PANEL` / `REQUEST_SIDE_PANEL_CLOSE` | [IMPL-ICON_CLICK_BEHAVIOR](../implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml) |
+| Tools toolbar (non-web) | Tools | — | `action.setPopup` → `tools-toolbar.html` | [IMPL-NON_WEB_TOOLS_TOOLBAR](../implementation-decisions/IMPL-NON_WEB_TOOLS_TOOLBAR.yaml) |
 | Open tags tree | By Tag (footer) | — | `openTagsTree` → `OPEN_SIDE_PANEL` | popup |
 | Open index | Bookmarks index | — | `OPEN_BOOKMARKS_INDEX` / `openBookmarksIndex` | SW `_openBookmarksIndexTab` (tabs.create + `REQUEST_SIDE_PANEL_CLOSE`) |
 | Search Bookmarks | Search Bookmarks | — | `OPEN_BOOKMARKS_INDEX` + `{ q }` | [IMPL-LIBRARY_SEARCH_ENTRY] `OPEN_LIBRARY_SEARCH` |
@@ -76,7 +79,9 @@
 - **overlay** — Transparent/fixed on-page UI for current bookmark status and tags.
 - **persistent popup session** — Popup stays open across actions (no automatic `window.close`).
 - **badge indicators** — Not bookmarked / no tags / private / to-read markers (defaults `-`, `0`, `*`, `!`).
-- **quick access** — Manifest `commands` and context-menu entries for side panel, options, index, import, Bookmarks tab.
+- **quick access** — Manifest `commands` and context-menu entries for side panel, options, index, import, and standalone Browser Bookmarks page (legacy command id `open-side-panel-browser-bookmarks`).
+- **tools toolbar** — Compact badge popup on non-web tabs; five launchers to full-page tools (not side panel). Canonical detail in [`side-panel.md`](side-panel.md).
+- **tool page shell** — Shared brand-row / layout CSS for standalone tool pages; version via `initToolPageVersion`.
 - **UI action contract** — Single source of truth mapping action IDs ↔ messages for tests and inspector (`src/shared/ui-action-contract.js`).
 - **CONTENT_MESSAGE_TYPES** — Content-script handled types (`TOGGLE_HOVER`, `HIDE_OVERLAY`, `GET_OVERLAY_STATE`, …).
 - **non-scriptable URL** — Target where inject/suggested-tags scripting must precheck-skip; expected skips record **injectionOutcome**, not error spam.
@@ -96,6 +101,8 @@
 | Classify script inject URL | `CLASSIFY_SCRIPT_INJECTION_URL` | [IMPL-POPUP_SESSION](../implementation-decisions/IMPL-POPUP_SESSION.yaml) |
 | Record injection outcome | `RECORD_INJECTION_OUTCOME` | [IMPL-UI_INSPECTOR](../implementation-decisions/IMPL-UI_INSPECTOR.yaml) |
 | Icon click toggle | `(proposed) ICON_CLICK_SIDE_PANEL_TOGGLE` | [IMPL-ICON_CLICK_BEHAVIOR](../implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml) |
+| Tools toolbar launchers | `TOOLS_TOOLBAR_PAGE` | [IMPL-NON_WEB_TOOLS_TOOLBAR](../implementation-decisions/IMPL-NON_WEB_TOOLS_TOOLBAR.yaml) |
+| Tool page version | `initToolPageVersion` | Shared `tool-page-version.js` |
 | Action → message map | `POPUP_ACTION_TO_MESSAGE` | [IMPL-UI_ACTION_CONTRACT](../implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml) |
 | Notes editable by backend | `NOTES_EDITABLE_FOR_BACKEND` | [IMPL-BOOKMARK_NOTES_UI](../implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml) |
 | Build Title/Notes save payload | `BUILD_BOOKMARK_NOTES_SAVE_PAYLOAD` | [IMPL-BOOKMARK_NOTES_UI](../implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml) |
@@ -130,4 +137,6 @@
 | Show on page load | Preferred terms |
 | SYNC_BOOKMARK_NOTES_FIELDS | Pseudo-code block names |
 | Title/Notes Details | Preferred terms / Named concepts |
+| tool page shell | Preferred terms / Named concepts |
+| tools toolbar | Preferred terms / Named concepts |
 | UI action contract | Named concepts |

@@ -1,0 +1,16 @@
+ARCH-NON_WEB_TOOLS_TOOLBAR:
+  category: "UI"
+  consequences:
+    - "Non-web open-side-panel opens tools toolbar"
+    - "open-side-panel-browser-bookmarks opens standalone page"
+    - "Side panel loses Bookmarks and Usage tabs"
+    - "Visit History opened from tools toolbar"
+  decision: "Use a shared isWebProtocolUrl(http/https allowlist). On active-tab switch to non-web, SW broadcasts REQUEST_SIDE_PANEL_CLOSE. Sync chrome.action.setPopup to tools-toolbar.html on non-web tabs and clear (or popup.html) on web so badge click opens the tools toolbar without sidePanel.open. Browser Bookmarks and Visit History live as standalone extension pages opened via tabs.create, not side-panel tabs."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-31"
+      reason: "Visit History standalone page on tools toolbar"
+  name: "Non-web tools toolbar architecture"
+  rationale: "Chrome fires onClicked only when popup is empty; setPopup per protocol gives the right surface. Cooperative close reuses existing panel message. Bookmarks and Visit History UX are tab-independent so they belong with other full-page tools."
+  status: "Active"

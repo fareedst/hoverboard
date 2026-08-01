@@ -1,0 +1,80 @@
+/**
+ * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
+ * Visit History standalone page styles. Shell: tool-page-shell.css
+ */
+
+.visit-history-panel {
+  overflow-y: auto;
+}
+
+.usage-panel-toolbar {
+  margin-bottom: var(--space-3);
+}
+
+.usage-section {
+  margin-bottom: var(--space-4);
+}
+
+.usage-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-1-5) 0;
+  color: var(--color-text-primary);
+}
+
+.usage-list,
+.usage-graph {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.usage-row {
+  margin: var(--space-1) 0;
+  padding: var(--space-0-5) 0;
+}
+
+.usage-rank {
+  margin-right: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+.usage-link {
+  color: var(--color-interactive-primary);
+  text-decoration: none;
+}
+
+.usage-link:hover {
+  text-decoration: underline;
+}
+
+.usage-meta {
+  margin-left: var(--space-1-5);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.usage-graph-group {
+  margin: var(--space-2) 0;
+  padding: var(--space-1-5) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.usage-graph-source {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-1);
+}
+
+.usage-graph-edge {
+  margin: var(--space-0-5) 0 var(--space-0-5) var(--space-4);
+}
+
+.usage-empty,
+.usage-error {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) 0;
+}
+
+.usage-error {
+  color: var(--color-error-600);
+}

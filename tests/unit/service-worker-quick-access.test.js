@@ -324,10 +324,10 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COM
     expect(global.chrome.runtime.openOptionsPage).toHaveBeenCalledTimes(1)
   })
 
-  test('command open-side-panel calls chrome.sidePanel.open with cached windowId', () => {
+  test('command open-side-panel calls chrome.sidePanel.open with cached windowId', async () => {
     sw._sidePanelWindowId = 42
-    const listener = global.chrome.commands.onCommand.addListener.mock.calls[0][0]
-    listener('open-side-panel')
+    global.chrome.tabs.query.mockResolvedValue([{ id: 1, url: 'https://example.com', windowId: 42 }])
+    await sw.handleCommand('open-side-panel')
     expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
   })
 
@@ -358,13 +358,12 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COM
     expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
   })
 
-  test('command open-side-panel-browser-bookmarks sets storage then opens side panel [IMPL-EXTENSION_COMMANDS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS]', async () => {
-    sw._sidePanelWindowId = 42
+  test('command open-side-panel-browser-bookmarks opens standalone Browser Bookmarks page [IMPL-EXTENSION_COMMANDS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-NON_WEB_TOOLS_TOOLBAR]', async () => {
     await sw.handleCommand('open-side-panel-browser-bookmarks')
-    expect(global.chrome.storage.local.set).toHaveBeenCalledWith(
-      { hoverboard_sidepanel_active_tab: 'browserBookmarks' }
-    )
-    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
+    expect(global.chrome.tabs.create).toHaveBeenCalledWith({
+      url: 'chrome-extension://test-id/src/ui/browser-bookmarks/browser-bookmarks.html'
+    })
+    expect(global.chrome.sidePanel.open).not.toHaveBeenCalled()
   })
 
   test('command open-bookmarks-index calls chrome.tabs.create with bookmarks-table URL', () => {
@@ -383,7 +382,7 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COM
     })
   })
 
-  // [IMPL-EXTENSION_COMMANDS] Cold-start fallback: when _sidePanelWindowId null, command uses tabs.query callback.
+  // [IMPL-EXTENSION_COMMANDS] Cold-start fallback: when _sidePanelWindowId null, open-side-panel probes active tab then opens panel.
   test('command open-side-panel with _sidePanelWindowId null uses tabs.query and opens panel [IMPL-EXTENSION_COMMANDS]', async () => {
     sw._sidePanelWindowId = null
     let queryCallback
@@ -392,15 +391,11 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COM
         queryCallback = cb
         return undefined
       }
-      return Promise.resolve([])
+      return Promise.resolve([{ id: 1, windowId: 88, url: 'https://example.com' }])
     })
-    const listener = global.chrome.commands.onCommand.addListener.mock.calls[0][0]
-    listener('open-side-panel')
-    expect(global.chrome.tabs.query).toHaveBeenCalledWith(
-      { active: true, currentWindow: true },
-      expect.any(Function)
-    )
-    queryCallback([{ id: 1, windowId: 88 }])
+    await sw.handleCommand('open-side-panel')
+    expect(global.chrome.tabs.query).toHaveBeenCalledWith({ active: true, currentWindow: true })
+    if (queryCallback) queryCallback([{ id: 1, windowId: 88, url: 'https://example.com' }])
     expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 88 })
   })
 })
@@ -435,16 +430,17 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_
     expect(global.chrome.runtime.openOptionsPage).toHaveBeenCalledTimes(1)
   })
 
-  test('context menu onClicked hoverboard-open-side-panel calls sidePanel.open', () => {
+  test('context menu onClicked hoverboard-open-side-panel calls sidePanel.open', async () => {
     sw._sidePanelWindowId = 10
+    global.chrome.tabs.query.mockResolvedValue([{ id: 1, url: 'https://example.com', windowId: 10 }])
     sw.setupContextMenus()
     const onClicked = global.chrome.contextMenus.onClicked.addListener.mock.calls[0][0]
-    onClicked({ menuItemId: 'hoverboard-open-side-panel' }, {})
+    await onClicked({ menuItemId: 'hoverboard-open-side-panel' }, {})
     expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 10 })
   })
 
-  // [IMPL-CONTEXT_MENU_QUICK_ACCESS] Cold-start fallback: when _sidePanelWindowId null, context menu uses tabs.query.
-  test('context menu hoverboard-open-side-panel with _sidePanelWindowId null uses tabs.query [IMPL-CONTEXT_MENU_QUICK_ACCESS]', () => {
+  // [IMPL-CONTEXT_MENU_QUICK_ACCESS] Cold-start: null cache → query then open (web tab).
+  test('context menu hoverboard-open-side-panel with _sidePanelWindowId null uses tabs.query [IMPL-CONTEXT_MENU_QUICK_ACCESS]', async () => {
     sw._sidePanelWindowId = null
     let queryCallback
     global.chrome.tabs.query.mockImplementation((queryInfo, cb) => {
@@ -452,12 +448,12 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_
         queryCallback = cb
         return undefined
       }
-      return Promise.resolve([])
+      return Promise.resolve([{ id: 2, windowId: 77, url: 'https://example.com' }])
     })
     sw.setupContextMenus()
     const onClicked = global.chrome.contextMenus.onClicked.addListener.mock.calls[0][0]
-    onClicked({ menuItemId: 'hoverboard-open-side-panel' }, {})
-    queryCallback([{ id: 2, windowId: 77 }])
+    await onClicked({ menuItemId: 'hoverboard-open-side-panel' }, {})
+    if (queryCallback) queryCallback([{ id: 2, windowId: 77, url: 'https://example.com' }])
     expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 77 })
   })
 
@@ -562,13 +558,19 @@ describe('[REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Extension icon cl
     expect(sw._sidePanelWindowId).toBe(77)
   })
 
-  // [IMPL-ICON_CLICK_BEHAVIOR] Tab from onClicked with restricted URL: still open in that window; do not update cache.
-  test('handleActionClick with tab from onClicked restricted URL opens in that window and does not update cache [IMPL-ICON_CLICK_BEHAVIOR]', () => {
+  // [REQ-NON_WEB_TOOLS_TOOLBAR] Non-web icon click opens tools toolbar, not side panel.
+  test('handleActionClick with tab from onClicked non-web URL opens tools toolbar [REQ-NON_WEB_TOOLS_TOOLBAR]', () => {
     sw._sidePanelWindowId = 42
     sw._iconClickOpensSidePanel = true
+    global.chrome.action.setPopup = jest.fn()
+    global.chrome.action.openPopup = jest.fn()
     sw.handleActionClick({ id: 1, windowId: 88, url: 'chrome://extensions/' })
-    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 88 })
-    expect(global.chrome.windows.update).toHaveBeenCalledWith(88, { focused: true })
+    expect(global.chrome.sidePanel.open).not.toHaveBeenCalled()
+    expect(global.chrome.action.setPopup).toHaveBeenCalledWith({
+      tabId: 1,
+      popup: 'src/ui/tools-toolbar/tools-toolbar.html'
+    })
+    expect(global.chrome.action.openPopup).toHaveBeenCalled()
     expect(sw._sidePanelWindowId).toBe(42)
   })
 

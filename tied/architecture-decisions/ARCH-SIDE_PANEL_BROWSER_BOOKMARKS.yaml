@@ -1,36 +1,30 @@
 ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
   cross_references:
     - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
-  decision: "The Bookmarks panel (Chrome tree UI) talks directly to chrome.bookmarks for folder-tree UX (getTree, create/update/move/remove, HTML/CSV import-export of the native tree). It is not wired through BookmarkRouter. Distinct from ARCH-BROWSER_BOOKMARK_PROVIDER (Store B): that peer provider exposes chrome.bookmarks bookmarks to Save-to, Index Storage column B, and router CRUD with folder→tags mapping and 2C race exclusion. Both may read/write the same Chrome bookmark nodes; panel owns tree-centric management UI; provider owns Hoverboard storage-backend parity. This remediation documents the dual path; it does not force panel mutations through the router."
+  decision: "The Browser Bookmarks page (Chrome tree UI at browser-bookmarks.html) talks directly to chrome.bookmarks for folder-tree UX (getTree, create/update/move/remove, HTML/CSV import-export of the native tree). It is not a side-panel tab (legacy token name SIDE_PANEL_). It is not wired through BookmarkRouter. Distinct from ARCH-BROWSER_BOOKMARK_PROVIDER (Store B). Command open-side-panel-browser-bookmarks and tools-toolbar btn-browser-bookmarks open the page via tabs.create."
   implementation_approach:
     details:
-      - Bulk: "selectedIds Set; Select all/Deselect all; Open in tabs (chrome.tabs.create per URL), Open in window (chrome.windows.create); Copy URLs (buildUrlListForCopy + clipboard); Move (folder picker + chrome.bookmarks.move); Delete (confirm + chrome.bookmarks.remove); Export selected/all (buildBookmarksHtml/buildBookmarksCsv + Blob download)"
-      - Click URL: "chrome.tabs.create({ url }) for http(s) URLs"
-      - Command: "manifest command open-side-panel-browser-bookmarks; SW sets storage tab then sidePanel.open; panel bindStorageTabChange switches to tab"
-      - Data fetch: "chrome.bookmarks.getTree in panel; flatten to list of { id, url, title, dateAdded, folderPath, parentId }; folder tree built recursively with counts"
-      - Filter: "filterBrowserBookmarks(bookmarks, query, folderId) pure function; empty query returns all; folderId filters by parentId"
-      - Import: "file input (HTML/CSV); parseBookmarksHtml/parseBookmarksCsv; target folder select; conflict skip/overwrite; getSubTree for existing URLs; progress text; chrome.bookmarks.create"
-      - Inline edit: "double-click title/URL; replace node with input; on blur/Enter call chrome.bookmarks.update and re-apply filter"
-      - Keyboard: "document keydown when panel visible; Escape clear selection; Ctrl+F focus search (skip when focus in input/select/textarea)"
-      - UI: "search input; folder selector (sidebar or dropdown) with folder tree; list section with above-list controls; match count"
-      - Undo: "session-scoped undo stack (max 50); on delete push { bookmarks, timestamp }; show undo bar with timed dismiss (10s); on Undo pop stack and chrome.bookmarks.create per item"
-    summary: "Panel uses chrome.bookmarks.getTree; flatten to flat list with folder path; folder tree built from nodes; filter by query and folder; actions on visible list; bulk, undo, import/export, inline edit, keyboard, command."
+      - Command: "manifest command open-side-panel-browser-bookmarks; SW tabs.create browser-bookmarks.html (legacy command id retained)"
+      - Data fetch: "chrome.bookmarks.getTree in page; flatten to list of { id, url, title, dateAdded, folderPath, parentId }; folder tree built recursively with counts"
+      - UI: "standalone browser-bookmarks.html; search; folder selector; list; match count; no side-panel tab button"
+    summary: "Standalone page uses chrome.bookmarks.getTree; flatten to flat list with folder path; folder tree; filter by query and folder; bulk, undo, import/export, inline edit, keyboard. Opened via tabs.create, not side-panel tab switch."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-03-02"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "ARCH corpus Phase 3: panel vs Store B boundary"
+      date: "2026-07-31"
+      reason: "LEAP: standalone Browser Bookmarks page"
   name: "Side Panel Browser Bookmarks Architecture"
   rationale:
     benefits:
-      - "Panel can show full folder hierarchy and native import/export"
-      - "Store B participates in Index/Save-to without replacing the panel"
+      - "Page can show full folder hierarchy and native import/export"
+      - "Store B participates in Index/Save-to without replacing the page"
     problems_solved:
-      - "Ambiguity between side-panel Chrome tree UI and Browser storage backend"
-    why: "Chrome folder tree UX needs direct bookmarks API; Hoverboard Store B needs a router peer — keep both paths with an explicit boundary"
+      - "Ambiguity between Chrome tree UI surface and Browser storage backend"
+      - "Side-panel tab was wrong surface for non-page-bound tree UX"
+    why: "Chrome folder tree UX needs direct bookmarks API and a tab-independent full page; Hoverboard Store B needs a router peer — keep both paths with an explicit boundary"
   related_decisions:
     depends_on:
       - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
@@ -39,6 +33,7 @@ ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
     see_also:
       - "ARCH-BROWSER_BOOKMARK_IMPORT"
       - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+      - "ARCH-NON_WEB_TOOLS_TOOLBAR"
       - "ARCH-SIDE_PANEL_TABS"
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
   status: "Active"

@@ -1,6 +1,6 @@
 # Side panel (canonical)
 
-**Scope:** Chrome **side panel** surfaces: tab IDs and labels (**This Page**, **By Tag**, **Tabs**, **Bookmarks**, **Usage**), panel DOM IDs, browser-tabs workflow (open / recently closed / both, search scopes, gather/distribute), tags tree, browser bookmarks panel, and Usage panel views. **Vocabulary only** — list/filter algorithms stay in IMPL.
+**Scope:** Chrome **side panel** surfaces: tab IDs and labels (**This Page**, **By Tag**, **Tabs**), panel DOM IDs, browser-tabs workflow (open / recently closed / both, search scopes, gather/distribute), tags tree, and related full-page tools (**Browser Bookmarks**, **Visit History**). **Vocabulary only** — list/filter algorithms stay in IMPL.
 
 **Excludes:** Popup-only chrome when not shared with This Page (see [`ui-surfaces.md`](ui-surfaces.md)); pin/backend field semantics ([`bookmarks.md`](bookmarks.md), [`storage-backends.md`](storage-backends.md)); Local Bookmarks Index full page ([`bookmarks-index.md`](bookmarks-index.md)).
 
@@ -14,12 +14,18 @@
 
 | Preferred | Avoid / demote | Notes |
 |-----------|----------------|-------|
-| **side panel** | sidebar, drawer | Chrome `sidePanel` UI |
+| **side panel** | sidebar, drawer | Chrome `sidePanel` UI (extension); not **Brave native sidebar** |
+| **Brave native sidebar** | Brave side panel (for Brave’s own chrome) | Brave product sidebar (e.g. `Ctrl+B`); distinct from Hoverboard **side panel** |
+| **Brave side-panel window arrange bug** | Hoverboard window snap bug | Browser-owned: with **side panel** or **Brave native sidebar** open, OS maximize/half-screen may overshoot or ignore arrange keys; see [brave-side-panel-window-arrange.md](../../docs/troubleshooting/brave-side-panel-window-arrange.md); upstream [brave-browser#55575](https://github.com/brave/brave-browser/issues/55575). No Hoverboard REQ token. |
 | **This Page** | Bookmark tab (UI) | Popup-equivalent; `data-tab="bookmark"` |
 | **By Tag** | tags tree (UI) | Hierarchical bookmarks-by-tag; `data-tab="tagsTree"` |
 | **Tabs** (panel) | browser tabs panel | Open/closed tab manager; `data-tab="browserTabs"` |
-| **Bookmarks** (panel) | browser bookmarks panel | Chrome `bookmarks.getTree` UI — **not** Local Bookmarks Index and **not** **Browser storage (backend)** / Store B ([REQ-BROWSER_BOOKMARK_STORAGE](../requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml)); panel owns tree UX ([REQ-SIDE_PANEL_BROWSER_BOOKMARKS](../requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml)) |
-| **Usage** (panel) | analytics tab | Most Visited / Recently Visited / Navigation Graph |
+| **Browser Bookmarks** (page) | Bookmarks (panel), browser bookmarks panel | Standalone full-page Chrome `bookmarks.getTree` UI (`browser-bookmarks.html`) — **not** a **side panel** tab; **not** Local Bookmarks Index; **not** **Browser storage (backend)** / Store B ([REQ-SIDE_PANEL_BROWSER_BOOKMARKS](../requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml)) |
+| **Visit History** (page) | Usage (panel), analytics tab | Standalone full-page Most Visited / Recently Visited / Navigation Graph (`visit-history.html`) — **not** a **side panel** tab; opened from **tools toolbar** ([REQ-BOOKMARK_USAGE_TRACKING](../requirements/REQ-BOOKMARK_USAGE_TRACKING.yaml)) |
+| **web protocol** | http(s) page | Active tab URL is `http:` or `https:` ([REQ-NON_WEB_TOOLS_TOOLBAR](../requirements/REQ-NON_WEB_TOOLS_TOOLBAR.yaml)) |
+| **tools toolbar** | non-web tools popup | Badge popup on non-**web protocol** tabs with launchers for full-page tools ([REQ-NON_WEB_TOOLS_TOOLBAR](../requirements/REQ-NON_WEB_TOOLS_TOOLBAR.yaml)) |
+| **tool page shell** | standalone tool chrome | Shared full-page chrome (`tool-page-shell.css`) for Index, Import, Options, **Browser Bookmarks (page)**, **Visit History (page)** |
+| **tool-page-version** | brand-row version | `initToolPageVersion` fills `[data-extension-version]` from the extension manifest |
 | **tab source** | list source | `open` \| `recentlyClosed` \| `both` |
 | **window scope** | window filter | `currentWindow` \| `all` |
 | **search scope** | filter scope | `tabInfo` \| `pageText` \| `importantTags` (UI: Elements) |
@@ -39,18 +45,24 @@
 | **tabChangeRefresh** | tab change action | UI inspector `recordAction` id from `bindTabChangeRefresh` (`source`: `onActivated` \| `onUpdated`) before This Page refresh |
 | **non-scriptable URL** | restricted URL (alone) | Browser forbids content scripting (restricted schemes + Chrome Web Store / extensions gallery hosts) — **not** user **inhibit URL** ([`config-and-privacy.md`](config-and-privacy.md)) |
 | **index-open dismisses side panel** | close on bookmarks index | See [`bookmarks-index.md`](bookmarks-index.md); SW sends `REQUEST_SIDE_PANEL_CLOSE` when creating the index tab |
+| **non-web dismisses side panel** | close on chrome:// | Active tab becomes non-**web protocol** → SW sends `REQUEST_SIDE_PANEL_CLOSE` ([REQ-NON_WEB_TOOLS_TOOLBAR](../requirements/REQ-NON_WEB_TOOLS_TOOLBAR.yaml)) |
 
 ---
 
 ## Naming bridge: tabs and panels
+
+| Canonical concept | Legacy token / synonym | Notes |
+|-------------------|------------------------|-------|
+| **Browser Bookmarks (page)** | Token `REQ-SIDE_PANEL_BROWSER_BOOKMARKS` / `ARCH-SIDE_PANEL_BROWSER_BOOKMARKS` / `IMPL-SIDE_PANEL_BROWSER_BOOKMARKS`; UI synonym **Bookmarks (panel)** | Prefer **Browser Bookmarks (page)**; token IDs keep `SIDE_PANEL_` for history but behavior is standalone `browser-bookmarks.html`, not a side-panel tab |
+| **Visit History (page)** | UI synonym **Usage (panel)**; storage tab id `usage` | Prefer **Visit History (page)** (`visit-history.html`); not a side-panel tab |
 
 | Canonical concept | UI label | `data-tab` / panel id | Storage key | Message |
 |-------------------|----------|----------------------|-------------|---------|
 | This Page | This Page | `bookmark` / `#bookmarkPanel` | `hoverboard_sidepanel_active_tab` | popup-equivalent messages |
 | By Tag | By Tag | `tagsTree` / `#tagsTreePanel` | `hoverboard_sidepanel_selected_tags`, `hoverboard_sidepanel_collapsed`, `hoverboard_sidepanel_config` | `OPEN_SIDE_PANEL` |
 | Tabs | Tabs | `browserTabs` / `#browserTabsPanel` | `hoverboard_tabs_important_tag_sources` | `GET_RECENTLY_CLOSED_TABS`, `GET_TABS_PAGE_TEXT`, `GET_TABS_IMPORTANT_TAGS`, `GET_TAB_REFERRERS` |
-| Browser bookmarks | Bookmarks | `browserBookmarks` | — | browser bookmarks API |
-| Usage | Usage | `usage` / `#usagePanel` | usage keys in [`bookmarks.md`](bookmarks.md) | `GET_BOOKMARK_USAGE*`, `GET_BOOKMARK_NAVIGATION_GRAPH` |
+| Browser Bookmarks (page) | Browser Bookmarks | (standalone page) | — | `tabs.create` browser-bookmarks.html |
+| Visit History (page) | Visit History | (standalone page) `#visitHistoryPanel` | usage keys in [`bookmarks.md`](bookmarks.md) | `GET_BOOKMARK_USAGE*`, `GET_BOOKMARK_NAVIGATION_GRAPH`; tools toolbar `btn-visit-history` |
 | Elements search | Elements | search scope `importantTags` | `hoverboard_tabs_important_tag_sources` | `GET_TABS_IMPORTANT_TAGS` |
 | Tab search (title) | Search tabs by title | — | search history in TabSearchService | `SEARCH_TABS` |
 
@@ -58,12 +70,14 @@
 
 ## Named concepts
 
-- **side panel tab** — One of five primary surfaces; persisted via `hoverboard_sidepanel_active_tab`.
-- **This Page** — Same job as popup for the active tab (quick actions, Save to, tags, search).
+- **side panel tab** — One of three primary surfaces (**This Page**, **By Tag**, **Tabs**); persisted via `hoverboard_sidepanel_active_tab`.
+- **Brave native sidebar** — Brave’s own sidebar chrome (not Hoverboard’s `chrome.sidePanel` document).
+- **Brave side-panel window arrange bug** — When **side panel** or **Brave native sidebar** is open, OS maximize/half-screen may overshoot the display or ignore arrange keystrokes; browser-owned; documented in [brave-side-panel-window-arrange.md](../../docs/troubleshooting/brave-side-panel-window-arrange.md).
+- **This Page** — Same job as popup for the active tab (quick actions, Save to, tags, search); no bottom footer toolbar in the side panel.
 - **By Tag / tags tree** — Hierarchical tag navigation; “Show all tags” vs checked-only.
 - **Tabs panel** — Manage open and recently closed browser tabs (`chrome.sessions` for closed).
-- **Bookmarks panel** — Browser bookmark tree (Chrome bookmarks API), distinct from Hoverboard-stored pins.
-- **Usage panel** — **Most Visited**, **Recently Visited**, **Navigation Graph**.
+- **Bookmarks panel** — Legacy name for Browser Bookmarks when it was a side-panel tab; now **Browser Bookmarks (page)**.
+- **Visit History (page)** — Standalone page: **Most Visited**, **Recently Visited**, **Navigation Graph** (former Usage tab).
 - **bookmark search (Next/Previous)** — Search within side-panel bookmark lists.
 - **data-popup-ref** — Attribute bridging shared This Page / popup controls.
 - **TabSearchService** — `searchAndNavigate` / `findNextTab` with circular wrap; `lastSearchText`, `searchHistory`.
@@ -91,6 +105,13 @@
 | Tags tree | `(proposed) RENDER_TAGS_TREE` | [IMPL-SIDE_PANEL_TAGS_TREE](../implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml) |
 | Tab search navigate | `searchAndNavigate` / `findNextTab` | [IMPL-TAB_SEARCH_SERVICE](../implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml) |
 | No-match feedback | `(proposed) TAB_SEARCH_NO_MATCH_UI` | [IMPL-TAB_SEARCH_NO_MATCH_UI](../implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI.yaml) |
+| Web-protocol allowlist | `IS_WEB_PROTOCOL_URL` / `isWebProtocolUrl` | [IMPL-NON_WEB_TOOLS_TOOLBAR](../implementation-decisions/IMPL-NON_WEB_TOOLS_TOOLBAR.yaml) |
+| Non-web panel dismiss | `DISMISS_SIDE_PANEL_IF_NON_WEB` | [IMPL-NON_WEB_TOOLS_TOOLBAR](../implementation-decisions/IMPL-NON_WEB_TOOLS_TOOLBAR.yaml) |
+| Badge popup sync | `SYNC_ACTION_POPUP_FOR_TAB` | [IMPL-NON_WEB_TOOLS_TOOLBAR](../implementation-decisions/IMPL-NON_WEB_TOOLS_TOOLBAR.yaml) |
+| Tools toolbar launchers | `TOOLS_TOOLBAR_PAGE` | [IMPL-NON_WEB_TOOLS_TOOLBAR](../implementation-decisions/IMPL-NON_WEB_TOOLS_TOOLBAR.yaml) |
+| Open Browser Bookmarks page | `OPEN_BROWSER_BOOKMARKS_PAGE` | [IMPL-NON_WEB_TOOLS_TOOLBAR](../implementation-decisions/IMPL-NON_WEB_TOOLS_TOOLBAR.yaml) |
+| Visit History page init | `INIT_VISIT_HISTORY_PAGE` / `bindVisitHistoryPage` → `initVisitHistoryPage` | [IMPL-BOOKMARK_USAGE_TRACKING_UI](../implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING_UI.yaml) |
+| Tool page version | `initToolPageVersion` | Shared `src/ui/styles/tool-page-version.js` (used by standalone tool pages) |
 
 ---
 
@@ -98,7 +119,9 @@
 
 | Term | Section |
 |------|---------|
-| Bookmarks (panel) | Preferred terms |
+| Browser Bookmarks (page) | Preferred terms |
+| Brave native sidebar | Preferred terms / Named concepts |
+| Brave side-panel window arrange bug | Preferred terms / Named concepts |
 | By Tag | Preferred terms |
 | Close tagged / Close untagged | Preferred terms |
 | Gather into this window | Preferred terms |
@@ -106,6 +129,7 @@
 | list display mode | Preferred terms |
 | mergeBookmarkReplyIntoTab | Pseudo-code block names |
 | non-scriptable URL | Preferred terms |
+| non-web dismisses side panel | Preferred terms |
 | no-match UX | Preferred terms |
 | One window per tab | Preferred terms |
 | post-batch bookmark refresh | Preferred terms |
@@ -120,6 +144,11 @@
 | TabSearchService | Named concepts |
 | This Page | Preferred terms |
 | to-read indicator | Preferred terms |
-| Usage (panel) | Preferred terms |
+| tool page shell | Preferred terms |
+| tool-page-version | Preferred terms |
+| tools toolbar | Preferred terms |
+| Usage (panel) | Preferred terms (demoted synonym) |
+| Visit History (page) | Preferred terms |
+| web protocol | Preferred terms |
 | window-focus Recent Tags refresh | Preferred terms |
 | window scope | Preferred terms |

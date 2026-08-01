@@ -77,11 +77,10 @@ describe('[IMPL-SIDE_PANEL_SNAPSHOT] snapshotSidePanel DOM PROCEDURE', () => {
         <button id="configToggle"></button>
       </div>
       <div id="browserTabsPanel"><input /><ul class="tabs-list"></ul></div>
-      <div id="browserBookmarksPanel"><input type="search" /><select></select><ul class="bookmarks-list"></ul></div>
     `
   })
 
-  test('returns four tab shapes with panelPresent and key flags [IMPL-SIDE_PANEL_SNAPSHOT]', () => {
+  test('returns This Page/By Tag/Tabs present and Bookmarks absent [IMPL-SIDE_PANEL_SNAPSHOT]', () => {
     const snap = snapshotSidePanel()
     expect(snap.bookmarkTab).toMatchObject({
       panelPresent: true,
@@ -97,7 +96,8 @@ describe('[IMPL-SIDE_PANEL_SNAPSHOT] snapshotSidePanel DOM PROCEDURE', () => {
       hasConfigToggle: true
     })
     expect(snap.browserTabsTab.panelPresent).toBe(true)
-    expect(snap.browserBookmarksTab.panelPresent).toBe(true)
+    // Browser Bookmarks is standalone — absent from side panel [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    expect(snap.browserBookmarksTab.panelPresent).toBe(false)
   })
 
   test('missing bookmarkPanel yields panelPresent false [IMPL-SIDE_PANEL_SNAPSHOT]', () => {

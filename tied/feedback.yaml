@@ -1,0 +1,16 @@
+entries:
+  - id: "fb-ms9h01e6-e3di1y"
+    context:
+      browser: "Brave"
+      doc: "docs/troubleshooting/brave-side-panel-window-arrange.md"
+      hoverboard_fixable: "false"
+      os: "darwin"
+      project: "hoverboard"
+      surfaces:
+        - "brave_native_sidebar"
+        - "hoverboard_side_panel"
+      upstream: "https://github.com/brave/brave-browser/issues/55575"
+    created_at: "2026-07-31T21:44:26.382Z"
+    description: "On macOS Brave, when Hoverboard's chrome.sidePanel side panel is visible and/or Brave's native sidebar is visible, OS window arrange is broken: maximizing/filling the display makes the window wider than the display, and most half-screen arrange keystrokes do not trigger. Without panel/sidebar, fullscreen and half-screen arrange work. Reproduces with Hoverboard side panel alone and with Brave native sidebar alone — browser chrome issue, not Hoverboard layout CSS. Extension cannot set OS window bounds via Side Panel API. Workaround: close panel/sidebar, arrange, reopen. Documented in docs/troubleshooting/brave-side-panel-window-arrange.md and README Supported Browsers. Upstream: https://github.com/brave/brave-browser/issues/55575 (Linux sidebar maximize/arrange; same class of failure)."
+    title: "Brave: OS window arrange broken with side panel or native sidebar open"
+    type: "bug_report"

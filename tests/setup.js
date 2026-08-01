@@ -143,129 +143,149 @@ function applyChromeMockImplementations (chrome) {
   chrome.contextMenus?.removeAll?.mockImplementation((cb) => { if (typeof cb === 'function') cb(); });
 }
 
+/**
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK]
+ * Full chrome mock factory. Bun's test runner shares one process and preload runs once;
+ * tests that replace/delete global.chrome must not leave later files without storage/runtime.
+ */
+function createDefaultChromeMock () {
+  return {
+    runtime: {
+      sendMessage: jest.fn(),
+      getBackgroundPage: jest.fn(),
+      onMessage: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      getURL: jest.fn(),
+      id: 'test-extension-id',
+      // [TEST-FIX-IMPL-2025-07-14] - Add missing properties to prevent Object.values error
+      connect: jest.fn(),
+      disconnect: jest.fn(),
+      onConnect: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      onDisconnect: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      onInstalled: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      onStartup: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      onUpdateAvailable: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      onSuspend: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      onSuspendCanceled: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      onRestartRequired: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      onConnectExternal: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      onMessageExternal: {
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      },
+      getManifest: jest.fn(),
+      getPlatformInfo: jest.fn(),
+      getPackageDirectoryEntry: jest.fn(),
+      requestUpdateCheck: jest.fn(),
+      restart: jest.fn(),
+      reload: jest.fn(),
+      connectNative: jest.fn(),
+      sendNativeMessage: jest.fn(),
+      openOptionsPage: jest.fn(),
+      setUninstallURL: jest.fn(),
+      lastError: null,
+    },
+    storage: {
+      local: {
+        get: jest.fn(),
+        set: jest.fn(),
+        remove: jest.fn(),
+        clear: jest.fn(),
+      },
+      sync: {
+        get: jest.fn(),
+        set: jest.fn(),
+        remove: jest.fn(),
+        clear: jest.fn(),
+      },
+    },
+    tabs: {
+      query: jest.fn(),
+      sendMessage: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      get: jest.fn(),
+      onActivated: { addListener: jest.fn(), removeListener: jest.fn() },
+      onUpdated: { addListener: jest.fn(), removeListener: jest.fn() },
+    },
+    windows: {
+      get: jest.fn(),
+    },
+    scripting: {
+      executeScript: jest.fn(),
+      insertCSS: jest.fn(),
+      removeCSS: jest.fn(),
+    },
+    permissions: {
+      request: jest.fn(),
+      contains: jest.fn(),
+    },
+    // [REQ-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS] [IMPL-CONTEXT_MENU_QUICK_ACCESS] Mocks for quick-access tests
+    commands: {
+      onCommand: { addListener: jest.fn() },
+    },
+    sidePanel: {
+      open: jest.fn(),
+    },
+    contextMenus: {
+      create: jest.fn(),
+      removeAll: jest.fn(),
+      onClicked: { addListener: jest.fn() },
+    },
+    // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] [REQ-NON_WEB_TOOLS_TOOLBAR] action.onClicked, setPopup, openPopup
+    action: {
+      onClicked: { addListener: jest.fn() },
+      openPopup: jest.fn(),
+      setPopup: jest.fn(),
+    },
+  };
+}
+
+function chromeMockLooksComplete (chrome) {
+  // Recreate only when local storage get was deleted/replaced away.
+  // Many unit tests intentionally install a partial chrome (storage-only, etc.).
+  return typeof chrome?.storage?.local?.get === 'function';
+}
+
 function resetChromeMockImplementations () {
+  if (!chromeMockLooksComplete(global.chrome)) {
+    global.chrome = createDefaultChromeMock();
+    global.browser = global.chrome;
+  }
   applyChromeMockImplementations(global.chrome);
 }
 
 // [TEST-FIX-IMPL-2025-07-14] - Enhanced Chrome extension API mocks
-global.chrome = {
-  runtime: {
-    sendMessage: jest.fn(),
-    getBackgroundPage: jest.fn(),
-    onMessage: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    getURL: jest.fn(),
-    id: 'test-extension-id',
-    // [TEST-FIX-IMPL-2025-07-14] - Add missing properties to prevent Object.values error
-    connect: jest.fn(),
-    disconnect: jest.fn(),
-    onConnect: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onDisconnect: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onInstalled: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onStartup: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onUpdateAvailable: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onSuspend: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onSuspendCanceled: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onRestartRequired: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onConnectExternal: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onMessageExternal: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    getManifest: jest.fn(),
-    getPlatformInfo: jest.fn(),
-    getPackageDirectoryEntry: jest.fn(),
-    requestUpdateCheck: jest.fn(),
-    restart: jest.fn(),
-    reload: jest.fn(),
-    connectNative: jest.fn(),
-    sendNativeMessage: jest.fn(),
-    openOptionsPage: jest.fn(),
-    setUninstallURL: jest.fn(),
-    lastError: null,
-  },
-  storage: {
-    local: {
-      get: jest.fn(),
-      set: jest.fn(),
-      remove: jest.fn(),
-      clear: jest.fn(),
-    },
-    sync: {
-      get: jest.fn(),
-      set: jest.fn(),
-      remove: jest.fn(),
-      clear: jest.fn(),
-    },
-  },
-  tabs: {
-    query: jest.fn(),
-    sendMessage: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    get: jest.fn(),
-    onActivated: { addListener: jest.fn(), removeListener: jest.fn() },
-    onUpdated: { addListener: jest.fn(), removeListener: jest.fn() },
-  },
-  windows: {
-    get: jest.fn(),
-  },
-  scripting: {
-    executeScript: jest.fn(),
-    insertCSS: jest.fn(),
-    removeCSS: jest.fn(),
-  },
-  permissions: {
-    request: jest.fn(),
-    contains: jest.fn(),
-  },
-  // [REQ-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS] [IMPL-CONTEXT_MENU_QUICK_ACCESS] Mocks for quick-access tests
-  commands: {
-    onCommand: { addListener: jest.fn() },
-  },
-  sidePanel: {
-    open: jest.fn(),
-  },
-  contextMenus: {
-    create: jest.fn(),
-    removeAll: jest.fn(),
-    onClicked: { addListener: jest.fn() },
-  },
-  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] action.onClicked and openPopup for icon click tests
-  action: {
-    onClicked: { addListener: jest.fn() },
-    openPopup: jest.fn(),
-  },
-};
+global.chrome = createDefaultChromeMock();
 
 resetChromeMockImplementations();
 

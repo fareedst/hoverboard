@@ -25356,7 +25356,14 @@ var SIDE_PANEL_TAB_STORAGE_KEY = "hoverboard_sidepanel_active_tab";
 var TAB_BOOKMARK = "bookmark";
 var TAB_TAGS_TREE = "tagsTree";
 var TAB_BROWSER_TABS = "browserTabs";
-var TAB_BROWSER_BOOKMARKS = "browserBookmarks";
+
+// src/shared/web-protocol.js
+function isWebProtocolUrl(url2) {
+  if (typeof url2 !== "string") return false;
+  const lower = url2.trim().toLowerCase();
+  if (!lower) return false;
+  return lower.startsWith("http://") || lower.startsWith("https://");
+}
 
 // src/core/service-worker.js
 init_safari_shim();
@@ -25673,7 +25680,10 @@ function buildBookmarksIndexUrlWithQuery(baseUrl, query = "") {
 }
 
 // src/core/service-worker.js
-var _isRestrictedForSidePanel = (url2) => typeof url2 === "string" && (url2.startsWith("chrome://") || url2.startsWith("chrome-extension://"));
+var _isRestrictedForSidePanel = (url2) => !isWebProtocolUrl(url2);
+var TOOLS_TOOLBAR_POPUP = "src/ui/tools-toolbar/tools-toolbar.html";
+var FULL_POPUP_PATH = "src/ui/popup/popup.html";
+var BROWSER_BOOKMARKS_PAGE = "src/ui/browser-bookmarks/browser-bookmarks.html";
 var HoverboardServiceWorker = class {
   constructor() {
     this.messageHandler = new MessageHandler();
@@ -25751,7 +25761,9 @@ var HoverboardServiceWorker = class {
     safariEnhancements.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("[SERVICE-WORKER] Received message:", message);
       if (message.type === MESSAGE_TYPES.OPEN_SIDE_PANEL) {
-        this._openSidePanelWithFallback((result) => sendResponse(result));
+        this._openSidePanelOrToolsToolbar().then(() => sendResponse({ success: true })).catch(() => {
+          this._openSidePanelWithFallback((result) => sendResponse(result));
+        });
         return true;
       }
       if (message.type === MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX) {
@@ -25829,6 +25841,10 @@ var HoverboardServiceWorker = class {
    */
   handleActionClick(tab) {
     const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    if (tab?.url != null && !isWebProtocolUrl(tab.url)) {
+      this._openToolsToolbar(tab);
+      return;
+    }
     const openSidePanel = this._iconClickOpensSidePanel !== false;
     if (!openSidePanel) {
       if (chromeApi?.action?.openPopup) chromeApi.action.openPopup();
@@ -25875,11 +25891,15 @@ var HoverboardServiceWorker = class {
     const getURL = runtime.getURL ? (path) => runtime.getURL(path) : () => "";
     const windowId = this._sidePanelWindowId;
     if (command === "open-side-panel") {
-      this._openSidePanelWithFallback();
+      await this._openSidePanelOrToolsToolbar();
       return;
     }
-    if (command === "open-side-panel-bookmark" || command === "open-side-panel-tags-tree" || command === "open-side-panel-browser-tabs" || command === "open-side-panel-browser-bookmarks") {
-      const tabId = command === "open-side-panel-bookmark" ? TAB_BOOKMARK : command === "open-side-panel-tags-tree" ? TAB_TAGS_TREE : command === "open-side-panel-browser-tabs" ? TAB_BROWSER_TABS : TAB_BROWSER_BOOKMARKS;
+    if (command === "open-side-panel-browser-bookmarks") {
+      this._openBrowserBookmarksPage();
+      return;
+    }
+    if (command === "open-side-panel-bookmark" || command === "open-side-panel-tags-tree" || command === "open-side-panel-browser-tabs") {
+      const tabId = command === "open-side-panel-bookmark" ? TAB_BOOKMARK : command === "open-side-panel-tags-tree" ? TAB_TAGS_TREE : TAB_BROWSER_TABS;
       if (chromeApi?.storage?.local?.set) {
         await chromeApi.storage.local.set({ [SIDE_PANEL_TAB_STORAGE_KEY]: tabId });
       }
@@ -25906,6 +25926,138 @@ var HoverboardServiceWorker = class {
    * OPEN_BOOKMARKS_INDEX_TAB: create Local Bookmarks Index tab then dismiss already-open side panel (tab-create only).
    * [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY] Optional q via BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY
    */
+  /**
+   * === IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   * [IMPL-NON_WEB_TOOLS_TOOLBAR] [ARCH-NON_WEB_TOOLS_TOOLBAR] [REQ-NON_WEB_TOOLS_TOOLBAR] How: setPopup tools-toolbar on non-web; clear or popup.html on web per iconClickOpensSidePanel.
+   *
+   * ## SYNC_ACTION_POPUP_FOR_TAB
+   *
+   * - Contract:
+   *   - INPUT: tab, _iconClickOpensSidePanel
+   *   - PRE: action.setPopup available
+   *   - OUTPUT: popup path synced for tabId
+   *   - POST: non-web → tools-toolbar.html; web + side-panel preference → empty popup; web + popup preference → popup.html
+   *   - EFFECTS: IO
+   *   - TERMINATION: total
+   * - PROCEDURE: SYNC_ACTION_POPUP_FOR_TAB
+   *   - IF NOT IS_WEB_PROTOCOL_URL(tab.url): action.setPopup({ tabId, popup: 'src/ui/tools-toolbar/tools-toolbar.html' }); RETURN
+   *   - IF _iconClickOpensSidePanel === false: action.setPopup({ tabId, popup: 'src/ui/popup/popup.html' }); RETURN
+   *   - action.setPopup({ tabId, popup: '' })
+   *
+   * === END IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   */
+  _syncActionPopupForTab(tab) {
+    const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    if (!chromeApi?.action?.setPopup || tab?.id == null) return;
+    if (!isWebProtocolUrl(tab.url)) {
+      chromeApi.action.setPopup({ tabId: tab.id, popup: TOOLS_TOOLBAR_POPUP });
+      return;
+    }
+    if (this._iconClickOpensSidePanel === false) {
+      chromeApi.action.setPopup({ tabId: tab.id, popup: FULL_POPUP_PATH });
+      return;
+    }
+    chromeApi.action.setPopup({ tabId: tab.id, popup: "" });
+  }
+  /**
+   * === IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   * [IMPL-NON_WEB_TOOLS_TOOLBAR] [ARCH-NON_WEB_TOOLS_TOOLBAR] [REQ-NON_WEB_TOOLS_TOOLBAR] How: On active tab activate/navigate-complete, if URL non-web send REQUEST_SIDE_PANEL_CLOSE.
+   *
+   * ## DISMISS_SIDE_PANEL_IF_NON_WEB
+   *
+   * - Contract:
+   *   - INPUT: tab.url
+   *   - PRE: SW runtime available
+   *   - OUTPUT: message sent when non-web
+   *   - POST: web URLs do not send dismiss for protocol reason
+   *   - EFFECTS: IO (runtime.sendMessage)
+   *   - TERMINATION: total
+   * - PROCEDURE: DISMISS_SIDE_PANEL_IF_NON_WEB
+   *   - IF NOT IS_WEB_PROTOCOL_URL(tab.url): runtime.sendMessage({ type: REQUEST_SIDE_PANEL_CLOSE })
+   *
+   * === END IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   */
+  _dismissSidePanelIfNonWeb(url2) {
+    if (isWebProtocolUrl(url2)) return;
+    const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    const runtime = chromeApi?.runtime || (typeof safariEnhancements !== "undefined" ? safariEnhancements.runtime : null);
+    if (!runtime?.sendMessage) return;
+    const p = runtime.sendMessage({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE });
+    if (p && typeof p.catch === "function") p.catch(() => {
+    });
+  }
+  /**
+   * === IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   * [IMPL-NON_WEB_TOOLS_TOOLBAR] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] How: tabs.create standalone Browser Bookmarks page (no longer side-panel tab).
+   *
+   * ## OPEN_BROWSER_BOOKMARKS_PAGE
+   *
+   * - Contract:
+   *   - INPUT: none
+   *   - PRE: runtime.getURL
+   *   - OUTPUT: new tab with browser-bookmarks.html
+   *   - POST: does not switch a side-panel tab (Bookmarks is not a side-panel surface)
+   *   - EFFECTS: IO
+   *   - TERMINATION: total
+   * - PROCEDURE: OPEN_BROWSER_BOOKMARKS_PAGE
+   *   - tabs.create({ url: runtime.getURL('src/ui/browser-bookmarks/browser-bookmarks.html') })
+   *
+   * === END IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   */
+  _openBrowserBookmarksPage() {
+    const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    const runtime = chromeApi?.runtime || safariEnhancements.runtime;
+    const getURL = runtime?.getURL ? (path) => runtime.getURL(path) : () => "";
+    const url2 = getURL(BROWSER_BOOKMARKS_PAGE);
+    const tabsApi = chromeApi?.tabs ?? safariEnhancements.tabs;
+    if (url2 && tabsApi?.create) tabsApi.create({ url: url2 });
+  }
+  /**
+   * === IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   * [IMPL-NON_WEB_TOOLS_TOOLBAR] [IMPL-ICON_CLICK_BEHAVIOR] [REQ-NON_WEB_TOOLS_TOOLBAR] How: open-side-panel / OPEN_SIDE_PANEL / handleActionClick on non-web must not sidePanel.open; ensure tools popup then openPopup.
+   *
+   * ## HANDLE_OPEN_SIDE_PANEL_WHEN_NON_WEB
+   *
+   * - Contract:
+   *   - INPUT: active tab url
+   *   - PRE: user gesture when openPopup
+   *   - OUTPUT: tools toolbar shown
+   *   - POST: non-web path never calls sidePanel.open
+   *   - EFFECTS: IO
+   *   - FAILURE_MODES: openPopup unavailable after setPopup (best-effort)
+   *   - TERMINATION: total
+   * - PROCEDURE: HANDLE_OPEN_SIDE_PANEL_WHEN_NON_WEB
+   *   - IF IS_WEB_PROTOCOL_URL(url): existing side panel / popup path; RETURN
+   *   - SYNC_ACTION_POPUP_FOR_TAB(tab)
+   *   - action.openPopup()
+   *
+   * === END IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   */
+  _openToolsToolbar(tab) {
+    const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    if (tab) this._syncActionPopupForTab(tab);
+    if (chromeApi?.action?.openPopup) {
+      try {
+        chromeApi.action.openPopup();
+      } catch (_) {
+      }
+    }
+  }
+  /** [REQ-NON_WEB_TOOLS_TOOLBAR] [IMPL-NON_WEB_TOOLS_TOOLBAR] Open side panel on web; tools toolbar on non-web. */
+  async _openSidePanelOrToolsToolbar() {
+    const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    const tabsApi = chromeApi?.tabs ?? (typeof safariEnhancements !== "undefined" ? safariEnhancements.tabs : null);
+    try {
+      const tabs = tabsApi?.query ? await tabsApi.query({ active: true, currentWindow: true }) : [];
+      const tab = tabs && tabs[0];
+      if (tab && !isWebProtocolUrl(tab.url)) {
+        this._openToolsToolbar(tab);
+        return;
+      }
+    } catch (_) {
+    }
+    this._openSidePanelWithFallback();
+  }
   _openBookmarksIndexTab(q = "") {
     const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
     const runtime = chromeApi?.runtime || safariEnhancements.runtime;
@@ -26456,6 +26608,8 @@ var HoverboardServiceWorker = class {
         } catch (_) {
         }
       }
+      this._dismissSidePanelIfNonWeb(tab?.url);
+      this._syncActionPopupForTab(tab);
       if (tab.url) {
         const bookmark = await this.updateBadgeForTab(tab);
         await this._recordBookmarkVisitIfNeeded(tab, bookmark);
@@ -26467,6 +26621,12 @@ var HoverboardServiceWorker = class {
   async handleTabUpdated(tabId, changeInfo, tab) {
     if (changeInfo.status === "complete" && tab.url) {
       try {
+        const tabsApi = typeof globalThis.chrome !== "undefined" && globalThis.chrome.tabs ? globalThis.chrome.tabs : safariEnhancements.tabs;
+        const active = await tabsApi.query({ active: true, currentWindow: true });
+        if (active?.[0]?.id === tabId) {
+          this._dismissSidePanelIfNonWeb(tab.url);
+          this._syncActionPopupForTab(tab);
+        }
         const bookmark = await this.updateBadgeForTab(tab);
         await this._recordBookmarkVisitIfNeeded(tab, bookmark);
       } catch (error48) {
@@ -26536,7 +26696,7 @@ var HoverboardServiceWorker = class {
     api.onClicked.addListener((info) => {
       const menuId = info?.menuItemId;
       if (menuId === "hoverboard-open-side-panel") {
-        self2._openSidePanelWithFallback();
+        self2._openSidePanelOrToolsToolbar();
         return;
       }
       if (menuId === "hoverboard-open-options") {

@@ -1,6 +1,6 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BROWSER_BOOKMARKS ===
- * [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] — This block defines the browser bookmarks panel: data fetch, flatten, folder tree, filter, UI, click to open. Implements REQ by listing Chrome bookmarks with folder path and favicon; real-time search; folder filter; implements ARCH by direct chrome.bookmarks tree UX. Boundary: this panel is NOT Store B / IMPL-BROWSER_BOOKMARK_SERVICE (BookmarkRouter peer). Panel owns direct tree UI; Store B is the fifth router backend for Index/Save-to/move.
+ * [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] — Standalone Browser Bookmarks page (legacy SIDE_PANEL_ token): data fetch, flatten, folder tree, filter, UI, click to open. Not a side-panel tab. Boundary: NOT Store B / IMPL-BROWSER_BOOKMARK_SERVICE.
  * 
  * ## FLATTEN_BOOKMARK_TREE
  * 
@@ -116,7 +116,7 @@ import {
   buildBookmarksCsv,
   parseBookmarksHtml,
   parseBookmarksCsv
-} from '../../src/ui/side-panel/browser-bookmarks-panel.js'
+} from '../../src/ui/browser-bookmarks/browser-bookmarks-panel.js'
 
 const sampleTree = [
   {

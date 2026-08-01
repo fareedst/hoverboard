@@ -2,7 +2,7 @@
 
 **Scope:** Hoverboard **bookmark** / **pin** record shape (Pinboard-compatible fields), UI↔API dual names, create/update times, bookmark state synchronization, **badge** display values derived from bookmark state, and **usage tracking** fields. **Vocabulary only** — save/sync algorithms stay in IMPL.
 
-**Excludes:** Which backend stores a pin (see [`storage-backends.md`](storage-backends.md)); Local Bookmarks Index / Netscape import UI (see [`bookmarks-index.md`](bookmarks-index.md)); tag chip systems (see [`tags.md`](tags.md)); Usage panel chrome (see [`side-panel.md`](side-panel.md)).
+**Excludes:** Which backend stores a pin (see [`storage-backends.md`](storage-backends.md)); Local Bookmarks Index / Netscape import UI (see [`bookmarks-index.md`](bookmarks-index.md)); tag chip systems (see [`tags.md`](tags.md)); Visit History page chrome (see [`side-panel.md`](side-panel.md)).
 
 **Traceability:** [REQ-PINBOARD_COMPATIBILITY](../requirements/REQ-PINBOARD_COMPATIBILITY.yaml) · [REQ-BOOKMARK_CREATE_UPDATE_TIMES](../requirements/REQ-BOOKMARK_CREATE_UPDATE_TIMES.yaml) · [REQ-BOOKMARK_STATE_SYNCHRONIZATION](../requirements/REQ-BOOKMARK_STATE_SYNCHRONIZATION.yaml) · [REQ-BADGE_INDICATORS](../requirements/REQ-BADGE_INDICATORS.yaml) · [REQ-BOOKMARK_USAGE_TRACKING](../requirements/REQ-BOOKMARK_USAGE_TRACKING.yaml) · [REQ-SMART_BOOKMARKING](../requirements/REQ-SMART_BOOKMARKING.yaml) · [ARCH-PINBOARD_API](../architecture-decisions/ARCH-PINBOARD_API.yaml) · [ARCH-BADGE](../architecture-decisions/ARCH-BADGE.yaml) · [IMPL-PINBOARD_API](../implementation-decisions/IMPL-PINBOARD_API.yaml) · [IMPL-BOOKMARK_CREATE_UPDATE_TIMES](../implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml) · [IMPL-BOOKMARK_STATE_SYNC](../implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.yaml) · [IMPL-BADGE](../implementation-decisions/IMPL-BADGE.yaml) · [IMPL-BOOKMARK_USAGE_TRACKING](../implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING.yaml)
 
@@ -59,7 +59,7 @@
 - **BOOKMARK_UPDATED** — Message broadcasting pin changes for cross-surface sync.
 - **badge display value** — Computed toolbar badge text (tag count and/or private/to-read markers).
 - **usage tracking** — Per-URL visit stats in `hoverboard_bookmark_usage`; referrer edges in `hoverboard_bookmark_nav_edges`.
-- **Most Visited / Recently Visited / Navigation Graph** — Usage panel views over usage data (UI names; see [`side-panel.md`](side-panel.md)).
+- **Most Visited / Recently Visited / Navigation Graph** — Visit History page views over usage data (UI names; see [`side-panel.md`](side-panel.md)).
 - **inbound links** — Referrers pointing at a bookmarked URL (`GET_BOOKMARK_INBOUND_LINKS`).
 
 ---

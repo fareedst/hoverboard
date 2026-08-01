@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visit History – Hoverboard</title>
+  <link rel="stylesheet" href="../styles/design-tokens.css">
+  <link rel="stylesheet" href="../styles/tool-page-shell.css">
+  <link rel="stylesheet" href="visit-history.css">
+</head>
+<body>
+  <!-- [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Standalone Visit History page (former Usage side-panel tab). -->
+  <div class="container">
+    <header class="header">
+      <div class="header-brand">
+        <img src="../../../icons/hoverboard_48.png" alt="Hoverboard" class="logo">
+        <span class="extension-name">Hoverboard</span>
+        <span class="extension-version" data-extension-version aria-label="Extension version"></span>
+      </div>
+      <h1 class="visit-history-title">Visit History</h1>
+      <p class="subtitle visit-history-subtitle">Most visited bookmarks, recent visits, and navigation graph.</p>
+    </header>
+    <div id="visitHistoryPanel" class="visit-history-panel usage-panel">
+      <div class="usage-panel-toolbar">
+        <button type="button" data-usage-refresh class="btn btn-secondary">Refresh</button>
+      </div>
+      <section class="usage-section" aria-labelledby="usage-most-visited-heading">
+        <h2 id="usage-most-visited-heading" class="usage-section-title">Most Visited</h2>
+        <div data-usage-most-visited class="usage-list"></div>
+      </section>
+      <section class="usage-section" aria-labelledby="usage-recently-visited-heading">
+        <h2 id="usage-recently-visited-heading" class="usage-section-title">Recently Visited</h2>
+        <div data-usage-recently-visited class="usage-list"></div>
+      </section>
+      <section class="usage-section" aria-labelledby="usage-graph-heading">
+        <h2 id="usage-graph-heading" class="usage-section-title">Navigation Graph</h2>
+        <div data-usage-graph class="usage-graph"></div>
+      </section>
+    </div>
+  </div>
+  <script type="module" src="visit-history.js"></script>
+</body>
+</html>

@@ -14,6 +14,7 @@ This directory contains comprehensive troubleshooting guides, fix summaries, and
 | **[Show Hover Fix Summary](show-hover-fix-summary.md)** | Hover functionality problems | 🔺 MEDIUM | Resolved |
 | **[Overlay Fix Summary](overlay-fix-summary.md)** | UI overlay issues | 🔶 MEDIUM | Fixed |
 | **[Overlay Development](overlay-development.md)** | Development notes and solutions | 🔻 LOW | Reference |
+| **[Brave side-panel window arrange](brave-side-panel-window-arrange.md)** | OS maximize/arrange broken with side panel or Brave sidebar | 🔺 MEDIUM | Open (browser) |
 
 ## 🎯 Common Issue Categories
 
@@ -30,6 +31,7 @@ This directory contains comprehensive troubleshooting guides, fix summaries, and
 - **[Show Hover Fix Summary](show-hover-fix-summary.md)** - Hover display problems
 - **[Overlay Fix Summary](overlay-fix-summary.md)** - UI overlay rendering
 - **[Overlay Development](overlay-development.md)** - Development insights
+- **[Brave side-panel window arrange](brave-side-panel-window-arrange.md)** - Maximize/arrange overshoots or ignores keys when Hoverboard side panel or Brave native sidebar is open (browser bug)
 
 ### ⚡ **Extension Lifecycle**
 - **[Extension Loading Fix](extension-loading-fix.md)** - Startup and initialization
@@ -46,6 +48,7 @@ This directory contains comprehensive troubleshooting guides, fix summaries, and
 1. **Extension not loading?** → [Extension Loading Fix](extension-loading-fix.md)
 2. **Data not syncing?** → [Debugging Live Data Issue](debugging-live-data-issue.md)
 3. **Hover not working?** → [Show Hover Fix Summary](show-hover-fix-summary.md)
+4. **Brave window maximize/arrange broken with side panel?** → [Brave side-panel window arrange](brave-side-panel-window-arrange.md)
 
 ### 👨‍💻 **For Developers**
 1. **"Message port closed" errors?** → [Messaging Fixes Summary](messaging-fixes-2025-07-15.md)

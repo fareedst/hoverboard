@@ -235,7 +235,23 @@ describe('[REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TABS] Side panel HT
     expect(getTabButtonLabel(html, 'browserTabs')).toBe('Tabs')
   })
 
-  test('tab button data-tab=browserBookmarks has display label "Bookmarks"', () => {
-    expect(getTabButtonLabel(html, 'browserBookmarks')).toBe('Bookmarks')
+  // [REQ-NON_WEB_TOOLS_TOOLBAR] [ARCH-NON_WEB_TOOLS_TOOLBAR] [IMPL-NON_WEB_TOOLS_TOOLBAR]
+  // Browser Bookmarks is a standalone page, not a side-panel tab.
+  test('no tab button data-tab=browserBookmarks (standalone Browser Bookmarks page)', () => {
+    expect(html).not.toMatch(/data-tab="browserBookmarks"/)
+    expect(getTabButtonLabel(html, 'browserBookmarks')).toBe('')
+  })
+
+  // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
+  // Visit History is a standalone page, not a side-panel tab.
+  test('no tab button data-tab=usage (standalone Visit History page)', () => {
+    expect(html).not.toMatch(/data-tab="usage"/)
+    expect(html).not.toMatch(/id="usagePanel"/)
+    expect(getTabButtonLabel(html, 'usage')).toBe('')
+  })
+
+  // This Page footer removed from side panel (tools live on tools toolbar / popup).
+  test('This Page panel has no popup-footer toolbar', () => {
+    expect(html).not.toMatch(/class="popup-footer"/)
   })
 })

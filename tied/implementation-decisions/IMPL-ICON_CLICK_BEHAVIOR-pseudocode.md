@@ -1,4 +1,4 @@
-# [IMPL-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [REQ-ICON_CLICK_BEHAVIOR] — Icon click opens side panel (default) or popup; when side panel, click toggles (close if already open).
+# [IMPL-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [REQ-ICON_CLICK_BEHAVIOR] — Icon click opens side panel (default) or popup; non-web tabs route to tools toolbar ([IMPL-NON_WEB_TOOLS_TOOLBAR]); when side panel, click toggles (close if already open).
 
 ## _SEED_ICON_CLICK_PREFERENCE_CACHE
 
@@ -6,7 +6,7 @@
 - Contract:
   - INPUT: user clicks extension toolbar icon
   - PRE: caller supplies valid inputs for this block; dependencies wired
-  - OUTPUT: side panel opens or closes (toggle) when option enabled; else popup opens
+  - OUTPUT: side panel opens or closes (toggle) when option enabled; else popup opens; non-web → tools toolbar
   - POST:
     - success => block outputs match OUTPUT shape
   - DATA: SW _iconClickOpensSidePanel (cached), _sidePanelWindowId; panel _sidePanelLoadTime; MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE
@@ -19,17 +19,20 @@
 
 ## HANDLE_ACTION_CLICK
 
-- [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] How: SW: listener passes tab from Chrome into handleActionClick(tab). SW handleActionClick(tab): prefer clicked window; Chrome requires sidePanel.open() in same synchronous user-gesture stack.
+- [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] [IMPL-NON_WEB_TOOLS_TOOLBAR] [REQ-NON_WEB_TOOLS_TOOLBAR] How: SW: listener passes tab from Chrome into handleActionClick(tab). Non-web URL → _openToolsToolbar (setPopup tools-toolbar + openPopup); do not sidePanel.open. Web: prefer clicked window; Chrome requires sidePanel.open() in same synchronous user-gesture stack.
 - Contract:
-  - INPUT: user clicks extension toolbar icon
+  - INPUT: user clicks extension toolbar icon; tab from onClicked
   - PRE: caller supplies valid inputs for this block; dependencies wired
-  - OUTPUT: side panel opens or closes (toggle) when option enabled; else popup opens
+  - OUTPUT: tools toolbar on non-web; else side panel opens or closes (toggle) when option enabled; else popup opens
   - POST:
     - success => block outputs match OUTPUT shape
   - DATA: SW _iconClickOpensSidePanel (cached), _sidePanelWindowId; panel _sidePanelLoadTime; MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE
   - EFFECTS: Async, IO
+  - FAILURE_MODES: openPopup unavailable (best-effort no-op after setPopup)
   - TERMINATION: total
 - PROCEDURE: HANDLE_ACTION_CLICK
+  - How (sub-block): # [IMPL-NON_WEB_TOOLS_TOOLBAR] Non-web: badge opens tools toolbar, not side panel.
+  - IF tab?.url != null AND NOT IS_WEB_PROTOCOL_URL(tab.url): _openToolsToolbar(tab); RETURN
   - openSidePanel = (this._iconClickOpensSidePanel !== false)
   - IF NOT openSidePanel: action.openPopup(); RETURN
   - IF NOT sidePanel.open available: action.openPopup(); RETURN

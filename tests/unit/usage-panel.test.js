@@ -18,9 +18,9 @@
  *   - How (sub-block): 2a. On load: after getAggregatedBookmarksForIndex, send getBookmarkUsage() (no url) to get all usage array.
  *   - How (sub-block): 2b. Build map url -> usage; for each bookmark b, set b.visits = map[b.url]?.visitCount ?? 0, b.lastVisited = map[b.url]?.lastVisitedAt ?? ''.
  *   - How (sub-block): 2c. renderTableBody: for each row add <td class="col-visits"> and <td class="col-last-visited">; lastVisited uses timeDisplayMode (absolute/age).
- *   - How (sub-block): Block 3: Surface 3 – Usage side-panel tab. ARCH: Usage tab; IMPL: initUsageTab, fetch stats and graph, render.
- *   - How (sub-block): 3a. Tab state: TAB_USAGE = 'usage'; TAB_IDS include it; getVisibilityForTab returns usageVisible for activeTab === TAB_USAGE.
- *   - How (sub-block): 3b. initUsageTab(): send getBookmarkUsageStats({ n: 10 }), getBookmarkNavigationGraph(); render Most Visited list (mostFrequent), Recently Visited list (mostRecent), Navigation Graph (edges grouped by sourceUrl).
+ *   - How (sub-block): Block 3: Surface 3 – Visit History standalone page. ARCH: Visit History page; IMPL: initVisitHistoryPage, fetch stats and graph, render.
+ *   - How (sub-block): 3a. Page: visit-history.html; TAB_USAGE legacy only; TAB_IDS exclude usage.
+ *   - How (sub-block): 3b. initVisitHistoryPage(): send getBookmarkUsageStats({ n: 10 }), getBookmarkNavigationGraph(); render Most Visited, Recently Visited, Navigation Graph.
  * 
  * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_USAGE_TRACKING_UI ===
  */
@@ -28,7 +28,7 @@ import {
   buildMostVisitedList,
   buildRecentlyVisitedList,
   buildNavigationGraphGroups
-} from '../../src/ui/side-panel/usage-panel.js'
+} from '../../src/ui/visit-history/visit-history-panel.js'
 
 describe('[REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] buildMostVisitedList', () => {
   test('returns array of items with url, visitCount, lastVisitedAt from stats.mostFrequent', () => {

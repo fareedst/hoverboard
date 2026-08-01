@@ -8,35 +8,40 @@ IMPL-BOOKMARK_USAGE_TRACKING_UI:
       - path: "src/ui/popup/PopupController.js"
       - path: "src/ui/popup/UIManager.js"
       - path: "src/ui/side-panel/side-panel-tab-state.js"
-      - path: "src/ui/side-panel/side-panel.css"
       - path: "src/ui/side-panel/side-panel.html"
       - path: "src/ui/side-panel/side-panel.js"
-      - path: "src/ui/side-panel/usage-panel.js"
+      - path: "src/ui/tools-toolbar/tools-toolbar.html"
+      - path: "src/ui/tools-toolbar/tools-toolbar.js"
+      - path: "src/ui/visit-history/visit-history-panel.js"
+      - path: "src/ui/visit-history/visit-history.css"
+      - path: "src/ui/visit-history/visit-history.html"
+      - path: "src/ui/visit-history/visit-history.js"
     functions:
-      - name: "initUsageTab"
-        file: "src/ui/side-panel/usage-panel.js"
+      - name: "initVisitHistoryPage"
+        file: "src/ui/visit-history/visit-history-panel.js"
       - name: "renderTableBody"
         file: "src/ui/bookmarks-table/bookmarks-table.js"
   cross_references:
     - "ARCH-BOOKMARK_USAGE_TRACKING_UI"
     - "IMPL-BOOKMARK_USAGE_TRACKING"
     - "REQ-BOOKMARK_USAGE_TRACKING"
+  description: "Three usage UI surfaces: This Page inline, Index Visits/Last Visited columns, Visit History standalone page (INIT_VISIT_HISTORY_PAGE; not a side-panel tab)."
   detail_file: "implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING_UI.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING_UI-pseudocode.md"
   implementation_approach:
     details:
       - Surface 1: "data-popup-ref usageStatsSection, usageStatsText, usageReferrerText; hide when !usage?.visitCount"
       - Surface 2: "th data-sort visits, lastVisited; merge b.visits = u.visitCount, b.lastVisited = u.lastVisitedAt; formatTimeAge/formatTimeAbsolute for lastVisited"
-      - Surface 3: "getVisibilityForTab usageVisible; usagePanelEl; initUsageTab in usage-panel.js; Refresh button"
-    summary: "Surface 1 – HTML section in side-panel.html"
+      - Surface 3: "visit-history.html; visit-history-panel.js initVisitHistoryPage; tools toolbar btn-visit-history; legacy TAB_USAGE not in TAB_IDS"
+    summary: "Surface 1 – HTML section in side-panel/popup. Surface 2 – Index Visits/Last Visited. Surface 3 – Visit History standalone page (visit-history.html) with initVisitHistoryPage; tools toolbar opens via tabs.create."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-03-03"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-31"
+      reason: "LEAP: INIT_VISIT_HISTORY_PAGE H2 for standalone Visit History page"
     last_validated:
       date: "2026-03-03"
       result: "pass"
@@ -44,9 +49,9 @@ IMPL-BOOKMARK_USAGE_TRACKING_UI:
   name: "Bookmark Usage Tracking UI Implementation"
   rationale:
     benefits:
-      - "Users see visit count and last visited per bookmark; can sort/filter by usage; can browse referrer graph"
+      - "Users see visit count and last visited per bookmark; can sort/filter by usage; can browse referrer graph on Visit History page"
     problems_solved: []
-    why: "Implement the three-surface UI so usage data is visible in This Page, Index table, and Usage tab; logic in testable modules; minimal glue in entry points."
+    why: "Implement the three-surface UI so usage data is visible in This Page, Index table, and Visit History page; logic in testable modules; minimal glue in entry points."
   related_decisions:
     composed_with:
       - "IMPL-MESSAGE_HANDLING"
@@ -65,5 +70,7 @@ IMPL-BOOKMARK_USAGE_TRACKING_UI:
     requirements:
       - "REQ-BOOKMARK_USAGE_TRACKING"
     tests:
+      - "tests/playwright/extension-usage-tracking.spec.js"
       - "tests/unit/bookmarks-table-usage-columns.test.js"
+      - "tests/unit/side-panel-html.test.js"
       - "tests/unit/usage-panel.test.js"

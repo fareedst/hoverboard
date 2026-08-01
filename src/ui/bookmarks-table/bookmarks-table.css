@@ -1,8 +1,4 @@
-/* [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Local bookmarks index – uses design-tokens.css for theme and typography */
-
-* {
-  box-sizing: border-box;
-}
+/* [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Local bookmarks index – shell: tool-page-shell.css */
 
 /* [IMPL-LOCAL_BOOKMARKS_INDEX] Full viewport height so .container flex + .footer-info margin-top:auto can push count to bottom [REQ-LOCAL_BOOKMARKS_INDEX] */
 html {
@@ -13,60 +9,18 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  font-family: var(--font-family-primary);
-  line-height: var(--line-height-normal);
-  color: var(--color-text-primary);
-  background-color: var(--color-background-secondary);
-  margin: 0;
-  padding: 0;
 }
 
-/* [IMPL-LOCAL_BOOKMARKS_INDEX] Compact layout: reduced padding to maximize table space. Flex column so footer stays at visual bottom when content is short [REQ-LOCAL_BOOKMARKS_INDEX]. min-height: 100vh so container has free space for margin-top:auto when content is shorter than viewport. */
+/* [IMPL-LOCAL_BOOKMARKS_INDEX] Compact layout: reduced padding to maximize table space. Flex column so footer stays at visual bottom when content is short [REQ-LOCAL_BOOKMARKS_INDEX]. */
 .container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 1200px;
-  margin: 0 auto;
   padding: var(--space-2);
-  background-color: var(--color-background);
-  min-height: 100vh;
-}
-
-/* [IMPL-LOCAL_BOOKMARKS_INDEX] Compact header: minimal height for banner and page heading */
-.header-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-1);
-}
-
-.header-brand .logo {
-  width: 32px;
-  height: 32px;
-}
-
-.header-brand .extension-name {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
 }
 
 .header {
   margin-bottom: var(--space-2);
-}
-
-.header h1 {
-  margin: 0 0 var(--space-1) 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.subtitle {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
 }
 
 .toolbar {
@@ -141,26 +95,6 @@ body {
 .search-input:focus {
   outline: none;
   border-color: var(--color-input-border-focus);
-}
-
-.btn {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-family-primary);
-  cursor: pointer;
-  border: 1px solid var(--color-border);
-  background: var(--color-button-secondary-bg);
-  color: var(--color-button-secondary-text);
-}
-
-.btn-sm {
-  padding: var(--space-1-5) var(--space-3);
-  font-size: var(--font-size-xs);
-}
-
-.btn:hover {
-  background: var(--color-button-secondary-bg-hover);
 }
 
 .filters-row {
@@ -261,16 +195,6 @@ body {
 
 .delete-row .delete-result.is-final {
   color: var(--color-success-600);
-}
-
-.btn-danger {
-  background: var(--color-button-danger-bg, #c53030);
-  color: var(--color-button-danger-text, #fff);
-  border-color: var(--color-button-danger-bg, #c53030);
-}
-
-.btn-danger:hover {
-  background: var(--color-button-danger-bg-hover, #9b2c2c);
 }
 
 /* [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import row */

@@ -3,6 +3,8 @@
  * Handles user configuration with validation and persistence
  */
 
+import { initToolPageVersion } from '../styles/tool-page-version.js'
+
 /**
  * === IMPL-FULL-BLOCK: IMPL-FILE_STORAGE_TYPED_PATH ===
  * [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] — User-typed path for file storage; Options persist path; native host read/write; initBookmarkProvider path vs picker. Contract: path input and storage; persisted path and file I/O via native host.
@@ -1322,15 +1324,19 @@ export class OptionsController {
   }
 }
 
-// Initialize when DOM is ready (skip under Jest so unit tests can import OptionsController)
-const isJest = typeof process !== 'undefined' && process.env?.JEST_WORKER_ID != null
-if (!isJest) {
+// Initialize when DOM is ready (skip under unit test runners that import OptionsController)
+const isUnitTest = typeof process !== 'undefined' && (
+  process.env?.JEST_WORKER_ID != null || process.env?.BUN_TEST === '1'
+)
+if (!isUnitTest && typeof document !== 'undefined') {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+      initToolPageVersion()
       // eslint-disable-next-line no-new
       new OptionsController()
     })
   } else {
+    initToolPageVersion()
     // eslint-disable-next-line no-new
     new OptionsController()
   }

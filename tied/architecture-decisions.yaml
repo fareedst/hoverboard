@@ -303,7 +303,7 @@ ARCH-BOOKMARK_USAGE_TRACKING_UI:
   cross_references:
     - "ARCH-BOOKMARK_USAGE_TRACKING"
     - "REQ-BOOKMARK_USAGE_TRACKING"
-  decision: "Three surfaces – This Page inline, Index columns, Usage tab. Query via getBookmarkUsage, getBookmarkUsageStats, getBookmarkNavigationGraph."
+  decision: "Three surfaces – This Page inline, Index columns, Visit History standalone page. Query via getBookmarkUsage, getBookmarkUsageStats, getBookmarkNavigationGraph."
   detail_file: "architecture-decisions/ARCH-BOOKMARK_USAGE_TRACKING_UI.yaml"
   implementation_approach:
     details: []
@@ -314,8 +314,8 @@ ARCH-BOOKMARK_USAGE_TRACKING_UI:
       date: "2026-03-03"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-03"
-      reason: "Initial creation for usage tracking UX"
+      date: "2026-07-31"
+      reason: "Visit History page replaces Usage tab"
   name: "Bookmark Usage Tracking UI Architecture"
   rationale:
     benefits:
@@ -1594,6 +1594,22 @@ ARCH-NATIVE_HOST:
       - "IMPL-NATIVE_HOST_WRAPPER"
     requirements:
       - "REQ-NATIVE_HOST_WRAPPER"
+ARCH-NON_WEB_TOOLS_TOOLBAR:
+  category: "UI"
+  cross_references:
+    implementation:
+      - "IMPL-NON_WEB_TOOLS_TOOLBAR"
+    requirements:
+      - "REQ-NON_WEB_TOOLS_TOOLBAR"
+  decision: "Use isWebProtocolUrl; dismiss side panel on non-web; setPopup tools-toolbar with five launchers including Visit History; Browser Bookmarks and Visit History are standalone pages."
+  detail_file: "architecture-decisions/ARCH-NON_WEB_TOOLS_TOOLBAR.yaml"
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-31"
+      reason: "Five launchers including Visit History"
+  name: "Non-web tools toolbar architecture"
+  status: "Active"
 ARCH-OVERLAY:
   alternatives_considered:
     - name: "Modal dialogs"
@@ -2254,6 +2270,7 @@ ARCH-SIDE_PANEL_BOOKMARK_SEARCH:
 ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
   cross_references:
     - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+  decision: "Standalone Browser Bookmarks page uses direct chrome.bookmarks tree UX (not BookmarkRouter; not a side-panel tab). Legacy SIDE_PANEL_ token name retained."
   detail_file: "architecture-decisions/ARCH-SIDE_PANEL_BROWSER_BOOKMARKS.yaml"
   implementation_approach:
     summary: "Panel uses chrome.bookmarks.getTree; flatten to flat list with folder path; folder tree built from nodes; filter by query and folder; actions on visible list."
@@ -2263,8 +2280,8 @@ ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
       date: "2026-03-02"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "ARCH corpus Phase 3: panel vs Store B boundary"
+      date: "2026-07-31"
+      reason: "LEAP: standalone page"
   name: "Side Panel Browser Bookmarks Architecture"
   rationale:
     benefits:

@@ -24855,17 +24855,19 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       };
     }
   };
-  window.addEventListener("beforeunload", () => {
-    if (window.hoverboardMessageClient) {
-      window.hoverboardMessageClient.cleanup();
-    }
-  });
+  if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+    window.addEventListener("beforeunload", () => {
+      if (window.hoverboardMessageClient) {
+        window.hoverboardMessageClient.cleanup();
+      }
+    });
+  }
 
   // src/features/content/overlay-manager.js
   init_tag_service();
   init_utils();
   var debugLog3 = (message, data = null) => {
-    if (window.HOVERBOARD_DEBUG) {
+    if (typeof window !== "undefined" && window.HOVERBOARD_DEBUG) {
       if (data) {
         console.log(`[Hoverboard Overlay Debug] ${message}`, data);
       } else {
@@ -24874,7 +24876,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     }
   };
   var debugError2 = (message, error48 = null) => {
-    if (window.HOVERBOARD_DEBUG) {
+    if (typeof window !== "undefined" && window.HOVERBOARD_DEBUG) {
       if (error48) {
         console.error(`[Hoverboard Overlay Debug] ${message}`, error48);
       } else {

@@ -1,4 +1,18 @@
-# [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] — This block defines the browser bookmarks panel: data fetch, flatten, folder tree, filter, UI, click to open. Implements REQ by listing Chrome bookmarks with folder path and favicon; real-time search; folder filter; implements ARCH by direct chrome.bookmarks tree UX. Boundary: this panel is NOT Store B / IMPL-BROWSER_BOOKMARK_SERVICE (BookmarkRouter peer). Panel owns direct tree UI; Store B is the fifth router backend for Index/Save-to/move.
+# [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] — Standalone Browser Bookmarks page (browser-bookmarks.html; legacy SIDE_PANEL_ token): data fetch, flatten, folder tree, filter, UI, click to open. Not a side-panel tab. Boundary: this page is NOT Store B / IMPL-BROWSER_BOOKMARK_SERVICE (BookmarkRouter peer).
+
+## INIT_BROWSER_BOOKMARKS_PAGE
+
+- [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-NON_WEB_TOOLS_TOOLBAR] How: browser-bookmarks.js DOMContentLoaded → initToolPageVersion + initBrowserBookmarksTab(); SW/command/tools toolbar open via tabs.create (OPEN_BROWSER_BOOKMARKS_PAGE). Side panel TAB_IDS exclude browserBookmarks; legacy storage falls back to default.
+- Contract:
+  - INPUT: DOMContentLoaded on browser-bookmarks.html; or SW tabs.create URL
+  - PRE: tool page shell with #browserBookmarksPanel in DOM when init runs
+  - OUTPUT: page chrome versioned; Chrome tree UI initialized on standalone page
+  - POST: side panel has no Bookmarks tab button
+  - EFFECTS: IO (tabs.create from SW/toolbar; bookmarks API from page)
+  - TERMINATION: total
+- PROCEDURE: INIT_BROWSER_BOOKMARKS_PAGE
+  - ON DOMContentLoaded: initToolPageVersion(); initBrowserBookmarksTab()
+  - ON command open-side-panel-browser-bookmarks OR tools-toolbar btn-browser-bookmarks: tabs.create(getURL('src/ui/browser-bookmarks/browser-bookmarks.html'))
 
 ## FLATTEN_BOOKMARK_TREE
 

@@ -1,0 +1,22 @@
+REQ-NON_WEB_TOOLS_TOOLBAR:
+  category: "Functional"
+  description: "On non-web-protocol active tabs (not http/https), the side panel must close if visible. Badge/icon click on a non-web tab must open a compact tools toolbar popup with five launchers: Local Bookmarks Index, Browser Bookmark Import, Options, Browser Bookmarks (standalone page), and Visit History (standalone page). Web-protocol badge behavior remains iconClickOpensSidePanel (side panel or full popup)."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-31"
+      reason: "Add Visit History as fifth tools toolbar launcher"
+  name: "Non-web tools toolbar"
+  priority: "P1"
+  rationale:
+    why: "Page-bound side panel UX is meaningless on browser-internal and other non-http(s) URLs; users still need access to tab-independent full-page tools."
+  satisfaction_criteria:
+    - criterion: "Switching to a non-web active tab sends REQUEST_SIDE_PANEL_CLOSE so a visible side panel closes"
+      coverage: "unit SW tab activate/update"
+    - criterion: "Badge click on non-web opens tools toolbar with Index, Import, Options, Browser Bookmarks, Visit History — not the side panel"
+      coverage: "unit setPopup sync + tools toolbar"
+    - criterion: "Badge click on http/https unchanged (side panel toggle or popup per config)"
+      coverage: "unit handleActionClick"
+    - criterion: "isWebProtocolUrl allows only http and https"
+      coverage: "unit isWebProtocolUrl"
+  status: "In Progress"

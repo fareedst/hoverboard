@@ -1,0 +1,204 @@
+/* [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] Standalone Browser Bookmarks page styles. Shell: tool-page-shell.css */
+
+.browser-bookmarks-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.browser-bookmarks-above-list {
+  flex: none;
+}
+
+.browser-bookmarks-list-section {
+  min-height: 100%;
+  overflow-y: auto;
+  padding: var(--space-2) 0;
+}
+
+.browser-bookmarks-section {
+  flex-shrink: 0;
+  margin-bottom: var(--space-3);
+}
+
+.browser-bookmarks-control-group {
+  margin: var(--space-0-5) 0;
+}
+
+.browser-bookmarks-section-actions .browser-bookmarks-control-group,
+.browser-bookmarks-section-import .browser-bookmarks-control-group,
+.browser-bookmarks-section-filter .browser-bookmarks-control-group:has(.btn) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.browser-bookmarks-search-input {
+  width: 100%;
+  padding: var(--space-1-5) var(--space-2);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-base);
+  background: var(--color-input-bg);
+  color: var(--color-input-text);
+}
+
+.browser-bookmarks-folder-select,
+.browser-bookmarks-sort-select {
+  width: 100%;
+  padding: var(--space-1-5) var(--space-2);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-base);
+  background: var(--color-input-bg);
+  color: var(--color-input-text);
+}
+
+.browser-bookmarks-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+.browser-bookmarks-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: var(--space-1-5) 0;
+}
+
+.browser-bookmarks-message {
+  flex-shrink: 0;
+  margin: var(--space-1) 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.browser-bookmarks-message.hidden {
+  display: none;
+}
+
+.browser-bookmarks-undo-bar {
+  flex-shrink: 0;
+  padding: var(--space-1-5) var(--space-2);
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-xs);
+}
+
+.browser-bookmarks-undo-bar.hidden {
+  display: none;
+}
+
+.browser-bookmarks-undo-btn {
+  margin-left: var(--space-1);
+}
+
+.browser-bookmarks-import-file-input {
+  max-width: 12rem;
+}
+
+.browser-bookmarks-import-progress {
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-1);
+}
+
+.browser-bookmarks-import-progress.hidden {
+  display: none;
+}
+
+.browser-bookmarks-inline-edit {
+  width: 100%;
+  font: inherit;
+  padding: var(--space-0-5) var(--space-1);
+  border: 1px solid var(--color-input-border-focus);
+  border-radius: var(--radius-sm);
+  background: var(--color-input-bg);
+  color: var(--color-input-text);
+}
+
+.browser-bookmarks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.browser-bookmarks-row {
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  background: var(--color-background-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.browser-bookmarks-row-checkbox-wrap {
+  flex-shrink: 0;
+  margin-right: var(--space-2);
+  display: flex;
+  align-items: center;
+}
+
+.browser-bookmarks-row-checkbox {
+  margin: 0;
+  cursor: pointer;
+}
+
+.browser-bookmarks-section-actions {
+  flex-shrink: 0;
+}
+
+.browser-bookmarks-move-select {
+  width: 100%;
+  max-width: 12rem;
+}
+
+.browser-bookmarks-row-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1-5);
+}
+
+.browser-bookmarks-favicon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: var(--space-0-5);
+}
+
+.browser-bookmarks-favicon-placeholder {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  background: var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.browser-bookmarks-row-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.browser-bookmarks-row-title {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-0-5);
+  word-break: break-word;
+}
+
+.browser-bookmarks-row-url {
+  color: var(--color-interactive-primary);
+  word-break: break-all;
+  font-size: var(--font-size-xs);
+}
+
+.browser-bookmarks-row-url:hover {
+  text-decoration: underline;
+}
+
+.browser-bookmarks-row-folder {
+  margin-top: var(--space-0-5);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  word-break: break-word;
+}

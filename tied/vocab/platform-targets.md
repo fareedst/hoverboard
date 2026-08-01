@@ -20,7 +20,9 @@
 | **cross-browser (deferred)** | Safari support (as current) | Future multi-browser expansion via the shim; not active delivery |
 | **Safari App Extension (deferred)** | safari/ package (as live) | TIED `REQ/ARCH/IMPL-SAFARI_ADAPTATION` Deferred; package removed from tree |
 | **Chrome / Chromium** | WebKit (as target) | Active browser target per REQ-EXTENSION_IDENTITY |
+| **Brave** | Chrome (when meaning Brave product) | Chromium-based browser target; loads the same unpacked extension |
 | **API availability check** | Safari support (for missing APIs) | Guard UI/features when an API is absent (e.g. `chrome.sessions`); not product support |
+| **Brave side-panel window arrange bug** | extension window-sizing bug | Platform limitation in Brave when extension **side panel** or **Brave native sidebar** is open; see [`side-panel.md`](side-panel.md) and [brave-side-panel-window-arrange.md](../../docs/troubleshooting/brave-side-panel-window-arrange.md) |
 
 ---
 
@@ -39,3 +41,4 @@
 - Capability guards (e.g. hide UI when `chrome.sessions` is unavailable) are **API availability checks**, not Safari product support.
 - CSS `-webkit-*` prefixes are Chromium-compatible vendor prefixes, not Safari App Extension code.
 - Numbered legacy `SAFARI-*` tokens in source comments are out of scope; see `tied/docs/numbered-token-mapping.md`.
+- **Brave** is a supported Chromium host. The **Brave side-panel window arrange bug** is browser chrome (Side Panel API panel and Brave’s own sidebar), not Hoverboard layout; do not invent a REQ to “fix” OS snap from the extension.

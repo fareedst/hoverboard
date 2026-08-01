@@ -746,6 +746,7 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
  */
+import { initToolPageVersion } from '../styles/tool-page-version.js'
 import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
@@ -1466,6 +1467,7 @@ function handleStoreFilterChange () {
 }
 
 function init () {
+  initToolPageVersion()
   elements.searchInput.addEventListener('input', applySearchAndFilter)
   elements.searchClear.addEventListener('click', () => {
     elements.searchInput.value = ''

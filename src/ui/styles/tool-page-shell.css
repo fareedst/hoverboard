@@ -1,0 +1,111 @@
+/**
+ * Shared full-page tool chrome (Index, Import, Options, Browser Bookmarks, Visit History).
+ * Pair with design-tokens.css. Page-specific layout stays in each page CSS.
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family-primary);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-background-secondary);
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-6);
+  background-color: var(--color-background);
+  min-height: 100vh;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.header-brand .logo {
+  width: 32px;
+  height: 32px;
+}
+
+.header-brand .extension-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.header-brand .extension-version {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-tertiary);
+}
+
+.header-brand .extension-version:empty {
+  display: none;
+}
+
+.header {
+  margin-bottom: var(--space-4);
+}
+
+.header h1 {
+  margin: 0 0 var(--space-1) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.btn {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-primary);
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background: var(--color-button-secondary-bg);
+  color: var(--color-button-secondary-text);
+}
+
+.btn-sm {
+  padding: var(--space-1-5) var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
+.btn:hover {
+  background: var(--color-button-secondary-bg-hover);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--color-button-secondary-bg);
+  color: var(--color-button-secondary-text);
+  border-color: var(--color-border);
+}
+
+.btn-danger {
+  background: var(--color-button-danger-bg, #c53030);
+  color: var(--color-button-danger-text, #fff);
+  border-color: var(--color-button-danger-bg, #c53030);
+}
+
+.btn-danger:hover {
+  background: var(--color-button-danger-bg-hover, #9b2c2c);
+}

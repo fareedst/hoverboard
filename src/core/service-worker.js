@@ -1448,7 +1448,8 @@ import { BookmarkUsageTracker } from '../features/storage/bookmark-usage-tracker
 import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
 // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-EXTENSION_COMMANDS] Tab IDs and storage key for side panel tab-specific commands
-import { SIDE_PANEL_TAB_STORAGE_KEY, TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TABS, TAB_BROWSER_BOOKMARKS } from '../ui/side-panel/side-panel-tab-state.js'
+import { SIDE_PANEL_TAB_STORAGE_KEY, TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TABS } from '../ui/side-panel/side-panel-tab-state.js'
+import { isWebProtocolUrl } from '../shared/web-protocol.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
 import { browser } from '../shared/safari-shim.js' // [SAFARI-EXT-SHIM-001]
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Optional message log for testing/debugging
@@ -1457,8 +1458,12 @@ import { RecentTagsMemoryManager } from '../features/tagging/recent-tags-memory-
 import { createProviderInitMutex } from '../shared/async-init-mutex.js'
 import { buildBookmarksIndexUrlWithQuery } from '../shared/library-search-entry.js'
 
-/** [IMPL-ICON_CLICK_BEHAVIOR] Chrome does not show side panel when active tab is chrome:// or chrome-extension://. */
-const _isRestrictedForSidePanel = (url) => typeof url === 'string' && (url.startsWith('chrome://') || url.startsWith('chrome-extension://'))
+/** [IMPL-ICON_CLICK_BEHAVIOR] [IMPL-NON_WEB_TOOLS_TOOLBAR] Non-web (not http/https) — skip window cache / prefer web fallback. */
+const _isRestrictedForSidePanel = (url) => !isWebProtocolUrl(url)
+
+const TOOLS_TOOLBAR_POPUP = 'src/ui/tools-toolbar/tools-toolbar.html'
+const FULL_POPUP_PATH = 'src/ui/popup/popup.html'
+const BROWSER_BOOKMARKS_PAGE = 'src/ui/browser-bookmarks/browser-bookmarks.html'
 
 // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Main service worker class for V3 architecture
 class HoverboardServiceWorker {
@@ -1562,9 +1567,11 @@ class HoverboardServiceWorker {
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log('[SERVICE-WORKER] Received message:', message)
 
-      // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] [IMPL-ICON_CLICK_BEHAVIOR] Handle OPEN_SIDE_PANEL; use cached windowId or cold-start fallback. Popup sends this; SW opens side panel.
+      // [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-ICON_CLICK_BEHAVIOR] [REQ-NON_WEB_TOOLS_TOOLBAR] OPEN_SIDE_PANEL; on non-web open tools toolbar.
       if (message.type === MESSAGE_TYPES.OPEN_SIDE_PANEL) {
-        this._openSidePanelWithFallback((result) => sendResponse(result))
+        this._openSidePanelOrToolsToolbar().then(() => sendResponse({ success: true })).catch(() => {
+          this._openSidePanelWithFallback((result) => sendResponse(result))
+        })
         return true
       }
 
@@ -1662,6 +1669,11 @@ class HoverboardServiceWorker {
    */
   handleActionClick (tab) {
     const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
+    // [REQ-NON_WEB_TOOLS_TOOLBAR] [IMPL-NON_WEB_TOOLS_TOOLBAR] Non-web badge: tools toolbar (not side panel).
+    if (tab?.url != null && !isWebProtocolUrl(tab.url)) {
+      this._openToolsToolbar(tab)
+      return
+    }
     // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Preference and API check; open popup when side panel disabled or unavailable.
     const openSidePanel = this._iconClickOpensSidePanel !== false
     if (!openSidePanel) {
@@ -1711,12 +1723,18 @@ class HoverboardServiceWorker {
     const windowId = this._sidePanelWindowId
 
     if (command === 'open-side-panel') {
-      this._openSidePanelWithFallback()
+      // [REQ-NON_WEB_TOOLS_TOOLBAR] On non-web active tab, open tools toolbar instead of side panel.
+      await this._openSidePanelOrToolsToolbar()
+      return
+    }
+    // [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-NON_WEB_TOOLS_TOOLBAR] Standalone Browser Bookmarks page (not side-panel tab).
+    if (command === 'open-side-panel-browser-bookmarks') {
+      this._openBrowserBookmarksPage()
       return
     }
     // [IMPL-EXTENSION_COMMANDS] Tab-specific commands: set persisted tab then open panel; panel reads storage on load or onChanged.
-    if (command === 'open-side-panel-bookmark' || command === 'open-side-panel-tags-tree' || command === 'open-side-panel-browser-tabs' || command === 'open-side-panel-browser-bookmarks') {
-      const tabId = command === 'open-side-panel-bookmark' ? TAB_BOOKMARK : command === 'open-side-panel-tags-tree' ? TAB_TAGS_TREE : command === 'open-side-panel-browser-tabs' ? TAB_BROWSER_TABS : TAB_BROWSER_BOOKMARKS
+    if (command === 'open-side-panel-bookmark' || command === 'open-side-panel-tags-tree' || command === 'open-side-panel-browser-tabs') {
+      const tabId = command === 'open-side-panel-bookmark' ? TAB_BOOKMARK : command === 'open-side-panel-tags-tree' ? TAB_TAGS_TREE : TAB_BROWSER_TABS
       if (chromeApi?.storage?.local?.set) {
         await chromeApi.storage.local.set({ [SIDE_PANEL_TAB_STORAGE_KEY]: tabId })
       }
@@ -1745,6 +1763,138 @@ class HoverboardServiceWorker {
    * OPEN_BOOKMARKS_INDEX_TAB: create Local Bookmarks Index tab then dismiss already-open side panel (tab-create only).
    * [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY] Optional q via BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY
    */
+  /**
+   * === IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   * [IMPL-NON_WEB_TOOLS_TOOLBAR] [ARCH-NON_WEB_TOOLS_TOOLBAR] [REQ-NON_WEB_TOOLS_TOOLBAR] How: setPopup tools-toolbar on non-web; clear or popup.html on web per iconClickOpensSidePanel.
+   *
+   * ## SYNC_ACTION_POPUP_FOR_TAB
+   *
+   * - Contract:
+   *   - INPUT: tab, _iconClickOpensSidePanel
+   *   - PRE: action.setPopup available
+   *   - OUTPUT: popup path synced for tabId
+   *   - POST: non-web → tools-toolbar.html; web + side-panel preference → empty popup; web + popup preference → popup.html
+   *   - EFFECTS: IO
+   *   - TERMINATION: total
+   * - PROCEDURE: SYNC_ACTION_POPUP_FOR_TAB
+   *   - IF NOT IS_WEB_PROTOCOL_URL(tab.url): action.setPopup({ tabId, popup: 'src/ui/tools-toolbar/tools-toolbar.html' }); RETURN
+   *   - IF _iconClickOpensSidePanel === false: action.setPopup({ tabId, popup: 'src/ui/popup/popup.html' }); RETURN
+   *   - action.setPopup({ tabId, popup: '' })
+   *
+   * === END IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   */
+  _syncActionPopupForTab (tab) {
+    const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
+    if (!chromeApi?.action?.setPopup || tab?.id == null) return
+    if (!isWebProtocolUrl(tab.url)) {
+      chromeApi.action.setPopup({ tabId: tab.id, popup: TOOLS_TOOLBAR_POPUP })
+      return
+    }
+    if (this._iconClickOpensSidePanel === false) {
+      chromeApi.action.setPopup({ tabId: tab.id, popup: FULL_POPUP_PATH })
+      return
+    }
+    chromeApi.action.setPopup({ tabId: tab.id, popup: '' })
+  }
+
+  /**
+   * === IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   * [IMPL-NON_WEB_TOOLS_TOOLBAR] [ARCH-NON_WEB_TOOLS_TOOLBAR] [REQ-NON_WEB_TOOLS_TOOLBAR] How: On active tab activate/navigate-complete, if URL non-web send REQUEST_SIDE_PANEL_CLOSE.
+   *
+   * ## DISMISS_SIDE_PANEL_IF_NON_WEB
+   *
+   * - Contract:
+   *   - INPUT: tab.url
+   *   - PRE: SW runtime available
+   *   - OUTPUT: message sent when non-web
+   *   - POST: web URLs do not send dismiss for protocol reason
+   *   - EFFECTS: IO (runtime.sendMessage)
+   *   - TERMINATION: total
+   * - PROCEDURE: DISMISS_SIDE_PANEL_IF_NON_WEB
+   *   - IF NOT IS_WEB_PROTOCOL_URL(tab.url): runtime.sendMessage({ type: REQUEST_SIDE_PANEL_CLOSE })
+   *
+   * === END IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   */
+  _dismissSidePanelIfNonWeb (url) {
+    if (isWebProtocolUrl(url)) return
+    const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
+    const runtime = chromeApi?.runtime || (typeof browser !== 'undefined' ? browser.runtime : null)
+    if (!runtime?.sendMessage) return
+    const p = runtime.sendMessage({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE })
+    if (p && typeof p.catch === 'function') p.catch(() => {})
+  }
+
+  /**
+   * === IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   * [IMPL-NON_WEB_TOOLS_TOOLBAR] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] How: tabs.create standalone Browser Bookmarks page (no longer side-panel tab).
+   *
+   * ## OPEN_BROWSER_BOOKMARKS_PAGE
+   *
+   * - Contract:
+   *   - INPUT: none
+   *   - PRE: runtime.getURL
+   *   - OUTPUT: new tab with browser-bookmarks.html
+   *   - POST: does not switch a side-panel tab (Bookmarks is not a side-panel surface)
+   *   - EFFECTS: IO
+   *   - TERMINATION: total
+   * - PROCEDURE: OPEN_BROWSER_BOOKMARKS_PAGE
+   *   - tabs.create({ url: runtime.getURL('src/ui/browser-bookmarks/browser-bookmarks.html') })
+   *
+   * === END IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   */
+  _openBrowserBookmarksPage () {
+    const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
+    const runtime = chromeApi?.runtime || browser.runtime
+    const getURL = runtime?.getURL ? (path) => runtime.getURL(path) : () => ''
+    const url = getURL(BROWSER_BOOKMARKS_PAGE)
+    const tabsApi = chromeApi?.tabs ?? browser.tabs
+    if (url && tabsApi?.create) tabsApi.create({ url })
+  }
+
+  /**
+   * === IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   * [IMPL-NON_WEB_TOOLS_TOOLBAR] [IMPL-ICON_CLICK_BEHAVIOR] [REQ-NON_WEB_TOOLS_TOOLBAR] How: open-side-panel / OPEN_SIDE_PANEL / handleActionClick on non-web must not sidePanel.open; ensure tools popup then openPopup.
+   *
+   * ## HANDLE_OPEN_SIDE_PANEL_WHEN_NON_WEB
+   *
+   * - Contract:
+   *   - INPUT: active tab url
+   *   - PRE: user gesture when openPopup
+   *   - OUTPUT: tools toolbar shown
+   *   - POST: non-web path never calls sidePanel.open
+   *   - EFFECTS: IO
+   *   - FAILURE_MODES: openPopup unavailable after setPopup (best-effort)
+   *   - TERMINATION: total
+   * - PROCEDURE: HANDLE_OPEN_SIDE_PANEL_WHEN_NON_WEB
+   *   - IF IS_WEB_PROTOCOL_URL(url): existing side panel / popup path; RETURN
+   *   - SYNC_ACTION_POPUP_FOR_TAB(tab)
+   *   - action.openPopup()
+   *
+   * === END IMPL-FULL-BLOCK: IMPL-NON_WEB_TOOLS_TOOLBAR ===
+   */
+  _openToolsToolbar (tab) {
+    const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
+    if (tab) this._syncActionPopupForTab(tab)
+    if (chromeApi?.action?.openPopup) {
+      try { chromeApi.action.openPopup() } catch (_) {}
+    }
+  }
+
+  /** [REQ-NON_WEB_TOOLS_TOOLBAR] [IMPL-NON_WEB_TOOLS_TOOLBAR] Open side panel on web; tools toolbar on non-web. */
+  async _openSidePanelOrToolsToolbar () {
+    const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
+    const tabsApi = chromeApi?.tabs ?? (typeof browser !== 'undefined' ? browser.tabs : null)
+    try {
+      const tabs = tabsApi?.query ? await tabsApi.query({ active: true, currentWindow: true }) : []
+      const tab = tabs && tabs[0]
+      if (tab && !isWebProtocolUrl(tab.url)) {
+        this._openToolsToolbar(tab)
+        return
+      }
+    } catch (_) {}
+    this._openSidePanelWithFallback()
+  }
+
   _openBookmarksIndexTab (q = '') {
     const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
     const runtime = chromeApi?.runtime || browser.runtime
@@ -2326,6 +2476,9 @@ class HoverboardServiceWorker {
           if (win?.type === 'normal' && win?.id != null) this._sidePanelWindowId = win.id
         } catch (_) {}
       }
+      // [REQ-NON_WEB_TOOLS_TOOLBAR] [IMPL-NON_WEB_TOOLS_TOOLBAR] Close panel on non-web; sync badge popup.
+      this._dismissSidePanelIfNonWeb(tab?.url)
+      this._syncActionPopupForTab(tab)
       if (tab.url) {
         const bookmark = await this.updateBadgeForTab(tab)
         await this._recordBookmarkVisitIfNeeded(tab, bookmark)
@@ -2338,6 +2491,13 @@ class HoverboardServiceWorker {
   async handleTabUpdated (tabId, changeInfo, tab) {
     if (changeInfo.status === 'complete' && tab.url) {
       try {
+        // [REQ-NON_WEB_TOOLS_TOOLBAR] [IMPL-NON_WEB_TOOLS_TOOLBAR] Navigate to non-web → dismiss panel; resync popup.
+        const tabsApi = typeof globalThis.chrome !== 'undefined' && globalThis.chrome.tabs ? globalThis.chrome.tabs : browser.tabs
+        const active = await tabsApi.query({ active: true, currentWindow: true })
+        if (active?.[0]?.id === tabId) {
+          this._dismissSidePanelIfNonWeb(tab.url)
+          this._syncActionPopupForTab(tab)
+        }
         const bookmark = await this.updateBadgeForTab(tab)
         await this._recordBookmarkVisitIfNeeded(tab, bookmark)
       } catch (error) {
@@ -2412,7 +2572,8 @@ class HoverboardServiceWorker {
     api.onClicked.addListener((info) => {
       const menuId = info?.menuItemId
       if (menuId === 'hoverboard-open-side-panel') {
-        self._openSidePanelWithFallback()
+        // [REQ-NON_WEB_TOOLS_TOOLBAR] Same as open-side-panel command (tools toolbar on non-web).
+        self._openSidePanelOrToolsToolbar()
         return
       }
       if (menuId === 'hoverboard-open-options') {

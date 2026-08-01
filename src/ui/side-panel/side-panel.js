@@ -5,11 +5,10 @@
 
 /**
  * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_USAGE_TRACKING_UI ===
- * [IMPL-BOOKMARK_USAGE_TRACKING_UI] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [REQ-BOOKMARK_USAGE_TRACKING] — Block 1: Surface 1 – This Page inline usage section. REQ: UI display of usage; ARCH: three surfaces; IMPL: popup/panel fetch and render.
+ * [IMPL-BOOKMARK_USAGE_TRACKING_UI] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [REQ-BOOKMARK_USAGE_TRACKING] — Block 1: Surface 1 – This Page inline usage section. Surface 3 is Visit History standalone page (not a side-panel tab).
  *
  * ## MAIN
  *
- * - 1c. Else: hide usageStatsSection. [REQ-BOOKMARK_USAGE_TRACKING] satisfaction: UI can query and display. How: 2d. Sort comparator: add visits (numeric), lastVisited (string compare).  display and sort.
  * - Contract:
  *   - INPUT: context / caller args
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
@@ -23,12 +22,14 @@
  *   - How (sub-block): 2a. On load: after getAggregatedBookmarksForIndex, send getBookmarkUsage() (no url) to get all usage array.
  *   - How (sub-block): 2b. Build map url -> usage; for each bookmark b, set b.visits = map[b.url]?.visitCount ?? 0, b.lastVisited = map[b.url]?.lastVisitedAt ?? ''.
  *   - How (sub-block): 2c. renderTableBody: for each row add <td class="col-visits"> and <td class="col-last-visited">; lastVisited uses timeDisplayMode (absolute/age).
- *   - How (sub-block): Block 3: Surface 3 – Usage side-panel tab. ARCH: Usage tab; IMPL: initUsageTab, fetch stats and graph, render.
- *   - How (sub-block): 3a. Tab state: TAB_USAGE = 'usage'; TAB_IDS include it; getVisibilityForTab returns usageVisible for activeTab === TAB_USAGE.
- *   - How (sub-block): 3b. initUsageTab(): send getBookmarkUsageStats({ n: 10 }), getBookmarkNavigationGraph(); render Most Visited list (mostFrequent), Recently Visited list (mostRecent), Navigation Graph (edges grouped by sourceUrl).
+ *   - How (sub-block): Block 3: Surface 3 – Visit History standalone page (not a side-panel tab). ARCH: Visit History page; IMPL: initVisitHistoryPage, fetch stats and graph, render; tools toolbar opens via tabs.create.
+ *   - How (sub-block): 3a. Page: visit-history.html with #visitHistoryPanel; TAB_USAGE kept as legacy id only; TAB_IDS exclude usage; stored active tab usage falls back to default.
+ *   - How (sub-block): 3b. initVisitHistoryPage(): send getBookmarkUsageStats({ n: 10 }), getBookmarkNavigationGraph(); render Most Visited / Recently Visited / Navigation Graph.
+ *   - How (sub-block): 3c. Tools toolbar btn-visit-history: tabs.create(getURL('src/ui/visit-history/visit-history.html')).
  *
  * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_USAGE_TRACKING_UI ===
  */
+
 /**
  * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BOOKMARK ===
  * [IMPL-SIDE_PANEL_BOOKMARK] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] — This block defines the Bookmark tab content and init: markup with data-popup-ref, PopupController + UIManager with container, and "By Tag" → switch tab. Implements REQ by providing popup-equivalent in panel; implements ARCH by scoped root.
@@ -76,108 +77,24 @@
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BROWSER_BOOKMARKS ===
- * [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] — This block defines the browser bookmarks panel: data fetch, flatten, folder tree, filter, UI, click to open. Implements REQ by listing Chrome bookmarks with folder path and favicon; real-time search; folder filter; implements ARCH by direct chrome.bookmarks tree UX. Boundary: this panel is NOT Store B / IMPL-BROWSER_BOOKMARK_SERVICE (BookmarkRouter peer). Panel owns direct tree UI; Store B is the fifth router backend for Index/Save-to/move.
+ * [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] — Browser Bookmarks is standalone (browser-bookmarks.html); side panel does not host Bookmarks tab. Full tree UX block lives in src/ui/browser-bookmarks/browser-bookmarks-panel.js.
  *
- * ## FLATTEN_BOOKMARK_TREE
+ * ## INIT_BROWSER_BOOKMARKS_PAGE
  *
- * - [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] How: Data fetch: panel calls chrome.bookmarks.getTree; flatten to list. Implements "list all Chrome bookmarks". flattenBookmarkTree(nodes, parentPath): pure. For each node: if node.url push { id, url, title, dateAdded, folderPath: parentPath, parentId }; if node.children recurse with path = parentPath ? parentPath + ' / ' + node.title : node.title. Return flat list. Implements "folder path per bookmark".
+ * - [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] How: side-panel.js must not init Bookmarks tab; legacy stored browserBookmarks falls back to default tab.
  * - Contract:
- *   - INPUT: searchQuery (string), selectedFolderId (string | null), bookmarks from chrome.bookmarks.getTree
- *   - PRE: caller supplies valid inputs for this block; dependencies wired
- *   - OUTPUT: visible bookmarks (filtered), click URL opens in new tab
- *   - POST:
- *     - success => block outputs match OUTPUT shape
- *   - DATA: allBookmarks = flattenBookmarkTree(tree), visibleBookmarks = filterBrowserBookmarks(allBookmarks, searchQuery, selectedFolderId)
- *   - EFFECTS: Async, IO
+ *   - INPUT: persisted active tab
+ *   - PRE: side panel DOM loaded
+ *   - OUTPUT: no Bookmarks tab button/panel in side-panel.html
+ *   - POST: Bookmarks opened only via tabs.create standalone page
+ *   - EFFECTS: none in side-panel.js
  *   - TERMINATION: total
- * - PROCEDURE: FLATTEN_BOOKMARK_TREE
- *   - list = []
- *   - FOR each node in nodes:
- *   - path = parentPath ? parentPath + ' / ' + (node.title || 'Unnamed') : (node.title || 'Unnamed')
- *   - IF node.url: list.push({ id: node.id, url: node.url, title: node.title || '', dateAdded: node.dateAdded ?? 0, folderPath: parentPath, parentId: node.parentId })
- *   - IF node.children: list.push(...flattenBookmarkTree(node.children, path))
- *   - RETURN list
- *
- * ## BUILD_FOLDER_TREE
- *
- * - [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] How: buildFolderTree(nodes, parentPath): pure. Returns [{ id, title, path, count, children }]. count = number of direct bookmarks (node.url) in this folder; children = recurse on node.children. Implements "folder tree with bookmark counts".
- * - Contract:
- *   - INPUT: searchQuery (string), selectedFolderId (string | null), bookmarks from chrome.bookmarks.getTree
- *   - PRE: caller supplies valid inputs for this block; dependencies wired
- *   - OUTPUT: visible bookmarks (filtered), click URL opens in new tab
- *   - POST:
- *     - success => block outputs match OUTPUT shape
- *   - DATA: allBookmarks = flattenBookmarkTree(tree), visibleBookmarks = filterBrowserBookmarks(allBookmarks, searchQuery, selectedFolderId)
- *   - EFFECTS: IO
- *   - TERMINATION: total
- * - PROCEDURE: BUILD_FOLDER_TREE
- *   - result = []
- *   - FOR each node in nodes:
- *   - path = parentPath ? parentPath + ' / ' + (node.title || 'Unnamed') : (node.title || 'Unnamed')
- *   - directCount = (node.children ?? []).filter(c => c.url).length
- *   - childFolders = buildFolderTree((node.children ?? []).filter(c => !c.url), path)
- *   - result.push({ id: node.id, title: node.title || 'Unnamed', path, count: directCount, children: childFolders })
- *   - RETURN result
- *
- * ## FILTER_BROWSER_BOOKMARKS
- *
- * - [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] How: filterBrowserBookmarks(bookmarks, query, folderId): pure. Empty query returns all. If folderId: filter where parentId === folderId. Then filter by query: case-insensitive substring match on title, url, folderPath. Implements "real-time search" and "folder filter".
- * - Contract:
- *   - INPUT: searchQuery (string), selectedFolderId (string | null), bookmarks from chrome.bookmarks.getTree
- *   - PRE: caller supplies valid inputs for this block; dependencies wired
- *   - OUTPUT: visible bookmarks (filtered), click URL opens in new tab
- *   - POST:
- *     - success => block outputs match OUTPUT shape
- *   - DATA: allBookmarks = flattenBookmarkTree(tree), visibleBookmarks = filterBrowserBookmarks(allBookmarks, searchQuery, selectedFolderId)
- *   - EFFECTS: IO
- *   - TERMINATION: total
- * - PROCEDURE: FILTER_BROWSER_BOOKMARKS
- *   - filtered = bookmarks
- *   - IF folderId: filtered = filtered.filter(b => b.parentId === folderId)
- *   - q = String(query).trim().toLowerCase()
- *   - IF q === '': RETURN filtered
- *   - RETURN filtered.filter(b => (b.title??'').toLowerCase().includes(q) OR (b.url??'').toLowerCase().includes(q) OR (b.folderPath??'').toLowerCase().includes(q))
- *
- * ## BLOCK_4
- *
- * - [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] How: UI: search input; folder dropdown/sidebar; list section; match count. Each row: favicon, title, url, folder path. Click url: chrome.tabs.create({ url }) for http(s). Implements "match count", "click URL opens in new tab". Bulk selection and button state: selectedIds Set; renderList outputs checkbox per row; checkbox change toggles selectedIds; updateBulkButtonStates disables Open/Copy/Move/Delete/Export when selectedIds.size === 0. Select all / Deselect all buttons. Bulk actions: Open in tabs (getSelectedBookmarks, chrome.tabs.create per URL); Open in window (chrome.windows.create); Copy (buildUrlListForCopy, navigator.clipboard.writeText); Move (move select value, chrome.bookmarks.move); Delete (confirm, chrome.bookmarks.remove, push undo stack, showUndoMessage). Undo: undoStack array; UNDO_STACK_LIMIT 50; showUndoMessage(count) renders #browserBookmarksUndoBar with "Undo" button and setTimeout(UNDO_MESSAGE_DURATION_MS) to hide; on Undo click pop entry, chrome.bookmarks.create per bookmark, loadBookmarks. Export: buildBookmarksHtml/buildBookmarksCsv(selected|allBookmarks); Blob; downloadBlob. Export selected/all buttons disabled when no selection or no data. Import: populateImportFolderSelect from folderTree; file input; on Import read file.text(), parse by extension (parseBookmarksHtml|parseBookmarksCsv); get existing URLs via getSubTree(targetId)+flatten; for each row skip or overwrite per conflict; chrome.bookmarks.create; progress; loadBookmarks. Inline edit: double-click [data-field="title"] or [data-field="url"]; startInlineEdit(el): create input, replace el, focus; on blur/Enter finishEdit: chrome.bookmarks.update(id, { title }|{ url }), update allBookmarks, applyFilter(); Escape restore currentVal and applyFilter(). Keyboard: document keydown; if panel hidden return; if target in input/select/textarea and Escape blur and return; if Escape clear selectedIds and applyFilter(); if Ctrl+F preventDefault and focus searchInput. Layout: Undo bar #browserBookmarksUndoBar; import section with Import to folder, Conflict select, file input, Import button, progress; populateMoveSelect and populateImportFolderSelect mirror folder tree. Panel layout: same as Tags tree. #browserBookmarksPanel scroll container; .browser-bookmarks-above-list (flex none) with header, search, folder selector; .browser-bookmarks-list-section (min-height 100%, overflow-y auto) with #browserBookmarksList.
- * - Contract:
- *   - INPUT: searchQuery (string), selectedFolderId (string | null), bookmarks from chrome.bookmarks.getTree
- *   - PRE: caller supplies valid inputs for this block; dependencies wired
- *   - OUTPUT: visible bookmarks (filtered), click URL opens in new tab
- *   - POST:
- *     - success => block outputs match OUTPUT shape
- *   - DATA: selectedIds = Set(), lastVisible = filtered+sorted list
- *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
- *   - EFFECTS: Http, IO, State
- *   - TERMINATION: total
- * - PROCEDURE: BLOCK_4
- *   - 1. RENDER: FOR each b in visibleBookmarks: display row with favicon, title, url (clickable), folderPath; show "N bookmarks" count
- *   - 2. ON search input: searchQuery = value; applyFilter(); renderList()
- *   - 3. ON folder select: selectedFolderId = value; applyFilter(); renderList()
- *   - 4. ON sort select: sortValue = value; applyFilter(); chrome.storage.local.set({ hoverboard_browser_bookmarks_sort: sortValue })
- *   - 5. sortBrowserBookmarks(visible, sortBy, sortAsc): IF sortBy === 'default' RETURN copy; IF sortBy === 'date' sort by dateAdded; IF sortBy === 'name' sort by title; sortAsc controls direction
- *   - 6. ON url click: IF url starts with http(s): chrome.tabs.create({ url: b.url })
- *   - 7. getSelectedBookmarks() = lastVisible.filter(b => selectedIds.has(b.id))
- *   - 8. ON Select all: FOR b in lastVisible selectedIds.add(b.id); applyFilter()
- *   - 9. ON Deselect all: selectedIds.clear(); applyFilter()
- *   - 10. ON Open in tabs: FOR url in getSelectedBookmarks().map(b => b.url): chrome.tabs.create({ url })
- *   - 11. ON Open in window: chrome.windows.create({ url: getSelectedBookmarks().map(b => b.url) })
- *   - 12. ON Copy URLs: navigator.clipboard.writeText(buildUrlListForCopy(getSelectedBookmarks()))
- *   - 13. ON Move: targetId = moveSelect.value; FOR b in getSelectedBookmarks(): chrome.bookmarks.move(b.id, { parentId: targetId }); loadBookmarks()
- *   - 14. ON Delete: confirm; FOR b in getSelectedBookmarks(): chrome.bookmarks.remove(b.id); push to undoStack { bookmarks: [{ parentId, url, title }] }; showUndoMessage(count)
- *   - 15. showUndoMessage(deletedCount): render undo bar "Deleted N bookmarks. Undo"; setTimeout(hide, UNDO_MESSAGE_DURATION_MS)
- *   - 16. ON Undo click: entry = undoStack.pop(); FOR b in entry.bookmarks: chrome.bookmarks.create({ parentId: b.parentId||'1', url, title, index: 0 }); loadBookmarks()
- *   - 17. ON Export selected HTML/CSV: buildBookmarksHtml|buildBookmarksCsv(getSelectedBookmarks()); downloadBlob(blob, filename)
- *   - 18. ON Export all HTML/CSV: buildBookmarksHtml|buildBookmarksCsv(allBookmarks); downloadBlob(blob, filename)
- *   - 19. ON Import: list = parseBookmarksHtml(text)|parseBookmarksCsv(text); existingUrls = flatten(getSubTree(targetId)); FOR b in list: IF conflict skip skip; ELSE IF overwrite find and chrome.bookmarks.update OR create; ELSE chrome.bookmarks.create; update progress; loadBookmarks()
- *   - 20. ON double-click title|url: startInlineEdit(el); input.onblur|Enter => finishEdit (update then applyFilter); Escape => applyFilter (restore view)
- *   - 21. handleBookmarksKeydown(e): IF panel hidden RETURN; IF target in input|select|textarea AND Escape THEN blur; RETURN; IF Escape THEN selectedIds.clear(); applyFilter(); IF Ctrl+F THEN preventDefault; searchInput.focus()
- *   - 22. PANEL LAYOUT: above-list includes undo bar, bulk actions, import section; populateMoveSelect() and populateImportFolderSelect() from folderTree
- *   - 23. PANEL LAYOUT: browserBookmarksPanel = scroll container; above-list = header + search + folder + sort + bulk + undo + import; list-section = #browserBookmarksList
+ * - PROCEDURE: INIT_BROWSER_BOOKMARKS_PAGE
+ *   - IF stored tab === browserBookmarks OR usage: activeTab = default
  *
  * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BROWSER_BOOKMARKS ===
  */
+
 /**
  * === IMPL-FULL-BLOCK: IMPL-ICON_CLICK_BEHAVIOR ===
  * [IMPL-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [REQ-ICON_CLICK_BEHAVIOR] — Icon click opens side panel (default) or popup; when side panel, click toggles (close if already open).
@@ -485,7 +402,7 @@
  *
  * ## MAIN
  *
- * - [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BOOKMARK] How: Bookmark tab snapshot: root #bookmarkPanel; query by data-popup-ref for loadingState, errorState, mainInterface; derive visibility and screen. Implements "E2E can capture Bookmark tab state" and "Bookmark tab = popup-equivalent inspectable". Tags tree tab snapshot: root #tagsTreePanel; presence of #tagSelector, #treeContainer, #searchInput, #configToggle, etc. Implements "E2E can capture Tags tree tab state" and "Tags tree tab structure inspectable". browserTabsTab snapshot: root #browserTabsPanel; presence of filter input, Copy button, Close button, list container. Implements E2E-inspectable state for Tabs tab. browserBookmarksTab snapshot: root #browserBookmarksPanel; presence of search input, folder select, sort select, list container, Select all, Undo bar, Import folder select, Export HTML/CSV buttons. Implements E2E-inspectable state for Bookmarks tab.
+ * - [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BOOKMARK] How: Bookmark tab snapshot: root #bookmarkPanel; query by data-popup-ref for loadingState, errorState, mainInterface; derive visibility and screen. Implements "E2E can capture Bookmark tab state" and "Bookmark tab = popup-equivalent inspectable". Tags tree tab snapshot: root #tagsTreePanel; presence of #tagSelector, #treeContainer, #searchInput, #configToggle, etc. Implements "E2E can capture Tags tree tab state" and "Tags tree tab structure inspectable". browserTabsTab snapshot: root #browserTabsPanel; presence of filter input, Copy button, Close button, list container. Implements E2E-inspectable state for Tabs tab. browserBookmarksTab snapshot: absence check for #browserBookmarksPanel on side-panel.html (standalone Browser Bookmarks page; panelPresent false).
  * - Contract:
  *   - INPUT: page (Playwright/Puppeteer page navigated to side-panel.html)
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
@@ -611,8 +528,6 @@ import {
   TAB_BOOKMARK,
   TAB_TAGS_TREE,
   TAB_BROWSER_TABS,
-  TAB_BROWSER_BOOKMARKS,
-  TAB_USAGE,
   getDefaultTab,
   getVisibilityForTab,
   getTagsTreeInitOptions,
@@ -624,8 +539,6 @@ import {
 import { BUILD_TIME_UTC } from './build-info.js'
 import { initTagsTreeTab, setSelectedTagsFromCurrentBookmark } from './tags-tree.js'
 import { initBrowserTabsTab } from './browser-tabs-panel.js'
-import { initBrowserBookmarksTab } from './browser-bookmarks-panel.js'
-import { initUsageTab } from './usage-panel.js'
 import { init, popup } from '../index.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
 import { recordAction } from '../../shared/ui-inspector.js'
@@ -634,16 +547,12 @@ import { ConfigManager } from '../../config/config-manager.js'
 const bookmarkPanelEl = document.getElementById('bookmarkPanel')
 const tagsTreePanelEl = document.getElementById('tagsTreePanel')
 const browserTabsPanelEl = document.getElementById('browserTabsPanel')
-const browserBookmarksPanelEl = document.getElementById('browserBookmarksPanel')
-const usagePanelEl = document.getElementById('usagePanel')
 const tabButtons = document.querySelectorAll('.side-panel-tab[data-tab]')
 
 let activeTab = getDefaultTab()
 let bookmarkTabInited = false
 let tagsTreeTabInited = false
 let browserTabsTabInited = false
-let browserBookmarksTabInited = false
-let usageTabInited = false
 /** @type {{ controller: import('../popup/PopupController.js').PopupController, uiManager: import('../popup/UIManager.js').UIManager } | null} */
 let popupComponents = null
 // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Time when panel script ran; used to avoid closing on first open (toggle only if open > threshold).
@@ -654,7 +563,7 @@ const _sidePanelLoadTime = Date.now()
  * Show the panel for activeTab and hide the other; update tab aria-selected.
  */
 function showPanel () {
-  const { bookmarkVisible, tagsTreeVisible, browserTabsVisible, browserBookmarksVisible, usageVisible } = getVisibilityForTab(activeTab)
+  const { bookmarkVisible, tagsTreeVisible, browserTabsVisible } = getVisibilityForTab(activeTab)
   if (bookmarkPanelEl) {
     bookmarkPanelEl.hidden = !bookmarkVisible
   }
@@ -663,12 +572,6 @@ function showPanel () {
   }
   if (browserTabsPanelEl) {
     browserTabsPanelEl.hidden = !browserTabsVisible
-  }
-  if (browserBookmarksPanelEl) {
-    browserBookmarksPanelEl.hidden = !browserBookmarksVisible
-  }
-  if (usagePanelEl) {
-    usagePanelEl.hidden = !usageVisible
   }
   tabButtons.forEach((btn) => {
     const tab = btn.getAttribute('data-tab')
@@ -718,8 +621,6 @@ function switchTab (tabId) {
     if (wasTagsTreeInited) setSelectedTagsFromCurrentBookmark(tagsArray)
   } else if (tabId === TAB_BROWSER_TABS) {
     initTabIfNeeded(tabId)
-  } else if (tabId === TAB_BROWSER_BOOKMARKS) {
-    initTabIfNeeded(tabId)
   } else {
     initTabIfNeeded(tabId)
   }
@@ -745,8 +646,7 @@ async function initBookmarkTab () {
     errorHandler,
     config,
     enableKeyboard: true,
-    enableState: true,
-    onOpenTagsTreeInPanel: () => switchTab(TAB_TAGS_TREE)
+    enableState: true
   })
   if (popupComponents.controller) {
     await popupComponents.controller.loadInitialData()
@@ -776,41 +676,7 @@ function initTabIfNeeded (tabId, options = {}) {
     initTagsTreeTabIfNeeded(options)
   } else if (tabId === TAB_BROWSER_TABS) {
     initBrowserTabsTabIfNeeded()
-  } else if (tabId === TAB_BROWSER_BOOKMARKS) {
-    initBrowserBookmarksTabIfNeeded()
-  } else if (tabId === TAB_USAGE) {
-    initUsageTabIfNeeded()
   }
-}
-
-/**
- * [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
- * Init Browser Bookmarks tab: call initBrowserBookmarksTab() once.
- */
-function initBrowserBookmarksTabIfNeeded () {
-  if (browserBookmarksTabInited) return
-  browserBookmarksTabInited = true
-  initBrowserBookmarksTab()
-}
-
-/**
- * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
- * Init Usage tab: call initUsageTab() once with panel el and chrome.runtime.sendMessage.
- */
-function initUsageTabIfNeeded () {
-  if (usageTabInited || !usagePanelEl) return
-  usageTabInited = true
-  const sendMessage = (msg) => new Promise((resolve, reject) => {
-    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-      chrome.runtime.sendMessage(msg, (res) => {
-        if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message))
-        else resolve(res || {})
-      })
-    } else {
-      resolve({})
-    }
-  })
-  initUsageTab({ panelEl: usagePanelEl, sendMessage })
 }
 
 /**
@@ -859,7 +725,9 @@ async function loadPersistedTab () {
   return new Promise((resolve) => {
     chrome.storage.local.get([SIDE_PANEL_TAB_STORAGE_KEY], (o) => {
       const stored = o[SIDE_PANEL_TAB_STORAGE_KEY]
-      resolve(stored === TAB_BOOKMARK || stored === TAB_TAGS_TREE || stored === TAB_BROWSER_TABS || stored === TAB_BROWSER_BOOKMARKS || stored === TAB_USAGE ? stored : getDefaultTab())
+      // Legacy stored browserBookmarks → default (Bookmarks is standalone page)
+      // Legacy usage / browserBookmarks stored values fall back to default (standalone pages).
+      resolve(stored === TAB_BOOKMARK || stored === TAB_TAGS_TREE || stored === TAB_BROWSER_TABS ? stored : getDefaultTab())
     })
   })
 }
@@ -931,7 +799,7 @@ function bindStorageTabChange () {
     const change = changes[SIDE_PANEL_TAB_STORAGE_KEY]
     if (!change?.newValue) return
     const tabId = change.newValue
-    if (tabId !== TAB_BOOKMARK && tabId !== TAB_TAGS_TREE && tabId !== TAB_BROWSER_TABS && tabId !== TAB_BROWSER_BOOKMARKS && tabId !== TAB_USAGE) return
+    if (tabId !== TAB_BOOKMARK && tabId !== TAB_TAGS_TREE && tabId !== TAB_BROWSER_TABS) return
     if (tabId === activeTab) return
     switchTab(tabId)
   })
@@ -968,8 +836,6 @@ export async function runInitialTabInit (tabId) {
     await initBookmarkTab()
     initTabIfNeeded(tabId, getTagsTreeInitOptions(popupComponents?.controller))
   } else if (tabId === TAB_BROWSER_TABS) {
-    initTabIfNeeded(tabId)
-  } else if (tabId === TAB_BROWSER_BOOKMARKS) {
     initTabIfNeeded(tabId)
   } else {
     initTabIfNeeded(tabId)

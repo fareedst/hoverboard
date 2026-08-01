@@ -20,34 +20,35 @@ IMPL-SIDE_PANEL_SNAPSHOT:
   essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT-pseudocode.md"
   implementation_approach:
     details:
-      - "snapshotSidePanel(page) calls page.evaluate(() => { ... }) returning one object with bookmarkTab, tagsTreeTab, and browserTabsTab"
-      - bookmarkTab: "root"
-      - browserBookmarksTab: "root"
-      - browserTabsTab: "root"
-      - tagsTreeTab: "root"
-    summary: "tests/e2e/helpers.js exports snapshotSidePanel(page); single page.evaluate returns { bookmarkTab, tagsTreeTab }; This Page tab snapshot queries"
+      - "snapshotSidePanel(page) calls page.evaluate returning bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab"
+      - bookmarkTab: "root #bookmarkPanel"
+      - browserBookmarksTab: "absence check: #browserBookmarksPanel not in side-panel.html (standalone Browser Bookmarks page); panelPresent expected false"
+      - browserTabsTab: "root #browserTabsPanel"
+      - tagsTreeTab: "root #tagsTreePanel"
+    summary: "tests/e2e/helpers.js exports snapshotSidePanel(page); returns { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }. browserBookmarksTab.panelPresent is false on side-panel.html because Browser Bookmarks is a standalone page."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-25"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-31"
+      reason: "LEAP: browserBookmarksTab is absence check for standalone page"
   name: "Side Panel Snapshot E2E Helper"
   rationale:
     benefits:
-      - "Contract aligns with IMPL-SIDE_PANEL_TABS (two panels) and IMPL-SIDE_PANEL_BOOKMARK / IMPL-SIDE_PANEL_TAGS_TREE / IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
-      - "Single helper snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }; E2E can assert required properties"
+      - "browserBookmarksTab.panelPresent false proves Bookmarks tab removal from side panel"
+      - "Contract aligns with IMPL-SIDE_PANEL_TABS (three panels) and standalone Browser Bookmarks page"
     problems_solved:
-      - "Cannot assert Bookmark tab and Tags tree tab structure in one call"
-      - "No serializable snapshot of side panel for E2E regression"
-    why: "Enables E2E tests to assert on side panel structure and key elements for both tabs without DOM coupling; same pattern as snapshotPopup, snapshotOverlay, snapshotOptions."
+      - "Cannot assert Bookmark/Tags/Tabs structure in one call"
+      - "Stale snapshot documenting Bookmarks as side-panel tab"
+    why: "Enables E2E tests to assert on side panel structure for This Page / By Tag / Tabs without DOM coupling; documents that Browser Bookmarks is not a side-panel surface."
   related_decisions:
     depends_on:
       - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
       - "IMPL-SIDE_PANEL_TABS"
     see_also:
+      - "IMPL-NON_WEB_TOOLS_TOOLBAR"
       - "IMPL-SIDE_PANEL_BOOKMARK"
       - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
       - "IMPL-SIDE_PANEL_TAGS_TREE"

@@ -10,7 +10,7 @@
  * 
  * ## MAIN
  * 
- * - [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BOOKMARK] How: Bookmark tab snapshot: root #bookmarkPanel; query by data-popup-ref for loadingState, errorState, mainInterface; derive visibility and screen. Implements "E2E can capture Bookmark tab state" and "Bookmark tab = popup-equivalent inspectable". Tags tree tab snapshot: root #tagsTreePanel; presence of #tagSelector, #treeContainer, #searchInput, #configToggle, etc. Implements "E2E can capture Tags tree tab state" and "Tags tree tab structure inspectable". browserTabsTab snapshot: root #browserTabsPanel; presence of filter input, Copy button, Close button, list container. Implements E2E-inspectable state for Tabs tab. browserBookmarksTab snapshot: root #browserBookmarksPanel; presence of search input, folder select, sort select, list container, Select all, Undo bar, Import folder select, Export HTML/CSV buttons. Implements E2E-inspectable state for Bookmarks tab.
+ * - [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BOOKMARK] How: Bookmark tab snapshot: root #bookmarkPanel; query by data-popup-ref for loadingState, errorState, mainInterface; derive visibility and screen. Implements "E2E can capture Bookmark tab state" and "Bookmark tab = popup-equivalent inspectable". Tags tree tab snapshot: root #tagsTreePanel; presence of #tagSelector, #treeContainer, #searchInput, #configToggle, etc. Implements "E2E can capture Tags tree tab state" and "Tags tree tab structure inspectable". browserTabsTab snapshot: root #browserTabsPanel; presence of filter input, Copy button, Close button, list container. Implements E2E-inspectable state for Tabs tab. browserBookmarksTab snapshot: absence check for #browserBookmarksPanel on side-panel.html (standalone Browser Bookmarks page; panelPresent false).
  * - Contract:
  *   - INPUT: page (Playwright/Puppeteer page navigated to side-panel.html)
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
@@ -573,17 +573,8 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
 
     expect(browserBookmarksTab).toHaveProperty('panelPresent')
     expect(typeof browserBookmarksTab.panelPresent).toBe('boolean')
-    expect(browserBookmarksTab.panelPresent).toBe(true)
-    expect(browserBookmarksTab).toHaveProperty('hasSearchInput')
-    expect(typeof browserBookmarksTab.hasSearchInput).toBe('boolean')
-    expect(browserBookmarksTab).toHaveProperty('hasFolderSelect')
-    expect(browserBookmarksTab).toHaveProperty('hasSortSelect')
-    expect(browserBookmarksTab).toHaveProperty('hasListContainer')
-    expect(browserBookmarksTab).toHaveProperty('hasSelectAllBtn')
-    expect(browserBookmarksTab).toHaveProperty('hasUndoBar')
-    expect(browserBookmarksTab).toHaveProperty('hasImportFolderSelect')
-    expect(browserBookmarksTab).toHaveProperty('hasExportHtmlBtn')
-    expect(browserBookmarksTab).toHaveProperty('hasExportCsvBtn')
+    // Standalone Browser Bookmarks page — not present in side-panel.html [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    expect(browserBookmarksTab.panelPresent).toBe(false)
 
     await sidePanelPage.close()
   })

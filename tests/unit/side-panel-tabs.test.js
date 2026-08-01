@@ -455,12 +455,12 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     expect(SIDE_PANEL_TAB_STORAGE_KEY).toBe('hoverboard_sidepanel_active_tab')
   })
 
-  test('tab ids are bookmark, tagsTree, browserTabs, and browserBookmarks [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]', () => {
+  test('tab ids are bookmark, tagsTree, browserTabs (Bookmarks + Visit History are standalone pages) [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-SIDE_PANEL_BROWSER_TABS]', () => {
     expect(TAB_BOOKMARK).toBe('bookmark')
     expect(TAB_TAGS_TREE).toBe('tagsTree')
     expect(TAB_BROWSER_TABS).toBe('browserTabs')
     expect(TAB_BROWSER_BOOKMARKS).toBe('browserBookmarks')
-    expect(TAB_IDS).toEqual(['bookmark', 'tagsTree', 'browserTabs', 'browserBookmarks', 'usage'])
+    expect(TAB_IDS).toEqual(['bookmark', 'tagsTree', 'browserTabs'])
   })
 
   test('getDefaultTab returns bookmark', () => {
@@ -489,22 +489,18 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     expect(v.browserBookmarksVisible).toBe(false)
   })
 
-  test('getVisibilityForTab(browserBookmarks) shows only browser Bookmarks panel [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]', () => {
+  test('getVisibilityForTab(browserBookmarks) never shows Bookmarks in side panel (standalone page) [REQ-SIDE_PANEL_BROWSER_BOOKMARKS]', () => {
     const v = getVisibilityForTab('browserBookmarks')
-    expect(v.bookmarkVisible).toBe(false)
-    expect(v.tagsTreeVisible).toBe(false)
-    expect(v.browserTabsVisible).toBe(false)
-    expect(v.browserBookmarksVisible).toBe(true)
-    expect(v.usageVisible).toBe(false)
+    expect(v.browserBookmarksVisible).toBe(false)
   })
 
-  test('getVisibilityForTab(usage) shows only Usage panel [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI]', () => {
+  test('getVisibilityForTab(usage) never shows Usage in side panel (Visit History standalone page) [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI]', () => {
     const v = getVisibilityForTab('usage')
     expect(v.bookmarkVisible).toBe(false)
     expect(v.tagsTreeVisible).toBe(false)
     expect(v.browserTabsVisible).toBe(false)
     expect(v.browserBookmarksVisible).toBe(false)
-    expect(v.usageVisible).toBe(true)
+    expect(v.usageVisible).toBe(false)
   })
 
   test('getVisibilityForTab unknown defaults to neither', () => {

@@ -46,7 +46,7 @@
 #!/usr/bin/env node
 /**
  * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
- * Standalone script: launch extension, seed usage/edges and persist Usage tab, open side panel,
+ * Standalone script: launch extension, seed usage/edges, open Visit History page,
  * capture screenshot sequence per demo_gif_standard, assemble GIF via ffmpeg 3-part concat.
  * Run: node scripts/record-demo-side-panel-usage.js
  * Output: docs/demo-side-panel-usage.gif
@@ -113,12 +113,11 @@ async function main () {
     throw new Error('Extension ID not found')
   }
 
-  // [IMPL-BOOKMARK_USAGE_TRACKING_UI] [IMPL-DEMO_OVERLAY] Seed rich usage + nav edges and persist Usage tab so panel opens with Usage visible from first frame.
+  // [IMPL-BOOKMARK_USAGE_TRACKING_UI] [IMPL-DEMO_OVERLAY] Seed rich usage + nav edges for Visit History page.
   const localSeed = {
     ...placeholderStorageSeed,
     ...getPlaceholderUsageSeed(),
     ...getPlaceholderEdgesSeed(),
-    hoverboard_sidepanel_active_tab: 'usage',
   }
   const optionsPage = await context.newPage()
   await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
@@ -174,10 +173,10 @@ async function main () {
     })
   }
 
-  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-BOOKMARK_USAGE_TRACKING] Element highlight: scope to #usagePanel
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-BOOKMARK_USAGE_TRACKING] Element highlight: scope to #visitHistoryPanel
   async function highlightElement (selector) {
     await page.evaluate((sel) => {
-      const panel = document.getElementById('usagePanel')
+      const panel = document.getElementById('visitHistoryPanel')
       if (!panel) return
       const el = panel.querySelector(sel)
       if (!el) return
@@ -204,10 +203,10 @@ async function main () {
     })
   }
 
-  // [IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] Open side panel; storage already set to Usage tab so first frame shows Usage.
-  await page.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+  // [IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] Open Visit History standalone page.
+  await page.goto(`chrome-extension://${extensionId}/src/ui/visit-history/visit-history.html`)
   await page.waitForLoadState('domcontentloaded')
-  await page.waitForSelector('#usagePanel:not([hidden])', { timeout: 8000 }).catch(() => {})
+  await page.waitForSelector('#visitHistoryPanel', { timeout: 8000 }).catch(() => {})
   await page.waitForTimeout(Math.round(2000 * RATE))
 
   // [IMPL-DEMO_OVERLAY] 1 s with no overlay so the beginning is a useful static image (frame 0).
@@ -215,11 +214,11 @@ async function main () {
   await page.waitForTimeout(Math.round(1000 * RATE))
   await snap()
 
-  // Step 1: Viewing the Usage tab — overlay describes the tab (descriptions 30–50% longer).
+  // Step 1: Viewing Visit History — overlay describes the page (descriptions 30–50% longer).
   await clearHighlight()
   await setOverlay(
-    'Viewing the Usage tab',
-    'The side panel opens on the Usage tab so you can see Most Visited, Recently Visited, and the Navigation Graph (referrer → URL edges).',
+    'Viewing Visit History',
+    'The Visit History page shows Most Visited, Recently Visited, and the Navigation Graph (referrer → URL edges). Open it from the tools toolbar on non-web tabs.',
     'intro'
   )
   await highlightElement('.usage-panel-toolbar')
