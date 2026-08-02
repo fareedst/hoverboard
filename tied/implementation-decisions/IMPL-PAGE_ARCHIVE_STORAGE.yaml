@@ -6,13 +6,15 @@ IMPL-PAGE_ARCHIVE_STORAGE:
       - path: "src/features/archive/page-archive-storage-adapter.js"
         description: "Local/File archive adapter contract and test doubles"
       - path: "src/features/archive/page-capture.js"
-        description: "Readable HTML/text capture and sanitization"
+        description: "Readable HTML/text capture, sanitization, and profile normalization boundary"
+      - path: "src/features/archive/source-presentation.js"
+        description: "Allowlisted color parsing, profile normalization, and contrast primitives"
       - path: "src/features/archive/archive-sanitizer.js"
         description: "Standalone archive sanitizer shared by capture and Reader"
       - path: "src/features/archive/page-archive-bookmark-association.js"
         description: "Selected-backend archive capture and bookmark association orchestrator"
       - path: "src/core/message-handler.js"
-        description: "Archive capture/read/delete message handlers"
+        description: "Archive capture/read/delete message handlers and page-world profile extraction"
       - path: "src/features/storage/bookmark-router.js"
         description: "Backend capability and lifecycle delegation"
   cross_references:
@@ -29,14 +31,17 @@ IMPL-PAGE_ARCHIVE_STORAGE:
   implementation_approach:
     details:
       - "All adapter writes are atomic from the caller perspective and return explicit success/error outcomes."
-      - "Archive record contains url, archiveId, version, capturedAt, sourceTitle, contentHash, sanitizedHtml, textContent, status, and artifact references."
+      - "Archive record contains url, archiveId, version, capturedAt, sourceTitle, contentHash, sanitizedHtml, textContent, status, artifact references, and optional sourcePresentationProfile."
       - "Association failure restores the prior archive or removes the new archive version and returns cleanup diagnostics."
       - "Capture uses Readability extraction plus sanitized HTML; AI tagging retains its 16000-character payload cap as a separate option."
       - "CAPTURE_PAGE_ARCHIVE passes an explicit preferredBackend to the selected-backend association orchestrator; archive persistence precedes missing-bookmark creation and preserves existing bookmark metadata."
       - "Local persistence uses a quota-appropriate archive adapter separate from hoverboard_local_bookmarks; File persistence uses a versioned archive file/directory separate from hoverboard-bookmarks.json."
+      - "normalizeSourcePresentationProfile allowlists canonical opaque colors and light/dark intent, caps serialized profile size, and omits invalid values."
       - "Only Local and File backend values resolve to archive adapters; an unconfigured File archive adapter returns UnsupportedBackend instead of silently using memory."
       - "Reader lookup/list/delete paths operate on persisted archive records and synchronize derived archive search state."
-    summary: "Capture, sanitize, persist, retrieve, and delete Local/File page archive artifacts through mockable adapters, then associate successful capture with selected-backend bookmark ownership."
+      - "sourcePresentationProfile is excluded from archiveId and contentHash inputs so presentation changes do not change archive identity."
+      - "The executeScript capture boundary extracts only computed background, text, link, and color-scheme intent by walking body ancestors; it never copies source CSS."
+    summary: "Capture, sanitize, normalize, persist, retrieve, and delete Local/File page archive artifacts through mockable adapters, with bounded source presentation metadata kept outside archive identity."
   metadata:
     created:
       author: "AI Agent"
@@ -44,7 +49,7 @@ IMPL-PAGE_ARCHIVE_STORAGE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Align archive adapter contracts, screenshot lifecycle, and lookup/list boundaries"
+      reason: "Add bounded source presentation extraction, normalization, and hash exclusion"
   name: "Page Archive Storage Implementation"
   rationale:
     benefits:

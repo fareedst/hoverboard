@@ -2467,11 +2467,75 @@ export class MessageHandler {
       try {
         const results = await scripting.executeScript({
           target: { tabId: captureContext.tabId },
-          func: () => ({
-            title: document.title || '',
-            html: document.body?.innerHTML || document.documentElement?.innerHTML || '',
-            textContent: document.body?.innerText || document.body?.textContent || ''
-          })
+          func: () => {
+            /**
+             * ## EXTRACT_SOURCE_PRESENTATION
+             * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: extract only computed background, foreground, link, and color-scheme intent from the live document without copying source CSS.
+             * - Contract:
+             *   - INPUT: live document
+             *   - PRE: document is available in the page-world executeScript context
+             *   - OUTPUT: raw source presentation profile
+             *   - POST:
+             *     - background is the first opaque computed background found while walking from body toward document
+             *     - text and link are computed color values; color-scheme is light, dark, or absent
+             *     - no stylesheet text, inline style text, layout, script, or external asset enters the result
+             *   - FAILURE_MODES: MissingDocument
+             *   - EFFECTS: pure
+             *   - TERMINATION: total
+             * - PROCEDURE: EXTRACT_SOURCE_PRESENTATION
+             *   - IF document or document.documentElement is absent: RETURN {}
+             *   - nodes = body followed by each parent through document.documentElement
+             *   - FOR node IN nodes:
+             *     - style = GET_COMPUTED_STYLE(node)
+             *     - IF background is absent and style.backgroundColor is opaque: SET background
+             *   - text = GET_COMPUTED_STYLE(body OR document.documentElement).color
+             *   - link = GET_COMPUTED_STYLE(first anchor OR body OR document.documentElement).color
+             *   - colorScheme = document.documentElement.style.colorScheme OR computed color-scheme intent
+             *   - RETURN { background, text, link, colorScheme }
+             */
+            const extractSourcePresentation = () => {
+              const root = document.documentElement
+              const body = document.body
+              if (!root) return {}
+              const nodes = []
+              let node = body || root
+              while (node) {
+                nodes.push(node)
+                if (node === root) break
+                node = node.parentElement
+              }
+              const isOpaque = value => {
+                if (!value || value === 'transparent') return false
+                const alpha = String(value).match(/^rgba\([^,]+,[^,]+,[^,]+,\s*([^)]+)\)$/i)
+                return !alpha || Number(alpha[1]) === 1
+              }
+              let background = ''
+              for (const candidate of nodes) {
+                const style = getComputedStyle(candidate)
+                if (!background && isOpaque(style.backgroundColor)) background = style.backgroundColor
+              }
+              const textNode = body || root
+              const linkNode = document.querySelector('a') || textNode
+              const textStyle = getComputedStyle(textNode)
+              const linkStyle = getComputedStyle(linkNode)
+              const rootStyle = getComputedStyle(root)
+              const colorScheme = [root.style.colorScheme, rootStyle.colorScheme]
+                .map(value => String(value || '').trim().toLowerCase())
+                .find(value => value === 'light' || value === 'dark') || ''
+              return {
+                background,
+                text: textStyle.color || '',
+                link: linkStyle.color || '',
+                colorScheme
+              }
+            }
+            return {
+              title: document.title || '',
+              html: document.body?.innerHTML || document.documentElement?.innerHTML || '',
+              textContent: document.body?.innerText || document.body?.textContent || '',
+              sourcePresentationProfile: extractSourcePresentation()
+            }
+          }
         })
         const source = results?.[0]?.result
         return capturePageContentFromSource({ ...source, url: captureUrl }, data)

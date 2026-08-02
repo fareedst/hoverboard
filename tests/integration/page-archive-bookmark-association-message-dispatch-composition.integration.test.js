@@ -32,13 +32,10 @@ describe('[IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] message dispatch composition'
     global.chrome.storage.local.set.mockImplementation(async values => {
       if (values.hoverboard_local_bookmarks) localStorage = { ...values.hoverboard_local_bookmarks }
     })
-    global.chrome.scripting.executeScript = jest.fn().mockResolvedValue([{
-      result: {
-        title: 'Composition article',
-        html: '<article><h1>Composition article</h1><p>Stored body</p></article>',
-        textContent: 'Composition article Stored body'
-      }
-    }])
+    document.documentElement.innerHTML = '<head><title>Composition article</title></head><body style="background-color: transparent; color: rgb(32, 33, 36)"><a href="https://example.com" style="color: rgb(0, 0, 238)">Read</a><article><h1>Composition article</h1><p>Stored body</p></article></body>'
+    document.documentElement.style.backgroundColor = 'rgb(255, 255, 255)'
+    document.documentElement.style.colorScheme = 'light'
+    global.chrome.scripting.executeScript = jest.fn().mockImplementation(async ({ func }) => [{ result: func() }])
   })
 
   test('CAPTURE_PAGE_ARCHIVE creates the Local bookmark and separate archive through dispatch', async () => {
@@ -77,7 +74,13 @@ describe('[IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] message dispatch composition'
     })
     expect(await archiveStore.getArchive(url, 'local')).toMatchObject({
       url,
-      sourceTitle: 'Composition article'
+      sourceTitle: 'Composition article',
+      sourcePresentationProfile: {
+        background: '#ffffff',
+        text: '#202124',
+        link: '#0000ee',
+        colorScheme: 'light'
+      }
     })
   })
 })

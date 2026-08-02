@@ -1,0 +1,38 @@
+# Per-request tracker for [REQ-OFFLINE_READER_MODE].
+# Source: tied/docs/agent-req-implementation-checklist.yaml
+# Process: [PROC-AGENT_REQ_CHECKLIST]
+notes:
+  - "Profile metadata is excluded from contentHash and archiveId."
+  - "Resolved fallback: missing/invalid/transparent or contrast below WCAG AA 4.5:1."
+  - "Resolved profile scope: background, text, link, color-scheme; Reader shell and content."
+  - "Tracker is a per-request copy; canonical checklist remains unchanged."
+  - "Verification: 158 suites, 1588 Jest tests passed with 1 skipped; 12 archive composition tests and 8 archive Playwright tests passed."
+  - "Verification: lint, typecheck, token validation, build, and tied_validate_consistency passed."
+request:
+  architecture_tokens:
+    - "ARCH-OFFLINE_READER_MODE"
+    - "ARCH-PAGE_ARCHIVE_STORAGE"
+  implementation_tokens:
+    - "IMPL-OFFLINE_READER_MODE"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+  requirement_tokens:
+    - "REQ-OFFLINE_READER_MODE"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+  started_at: "2026-08-01T17:09:00-07:00"
+steps:
+  author_pseudocode: "completed"
+  change_definition: "completed"
+  composition_integration: "completed"
+  end_to_end_ui: "completed"
+  gate_pseudocode_validation: "completed"
+  impact_discovery: "completed"
+  persist_citdp_record: "completed"
+  risk_assessment: "completed"
+  session_bootstrap: "completed"
+  test_strategy: "completed"
+  traceable_commit: "completed"
+  unit_test_green: "completed"
+  unit_test_red: "completed"
+  update_tied_records: "completed"
+  verification_gate: "completed"
+  vocabulary_preload_resolve: "completed"

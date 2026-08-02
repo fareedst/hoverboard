@@ -1,5 +1,5 @@
 ARCH-OFFLINE_READER_MODE:
-  decision: "Reader is a standalone extension tool page addressed by archive identifier or normalized URL. It loads stored archive data through the archive message boundary, injects only sanitized HTML into a constrained container, and exposes capture status plus an explicit live URL action."
+  decision: "Reader is a standalone extension tool page addressed by archive identifier or normalized URL. It loads stored archive data through the archive message boundary, injects only sanitized HTML into a constrained container, and applies a validated bounded source presentation profile to the Reader shell and content through extension-owned CSS variables. Invalid, transparent, missing, or WCAG-AA-failing profiles clear the variables and use the Hoverboard Reader theme fallback."
   detail_file: "architecture-decisions/ARCH-OFFLINE_READER_MODE.yaml"
   metadata:
     created:
@@ -8,7 +8,7 @@ ARCH-OFFLINE_READER_MODE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Record Reader lookup/render and screenshot presentation evidence"
+      reason: "Define isolated source presentation profile application and fallback"
   name: "Offline Reader Mode Architecture"
   rationale:
     alternatives_considered:
@@ -17,8 +17,10 @@ ARCH-OFFLINE_READER_MODE:
       - name: "Refetch live HTML in Reader"
         rejected_reason: "Violates offline behavior and reintroduces untrusted live-page content."
     consequences:
+      - "Reader chrome and content share the validated profile while semantic status states remain extension-owned."
       - "Reader page and archive lookup messages must be composition-tested."
-      - "Sanitization becomes a storage boundary, not just a UI concern."
+      - "Sanitization remains a storage and render boundary, not just a UI concern."
+      - "Source presentation metadata is separated from archive HTML and cannot restore source CSS."
     why: "A dedicated page isolates rendering and makes offline behavior testable without coupling it to popup or side-panel lifecycle."
   related_decisions:
     depends_on:

@@ -1,0 +1,63 @@
+CITDP-OFFLINE_READER_SOURCE_PRESENTATION_20260801:
+  change_definition:
+    scope_in:
+      - "Allowlisted profile normalization and 512-byte bound"
+      - "Computed background, text, link, and color-scheme extraction at explicit capture boundary"
+      - "Fallback for legacy, malformed, transparent, and low-contrast profiles"
+      - "Reader content links inherit the validated source link color and invalid live-link state is cleared"
+      - "WCAG AA 4.5:1 Reader validation and extension-owned CSS variable application"
+    scope_out:
+      - "Archive migration or recapture prompts"
+      - "Pinboard, Sync, and Browser archive backends"
+      - "Source CSS, layout, fonts, inline colors, gradients, background images"
+    summary: "Preserve a bounded source presentation profile for sanitized Local/File archives and apply it to Offline Reader chrome and content when it passes validation."
+    type: "behavior_extension"
+  impact_analysis:
+    architecture:
+      - "ARCH-OFFLINE_READER_MODE"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+    implementation:
+      - "IMPL-OFFLINE_READER_MODE"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+    modules:
+      - "archive profile normalization"
+      - "page-world capture boundary"
+      - "Reader content link and live-link state"
+      - "Reader CSS fallback"
+      - "Reader validation/application"
+    requirements:
+      - "REQ-OFFLINE_READER_MODE"
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+  implementation_evidence:
+    build: "npm run build:only passed through the archive Playwright global setup."
+    leap: "IMPL sidecars and literal full-block test copies were aligned first; final behavior remained within the existing ARCH/REQ scope and vocabulary."
+    lint: "npm run lint passed; ReadLints reported no errors for edited files."
+    pseudocode: "Manual Layer B review passed for changed EXTRACT_SOURCE_PRESENTATION, NORMALIZE_SOURCE_PRESENTATION, VALIDATE_SOURCE_PRESENTATION, APPLY_SOURCE_PRESENTATION, and RENDER_READER_ARCHIVE blocks: token leads, PRE/POST/EFFECTS, failure/data/termination clauses, and literal test/source copies are present."
+    tests: "1,588 Jest tests passed with 1 skipped across 158 suites; 12 archive composition tests passed; 8 archive Playwright tests passed."
+    tied: "yaml_index_validate and tied_validate_consistency passed with pseudocode and detail-file validation enabled; tied_verify dry-run required no status changes."
+    tokens: "scripts/validate_tokens.sh passed."
+    typecheck: "npm run typecheck passed."
+  recorded_at: "2026-08-01T17:33:00-07:00"
+  risk_assessment:
+    - risk: "Persisted profile could inject CSS or unsafe values"
+      mitigation: "Parse only fixed color formats and light/dark intent; set fixed extension-owned variables; never place profile in archive HTML."
+    - risk: "Source colors could reduce readability"
+      mitigation: "Require 4.5:1 contrast for text and link against opaque background; otherwise clear profile and use Reader fallback."
+    - risk: "Legacy archives lack profile"
+      mitigation: "Fallback-only behavior preserves readability without migration."
+    - risk: "Profile changes could destabilize archive identity"
+      mitigation: "Exclude profile from archiveId and contentHash inputs."
+    - risk: "A previous valid live link could survive an invalid or legacy archive render"
+      mitigation: "Reader removes the href and hides the live link when the current archive URL is not HTTP(S); unit coverage exercises this transition."
+  status: "implemented"
+  test_strategy:
+    composition:
+      - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
+      - "tests/integration/service-worker-archive-dispatch-composition.integration.test.js"
+      - "tests/unit/message-handler-archive.test.js"
+    e2e:
+      - "tests/playwright/extension-archive-features.spec.js"
+    red_green: "Added actual executeScript extractor invocation, persistence assertions, Reader fallback/clear assertions, and content-link E2E assertions; focused and full suites are green."
+    unit:
+      - "tests/unit/page-capture.test.js"
+      - "tests/unit/reader.test.js"

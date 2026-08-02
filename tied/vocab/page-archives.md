@@ -30,6 +30,8 @@
 | **Reader availability** | enabled Reader | Boolean derived strictly from readable archive presence; screenshot-only state does not enable Reader |
 | **screenshot artifact** | demo screenshot, page image | Durable product image with its own hash/version and Local/File lifecycle |
 | **screenshot presentation E2E** | screenshot capture E2E | E2E validation of seeded persisted screenshot rendering; capture binding is composition-tested |
+| **source presentation profile** | page theme, source CSS, color profile | Bounded computed background, text, link, and color-scheme metadata captured separately from sanitized archive HTML |
+| **Reader theme fallback** | default colors | Hoverboard-owned Reader colors used when source presentation is absent, unsafe, transparent, or below WCAG AA contrast |
 | **selected-backend lookup** | aggregate URL lookup | Bookmark existence query constrained to `preferredBackend`; it does not use aggregate 2C semantics |
 | **status context key** | cached status identity | URL/backend pair used to discard stale cross-tab or cross-backend status responses |
 
@@ -48,6 +50,7 @@
 | Archived-content scope | Archived content | `SEARCH_ARCHIVED_CONTENT` | `APPLY_ARCHIVE_CONTENT_SCOPE` / `QUERY_ARCHIVED_CONTENT` | [IMPL-ARCHIVED_CONTENT_SEARCH] |
 | Archive snippet | — | result `snippet` | `snippetAround` | [IMPL-ARCHIVED_CONTENT_SEARCH] |
 | Offline Reader | Open offline Reader | `reader.html?url=…` or `archiveId` | `OPEN_OFFLINE_READER` / `LOAD_READER_ARCHIVE` | [IMPL-OFFLINE_READER_MODE] |
+| Source presentation profile | — | `sourcePresentationProfile` | `EXTRACT_SOURCE_PRESENTATION` / `NORMALIZE_SOURCE_PRESENTATION` / `VALIDATE_SOURCE_PRESENTATION` / `APPLY_SOURCE_PRESENTATION` | [IMPL-PAGE_ARCHIVE_STORAGE] [IMPL-OFFLINE_READER_MODE] |
 | Reader target | Open stored archive | Reader extension URL | `readerTarget` | [REQ-ARCHIVED_CONTENT_SEARCH] |
 | Stale archive status | Archive status warning | `status: 'stale'` | `renderReaderArchive` | [IMPL-OFFLINE_READER_MODE] |
 | Reader re-sanitization | — | — | `sanitizeArchiveHtml` at render | [IMPL-OFFLINE_READER_MODE] |
@@ -80,6 +83,8 @@
 - **screenshot artifact** — Separate binary image record with artifact ID, content hash, version, capture time, and storage backend.
 - **screenshot presentation E2E** — Browser-level validation of Reader presentation for a persisted screenshot fixture; popup capture is validated at unit/composition boundaries.
 - **capture source boundary** — The live service-worker scripting path supplies body HTML/text to the shared sanitization pipeline; the Readability document path remains a library/test boundary.
+- **source presentation profile** — Optional archive metadata containing only allowlisted opaque computed colors and light/dark intent; it never contains source CSS and is excluded from archive identity hashes.
+- **Reader theme fallback** — Extension-owned presentation used for legacy archives and any profile that fails validation or WCAG AA contrast.
 - **selected-backend lookup** — Lookup through only the provider named by `preferredBackend`; any non-null stub counts as an existing bookmark.
 - **status context key** — Current URL/backend pair used to reject stale asynchronous status results.
 
@@ -92,6 +97,8 @@
 | Resolve archive adapter | `RESOLVE_ARCHIVE_ADAPTER` | [IMPL-PAGE_ARCHIVE_STORAGE] |
 | Archive privacy gate | `ARCHIVE_PRIVACY_GATE` | [IMPL-PAGE_ARCHIVE_STORAGE] |
 | Capture and validate archive | `CAPTURE_AND_VALIDATE` | [IMPL-PAGE_ARCHIVE_STORAGE] |
+| Extract source presentation | `EXTRACT_SOURCE_PRESENTATION` | [IMPL-PAGE_ARCHIVE_STORAGE] |
+| Normalize source presentation | `NORMALIZE_SOURCE_PRESENTATION` | [IMPL-PAGE_ARCHIVE_STORAGE] |
 | Save page archive | `SAVE_PAGE_ARCHIVE` | [IMPL-PAGE_ARCHIVE_STORAGE] |
 | Delete page archive | `DELETE_PAGE_ARCHIVE` | [IMPL-PAGE_ARCHIVE_STORAGE] |
 | Resolve archive-bookmark context | `RESOLVE_ARCHIVE_BOOKMARK_CONTEXT` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
@@ -104,6 +111,8 @@
 | Apply archive scope | `APPLY_ARCHIVE_CONTENT_SCOPE` | [IMPL-ARCHIVED_CONTENT_SEARCH] |
 | Parse Reader query | `PARSE_READER_QUERY` | [IMPL-OFFLINE_READER_MODE] |
 | Load Reader archive | `LOAD_READER_ARCHIVE` | [IMPL-OFFLINE_READER_MODE] |
+| Validate source presentation | `VALIDATE_SOURCE_PRESENTATION` | [IMPL-OFFLINE_READER_MODE] |
+| Apply source presentation | `APPLY_SOURCE_PRESENTATION` | [IMPL-OFFLINE_READER_MODE] |
 | Render Reader state | `RENDER_READER_STATE` | [IMPL-OFFLINE_READER_MODE] |
 | Normalize archive artifact status | `NORMALIZE_ARCHIVE_ARTIFACT_STATUS` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
 | Query selected-backend artifact status | `QUERY_SELECTED_BACKEND_ARTIFACT_STATUS` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
@@ -139,7 +148,9 @@
 | COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE | Pseudo-code block names |
 | CREATE_MINIMAL_BOOKMARK_IF_ABSENT | Pseudo-code block names |
 | DELETE_PAGE_ARCHIVE | Pseudo-code block names |
+| EXTRACT_SOURCE_PRESENTATION | Pseudo-code block names |
 | LOAD_READER_ARCHIVE | Pseudo-code block names |
+| NORMALIZE_SOURCE_PRESENTATION | Pseudo-code block names |
 | Offline Reader | Preferred terms / Named concepts |
 | PARSE_READER_QUERY | Pseudo-code block names |
 | QUERY_ARCHIVED_CONTENT | Pseudo-code block names |
@@ -147,6 +158,7 @@
 | REPLACE_ARCHIVED_CONTENT | Pseudo-code block names |
 | RENDER_READER_STATE | Pseudo-code block names |
 | Reader re-sanitization | Preferred terms / Named concepts |
+| Reader theme fallback | Preferred terms / Named concepts |
 | RESET_ARCHIVE_STATUS_ON_CONTEXT_CHANGE | Pseudo-code block names |
 | RESOLVE_ARCHIVE_ADAPTER | Pseudo-code block names |
 | RESOLVE_ARCHIVE_BOOKMARK_CONTEXT | Pseudo-code block names |
@@ -157,8 +169,10 @@
 | selected-backend lookup | Preferred terms / Named concepts |
 | screenshot artifact | Preferred terms / Named concepts |
 | screenshot presentation E2E | Preferred terms / Named concepts |
+| source presentation profile | Preferred terms / Named concepts |
 | stale archive status | Preferred terms / Named concepts |
 | NORMALIZE_ARCHIVE_ARTIFACT_STATUS | Pseudo-code block names |
 | Reader availability | Preferred terms / Naming bridge / Named concepts |
 | status context key | Preferred terms / Named concepts |
 | VALIDATE_SCREENSHOT_REQUEST | Pseudo-code block names |
+| VALIDATE_SOURCE_PRESENTATION | Pseudo-code block names |

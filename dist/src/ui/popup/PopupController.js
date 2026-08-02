@@ -4053,8 +4053,7 @@ export class PopupController {
       if (result?.success) {
         await this.refreshArchiveStatusAfterCapture('screenshot')
         this.uiManager.showSuccess('Page screenshot saved')
-      }
-      else this.uiManager.showError(result?.error || result?.code || 'Page screenshot failed')
+      } else this.uiManager.showError(result?.error || result?.code || 'Page screenshot failed')
     } catch (error) {
       debugError('[IMPL-PAGE_SCREENSHOT_ARCHIVE] capture page screenshot failed:', error)
       this.uiManager.showError('Page screenshot failed')

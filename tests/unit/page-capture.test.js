@@ -47,7 +47,7 @@
  *   - PRE: bookmark passed ARCHIVE_PRIVACY_GATE; capturePageContent is callable
  *   - OUTPUT: archive | { error: CaptureFailed | TooLarge | RestrictedUrl | InhibitedUrl | UnsupportedBackend }
  *   - POST:
- *     - success => archive has sanitizedHtml, textContent, contentHash, version, capturedAt
+ *     - success => archive has sanitizedHtml, textContent, contentHash, version, capturedAt, and optional sourcePresentationProfile
  *     - error => no archive is persisted
  *   - FAILURE_MODES: CaptureFailed, TooLarge, RestrictedUrl, InhibitedUrl, UnsupportedBackend
  *   - EFFECTS: Async, IO
@@ -60,6 +60,51 @@
  *   - archive = NORMALIZE_ARCHIVE(captured)
  *   - IF archive exceeds limits: RETURN { error: TooLarge }
  *   - RETURN archive
+ *
+ * ## EXTRACT_SOURCE_PRESENTATION
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: extract only computed background, foreground, link, and color-scheme intent from the live document without copying source CSS.
+ * - Contract:
+ *   - INPUT: live document
+ *   - PRE: document is available in the page-world executeScript context
+ *   - OUTPUT: raw source presentation profile
+ *   - POST:
+ *     - background is the first opaque computed background found while walking from body toward document
+ *     - text and link are computed color values; color-scheme is light, dark, or absent
+ *     - no stylesheet text, inline style text, layout, script, or external asset enters the result
+ *   - FAILURE_MODES: MissingDocument
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: EXTRACT_SOURCE_PRESENTATION
+ *   - IF document or document.documentElement is absent: RETURN {}
+ *   - nodes = body followed by each parent through document.documentElement
+ *   - FOR node IN nodes:
+ *     - style = GET_COMPUTED_STYLE(node)
+ *     - IF background is absent and style.backgroundColor is opaque: SET background
+ *   - text = GET_COMPUTED_STYLE(body OR document.documentElement).color
+ *   - link = GET_COMPUTED_STYLE(first anchor OR body OR document.documentElement).color
+ *   - colorScheme = document.documentElement.style.colorScheme OR computed color-scheme intent
+ *   - RETURN { background, text, link, colorScheme }
+ *
+ * ## NORMALIZE_SOURCE_PRESENTATION
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: reduce raw computed presentation data to a bounded allowlisted archive field and keep it outside content identity hashes.
+ * - Contract:
+ *   - INPUT: raw source presentation profile, size limit
+ *   - PRE: raw data is untrusted and may contain malformed CSS-like strings
+ *   - OUTPUT: sourcePresentationProfile | absent
+ *   - POST:
+ *     - only canonical opaque colors and light/dark color-scheme intent remain
+ *     - malformed, transparent, unsupported, and oversized values are omitted
+ *     - contentHash and archiveId inputs remain based only on URL, sanitized HTML, and text
+ *   - FAILURE_MODES: InvalidProfile
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: NORMALIZE_SOURCE_PRESENTATION
+ *   - profile = parse each allowlisted color field as canonical RGB or hex
+ *   - profile = remove transparent or invalid background and any invalid optional fields
+ *   - profile.colorScheme = light or dark when the raw intent is allowlisted
+ *   - IF serialized profile exceeds the profile size limit: RETURN absent
+ *   - IF profile has no valid field: RETURN absent
+ *   - RETURN profile
  *
  * ## SAVE_PAGE_ARCHIVE
  * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: preserve the prior archive, write the new artifact, and update derived archive search only after storage succeeds.
@@ -155,6 +200,7 @@
 import {
   capturePageContentFromSource,
   hashArchiveContent,
+  normalizeSourcePresentationProfile,
   sanitizeArchiveHtml
 } from '../../src/features/archive/page-capture.js'
 
@@ -203,5 +249,63 @@ describe('page capture [REQ-PAGE_ARCHIVE_STORAGE]', () => {
   test('hash is stable for duplicate content', () => {
     expect(hashArchiveContent('same')).toBe(hashArchiveContent('same'))
     expect(hashArchiveContent('same')).not.toBe(hashArchiveContent('different'))
+  })
+
+  // - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: reduce raw computed presentation data to a bounded allowlisted archive field and keep it outside content identity hashes.
+  test('normalizes a bounded source presentation profile without changing archive identity [IMPL-PAGE_ARCHIVE_STORAGE]', () => {
+    const profile = normalizeSourcePresentationProfile({
+      background: 'rgb(255, 255, 255)',
+      text: '#202124',
+      link: 'rgba(0, 0, 238, 1)',
+      colorScheme: 'light dark',
+      ignored: 'url(https://attacker.example/style.css)'
+    })
+    expect(profile).toEqual({
+      background: '#ffffff',
+      text: '#202124',
+      link: '#0000ee'
+    })
+
+    const withProfile = capturePageContentFromSource({
+      url: 'https://example.com/article',
+      title: 'Example',
+      html: '<article><p>Readable content.</p></article>',
+      textContent: 'Readable content.',
+      sourcePresentationProfile: {
+        background: '#ffffff',
+        text: '#202124',
+        link: '#0000ee',
+        colorScheme: 'light'
+      }
+    })
+    const withoutProfile = capturePageContentFromSource({
+      url: 'https://example.com/article',
+      title: 'Example',
+      html: '<article><p>Readable content.</p></article>',
+      textContent: 'Readable content.'
+    })
+    expect(withProfile.archive.sourcePresentationProfile).toEqual({
+      background: '#ffffff',
+      text: '#202124',
+      link: '#0000ee',
+      colorScheme: 'light'
+    })
+    expect(withProfile.archive.archiveId).toBe(withoutProfile.archive.archiveId)
+    expect(withProfile.archive.contentHash).toBe(withoutProfile.archive.contentHash)
+  })
+
+  // - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: reduce raw computed presentation data to a bounded allowlisted archive field and keep it outside content identity hashes.
+  test('omits transparent, malformed, and oversized source presentation values [REQ-PAGE_ARCHIVE_STORAGE]', () => {
+    expect(normalizeSourcePresentationProfile({
+      background: 'transparent',
+      text: 'not-a-color',
+      link: '#fff',
+      colorScheme: 'sepia'
+    })).toEqual({ link: '#ffffff' })
+
+    expect(normalizeSourcePresentationProfile({
+      background: '#ffffff',
+      text: '#000000'
+    }, 10)).toBeUndefined()
   })
 })

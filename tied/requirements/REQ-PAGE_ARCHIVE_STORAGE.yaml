@@ -1,6 +1,6 @@
 REQ-PAGE_ARCHIVE_STORAGE:
   category: "Functional"
-  description: "Users can explicitly capture an HTTP(S) bookmark into a durable local or file-backed archive containing sanitized readable HTML and extracted text, with screenshots stored as separate artifacts."
+  description: "Users can explicitly capture an HTTP(S) bookmark into a durable local or file-backed archive containing sanitized readable HTML, extracted text, and optional bounded source presentation metadata, with screenshots stored as separate artifacts."
   detail_file: "requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml"
   metadata:
     created:
@@ -9,7 +9,7 @@ REQ-PAGE_ARCHIVE_STORAGE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Close archive lifecycle, selected backend, and validation evidence"
+      reason: "Add bounded source presentation profile storage contract"
   name: "Page Archive Storage"
   priority: "P1"
   rationale:
@@ -30,12 +30,13 @@ REQ-PAGE_ARCHIVE_STORAGE:
     supersedes: []
   satisfaction_criteria:
     - criterion: "A screenshot is a separate artifact linked to the bookmark archive and follows the same Local/File lifecycle."
-    - criterion: "An archive stores capture metadata, content hash/version, sanitized readable HTML, and extracted text outside the bookmark metadata map."
+    - criterion: "An archive stores capture metadata, content hash/version, sanitized readable HTML, extracted text, and an optional bounded source presentation profile outside the bookmark metadata map."
     - criterion: "Bookmark-association failure returns bookmarkCreated false with explicit archive-retention and cleanup diagnostics and compensates the archive mutation when possible."
     - criterion: "Capture is explicit and supports only HTTP(S) pages mapped to Local or File bookmark storage."
     - criterion: "Capture validates an explicit preferredBackend of local or file, checks existence only in that selected backend, preserves an existing bookmark, and creates one minimal bookmark after a successful archive capture when none exists."
     - criterion: "Deleting a Local or File bookmark removes its archive artifacts and search entries."
     - criterion: "Recapture, deletion, storage failure, size limits, restricted URLs, and sensitive/inhibited pages return observable states without partial success."
+    - criterion: "The source presentation profile is normalized to allowlisted values, bounded in size, excluded from content identity hashes, and never restores source CSS."
   status: "Implemented"
   summary: "Capture and persist sanitized readable page archives and separate screenshot artifacts for Local and File bookmarks only, associating each archive with the explicitly selected backend bookmark."
   traceability:

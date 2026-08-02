@@ -17,10 +17,16 @@ const archive = {
   sourceTitle: 'Archived feature article',
   capturedAt: '2026-07-31T12:00:00.000Z',
   status: 'available',
-  sanitizedHtml: '<h2>Offline article</h2><p>Durable archive content.</p><script>window.__archiveScriptRan = true</script>',
+  sanitizedHtml: '<h2>Offline article</h2><p>Durable archive content with <a href="https://archive-feature.example/reference">a source link</a>.</p><script>window.__archiveScriptRan = true</script>',
   textContent: 'Offline article Durable archive content.',
   contentHash: 'archive-content-hash',
-  version: 1
+  version: 1,
+  sourcePresentationProfile: {
+    background: '#ffffff',
+    text: '#202124',
+    link: '#0000ee',
+    colorScheme: 'light'
+  }
 }
 
 const screenshot = {
@@ -107,6 +113,7 @@ async function openStatusPopup (context, extensionId, options) {
 }
 
 test.describe('[REQ-OFFLINE_READER_MODE] archive feature extension pages', () => {
+  // - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: render only sanitized stored HTML and apply a validated source presentation profile without loading live HTML.
   test('renders stored Reader content and screenshot without executing archived scripts', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const seedPage = await context.newPage()
@@ -122,6 +129,23 @@ test.describe('[REQ-OFFLINE_READER_MODE] archive feature extension pages', () =>
     await expect(reader.locator('#reader-content')).toContainText('Offline article')
     await expect(reader.locator('#reader-content script')).toHaveCount(0)
     await expect(reader.locator('#reader-screenshot-list img')).toHaveCount(1)
+    const sourcePresentation = await reader.locator('.reader-shell').evaluate(element => {
+      const style = getComputedStyle(element)
+      return {
+        background: style.backgroundColor,
+        text: style.color,
+        link: getComputedStyle(element.querySelector('.reader-live-link')).color,
+        contentLink: getComputedStyle(element.querySelector('.reader-content a')).color,
+        colorScheme: style.colorScheme
+      }
+    })
+    expect(sourcePresentation).toEqual({
+      background: 'rgb(255, 255, 255)',
+      text: 'rgb(32, 33, 36)',
+      link: 'rgb(0, 0, 238)',
+      contentLink: 'rgb(0, 0, 238)',
+      colorScheme: 'light'
+    })
     expect(await reader.evaluate(() => globalThis.__archiveScriptRan)).toBeUndefined()
 
     await reader.close()
@@ -264,7 +288,7 @@ test.describe('[REQ-ARCHIVED_CONTENT_SEARCH] Local Bookmarks Index archive scope
     await readerLink.click()
     await expect(page).toHaveURL(/src\/ui\/reader\/reader\.html\?url=/)
     await expect(page.locator('#reader-title')).toHaveText('Archived feature article')
-    await expect(page.locator('#reader-content')).toContainText('Durable archive content.')
+    await expect(page.locator('#reader-content')).toContainText('Durable archive content with a source link.')
     await page.close()
   })
 })

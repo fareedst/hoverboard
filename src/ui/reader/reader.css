@@ -15,6 +15,15 @@ body {
   padding: 2rem 0 5rem;
 }
 
+.reader-shell[data-source-presentation="active"] {
+  --color-background: var(--reader-source-background);
+  --color-text: var(--reader-source-text);
+  --color-accent: var(--reader-source-link);
+  background: var(--reader-source-background);
+  color: var(--reader-source-text);
+  color-scheme: var(--reader-source-color-scheme, light);
+}
+
 .reader-header {
   border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent);
   margin-bottom: 2rem;
@@ -22,7 +31,8 @@ body {
 }
 
 .reader-back,
-.reader-live-link {
+.reader-live-link,
+.reader-content a {
   color: var(--color-accent, #1769aa);
 }
 

@@ -25048,6 +25048,64 @@ function sanitizeArchiveHtml(html, documentLike = globalThis.document) {
   return doc.body.innerHTML;
 }
 
+// src/features/archive/source-presentation.js
+var COLOR_FIELDS = ["background", "text", "link"];
+var SOURCE_PRESENTATION_PROFILE_MAX_BYTES = 512;
+function parseChannel(value) {
+  const text = String(value).trim();
+  if (text.endsWith("%")) {
+    const percentage = Number(text.slice(0, -1));
+    return Number.isFinite(percentage) && percentage >= 0 && percentage <= 100 ? Math.round(percentage * 2.55) : void 0;
+  }
+  const channel = Number(text);
+  return Number.isFinite(channel) && channel >= 0 && channel <= 255 ? Math.round(channel) : void 0;
+}
+function parseAlpha(value) {
+  const alpha = String(value).trim();
+  if (alpha.endsWith("%")) {
+    const percentage = Number(alpha.slice(0, -1));
+    return Number.isFinite(percentage) && percentage >= 0 && percentage <= 100 ? percentage / 100 : void 0;
+  }
+  const numeric = Number(alpha);
+  return Number.isFinite(numeric) && numeric >= 0 && numeric <= 1 ? numeric : void 0;
+}
+function parseSourceColor(value) {
+  const text = String(value || "").trim().toLowerCase();
+  if (!text || text === "transparent" || text.includes("url(") || text.includes("var(") || text.includes("gradient(")) return void 0;
+  const hex3 = text.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+  if (hex3) {
+    const value2 = hex3[1];
+    const hasAlpha = value2.length === 4 || value2.length === 8;
+    const alpha = hasAlpha ? value2.length === 4 ? parseInt(value2[3] + value2[3], 16) : parseInt(value2.slice(6, 8), 16) : 255;
+    if (alpha !== 255) return void 0;
+    const channels2 = value2.length <= 4 ? value2.slice(0, 3).split("").map((channel) => channel + channel) : [value2.slice(0, 2), value2.slice(2, 4), value2.slice(4, 6)];
+    return `#${channels2.join("")}`;
+  }
+  const rgb = text.match(/^rgba?\((.*)\)$/);
+  if (!rgb) return void 0;
+  const parts = rgb[1].split(",").map((part) => part.trim());
+  if (parts.length !== 3 && parts.length !== 4) return void 0;
+  const channels = parts.slice(0, 3).map(parseChannel);
+  if (channels.some((channel) => channel === void 0)) return void 0;
+  if (parts.length === 4 && parseAlpha(parts[3]) !== 1) return void 0;
+  return `#${channels.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
+}
+function normalizeSourcePresentationProfile(raw, maxBytes = SOURCE_PRESENTATION_PROFILE_MAX_BYTES) {
+  if (!raw || typeof raw !== "object") return void 0;
+  const profile = {};
+  for (const field of COLOR_FIELDS) {
+    const color = parseSourceColor(raw[field]);
+    if (color) profile[field] = color;
+  }
+  const colorScheme = String(raw.colorScheme || "").trim().toLowerCase();
+  if (colorScheme === "light" || colorScheme === "dark") profile.colorScheme = colorScheme;
+  if (!Object.keys(profile).length) return void 0;
+  const serialized = JSON.stringify(profile);
+  const serializedBytes = typeof globalThis.TextEncoder === "function" ? new globalThis.TextEncoder().encode(serialized).length : serialized.length;
+  if (serializedBytes > maxBytes) return void 0;
+  return profile;
+}
+
 // src/features/archive/page-capture.js
 var DEFAULT_ARCHIVE_LIMITS = Object.freeze({
   maxTextLength: 2e5,
@@ -25078,6 +25136,7 @@ function capturePageContentFromSource(source, options = {}) {
   if (sanitizedHtml.length > limits.maxHtmlLength || textContent.length > limits.maxTextLength) {
     return { success: false, code: "TooLarge" };
   }
+  const sourcePresentationProfile = normalizeSourcePresentationProfile(source?.sourcePresentationProfile, options.maxProfileBytes);
   const archive = {
     archiveId: hashArchiveContent(`${url2}:${sanitizedHtml}:${textContent}`),
     url: url2,
@@ -25089,7 +25148,8 @@ ${textContent}`),
     sanitizedHtml,
     textContent,
     status: "available",
-    screenshots: []
+    screenshots: [],
+    ...sourcePresentationProfile ? { sourcePresentationProfile } : {}
   };
   return { success: true, archive };
 }
@@ -26291,11 +26351,48 @@ var MessageHandler = class {
       try {
         const results = await scripting.executeScript({
           target: { tabId: captureContext.tabId },
-          func: () => ({
-            title: document.title || "",
-            html: document.body?.innerHTML || document.documentElement?.innerHTML || "",
-            textContent: document.body?.innerText || document.body?.textContent || ""
-          })
+          func: () => {
+            const extractSourcePresentation = () => {
+              const root = document.documentElement;
+              const body = document.body;
+              if (!root) return {};
+              const nodes = [];
+              let node = body || root;
+              while (node) {
+                nodes.push(node);
+                if (node === root) break;
+                node = node.parentElement;
+              }
+              const isOpaque = (value) => {
+                if (!value || value === "transparent") return false;
+                const alpha = String(value).match(/^rgba\([^,]+,[^,]+,[^,]+,\s*([^)]+)\)$/i);
+                return !alpha || Number(alpha[1]) === 1;
+              };
+              let background = "";
+              for (const candidate of nodes) {
+                const style = getComputedStyle(candidate);
+                if (!background && isOpaque(style.backgroundColor)) background = style.backgroundColor;
+              }
+              const textNode = body || root;
+              const linkNode = document.querySelector("a") || textNode;
+              const textStyle = getComputedStyle(textNode);
+              const linkStyle = getComputedStyle(linkNode);
+              const rootStyle = getComputedStyle(root);
+              const colorScheme = [root.style.colorScheme, rootStyle.colorScheme].map((value) => String(value || "").trim().toLowerCase()).find((value) => value === "light" || value === "dark") || "";
+              return {
+                background,
+                text: textStyle.color || "",
+                link: linkStyle.color || "",
+                colorScheme
+              };
+            };
+            return {
+              title: document.title || "",
+              html: document.body?.innerHTML || document.documentElement?.innerHTML || "",
+              textContent: document.body?.innerText || document.body?.textContent || "",
+              sourcePresentationProfile: extractSourcePresentation()
+            };
+          }
         });
         const source = results?.[0]?.result;
         return capturePageContentFromSource({ ...source, url: captureUrl }, data);

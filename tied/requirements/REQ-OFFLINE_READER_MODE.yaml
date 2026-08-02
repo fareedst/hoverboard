@@ -1,6 +1,6 @@
 REQ-OFFLINE_READER_MODE:
   category: "Functional"
-  description: "Users can open a captured archive from a bookmark and read it without requesting the live page."
+  description: "Users can open a captured archive from a bookmark and read it without requesting the live page; valid archives may carry a bounded source presentation profile for readable Reader chrome and content."
   detail_file: "requirements/REQ-OFFLINE_READER_MODE.yaml"
   metadata:
     created:
@@ -9,7 +9,7 @@ REQ-OFFLINE_READER_MODE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Close Reader lookup/render and screenshot presentation evidence"
+      reason: "Add bounded source presentation profile and WCAG-AA Reader fallback contract"
   name: "Offline Reader Mode"
   priority: "P1"
   rationale:
@@ -27,10 +27,12 @@ REQ-OFFLINE_READER_MODE:
       - "REQ-LOCAL_BOOKMARKS_INDEX"
     supersedes: []
   satisfaction_criteria:
+    - criterion: "Existing archives without a source presentation profile remain readable through the Hoverboard Reader theme fallback without migration or recapture."
     - criterion: "Only sanitized stored HTML is rendered; archived scripts and unsafe navigation are not executable."
     - criterion: "Reader displays capture time, archive status, and clear missing/stale/error states."
     - criterion: "Reader opens a stored archive by bookmark URL or archive identifier without fetching the live URL."
     - criterion: "Reader works for Local and File archives and preserves the bookmark/live URL as an explicit optional action."
+    - criterion: "When a valid source presentation profile exists, Reader applies its bounded background, text, link, and color-scheme values to the Reader shell and content; missing, invalid, transparent, or WCAG-AA-failing profiles use the Hoverboard Reader theme fallback."
   status: "Implemented"
   summary: "Render sanitized stored page archives in a dedicated offline Reader surface."
   traceability:

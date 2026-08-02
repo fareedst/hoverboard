@@ -27,15 +27,53 @@
   - RENDER_READER_SCREENSHOTS(screenshotResponse.screenshots)
   - RETURN success
 
+## VALIDATE_SOURCE_PRESENTATION
+- [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: validate persisted source presentation metadata before it can influence the extension-owned Reader shell.
+- Contract:
+  - INPUT: optional sourcePresentationProfile
+  - PRE: profile came from persisted archive data and is untrusted
+  - OUTPUT: valid profile | absent
+  - POST:
+    - valid output contains only allowlisted opaque colors and light/dark intent
+    - background-to-text and background-to-link contrast is at least WCAG AA 4.5:1
+    - invalid, transparent, missing, or low-contrast input returns absent
+  - FAILURE_MODES: InvalidProfile, InsufficientContrast
+  - EFFECTS: pure
+  - TERMINATION: total
+- PROCEDURE: VALIDATE_SOURCE_PRESENTATION
+  - parse background, text, and optional link as canonical opaque colors
+  - IF background or text is absent: RETURN absent
+  - IF contrast(background, text) is less than 4.5: RETURN absent
+  - IF link exists and contrast(background, link) is less than 4.5: RETURN absent
+  - RETURN profile with optional link and colorScheme
+
+## APPLY_SOURCE_PRESENTATION
+- [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: apply validated profile only through fixed extension-owned CSS variables on the Reader shell and clear them for the Hoverboard theme fallback.
+- Contract:
+  - INPUT: Reader shell element, validated profile or absent
+  - PRE: shell is an extension-owned DOM element; profile has passed VALIDATE_SOURCE_PRESENTATION
+  - OUTPUT: source presentation state
+  - POST:
+    - valid profile => shell receives fixed background, text, link, and color-scheme variables and active state
+    - absent profile => all source variables are cleared and fallback state is active
+    - archive HTML is never modified with profile values
+  - FAILURE_MODES: MissingShell
+  - EFFECTS: DOM
+  - TERMINATION: total
+- PROCEDURE: APPLY_SOURCE_PRESENTATION
+  - IF shell is absent: RETURN { state: fallback, error: MissingShell }
+  - IF profile is absent: clear fixed source variables; remove active state; RETURN fallback
+  - set fixed source variables from profile; set active state; RETURN active
+
 ## RENDER_READER_ARCHIVE
-- [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: render only sanitized stored HTML/text and show freshness state without loading live HTML.
+- [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: render only sanitized stored HTML/text and apply a validated source presentation profile without loading live HTML.
 - Contract:
   - INPUT: archive (nullable), Reader DOM elements
   - PRE: archive content came from persisted storage; sanitizer is available
   - OUTPUT: { success: true, archive } | { success: false, code: MissingArchive }
   - POST:
     - archive absent => content is empty, missing state is visible, live link is hidden
-    - archive present => only sanitized HTML is inserted
+    - archive present => only sanitized HTML is inserted and validated profile state is applied
     - stale archive => warning remains visible while content remains readable
   - FAILURE_MODES: MissingArchive, InvalidArchive
   - DATA_TRANSITION: archive fields become text/DOM state; no live HTML is inserted
@@ -48,6 +86,8 @@
     - hide live link
     - RETURN MissingArchive
   - title = archive.sourceTitle OR archive.title OR archive.url
+  - profile = VALIDATE_SOURCE_PRESENTATION(archive.sourcePresentationProfile)
+  - APPLY_SOURCE_PRESENTATION(reader shell, profile)
   - content.innerHTML = SANITIZE_ARCHIVE_HTML(archive.sanitizedHtml OR '')
   - status = archive.status == stale ? stale warning : available message
   - live link is optional and explicit; never auto-fetched
@@ -75,11 +115,12 @@
 - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: expose explicit live-page navigation without coupling it to archive rendering or fetching it automatically.
 - Contract:
   - INPUT: archive.url, live-link element
-  - PRE: archive.url is HTTP(S)
-  - OUTPUT: configured link
+  - PRE: archive.url may be absent, non-HTTP(S), or HTTP(S); live-link element is extension-owned
+  - OUTPUT: configured or hidden link
   - POST: user activation may navigate to the live URL; Reader performs no fetch
   - EFFECTS: DOM
   - TERMINATION: total
 - PROCEDURE: OPEN_LIVE_PAGE
+  - IF archive.url is not HTTP(S): clear live link href; hide live link; RETURN
   - set live link href to archive.url only when URL is HTTP(S)
   - user activation opens the link; Reader does not fetch it

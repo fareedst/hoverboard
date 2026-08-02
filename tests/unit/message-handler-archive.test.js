@@ -47,7 +47,7 @@
  *   - PRE: bookmark passed ARCHIVE_PRIVACY_GATE; capturePageContent is callable
  *   - OUTPUT: archive | { error: CaptureFailed | TooLarge | RestrictedUrl | InhibitedUrl | UnsupportedBackend }
  *   - POST:
- *     - success => archive has sanitizedHtml, textContent, contentHash, version, capturedAt
+ *     - success => archive has sanitizedHtml, textContent, contentHash, version, capturedAt, and optional sourcePresentationProfile
  *     - error => no archive is persisted
  *   - FAILURE_MODES: CaptureFailed, TooLarge, RestrictedUrl, InhibitedUrl, UnsupportedBackend
  *   - EFFECTS: Async, IO
@@ -60,6 +60,51 @@
  *   - archive = NORMALIZE_ARCHIVE(captured)
  *   - IF archive exceeds limits: RETURN { error: TooLarge }
  *   - RETURN archive
+ *
+ * ## EXTRACT_SOURCE_PRESENTATION
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: extract only computed background, foreground, link, and color-scheme intent from the live document without copying source CSS.
+ * - Contract:
+ *   - INPUT: live document
+ *   - PRE: document is available in the page-world executeScript context
+ *   - OUTPUT: raw source presentation profile
+ *   - POST:
+ *     - background is the first opaque computed background found while walking from body toward document
+ *     - text and link are computed color values; color-scheme is light, dark, or absent
+ *     - no stylesheet text, inline style text, layout, script, or external asset enters the result
+ *   - FAILURE_MODES: MissingDocument
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: EXTRACT_SOURCE_PRESENTATION
+ *   - IF document or document.documentElement is absent: RETURN {}
+ *   - nodes = body followed by each parent through document.documentElement
+ *   - FOR node IN nodes:
+ *     - style = GET_COMPUTED_STYLE(node)
+ *     - IF background is absent and style.backgroundColor is opaque: SET background
+ *   - text = GET_COMPUTED_STYLE(body OR document.documentElement).color
+ *   - link = GET_COMPUTED_STYLE(first anchor OR body OR document.documentElement).color
+ *   - colorScheme = document.documentElement.style.colorScheme OR computed color-scheme intent
+ *   - RETURN { background, text, link, colorScheme }
+ *
+ * ## NORMALIZE_SOURCE_PRESENTATION
+ * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: reduce raw computed presentation data to a bounded allowlisted archive field and keep it outside content identity hashes.
+ * - Contract:
+ *   - INPUT: raw source presentation profile, size limit
+ *   - PRE: raw data is untrusted and may contain malformed CSS-like strings
+ *   - OUTPUT: sourcePresentationProfile | absent
+ *   - POST:
+ *     - only canonical opaque colors and light/dark color-scheme intent remain
+ *     - malformed, transparent, unsupported, and oversized values are omitted
+ *     - contentHash and archiveId inputs remain based only on URL, sanitized HTML, and text
+ *   - FAILURE_MODES: InvalidProfile
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: NORMALIZE_SOURCE_PRESENTATION
+ *   - profile = parse each allowlisted color field as canonical RGB or hex
+ *   - profile = remove transparent or invalid background and any invalid optional fields
+ *   - profile.colorScheme = light or dark when the raw intent is allowlisted
+ *   - IF serialized profile exceeds the profile size limit: RETURN absent
+ *   - IF profile has no valid field: RETURN absent
+ *   - RETURN profile
  *
  * ## SAVE_PAGE_ARCHIVE
  * - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: preserve the prior archive, write the new artifact, and update derived archive search only after storage succeeds.
@@ -613,12 +658,39 @@ describe('archive message composition [REQ-PAGE_ARCHIVE_STORAGE]', () => {
       result: {
         title: 'Captured',
         html: '<article><h1>Captured</h1><script>bad()</script><p>Body text</p></article>',
-        textContent: 'Captured Body text'
+        textContent: 'Captured Body text',
+        sourcePresentationProfile: {
+          background: 'rgb(255, 255, 255)',
+          text: 'rgb(32, 33, 36)',
+          link: 'rgb(0, 0, 238)',
+          colorScheme: 'light'
+        }
       }
     }])
     global.chrome.tabs.captureVisibleTab = jest.fn().mockResolvedValue('data:image/png;base64,' + 'A'.repeat(128))
   })
 
+  // - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: extract only computed background, foreground, link, and color-scheme intent from the live document without copying source CSS.
+  test('executes the source presentation extractor at the capture boundary [REQ-PAGE_ARCHIVE_STORAGE]', async () => {
+    document.documentElement.innerHTML = '<head></head><body style="background-color: transparent; color: rgb(32, 33, 36)"><a href="https://example.com" style="color: rgb(0, 0, 238)">Read</a><p>Body text</p></body>'
+    document.documentElement.style.backgroundColor = 'rgb(255, 255, 255)'
+    document.documentElement.style.colorScheme = 'light'
+    global.chrome.scripting.executeScript.mockImplementationOnce(async ({ func }) => [{ result: func() }])
+
+    const captured = await handler.processMessage({
+      type: MESSAGE_TYPES.CAPTURE_PAGE_ARCHIVE,
+      data: { tabId: 7, url: 'https://example.com/extractor', preferredBackend: 'local' }
+    }, { tab: { id: 7, url: 'https://example.com/extractor' } })
+
+    expect(captured.archive.sourcePresentationProfile).toEqual({
+      background: '#ffffff',
+      text: '#202124',
+      link: '#0000ee',
+      colorScheme: 'light'
+    })
+  })
+
+  // - [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE] How: extract only computed background, foreground, link, and color-scheme intent from the live document without copying source CSS.
   test('routes explicit capture, lookup, and archive search', async () => {
     const captured = await handler.processMessage({
       type: MESSAGE_TYPES.CAPTURE_PAGE_ARCHIVE,
@@ -627,6 +699,12 @@ describe('archive message composition [REQ-PAGE_ARCHIVE_STORAGE]', () => {
     expect(captured.success).toBe(true)
     expect(captured.bookmarkCreated).toBe(true)
     expect(captured.archive.sanitizedHtml).not.toContain('<script')
+    expect(captured.archive.sourcePresentationProfile).toEqual({
+      background: '#ffffff',
+      text: '#202124',
+      link: '#0000ee',
+      colorScheme: 'light'
+    })
 
     const loaded = await handler.processMessage({
       type: MESSAGE_TYPES.GET_PAGE_ARCHIVE,

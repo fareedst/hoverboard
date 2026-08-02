@@ -4,17 +4,25 @@ IMPL-OFFLINE_READER_MODE:
       - path: "src/ui/reader/reader.html"
         description: "Standalone offline Reader markup"
       - path: "src/ui/reader/reader.js"
-        description: "Archive lookup, status, and rendering orchestration"
+        description: "Archive lookup, source profile validation/application, status, and rendering orchestration"
       - path: "src/ui/reader/reader.css"
-        description: "Reader layout and content styles"
+        description: "Reader layout, fallback theme, and source-colored shell styles"
+      - path: "src/features/archive/source-presentation.js"
+        description: "Shared profile normalization and contrast primitives"
       - path: "src/core/message-handler.js"
-        description: "GET_PAGE_ARCHIVE lookup handler"
+        description: "GET_PAGE_ARCHIVE lookup and archive capture profile boundary"
     functions:
       - name: "loadReaderArchive"
         description: "Load archive and render status/content"
         file: "src/ui/reader/reader.js"
       - name: "renderReaderArchive"
-        description: "Render safe archive content and metadata"
+        description: "Render safe archive content, metadata, and source presentation"
+        file: "src/ui/reader/reader.js"
+      - name: "validateSourcePresentation"
+        description: "Validate profile colors and WCAG AA contrast"
+        file: "src/ui/reader/reader.js"
+      - name: "applySourcePresentation"
+        description: "Apply or clear extension-owned shell variables"
         file: "src/ui/reader/reader.js"
   cross_references:
     - "ARCH-OFFLINE_READER_MODE"
@@ -28,11 +36,15 @@ IMPL-OFFLINE_READER_MODE:
   implementation_approach:
     details:
       - "After archive lookup, Reader requests only persisted product screenshots for the resolved URL and renders validated image data URLs; demo screenshot assets are never queried."
+      - "APPLY_SOURCE_PRESENTATION sets only fixed extension-owned CSS variables on the Reader shell and clears them for the Hoverboard Reader theme fallback."
+      - "Existing archives without a profile use fallback colors without migration or recapture."
       - "Missing, stale, unsupported, and storage-error states render as accessible status panels."
       - "Only sanitizedHtml from the archive store is assigned to a constrained reader container; scripts, inline event handlers, and unsafe URLs are removed at capture time and blocked by page policy."
+      - "Reader chrome and content inherit the active profile; status semantics remain extension-owned and archive HTML is never modified with profile values."
       - "Reader parses archive identifier or normalized URL from query parameters and requests archive data through a dedicated message."
       - "The live URL action is explicit and never part of archive loading."
-    summary: "Add a Reader tool page, message/API lookup handler, safe HTML container, and status renderer."
+      - "VALIDATE_SOURCE_PRESENTATION normalizes persisted profile fields and requires WCAG AA 4.5:1 contrast for text and optional link against an opaque background."
+    summary: "Add a Reader tool page, safe HTML container, status renderer, and validated source presentation application for persisted archives."
   metadata:
     created:
       author: "AI Agent"
@@ -40,7 +52,7 @@ IMPL-OFFLINE_READER_MODE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Define explicit freshness handoff and persisted screenshot presentation"
+      reason: "Add validated source presentation rendering and Reader fallback evidence"
   name: "Offline Reader Mode Implementation"
   rationale:
     benefits:

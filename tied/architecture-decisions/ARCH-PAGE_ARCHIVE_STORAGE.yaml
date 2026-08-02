@@ -1,5 +1,5 @@
 ARCH-PAGE_ARCHIVE_STORAGE:
-  decision: "Page archives are separate artifacts keyed by normalized bookmark URL and archive version. Local uses a quota-appropriate browser archive store; File uses a versioned archive directory and adapter alongside the existing bookmark JSON. Pinboard, Sync, and Browser storage remain metadata-only until separately designed. The capture boundary associates a saved archive with a bookmark in the explicitly selected Local or File backend, preserving existing bookmark metadata and compensating a failed bookmark creation."
+  decision: "Page archives are separate artifacts keyed by normalized bookmark URL and archive version. Local uses a quota-appropriate browser archive store; File uses a versioned archive directory and adapter alongside the existing bookmark JSON. Pinboard, Sync, and Browser storage remain metadata-only until separately designed. The capture boundary associates a saved archive with a bookmark in the explicitly selected Local or File backend, preserving existing bookmark metadata and compensating a failed bookmark creation. An archive may include an optional sourcePresentationProfile containing only bounded computed colors and color-scheme intent; profile metadata is excluded from content identity hashes and never contains source CSS."
   detail_file: "architecture-decisions/ARCH-PAGE_ARCHIVE_STORAGE.yaml"
   metadata:
     created:
@@ -8,7 +8,7 @@ ARCH-PAGE_ARCHIVE_STORAGE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Record archive lifecycle lookup/delete and explicit unavailable File storage evidence"
+      reason: "Define bounded source presentation profile artifact metadata"
   name: "Page Archive Storage Architecture"
   rationale:
     alternatives_considered:
@@ -20,6 +20,7 @@ ARCH-PAGE_ARCHIVE_STORAGE:
       - "Archive content stays outside the current aggregate metadata snapshot by default."
       - "Capture and deletion need an archive-capability resolver tied to the bookmark storage backend."
       - "Local and File adapters must expose the same mockable artifact contract."
+      - "Presentation metadata must be bounded and independently normalized so it cannot expand the trusted HTML boundary."
     why: "Large HTML/text/image data should not be embedded in Pinboard-shaped bookmark records or sent through unsupported backends."
   related_decisions:
     depends_on:
