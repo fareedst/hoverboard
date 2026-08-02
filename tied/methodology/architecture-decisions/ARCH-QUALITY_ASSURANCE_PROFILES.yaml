@@ -1,0 +1,90 @@
+ARCH-QUALITY_ASSURANCE_PROFILES:
+  alternatives_considered:
+    - name: "Universal quality checklist"
+      cons:
+        - "Imposes irrelevant ceremony and expensive evidence"
+      pros:
+        - "Simple to describe"
+      rejected_reason: "Conflicts with risk-triggered applicability."
+    - name: "TIED consistency as complete quality proof"
+      cons:
+        - "Does not exercise runtime security, performance, resilience, usability, or compliance behavior"
+      pros:
+        - "Uses an existing gate"
+      rejected_reason: "Proof boundary is technically false."
+  cross_references:
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  decision: "Quality assurance is selected through versioned risk profiles. Each applicable quality attribute produces a measurable evidence row; N/A decisions require rationale, owner, and expiry when risk is accepted. TIED consistency validates artifact integrity but does not prove runtime quality."
+  implementation_approach:
+    details:
+      - "Baseline functional profile is always considered; other profiles activate from change boundaries and risk signals."
+      - "Dedicated ownership covers manifest generation, command execution, command-to-manifest collection, security profile validation, Layer B pseudo-code validation, binding inventory validation, test adequacy validation, and the webhook pilot."
+      - "Evidence rows include applicability, rationale, risk, method, command/test, threshold, result, owner, limitation, and waiver/expiry."
+      - "Execution order remains IMPL pseudo-code validation, RED, GREEN, composition, justified E2E, and verification."
+    key_components:
+      - "Bounded scenario and abuse-case matrix"
+      - "Quality applicability matrix"
+      - "Residual-risk and waiver record"
+      - "Verification evidence manifest"
+    summary: "Add a versioned profile model to CITDP and checklist artifacts, generate machine evidence manifests, validate structural and risk-relative plans, and retain human residual-risk decisions separately."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-02"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Formalize dedicated quality implementation ownership and composition evidence"
+    last_validated:
+      date: "2026-08-02"
+      result: "pending"
+      validator: "AI Agent"
+  name: "Risk-triggered quality assurance profiles and evidence boundary"
+  rationale:
+    benefits:
+      - "Bounded applicability and explicit proof boundaries."
+      - "Reusable profile contracts for security, data, resilience, performance, accessibility, privacy, compliance, AI, and test adequacy."
+    problems_solved:
+      - "Evidence and human risk decisions are not separated from structural traceability validation."
+      - "Unbounded quality checklists create irrelevant work."
+    why: "A profile-based model provides safety and evidence for high-risk changes without imposing universal ceremony on low-risk changes."
+  related_decisions:
+    depends_on:
+      - "ARCH-MODULE_VALIDATION"
+      - "ARCH-TIED_STRUCTURE"
+    informs:
+      - "IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK"
+      - "IMPL-QUALITY_BINDING_INVENTORY"
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+      - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+      - "IMPL-QUALITY_PSEUDOCODE_VALIDATOR"
+      - "IMPL-QUALITY_SECURITY_PROFILE_VALIDATION"
+      - "IMPL-QUALITY_TEST_ADEQUACY"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    implementation:
+      - "IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK"
+      - "IMPL-QUALITY_BINDING_INVENTORY"
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+      - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+      - "IMPL-QUALITY_PSEUDOCODE_VALIDATOR"
+      - "IMPL-QUALITY_SECURITY_PROFILE_VALIDATION"
+      - "IMPL-QUALITY_TEST_ADEQUACY"
+    requirements:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    tests:
+      - "mcp-server/src/analysis/binding-inventory.test.ts"
+      - "mcp-server/src/analysis/pseudocode-validator.test.ts"
+      - "mcp-server/src/analysis/traceability-gap.test.ts"
+      - "mcp-server/src/quality-adequacy.test.ts"
+      - "mcp-server/src/quality-command-runner.test.ts"
+      - "mcp-server/src/quality-evidence-collection.test.ts"
+      - "mcp-server/src/quality-evidence.test.ts"
+      - "mcp-server/src/quality-security.test.ts"
+      - "mcp-server/src/tools/quality-validation-mcp.test.ts"
+      - "pilot/webhook-inbox/test/webhook-inbox.test.mjs"

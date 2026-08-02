@@ -1,0 +1,173 @@
+CITDP-REQ-TIED_SETUP-METHODOLOGY_REFRESH_20260802:
+  record_identity:
+    change_request_id: "REQ-TIED_SETUP-METHODOLOGY_REFRESH_20260802"
+    recorded_at: "2026-08-02"
+    title: "Audit staged TIED methodology refresh"
+  change_definition:
+    current_behavior: "The staged refresh updates inherited TIED documentation, methodology indexes/details, pseudo-code sidecars, and vocabulary; no application source or automated tests are staged."
+    desired_behavior: "The staged snapshot is traceable, vocabulary-aligned, and validated, with canonical-source defects explicitly recorded instead of editing the client methodology tree."
+    unchanged_behavior: "Client-owned project YAML, detail records, CITDP records, application source, tests, and runtime behavior remain unchanged."
+    non_goals:
+      - "Editing tied/methodology/ directly in this client checkout"
+      - "Claiming local unit, composition, or E2E coverage for upstream methodology paths"
+      - "Committing or pushing"
+    success_criteria:
+      - "CITDP records the staged change and canonical-source follow-up"
+      - "All changed names resolve through the vocabulary index"
+      - "Client-owned documentation has no staged whitespace errors"
+      - "TIED consistency and token validation pass"
+      - "Unit/composition/E2E applicability is explicitly evidenced"
+  impact_analysis:
+    modules_or_boundaries: "Client-owned tied/docs, tied/vocab, tied/citdp, and inherited tied/methodology snapshot; canonical TIED source copy_files.sh and mcp-server are provenance references."
+    tied_tokens_affected:
+      - "REQ-TIED_SETUP"
+      - "REQ-MODULE_VALIDATION"
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+      - "ARCH-TIED_STRUCTURE"
+      - "ARCH-MODULE_VALIDATION"
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+      - "IMPL-TIED_FILES"
+      - "IMPL-MODULE_VALIDATION"
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+      - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+      - "IMPL-QUALITY_PSEUDOCODE_VALIDATOR"
+      - "IMPL-QUALITY_BINDING_INVENTORY"
+      - "IMPL-QUALITY_SECURITY_PROFILE_VALIDATION"
+      - "IMPL-QUALITY_TEST_ADEQUACY"
+      - "IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK"
+    tied_tokens_new:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+      - "IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK"
+      - "IMPL-QUALITY_BINDING_INVENTORY"
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+      - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+      - "IMPL-QUALITY_PSEUDOCODE_VALIDATOR"
+      - "IMPL-QUALITY_SECURITY_PROFILE_VALIDATION"
+      - "IMPL-QUALITY_TEST_ADEQUACY"
+  risk_analysis:
+    quality_profiles:
+      - "baseline-functional"
+    risks:
+      - id: "RISK-TIED-METHODOLOGY-001"
+        quality_attribute: "correctness"
+        summary: "Inherited snapshot can claim behavior that differs from canonical source pseudo-code or script behavior."
+        mitigation: "Compare staged records with canonical TIED source and record LEAP follow-up."
+      - id: "RISK-TIED-METHODOLOGY-002"
+        quality_attribute: "traceability"
+        summary: "Quality IMPL dependency cycle can obscure ordering and validation ownership."
+        mitigation: "Resolve dependency direction in canonical source and rerun tied_cycles."
+      - id: "RISK-TIED-METHODOLOGY-003"
+        quality_attribute: "testability"
+        summary: "Methodology records reference upstream paths absent from Hoverboard."
+        mitigation: "Label those paths as canonical-source anchors and do not count them as local coverage."
+    scenarios:
+      - "Staged methodology index/detail consistency"
+      - "Every IMPL sidecar block has token linkage and applicable contracts"
+      - "Project-owned feedback records remain resolvable after inherited feedback removal"
+      - "No staged application source/test/E2E coverage is falsely attributed"
+    abuse_cases: []
+    quality_evidence_matrix:
+      - attribute: "baseline-functional"
+        applicability: "applicable"
+        rationale: "The refresh changes the methodology and validation contract, even though it does not change extension runtime behavior."
+        risk: "Traceability or validation guidance could be internally inconsistent."
+        evidence_method: "TIED consistency, token validation, cycle analysis, pseudo-code structural audit, and staged diff checks."
+        command_or_test: "tied_validate_consistency; tied_cycles; scripts/validate_tokens.sh; git diff --cached --check"
+        threshold: "No consistency/token/cycle/whitespace failures after client-owned fixes; canonical-source-only defects recorded."
+        result: "in_progress"
+        owner: "AI Agent"
+        limitation: "Does not prove runtime behavior of upstream MCP or pilot paths."
+        waiver:
+          required: "true"
+          reason: "No local application source or tests are part of this staged set; upstream implementation coverage is a provenance follow-up."
+          owner: "AI Agent"
+          expiry: "2026-08-16"
+    residual_risk:
+      summary: "Canonical-source IMPL/ARCH/REQ corrections are not applied in this client because tied/methodology is read-only."
+      owner: "AI Agent"
+      expiry: "2026-08-16"
+  test_strategy:
+    summary: "Documentation/methodology-only staged set; no new local unit, composition, or E2E implementation coverage."
+    matrix_notes: "Unit and composition coverage is applicable to canonical MCP/pilot implementations, but referenced paths are absent locally. E2E is not required for this client documentation refresh; existing repository suites may be recorded as baseline only."
+  tdd_sequence:
+    summary: "No RED/GREEN implementation loop applies to this client-only snapshot audit. Canonical-source follow-up must use IMPL sidecar -> tests -> code and composition-first wiring order where implementation exists."
+  evidence:
+    commands:
+      - "TIED_BASE_PATH=/Users/fareed/Documents/dev/browser/hoverboard/tied tied-cli.sh tied_config_get_base_path {}"
+      - "tied_validate_consistency include_detail_files=true include_pseudocode=true"
+      - "tied_cycles graph=implementation"
+      - "scripts/validate_tokens.sh"
+      - "git diff --cached --check"
+    manifest_reference: "not generated; evidence retained in CITDP and command output for this documentation-only audit"
+    proof_boundaries:
+      - "TIED consistency proves index/detail/token linkage, not runtime correctness"
+      - "tied_cycles proves graph acyclicity only"
+      - "Existing unit/composition/E2E suites are baseline and not coverage for this staged snapshot"
+      - "Baseline Hoverboard unit, composition, and E2E results do not constitute coverage for this documentation-only methodology snapshot."
+    results:
+      base_path: "passed: /Users/fareed/Documents/dev/browser/hoverboard/tied"
+      yaml_index_validate: "passed: requirements, architecture, implementation, semantic-tokens"
+      tied_validate_consistency: "passed: ok=true; index/detail/traceability/pseudo-code checks clean"
+      implementation_cycles: "failed: canonical-only cycle IMPL-QUALITY_EVIDENCE_COLLECTION -> IMPL-QUALITY_EVIDENCE_MANIFEST -> IMPL-QUALITY_EVIDENCE_COLLECTION"
+      pseudocode_validate: "passed: 10/10 staged IMPL sidecars, zero diagnostics"
+      token_validation: "passed: all referenced TIED tokens registered"
+      staged_whitespace: "passed: git diff --cached --check and git diff --check"
+      composition_plan: "passed baseline: 120 covered, 44 unit-only, 0 candidate, 0 e2e_only across 30 integration suites"
+      unit_tests: "passed baseline: 169 suites, 1663 passed, 1 skipped"
+      composition_tests: "passed baseline: 30 suites, 97 passed"
+      e2e_tests: "passed baseline: 54 passed, 2 skipped of 56"
+  leap_feedback:
+    divergences_from_analysis:
+      - "IMPL-TIED_FILES pseudo-code defines COPY_IMPLEMENTATION_PSEUDOCODE_SIDECARS but BOOTSTRAP_TIED does not call it"
+      - "Quality evidence collection and manifest records form a dependency cycle"
+      - "REQ-TIED_SETUP and ARCH-TIED_STRUCTURE promise stale inherited-file pruning; canonical pseudo-code should state the full replacement operation"
+      - "MCP migration guidance conflicts with the canonical copy_files.sh behavior"
+    tied_stack_updates_required:
+      - "Canonical-source IMPL update for bootstrap call, dependency direction, manifest boundary, and testability classifications"
+      - "Propagate to canonical ARCH/REQ if behavior or satisfaction criteria change"
+      - "Refresh this client methodology snapshot only through copy_files.sh"
+  completion_criteria:
+    verification_gate_notes: "Completed: client-owned fixes and evidence checks passed; canonical-source-only cycle and LEAP corrections remain explicitly tracked above."
+  record_status: "completed_with_canonical_follow_up"
+  vocabulary_audit:
+    result: "passed"
+    preloaded_glossaries:
+      - "tied-methodology.md"
+      - "tied-yaml-mcp.md"
+      - "pseudocode-and-citdp.md"
+      - "quality-assurance.md"
+    resolved_terms:
+      - "inherited methodology snapshot"
+      - "methodology migration"
+      - "client refresh"
+      - "pseudo-code sidecar"
+      - "quality evidence matrix"
+      - "evidence manifest"
+      - "proof boundary"
+      - "testability ladder"
+      - "composition test"
+      - "canonical source"
+    recorded_new_terms:
+      - "quality-assurance vocabulary was already present in the staged quality-assurance.md glossary and routed from routing.md"
+    additional_terms_needed: false
+    validation: "Alphabetical glossary/index review found no unresolved new canonical names; no speculative synonyms added."
+  coverage_boundary:
+    staged_runtime_changes: false
+    new_unit_coverage: false
+    new_composition_coverage: false
+    new_e2e_coverage: false
+    baseline_results: "Recorded for compatibility only; no staged application source or tests are attributable to this change."
+    e2e_decision: "not required for documentation-only client refresh; no feature-specific E2E claimed."
+  canonical_source_follow_up:
+    status: "required"
+    owner: "TIED methodology repository maintainers"
+    items:
+      - "Add COPY_IMPLEMENTATION_PSEUDOCODE_SIDECARS to BOOTSTRAP_TIED and model full methodology replacement/pruning in IMPL-TIED_FILES."
+      - "Break the IMPL-QUALITY_EVIDENCE_COLLECTION / IMPL-QUALITY_EVIDENCE_MANIFEST dependency cycle in the canonical source."
+      - "Clarify machine evidence versus human decisions in the quality evidence manifest contract."
+      - "Normalize Active IMPL testability classifications and propagate behavior changes IMPL -> ARCH -> REQ."
+      - "Reconcile methodology-migration.md and adding-tied-mcp-and-invoking-passes.md against actual copy_files.sh MCP configuration behavior."
+      - "Refresh this client inherited snapshot through copy_files.sh after canonical fixes."

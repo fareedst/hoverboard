@@ -1,0 +1,51 @@
+IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER:
+  code_locations:
+    files:
+      - path: "mcp-server/src/quality-command-runner.ts"
+        description: "Shell-free bounded quality command executor"
+      - path: "mcp-server/src/quality-command-runner.test.ts"
+        description: "Unit tests for command execution, provenance, and artifacts"
+    functions:
+      - name: "runDeclaredQualityCommands"
+        description: "Execute declared argv commands and capture evidence"
+        file: "mcp-server/src/quality-command-runner.ts"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  implementation_approach:
+    details:
+      - "Apply timeout and output-size limits."
+      - "Never invoke a shell; execute argv directly."
+      - "Record cwd, exact argv, exit code, result, duration, tool versions, diagnostics, and artifact paths."
+    summary: "Run argv-only declarations with timeout and output bounds, capture tool versions and artifacts, then pass results to the manifest builder."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Synchronize literal block leads"
+  name: "Quality evidence command runner"
+  rationale:
+    benefits:
+      - "Reproducible command evidence."
+    problems_solved:
+      - "Declared commands were not executable evidence."
+    why: "A manifest must be based on commands that actually ran, not planned entries."
+  related_decisions:
+    composed_with:
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    code_annotations:
+      - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+    requirements:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    tests:
+      - "mcp-server/src/quality-command-runner.test.ts"
+      - "mcp-server/src/quality-evidence-collection.test.ts"
+      - "mcp-server/src/tools/quality-validation-mcp.test.ts"

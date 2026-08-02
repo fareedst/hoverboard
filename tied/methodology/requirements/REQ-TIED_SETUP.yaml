@@ -4,13 +4,13 @@ REQ-TIED_SETUP:
   metadata:
     created:
       author: "AI Agent"
-      date: "2025-11-08"
+      date: "2025-11-08T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-06"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+      date: "2026-07-29T00:00:00.000Z"
+      reason: "Satisfaction criterion: double-quoted scalar lint via yaml_tool sort_keys(.. style=\"double\") [PROC-YAML_EDIT_LOOP]"
     last_validated:
-      date: "2026-02-06"
+      date: "2026-02-06T00:00:00.000Z"
       result: "pass"
       validator: "AI Agent"
   name: "TIED Methodology Setup"
@@ -30,13 +30,23 @@ REQ-TIED_SETUP:
     related_to: []
     supersedes: []
   satisfaction_criteria:
+    - criterion: "./tied/ directory exists with proper structure"
     - criterion: "All required documentation files exist and are populated from templates"
       metric: "requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml, semantic-tokens.md, processes.md all present"
     - criterion: "Base files properly configured"
       metric: ".cursorrules contains TIED rules, AGENTS.md contains canonical AI agent instructions"
+    - criterion: "copy_files.sh seeds tied/vocab/ when client tied/vocab/ is missing or empty (minimum domain-references.md and tied-methodology.md)"
+      metric: "After bootstrap, tied/vocab/*.md present; existing client vocab files never overwritten"
     - criterion: "Detail directories exist"
       metric: "requirements/, architecture-decisions/, implementation-decisions/ directories present"
-    - criterion: "tied/ directory exists with proper structure"
+    - criterion: "Domain vocabulary for TIED layout (project YAML, semantic token, TIED base path) is defined in tied/vocab/tied-methodology.md; naming uses sub-vocabulary-sync RESOLVE/RECORD per [PROC-VOCABULARY_INDEX]"
+    - criterion: "YAML validation uses scripts/yaml_tool.sh or lint_yaml wrapper per [PROC-YAML_EDIT_LOOP] with default double-quoted scalar lint (yq sort_keys(.. style=\"double\")); terms documented in tied/vocab/tied-methodology.md"
+    - criterion: "Existing clients can follow tied/docs/methodology-migration.md when adopting a newer methodology snapshot"
+      metric: "Migration guide is installed when missing and preserves client-owned project YAML and customized documentation"
+    - criterion: "copy_files.sh --merge-vocab adds absent glossary basenames without overwriting existing client vocabulary"
+      metric: "Existing client glossary contents remain unchanged while missing canonical glossaries are added"
+    - criterion: "Refreshing inherited methodology preserves project YAML and installs promoted quality detail files and pseudo-code sidecars"
+      metric: "tied/methodology/ matches the current template snapshot and stale inherited files are pruned"
   status: "Implemented"
   traceability:
     architecture:
@@ -49,10 +59,11 @@ REQ-TIED_SETUP:
       - "IMPL-TIED_FILES"
     tests:
       - "Manual verification checklists"
+      - "mcp-server/src/e2e/bootstrap-and-load.test.ts"
   validation_criteria:
-    - method: "AI agent acknowledgment"
-      coverage: "Agent responds with 'Observing AI principles!' confirming rules are loaded"
     - method: "Manual verification"
       coverage: "File existence checks for all required files and directories"
+    - method: "AI agent acknowledgment"
+      coverage: "Agent responds with 'Observing AI principles!' confirming rules are loaded"
     - method: "Structure validation"
       coverage: "All index files have corresponding detail directories with proper naming"

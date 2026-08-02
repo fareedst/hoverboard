@@ -8,7 +8,7 @@
 
 **Standards:** [`../docs/vocabulary-index-analysis-and-standards.md`](../docs/vocabulary-index-analysis-and-standards.md).
 
-**See also:** [`routing.md`](routing.md) (primary entry / PRELOAD) · [`../docs/client-development-index.md`](../docs/client-development-index.md) · [`tied-methodology.md`](tied-methodology.md) · [`tied-yaml-mcp.md`](tied-yaml-mcp.md) · [`feedback-to-tied.md`](feedback-to-tied.md) · [`leap-proposal-queue.md`](leap-proposal-queue.md) · [`agentstream.md`](agentstream.md) · [`agent-stream-ruby.md`](agent-stream-ruby.md) · [`pseudocode-and-citdp.md`](pseudocode-and-citdp.md) · [`test-composition.md`](test-composition.md) · [`storage-backends.md`](storage-backends.md) · [`bookmarks.md`](bookmarks.md) · [`bookmarks-index.md`](bookmarks-index.md) · [`tags.md`](tags.md) · [`side-panel.md`](side-panel.md) · [`ui-surfaces.md`](ui-surfaces.md) · [`ipc-messaging.md`](ipc-messaging.md) · [`config-and-privacy.md`](config-and-privacy.md) · [`config-discovery.md`](config-discovery.md)
+**See also:** [`routing.md`](routing.md) (primary entry / PRELOAD) · [`../docs/client-development-index.md`](../docs/client-development-index.md) · [`tied-methodology.md`](tied-methodology.md) · [`tied-yaml-mcp.md`](tied-yaml-mcp.md) · [`feedback-to-tied.md`](feedback-to-tied.md) · [`leap-proposal-queue.md`](leap-proposal-queue.md) · [`agentstream.md`](agentstream.md) · [`agent-stream-ruby.md`](agent-stream-ruby.md) · [`pseudocode-and-citdp.md`](pseudocode-and-citdp.md) · [`config-discovery.md`](config-discovery.md)
 
 ---
 
@@ -54,7 +54,7 @@
 | [`../docs/vocabulary-layer-tied-leap-citdp.md`](../docs/vocabulary-layer-tied-leap-citdp.md) | Outreach: Vocab understanding vs TIED intent vs CITDP vs LEAP |
 | [`../docs/tied-domain-vocabulary-research-prompt.md`](../docs/tied-domain-vocabulary-research-prompt.md) | Copy-paste agent prompt to author vocab corpora in client repos |
 | [`../docs/pseudocode-writing-and-validation.md`](../docs/pseudocode-writing-and-validation.md) | IMPL pseudo-code lifecycle (not domain term registry) |
-| [`../docs/implementation-decisions.md`](../docs/implementation-decisions.md) | IMPL grammar vocabulary (INPUT/OUTPUT/DATA) — distinct from domain vocab |
+| [`../docs/implementation-decisions.md`](../docs/implementation-decisions.md) | IMPL grammar vocabulary (INPUT/OUTPUT/DATA/PRE/POST/EFFECTS/…) — distinct from domain vocab |
 
 ---
 
@@ -62,9 +62,9 @@
 
 - **STDD / TIED repository layout:** canonical domain glossaries live at `tied/vocab/<topic>.md` (no `-vocabulary` filename suffix). Meta-standard: [`../docs/vocabulary-index-analysis-and-standards.md`](../docs/vocabulary-index-analysis-and-standards.md) § STDD convention. Other TIED client repos may use `docs/*-vocabulary.md` per the replication prompt; this repo uses `tied/vocab/`.
 - **agentstream** (Go product/CLI name) vs **agent-stream** (Ruby directory/package) vs **run-feature-batch** driver scripts — define once in [`agentstream.md`](agentstream.md) and [`agent-stream-ruby.md`](agent-stream-ruby.md); link from both.
-- **Domain vocabulary** (this tree) vs **IMPL grammar vocabulary** (INPUT/OUTPUT/DATA keywords) — define once in [`pseudocode-and-citdp.md`](pseudocode-and-citdp.md).
-- **Composition test / pattern ID / edge status** vs unit ALGORITHM vs E2E platform constraint — define once in [`test-composition.md`](test-composition.md); linked from `[PROC-TEST_STRATEGY]` and [`../docs/impl-code-test-linkage.md`](../docs/impl-code-test-linkage.md).
+- **Domain vocabulary** (this tree) vs **IMPL grammar vocabulary** (INPUT/OUTPUT/DATA/PRE/POST/EFFECTS keywords) — define once in [`pseudocode-and-citdp.md`](pseudocode-and-citdp.md).
 - **TIED base path** / **project YAML** vs **methodology YAML** — define once in [`tied-methodology.md`](tied-methodology.md); referenced from [`tied-yaml-mcp.md`](tied-yaml-mcp.md).
+- **Methodology migration** / **client refresh** / **vocabulary merge mode** — a `copy_files.sh` refresh replaces only the inherited `tied/methodology/` snapshot, preserves project YAML and client-owned vocabulary, and uses `--merge-vocab` to add absent glossary files; canonical terms live in [`tied-methodology.md`](tied-methodology.md) and the operational procedure in [`../docs/methodology-migration.md`](../docs/methodology-migration.md).
 - **Non-canonical LEAP proposals** (`leap-proposals/`) never mutate project TIED YAML — see [`leap-proposal-queue.md`](leap-proposal-queue.md).
 - **Local (storage backend)** vs **Local Bookmarks Index** — backend `local` (`hoverboard_local_bookmarks`) is defined in [`storage-backends.md`](storage-backends.md); the management page is [`bookmarks-index.md`](bookmarks-index.md).
 - **Sync (storage backend)** vs **bookmark state synchronization** — backend `sync` (`chrome.storage.sync`) in [`storage-backends.md`](storage-backends.md); cross-surface pin/tag broadcast (`BOOKMARK_UPDATED`) in [`bookmarks.md`](bookmarks.md) / [`ipc-messaging.md`](ipc-messaging.md).
@@ -97,6 +97,7 @@
 | API availability check | Cross-topic notes |
 | Bookmarks overloaded | Cross-topic notes |
 | browser API shim vs Safari App Extension | Cross-topic notes |
+| client refresh | Cross-topic notes |
 | Domain vocabulary index | Title |
 | domain-references.md | Preferred terms (directory entry) |
 | full catalog | Preferred terms (directory entry) |
@@ -111,3 +112,4 @@
 | Sync vs state synchronization | Cross-topic notes |
 | VOCAB_INDEX | Scope |
 | Vocab directory routing index | Preferred terms (directory entry) |
+| vocabulary merge mode | Cross-topic notes |

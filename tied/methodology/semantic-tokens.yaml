@@ -21,158 +21,324 @@
 #   detail_file: Path to the detailed .yaml, or null when no detail file (methodology seed)
 #   metadata: Structured metadata with registered and last_updated dates
 ARCH-FEEDBACK_STORAGE:
+  type: "ARCH"
+  name: "Feedback Storage for TIED Reporting"
+  status: "Active"
+  description: "Index stub; see checklist when building feedback path"
   cross_references:
     - "IMPL-MCP_FEEDBACK_TOOLS"
     - "REQ-FEEDBACK_TO_TIED"
-  description: "Index stub; see checklist when building feedback path"
+  source_index: "architecture-decisions.yaml"
   detail_file: "null"
   metadata:
-    last_updated: "2026-04-21"
     registered: "2026-03-03"
-  name: "Feedback Storage for TIED Reporting"
-  source_index: "architecture-decisions.yaml"
-  status: "Active"
-  type: "ARCH"
+    last_updated: "2026-04-21"
 ARCH-MODULE_VALIDATION:
+  type: "ARCH"
+  name: "Module Validation Strategy"
+  status: "Active"
+  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
   cross_references:
     - "IMPL-MODULE_VALIDATION"
     - "REQ-MODULE_VALIDATION"
-  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
+  source_index: "architecture-decisions.yaml"
   detail_file: "null"
   metadata:
-    last_updated: "2026-04-21"
     registered: "2025-12-18"
-  name: "Module Validation Strategy"
-  source_index: "architecture-decisions.yaml"
-  status: "Active"
+    last_updated: "2026-04-21"
+ARCH-QUALITY_ASSURANCE_PROFILES:
   type: "ARCH"
+  name: "Risk-triggered quality assurance profiles and evidence boundary"
+  status: "Active"
+  description: "Bounded applicability profiles keep TIED integrity distinct from runtime quality proof"
+  cross_references:
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+  source_index: "architecture-decisions.yaml"
+  detail_file: "architecture-decisions/ARCH-QUALITY_ASSURANCE_PROFILES.yaml"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
 ARCH-TIED_STRUCTURE:
+  type: "ARCH"
+  name: "TIED Project Structure"
+  status: "Active"
+  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
   cross_references:
     - "IMPL-TIED_FILES"
     - "REQ-TIED_SETUP"
-  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
+  source_index: "architecture-decisions.yaml"
   detail_file: "null"
   metadata:
-    last_updated: "2026-04-21"
     registered: "2025-12-18"
-  name: "TIED Project Structure"
-  source_index: "architecture-decisions.yaml"
-  status: "Active"
-  type: "ARCH"
+    last_updated: "2026-04-21"
 IMPL-MCP_FEEDBACK_TOOLS:
+  type: "IMPL"
+  name: "MCP Feedback Tools"
+  status: "Active"
+  description: "Index stub; TIED mcp-server tools when adopted"
   cross_references:
     - "ARCH-FEEDBACK_STORAGE"
     - "REQ-FEEDBACK_TO_TIED"
-  description: "Index stub; TIED mcp-server tools when adopted"
+  source_index: "implementation-decisions.yaml"
   detail_file: "null"
   metadata:
-    last_updated: "2026-04-21"
     registered: "2026-03-03"
-  name: "MCP Feedback Tools"
-  source_index: "implementation-decisions.yaml"
-  status: "Active"
-  type: "IMPL"
+    last_updated: "2026-04-21"
 IMPL-MODULE_VALIDATION:
+  type: "IMPL"
+  name: "Module Validation Implementation"
+  status: "Active"
+  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
   cross_references:
     - "ARCH-MODULE_VALIDATION"
     - "REQ-MODULE_VALIDATION"
-  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
+  source_index: "implementation-decisions.yaml"
   detail_file: "null"
   metadata:
-    last_updated: "2026-04-21"
     registered: "2025-12-18"
-  name: "Module Validation Implementation"
-  source_index: "implementation-decisions.yaml"
-  status: "Active"
+    last_updated: "2026-04-21"
+IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK:
   type: "IMPL"
+  name: "Authenticated webhook inbox pilot"
+  status: "Active"
+  description: "Bounded pilot exercising risk-triggered quality profiles"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  source_index: "implementation-decisions.yaml"
+  detail_file: "implementation-decisions/IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK.yaml"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
+IMPL-QUALITY_BINDING_INVENTORY:
+  type: "IMPL"
+  name: "Quality binding inventory validator"
+  status: "Active"
+  description: "Structural validation of composition binding inventory rows"
+  cross_references:
+    - "ARCH-MODULE_VALIDATION"
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  source_index: "implementation-decisions.yaml"
+  detail_file: "implementation-decisions/IMPL-QUALITY_BINDING_INVENTORY.yaml"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
+IMPL-QUALITY_EVIDENCE_COLLECTION:
+  type: "IMPL"
+  name: "Command-to-manifest evidence collector"
+  status: "Active"
+  description: "Collect declared command results into verification evidence"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+    - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  source_index: "implementation-decisions.yaml"
+  detail_file: "implementation-decisions/IMPL-QUALITY_EVIDENCE_COLLECTION.yaml"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
+IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER:
+  type: "IMPL"
+  name: "Quality evidence command runner"
+  status: "Active"
+  description: "Execute bounded quality commands and capture provenance"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  source_index: "implementation-decisions.yaml"
+  detail_file: "implementation-decisions/IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER.yaml"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
+IMPL-QUALITY_EVIDENCE_MANIFEST:
+  type: "IMPL"
+  name: "Verification evidence manifest generation"
+  status: "Active"
+  description: "Deterministic machine-derived verification evidence records"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  source_index: "implementation-decisions.yaml"
+  detail_file: "implementation-decisions/IMPL-QUALITY_EVIDENCE_MANIFEST.yaml"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
+IMPL-QUALITY_PSEUDOCODE_VALIDATOR:
+  type: "IMPL"
+  name: "Layer B pseudo-code validator"
+  status: "Active"
+  description: "Validate pseudo-code contracts and token-commented blocks"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "PROC-PSEUDOCODE_VALIDATION"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  source_index: "implementation-decisions.yaml"
+  detail_file: "implementation-decisions/IMPL-QUALITY_PSEUDOCODE_VALIDATOR.yaml"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
+IMPL-QUALITY_SECURITY_PROFILE_VALIDATION:
+  type: "IMPL"
+  name: "External-input security profile validation"
+  status: "Active"
+  description: "Validate selected external-input security abuse cases or waivers"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  source_index: "implementation-decisions.yaml"
+  detail_file: "implementation-decisions/IMPL-QUALITY_SECURITY_PROFILE_VALIDATION.yaml"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
+IMPL-QUALITY_TEST_ADEQUACY:
+  type: "IMPL"
+  name: "Risk-triggered test adequacy validator"
+  status: "Active"
+  description: "Validate risk-relative test strength"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "PROC-TEST_ADEQUACY"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  source_index: "implementation-decisions.yaml"
+  detail_file: "implementation-decisions/IMPL-QUALITY_TEST_ADEQUACY.yaml"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
 IMPL-TIED_FILES:
+  type: "IMPL"
+  name: "TIED File Creation"
+  status: "Active"
+  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
   cross_references:
     - "ARCH-TIED_STRUCTURE"
     - "REQ-TIED_SETUP"
-  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
+  source_index: "implementation-decisions.yaml"
   detail_file: "null"
   metadata:
-    last_updated: "2026-04-21"
     registered: "2025-12-18"
-  name: "TIED File Creation"
-  source_index: "implementation-decisions.yaml"
-  status: "Active"
-  type: "IMPL"
+    last_updated: "2026-04-21"
 PROC-BUILD_PIPELINE_VALIDATION:
+  type: "PROC"
+  name: "Build Pipeline Validation Process"
+  status: "Active"
+  description: "Build/deploy validation tied to REQ-MODULE_VALIDATION"
   cross_references:
     - "REQ-MODULE_VALIDATION"
-  description: "Build/deploy validation tied to REQ-MODULE_VALIDATION"
+  source_index: "processes.md"
   detail_file: "null"
   metadata:
-    last_updated: "2026-02-08"
     registered: "2025-11-08"
-  name: "Build Pipeline Validation Process"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
+    last_updated: "2026-02-08"
 PROC-COMMIT_MESSAGES:
-  cross_references:
-    - "PROC-TIED_DEV_CYCLE"
-  description: "Consistent commit message format (type/scope/subject, body, footer); optional TIED token references for traceability"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-03-03"
-    registered: "2026-03-03"
+  type: "PROC"
   name: "Commit message format and guidelines"
-  source_index: "processes.md"
   status: "Active"
-  type: "PROC"
-PROC-IMPL_PSEUDOCODE_TOKENS:
+  description: "Consistent commit message format (type/scope/subject, body, footer); optional TIED token references for traceability"
   cross_references:
     - "PROC-TIED_DEV_CYCLE"
-  description: "Every block in IMPL essence_pseudocode must have a comment naming REQ/ARCH/IMPL and how the block implements them; primary mechanism for implementation traceability"
+  source_index: "processes.md"
   detail_file: "null"
   metadata:
-    last_updated: "2026-03-05"
-    registered: "2026-03-05"
-  name: "IMPL pseudo-code semantic token comments (most critical)"
-  source_index: "processes.md"
-  status: "Active"
+    registered: "2026-03-03"
+    last_updated: "2026-03-03"
+PROC-IMPL_PSEUDOCODE_TOKENS:
   type: "PROC"
+  name: "IMPL pseudo-code semantic token comments (most critical)"
+  status: "Active"
+  description: "Every block in IMPL essence_pseudocode must have a comment naming REQ/ARCH/IMPL and how the block implements them; primary mechanism for implementation traceability"
+  cross_references:
+    - "PROC-TIED_DEV_CYCLE"
+  source_index: "processes.md"
+  detail_file: "null"
+  metadata:
+    registered: "2026-03-05"
+    last_updated: "2026-03-05"
 PROC-PROJECT_SURVEY_AND_SETUP:
+  type: "PROC"
+  name: "Project Survey and Setup Process"
+  status: "Active"
+  description: "Survey and readiness process supporting REQ-TIED_SETUP and ARCH-TIED_STRUCTURE"
   cross_references:
     - "ARCH-TIED_STRUCTURE"
     - "REQ-TIED_SETUP"
-  description: "Survey and readiness process supporting REQ-TIED_SETUP and ARCH-TIED_STRUCTURE"
+  source_index: "processes.md"
   detail_file: "null"
   metadata:
-    last_updated: "2026-02-08"
     registered: "2025-11-08"
-  name: "Project Survey and Setup Process"
-  source_index: "processes.md"
-  status: "Active"
+    last_updated: "2026-02-08"
+PROC-QUALITY_ASSURANCE:
   type: "PROC"
+  name: "Risk-triggered quality assurance"
+  status: "Active"
+  description: "Select applicable assurance profiles before implementation design"
+  cross_references:
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+  source_index: "processes.md"
+  detail_file: "null"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
+PROC-QUALITY_EVIDENCE_PROVENANCE:
+  type: "PROC"
+  name: "Quality evidence provenance"
+  status: "Active"
+  description: "Retain reproducible command and artifact provenance"
+  cross_references:
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+  source_index: "processes.md"
+  detail_file: "null"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
 PROC-RELEASE:
+  type: "PROC"
+  name: "Release and version numbering"
+  status: "Active"
+  description: "Version numbering (major/minor/patch/build) for releases"
   cross_references:
     - "PROC-COMMIT_MESSAGES"
-  description: "Version numbering (major/minor/patch/build) for releases"
+  source_index: "processes.md"
   detail_file: "null"
   metadata:
-    last_updated: "2026-03-03"
     registered: "2026-03-03"
-  name: "Release and version numbering"
-  source_index: "processes.md"
-  status: "Active"
+    last_updated: "2026-03-03"
+PROC-TEST_ADEQUACY:
   type: "PROC"
+  name: "Risk-triggered test adequacy"
+  status: "Active"
+  description: "Select advanced testing by risk and boundary"
+  cross_references:
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+  source_index: "processes.md"
+  detail_file: "null"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
 PROC-TEST_STRATEGY:
+  type: "PROC"
+  name: "Test Strategy and Coverage (minimize untested code)"
+  status: "Active"
+  description: "Minimize code not covered by tests; unit/integration cover IMPL/ARCH/REQ logic; E2E reserved for critical journeys"
   cross_references:
     - "IMPL-MODULE_VALIDATION"
     - "REQ-MODULE_VALIDATION"
-  description: "Minimize code not covered by tests; unit/integration cover IMPL/ARCH/REQ logic; E2E reserved for critical journeys"
+  source_index: "processes.md"
   detail_file: "null"
   metadata:
-    last_updated: "2026-03-01"
     registered: "2026-03-01"
-  name: "Test Strategy and Coverage (minimize untested code)"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
+    last_updated: "2026-03-01"
 PROC-TIED_DEV_CYCLE:
+  type: "PROC"
+  name: "TIED Development Cycle (session workflow)"
+  status: "Active"
+  description: "Session workflow: plan from TIED, author pseudo-code and tokens, add/align tests, implement (TDD), minimal glue, validate, sync TIED to code"
   cross_references:
     - "PROC-COMMIT_MESSAGES"
     - "PROC-IMPL_PSEUDOCODE_TOKENS"
@@ -180,136 +346,146 @@ PROC-TIED_DEV_CYCLE:
     - "PROC-TOKEN_VALIDATION"
     - "REQ-MODULE_VALIDATION"
     - "REQ-TIED_SETUP"
-  description: "Session workflow: plan from TIED, author pseudo-code and tokens, add/align tests, implement (TDD), minimal glue, validate, sync TIED to code"
+  source_index: "processes.md"
   detail_file: "null"
   metadata:
-    last_updated: "2026-03-05"
     registered: "2026-03-01"
-  name: "TIED Development Cycle (session workflow)"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
+    last_updated: "2026-03-05"
 PROC-TIED_METHODOLOGY_READONLY:
+  type: "PROC"
+  name: "TIED-sourced YAML read-only in client"
+  status: "Active"
+  description: "Methodology YAML (tied/methodology/) is read-only in client; project YAML (tied/ root) holds client data only; refresh methodology via copy_files.sh"
   cross_references:
     - "ARCH-TIED_STRUCTURE"
     - "PROC-YAML_DB_OPERATIONS"
     - "REQ-TIED_SETUP"
-  description: "Methodology YAML (tied/methodology/) is read-only in client; project YAML (tied/ root) holds client data only; refresh methodology via copy_files.sh"
+  source_index: "processes.md"
   detail_file: "null"
   metadata:
-    last_updated: "2026-03-16"
     registered: "2026-03-16"
-  name: "TIED-sourced YAML read-only in client"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
+    last_updated: "2026-03-16"
 PROC-TOKEN_AUDIT:
-  cross_references: []
-  description: "Mandatory checklist ensuring every requirement → architecture → implementation → code/test path is annotated and documented"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-02-08"
-    registered: "2025-11-08"
+  type: "PROC"
   name: "Token Audit Process"
-  source_index: "processes.md"
   status: "Active"
-  type: "PROC"
-PROC-TOKEN_VALIDATION:
+  description: "Mandatory checklist ensuring every requirement → architecture → implementation → code/test path is annotated and documented"
   cross_references: []
-  description: "Automated validation workflow that proves all referenced tokens exist in the registry"
+  source_index: "processes.md"
   detail_file: "null"
   metadata:
-    last_updated: "2026-02-08"
     registered: "2025-11-08"
-  name: "Token Validation Process"
-  source_index: "processes.md"
-  status: "Active"
+    last_updated: "2026-02-08"
+PROC-TOKEN_VALIDATION:
   type: "PROC"
+  name: "Token Validation Process"
+  status: "Active"
+  description: "Automated validation workflow that proves all referenced tokens exist in the registry"
+  cross_references: []
+  source_index: "processes.md"
+  detail_file: "null"
+  metadata:
+    registered: "2025-11-08"
+    last_updated: "2026-02-08"
 PROC-VOCABULARY_INDEX:
+  type: "PROC"
+  name: "Domain vocabulary index discipline"
+  status: "Active"
+  description: "Consult and maintain domain vocabulary index files at tied/vocab/*.md whenever a concept is named or expressed; distinct from IMPL pseudo-code grammar vocabulary"
   cross_references:
     - "PROC-AGENT_REQ_CHECKLIST"
     - "PROC-IMPL_PSEUDOCODE_TOKENS"
     - "PROC-TOKEN_AUDIT"
-  description: "Consult and maintain domain vocabulary index files at tied/vocab/*.md whenever a concept is named or expressed; distinct from IMPL pseudo-code grammar vocabulary"
+  source_index: "processes.md"
   detail_file: "null"
   metadata:
-    last_updated: "2026-05-29"
-    # ---
-    # Template Record - Copy this block to create new tokens
-    # ---
-    #
-    # TOKEN-IDENTIFIER:
-    #   type: REQ | ARCH | IMPL | TEST | PROC
-    #   name: Token Name
-    #   category: Optional category (e.g., Core Functional, Non-Functional for REQ)
-    #   status: Active | Deprecated | Template | Planned
-    #   description: "One-line description of what this token represents"
-    #   cross_references:
-    #     - RELATED-TOKEN-1
-    #     - RELATED-TOKEN-2
-    #   source_index: requirements.yaml | architecture-decisions.yaml | implementation-decisions.yaml | processes.md
-    #   detail_file: path/to/detail/file.yaml | null
-    #   metadata:
-    #     registered: YYYY-MM-DD
-    #     last_updated: YYYY-MM-DD
-
     registered: "2026-05-29"
-  name: "Domain vocabulary index discipline"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
+    last_updated: "2026-05-29"
+# ---
+# Template Record - Copy this block to create new tokens
+# ---
+#
+# TOKEN-IDENTIFIER:
+#   type: REQ | ARCH | IMPL | TEST | PROC
+#   name: Token Name
+#   category: Optional category (e.g., Core Functional, Non-Functional for REQ)
+#   status: Active | Deprecated | Template | Planned
+#   description: "One-line description of what this token represents"
+#   cross_references:
+#     - RELATED-TOKEN-1
+#     - RELATED-TOKEN-2
+#   source_index: requirements.yaml | architecture-decisions.yaml | implementation-decisions.yaml | processes.md
+#   detail_file: path/to/detail/file.yaml | null
+#   metadata:
+#     registered: YYYY-MM-DD
+#     last_updated: YYYY-MM-DD
+
 PROC-YAML_DB_OPERATIONS:
+  type: "PROC"
+  name: "YAML Database Operations Process"
+  status: "Active"
+  description: "YAML database operations for reading, writing, querying, and validating YAML index files"
   cross_references:
     - "ARCH-TIED_STRUCTURE"
     - "REQ-TIED_SETUP"
-  description: "YAML database operations for reading, writing, querying, and validating YAML index files"
+  source_index: "processes.md"
   detail_file: "null"
   metadata:
-    last_updated: "2026-02-08"
     registered: "2025-11-08"
-  name: "YAML Database Operations Process"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
+    last_updated: "2026-02-08"
 REQ-FEEDBACK_TO_TIED:
+  type: "REQ"
+  name: "Feedback to TIED (Feature Requests, Bug Reports, Methodology)"
   category: "Functional"
+  status: "Active"
+  description: "Index stub; optional feedback tooling; see checklist when building"
   cross_references:
     - "ARCH-FEEDBACK_STORAGE"
     - "IMPL-MCP_FEEDBACK_TOOLS"
-  description: "Index stub; optional feedback tooling; see checklist when building"
+  source_index: "requirements.yaml"
   detail_file: "null"
   metadata:
-    last_updated: "2026-04-21"
     registered: "2026-03-03"
-  name: "Feedback to TIED (Feature Requests, Bug Reports, Methodology)"
-  source_index: "requirements.yaml"
-  status: "Active"
-  type: "REQ"
+    last_updated: "2026-04-21"
 REQ-MODULE_VALIDATION:
+  type: "REQ"
+  name: "Independent Module Validation Before Integration"
   category: "Core Functional"
+  status: "Active"
+  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
   cross_references:
     - "ARCH-MODULE_VALIDATION"
     - "IMPL-MODULE_VALIDATION"
-  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
+  source_index: "requirements.yaml"
   detail_file: "null"
   metadata:
-    last_updated: "2026-04-21"
     registered: "2025-01-27"
-  name: "Independent Module Validation Before Integration"
-  source_index: "requirements.yaml"
-  status: "Active"
+    last_updated: "2026-04-21"
+REQ-QUALITY_ASSURANCE_EVIDENCE:
   type: "REQ"
+  name: "Risk-triggered quality assurance evidence"
+  category: "Non-Functional"
+  status: "Active"
+  description: "Bounded quality profiles and reproducible evidence for behavior-changing work"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+  source_index: "requirements.yaml"
+  detail_file: "requirements/REQ-QUALITY_ASSURANCE_EVIDENCE.yaml"
+  metadata:
+    registered: "2026-08-02"
+    last_updated: "2026-08-02"
 REQ-TIED_SETUP:
+  type: "REQ"
+  name: "TIED Methodology Setup"
   category: "Core Functional"
+  status: "Active"
+  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
   cross_references:
     - "ARCH-TIED_STRUCTURE"
     - "IMPL-TIED_FILES"
-  description: "Index stub; procedure in agent-req-implementation-checklist.yaml"
+  source_index: "requirements.yaml"
   detail_file: "null"
   metadata:
-    last_updated: "2026-04-21"
     registered: "2025-11-08"
-  name: "TIED Methodology Setup"
-  source_index: "requirements.yaml"
-  status: "Active"
-  type: "REQ"
+    last_updated: "2026-04-21"

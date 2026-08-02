@@ -47,7 +47,7 @@ REQ/ARCH/IMPL are already updated; do **not** re-author from scratch.
 
 - **Verify** REQ/ARCH/IMPL index and detail files are complete (all required fields, tokens in `semantic-tokens.yaml`).
 - **Verify** IMPL pseudo-code per checklist catalog-pseudocode-contracts–apply-token-comments:
-  - Contracts: INPUT/OUTPUT/DATA (and CONTROL when present) declared; procedure names and key branches/loops/error paths present.
+  - Contracts: INPUT/OUTPUT/DATA (and CONTROL when present); PRE/POST/EFFECTS on new/changed Active procedure blocks; FAILURE_MODES/DATA_TRANSITION/TERMINATION when applicable (SHAPE-003..006). Unchanged legacy Active blocks may retain N/A `pre-contract-grammar` until next edit.
   - No insufficient specs: no missing contracts, undefined procedures, unhandled error paths, stub pseudo-code on Active IMPLs, or blocks without token comments.
   - No contradictory specs across IMPLs (shared DATA, ordering, OUTPUT types, duplicate logic).
   - **Every block** has a token comment per `[PROC-IMPL_PSEUDOCODE_TOKENS]` (top-level and sub-blocks naming REQ/ARCH/IMPL and how the block implements them).

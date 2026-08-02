@@ -193,7 +193,12 @@ This section is **optional guidance** only. Checklist order and gating are uncha
 1. **Touchpoint 2 (pre-read):** **CALL sub-vocabulary-sync** (**PRELOAD**) scoped to modules and concepts from change-definition — load glossaries under `tied/vocab/` for affected subsystems so subsequent IMPL/code reads interpret symbols and paths with canonical names.
 2. Identify affected modules and functions with their tied tokens.
 3. Identify module boundaries the change touches or crosses.
-4. Build `tied_context`:
+4. **Risk-first quality applicability (before design)**:
+   - Select `baseline-functional` and any triggered assurance profiles from `tied/vocab/quality-assurance.md`.
+   - Record a quality evidence matrix row for each considered attribute: applicability, rationale, risk, evidence method, exact command/test, threshold, result placeholder, owner, limitation, and waiver/expiry when applicable.
+   - Generate bounded scenarios from IMPL branches, PRE/POST boundaries, failure modes, mutable-state transitions, and meaningful empty/minimal/maximal/malformed/duplicate cases. Add abuse-case rows for applicable input, authorization, resource, replay, sensitive-data, and untrusted-content boundaries.
+   - Keep specialized profiles conditional. A low-risk or irrelevant attribute receives an explicit N/A rationale rather than an invented test or universal ceremony.
+5. Build `tied_context`:
    - `tied_tokens_affected` — existing REQ/ARCH/IMPL tokens touched by the change.
    - `tied_tokens_new` — tokens to be created.
 5. **IMPL Discovery** (`[PROC-IMPL_CODE_TEST_SYNC]` Phase A):
@@ -213,7 +218,7 @@ This section is **optional guidance** only. Checklist order and gating are uncha
 
 6. **Stop expanding** when no new IMPLs share code paths, REQ/ARCH tokens, or `composed_with` links with the current set.
 
-**Outcomes**: Complete impact map; vocabulary term map loaded (PRELOAD) for affected subsystems; IMPL inventory table ready; all affected and related tokens identified.
+**Outcomes**: Complete impact map; vocabulary term map loaded (PRELOAD) for affected subsystems; risk/profile selection and an initial quality evidence matrix exist before REQ/ARCH/IMPL design; bounded scenarios and applicable abuse cases are recorded; IMPL inventory table ready; all affected and related tokens identified.
 
 **Branch**: IF the IMPL set is large (signal of high coupling) THEN consider whether IMPLs need decomposition before proceeding.
 
@@ -341,12 +346,14 @@ This section is **optional guidance** only. Checklist order and gating are uncha
 
 ## risk-assessment (risk-assessment): Risks, mitigations, token references
 
-**Goals**: Identify and document risks associated with the change.
+**Goals**: Confirm the pre-design risk/profile decision and document residual risks, mitigations, and evidence ownership associated with the change.
 
 **Tasks**:
-1. List risks with severity and likelihood.
-2. Where applicable, attach `tied_token_references` to each risk (which REQ/ARCH/IMPL the risk affects).
-3. Document mitigation strategies.
+1. Confirm that `impact-discovery` selected `baseline-functional` and any triggered assurance profiles before REQ/ARCH/IMPL design; if missing, return to `impact-discovery`.
+2. List risks with severity, likelihood, quality attribute, and selected profile.
+3. Where applicable, attach `tied_token_references` to each risk (which REQ/ARCH/IMPL the risk affects).
+4. Document mitigation strategies, evidence owner, limitation, and failure action.
+5. Record accepted residual risk only with an accountable owner and expiry; record N/A rows with rationale instead of silently omitting them.
 
 **Outcomes**: Risks documented with token references. Mitigations identified.
 
@@ -356,7 +363,7 @@ This section is **optional guidance** only. Checklist order and gating are uncha
 
 ## test-strategy (test-strategy): Test matrix, classification, mandatory order
 
-**Goals**: Classify testability for each IMPL block; produce a test matrix; plan the TDD sequence.
+**Goals**: Classify testability for each IMPL block; connect the selected quality evidence matrix to executable checks; produce a test matrix; plan the TDD sequence.
 
 **Tasks**:
 1. For each IMPL block/procedure, classify as: `unit`, `integration`, or `e2e_only`.
@@ -375,6 +382,7 @@ This section is **optional guidance** only. Checklist order and gating are uncha
    - (5) E2E (only for behavior requiring UI invocation).
    - (6) Validate and sync.
 5. Identify module boundaries and validation criteria per `[REQ-MODULE_VALIDATION]`.
+6. For selected profiles only, plan the applicable adequacy checks: mutation/property/metamorphic testing, fuzzing or deterministic replay, flaky-test detection, harness self-tests, complexity/dead-code review, dependency review, maintainability/coupling thresholds, and external-call cost controls. Record repeat count, seed, retry classification, quarantine owner/expiry, timeout, retry budget, caching/batching, and resource-exhaustion behavior when relevant.
 
 **Outcomes**: Test matrix complete; every IMPL block has a testability classification; TDD sequence planned; module boundaries documented.
 
@@ -825,7 +833,7 @@ flowchart TD
 | `tied/docs/processes.md` | Canonical definitions for all `[PROC-*]` tokens referenced in this checklist |
 | `tied/docs/pseudocode-writing-and-validation.md` | Unified IMPL pseudo-code guide: REQ vs post-fix tracks, MCP/sidecar mechanics, literal block linkage, phases A–I, LEAP, validation |
 | `tied/docs/LEAP.md` | LEAP rationale: why IMPL pseudo-code beats hunting through source |
-| `tied/docs/implementation-order.md` | Mandatory implementation order (tests → TDD → glue → E2E → close loop) |
+| `tied/docs/implementation-order.md` | Mandatory implementation order (unit tests → unit TDD → composition tests → composition code → justified E2E → close loop) |
 | `tied/docs/methodology-diagrams.md` | Visual diagrams for the traceability stack, dev cycle, TDD inner loop, CITDP, and YAML edit loop |
 | `tied/docs/ai-principles.md` | Agent principles, checklists, change impact tracking matrix |
 | `tied/docs/implementation-decisions.md` | IMPL detail schema, pseudo-code rules, preferred vocabulary, collision detection |

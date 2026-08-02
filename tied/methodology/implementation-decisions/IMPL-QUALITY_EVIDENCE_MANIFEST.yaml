@@ -1,0 +1,59 @@
+IMPL-QUALITY_EVIDENCE_MANIFEST:
+  code_locations:
+    files:
+      - path: "mcp-server/src/quality-evidence.ts"
+        description: "Pure evidence manifest types and builder"
+      - path: "mcp-server/src/quality-evidence.test.ts"
+        description: "Unit tests for deterministic manifest generation"
+    functions:
+      - name: "buildVerificationEvidenceManifest"
+        description: "Build normalized machine-derived evidence manifest"
+        file: "mcp-server/src/quality-evidence.ts"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  implementation_approach:
+    details:
+      - "Emit deterministic JSON suitable for hashing and retention."
+      - "Include covered REQ/IMPL tokens and validator proof-boundary labels."
+      - "Keep waiver, owner, expiry, and residual-risk decisions outside machine-derived pass/fail fields."
+      - "Normalize command, environment, tool version, exit code, threshold, result, and artifact references."
+    summary: "Use a pure manifest builder for normalized command results and quality-matrix outcomes, then add composition wiring for callers."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-02"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Synchronize literal block leads"
+  name: "Verification evidence manifest generation"
+  rationale:
+    benefits:
+      - "Clear separation between executable results and human decisions."
+      - "Stable evidence artifact for review and CI."
+    problems_solved:
+      - "Machine-derived results can be confused with human residual-risk or waiver decisions."
+      - "Verification results are scattered across command output and audit logs."
+    why: "Quality claims need reproducible provenance and explicit proof boundaries."
+  related_decisions:
+    composed_with:
+      - "IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK"
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+      - "IMPL-QUALITY_SECURITY_PROFILE_VALIDATION"
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    code_annotations:
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+    requirements:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    tests:
+      - "mcp-server/src/quality-evidence-collection.test.ts"
+      - "mcp-server/src/quality-evidence.test.ts"
+      - "mcp-server/src/tools/quality-validation-mcp.test.ts"

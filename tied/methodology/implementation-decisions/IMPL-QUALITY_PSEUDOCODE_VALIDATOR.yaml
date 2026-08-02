@@ -1,0 +1,54 @@
+IMPL-QUALITY_PSEUDOCODE_VALIDATOR:
+  code_locations:
+    files:
+      - path: "mcp-server/src/analysis/pseudocode-validator.ts"
+        description: "Layer B pseudo-code structure and contract validator"
+      - path: "mcp-server/src/analysis/pseudocode-validator.test.ts"
+        description: "Unit coverage for parser, contracts, symbols, and coverage references"
+      - path: "mcp-server/src/tools/index.ts"
+        description: "MCP pseudocode_validate handler"
+    functions:
+      - name: "validateEssencePseudocode"
+        description: "Validate token linkage, contracts, symbols, dependencies, and optional coverage references"
+        file: "mcp-server/src/analysis/pseudocode-validator.ts"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "PROC-PSEUDOCODE_VALIDATION"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  implementation_approach:
+    details:
+      - "Keep validation deterministic and independent of runtime execution."
+      - "Require PRE, POST, and EFFECTS for changed Active procedure blocks."
+      - "Return structural diagnostics without claiming behavioral coverage."
+    summary: "Parse language-agnostic pseudo-code, validate token links and contract shape, resolve dependencies, and emit source-located diagnostics."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Synchronize literal block leads"
+  name: "Layer B pseudo-code validator"
+  rationale:
+    benefits:
+      - "Clear ownership for structural pseudo-code validation."
+      - "Explicit proof boundary separating structure from runtime correctness."
+    problems_solved:
+      - "Contract, symbol, dependency, and coverage diagnostics lacked a dedicated traceability owner."
+      - "Generic Layer B validation was attributed to manifest generation."
+    why: "Structural pseudo-code checks need a separately owned, deterministic implementation boundary."
+  related_decisions:
+    depends_on: []
+    see_also:
+      - "PROC-PSEUDOCODE_VALIDATION"
+    supersedes: []
+  status: "Active"
+  testability: "unit"
+  traceability:
+    architecture:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    code_annotations:
+      - "IMPL-QUALITY_PSEUDOCODE_VALIDATOR"
+    requirements:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    tests:
+      - "mcp-server/src/analysis/pseudocode-validator.test.ts"
+      - "mcp-server/src/tools/quality-validation-mcp.test.ts"

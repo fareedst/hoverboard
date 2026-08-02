@@ -1,0 +1,52 @@
+IMPL-QUALITY_SECURITY_PROFILE_VALIDATION:
+  code_locations:
+    files:
+      - path: "mcp-server/src/quality-security.ts"
+        description: "External-input security profile completeness validator"
+      - path: "mcp-server/src/quality-security.test.ts"
+        description: "Unit tests for required abuse cases and waivers"
+    functions:
+      - name: "validateSecurityProfile"
+        description: "Require executable evidence or complete waivers for security cases"
+        file: "mcp-server/src/quality-security.ts"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  implementation_approach:
+    details:
+      - "A waiver requires rationale, owner, and expiry."
+      - "Each selected case requires an executable test or scanner command."
+      - "The validator reports plan completeness only and does not claim runtime security proof."
+    summary: "Validate selected external-input security abuse cases for malformed input, authorization, injection, path, replay, secrets, resources, and dependency review."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Synchronize literal block leads"
+  name: "External-input security profile validation"
+  rationale:
+    benefits:
+      - "Complete, actionable security evidence plans."
+      - "Conditional security ceremony tied to risk triggers."
+    problems_solved:
+      - "Runtime security proof was confused with TIED consistency."
+      - "Security profile selection did not require specific abuse cases."
+    why: "External boundaries need concrete abuse-case evidence instead of a profile label alone."
+  related_decisions:
+    composed_with:
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+    depends_on: []
+    see_also:
+      - "PROC-QUALITY_ASSURANCE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    code_annotations:
+      - "IMPL-QUALITY_SECURITY_PROFILE_VALIDATION"
+    requirements:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    tests:
+      - "mcp-server/src/quality-security.test.ts"
+      - "mcp-server/src/tools/quality-validation-mcp.test.ts"

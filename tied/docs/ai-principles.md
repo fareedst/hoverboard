@@ -59,8 +59,9 @@ This acknowledgment confirms that the AI agent has:
    - Validation failures MUST be documented and resolved before proceeding.
 
 7. **Priority-Based Implementation**
-   - **Most Important**: Tests, Code, Basic Functions
-   - **Least Important**: Environment Orchestration, Enhanced Security, Automated Deployment
+   - **Execution order**: IMPL pseudo-code and validation, RED tests, GREEN code, composition evidence, justified E2E, then verification and synchronization.
+   - **Quality priority**: For applicable risks, safety/correctness/data integrity/security/privacy, then reliability/recovery, performance/scalability/cost, usability/accessibility, and maintainability.
+   - Risk priority does not make every quality area applicable to every change, and it does not permit skipping the mandatory TDD sequence.
 
 8. **Extensive Debug Output During Development**
    - Use extensive diagnostic output (logging functions, debug flags) liberally during initial implementation and debugging
@@ -199,7 +200,9 @@ See `tied/docs/processes.md` § LEAP for the canonical process definition.
 - **P2 (Nice-to-Have)**: UI/UX improvements, documentation enhancements, convenience features, non-critical optimizations
 - **P3 (Future)**: Deferred features, experimental ideas, future enhancements, infrastructure improvements
 
-**Priority order**: Tests > Code > Basic Functions > Developer Experience > Infrastructure > Security
+**Execution order**: IMPL pseudo-code and validation > RED tests > GREEN code > composition evidence > justified E2E > verification and synchronization.
+
+**Quality priority**: Applicable safety/correctness/data integrity/security/privacy > reliability/recovery > performance/scalability/cost > usability/accessibility > maintainability.
 
 ---
 

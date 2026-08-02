@@ -1,0 +1,54 @@
+IMPL-QUALITY_TEST_ADEQUACY:
+  code_locations:
+    files:
+      - path: "mcp-server/src/quality-adequacy.ts"
+        description: "Risk-triggered test adequacy plan validator"
+      - path: "mcp-server/src/quality-adequacy.test.ts"
+        description: "Unit coverage for profile requirements, boundaries, failures, and waivers"
+      - path: "mcp-server/src/tools/index.ts"
+        description: "MCP test_adequacy_validate handler"
+    functions:
+      - name: "validateTestAdequacyPlan"
+        description: "Validate quality profile test-plan adequacy metadata"
+        file: "mcp-server/src/quality-adequacy.ts"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "PROC-TEST_ADEQUACY"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  implementation_approach:
+    details:
+      - "Map each selected profile to required adequacy fields."
+      - "Return diagnostics without executing tests."
+      - "Treat valid owner and expiry data as required for waivers."
+    summary: "Validate selected quality profiles against test-plan metadata, required test levels, negative paths, boundaries, and waiver evidence."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Synchronize literal block leads"
+  name: "Risk-triggered test adequacy validator"
+  rationale:
+    benefits:
+      - "Accepted waivers remain explicit and auditable."
+      - "Risk profiles produce deterministic missing-evidence diagnostics."
+    problems_solved:
+      - "A plan could be accepted without required boundary or failure-mode coverage."
+      - "Adequacy metadata and required evidence were not separately owned."
+    why: "Risk-triggered quality profiles need an independently testable adequacy decision boundary."
+  related_decisions:
+    depends_on: []
+    see_also:
+      - "PROC-TEST_ADEQUACY"
+    supersedes: []
+  status: "Active"
+  testability: "unit and composition"
+  traceability:
+    architecture:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    code_annotations:
+      - "IMPL-QUALITY_TEST_ADEQUACY"
+    requirements:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    tests:
+      - "mcp-server/src/quality-adequacy.test.ts"
+      - "mcp-server/src/tools/quality-validation-mcp.test.ts"

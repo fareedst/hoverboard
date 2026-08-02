@@ -24,113 +24,134 @@
 #   metadata: Optional metadata
 # Methodology seed: token identity and traceability only; do not expand rationale here (use the checklist and project detail files when needed).
 REQ-FEEDBACK_TO_TIED:
-  category: "Functional"
-  detail_file: "null"
-  metadata:
-    last_updated:
-      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
-  # ---
-  # Template Record - Copy this block to create new requirements
-  # ---
-  #
-  # REQ-IDENTIFIER:
-  #   name: Requirement Name
-  #   category: Functional
-  #   priority: P1
-  #   status: "Planned"
-  #   rationale:
-  #     why: "Primary reason for this requirement"
-  #     problems_solved:
-  #       - "Problem 1"
-  #       - "Problem 2"
-  #     benefits:
-  #       - "Benefit 1"
-  #       - "Benefit 2"
-  #   satisfaction_criteria:
-  #     - criterion: "Criterion description 1"
-  #       metric: "Measurable target (optional)"
-  #     - criterion: "Criterion description 2"
-  #   validation_criteria:
-  #     - method: "Unit tests"
-  #       coverage: "All core functions"
-  #     - method: "Integration tests"
-  #       coverage: "End-to-end flows"
-  #     - method: "Manual testing"
-  #       coverage: "QA checklist"
-  #   traceability:
-  #     architecture:
-  #       - ARCH-IDENTIFIER
-  #     implementation:
-  #       - IMPL-IDENTIFIER
-  #     tests:
-  #       - testFeatureName_REQ_IDENTIFIER
-  #     code_annotations:
-  #       - REQ-IDENTIFIER
-  #   related_requirements:
-  #     depends_on: []
-  #     related_to: []
-  #     supersedes: []
-  #   detail_file: requirements/REQ-IDENTIFIER.yaml
-  #   metadata:
-  #     created:
-  #       date: YYYY-MM-DD
-  #       author: "agent/contributor"
-  #     last_updated:
-  #       date: YYYY-MM-DD
-  #       author: "agent/contributor"
-  #       reason: "Initial creation"
-  #     last_validated:
-  #       date: YYYY-MM-DD
-  #       validator: "agent/contributor"
-  #       result: "pass"
-
   name: "Feedback to TIED (Feature Requests, Bug Reports, Methodology)"
+  category: "Functional"
   priority: "P1"
-  related_requirements:
-    depends_on: []
-    related_to:
-      - "REQ-TIED_SETUP"
-    supersedes: []
   status: "Planned"
+  detail_file: "null"
   traceability:
     architecture:
       - "ARCH-FEEDBACK_STORAGE"
     implementation:
       - "IMPL-MCP_FEEDBACK_TOOLS"
-REQ-MODULE_VALIDATION:
-  category: "Functional"
-  detail_file: "null"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-TIED_SETUP"
+    supersedes: []
   metadata:
     last_updated:
       reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
+REQ-MODULE_VALIDATION:
   name: "Independent Module Validation Before Integration"
+  category: "Functional"
   priority: "P0"
-  related_requirements:
-    depends_on:
-      - "REQ-TIED_SETUP"
-    related_to: []
-    supersedes: []
   status: "Implemented"
+  detail_file: "null"
   traceability:
     architecture:
       - "ARCH-MODULE_VALIDATION"
     implementation:
       - "IMPL-MODULE_VALIDATION"
-REQ-TIED_SETUP:
-  category: "Functional"
-  detail_file: "null"
+  related_requirements:
+    depends_on:
+      - "REQ-TIED_SETUP"
+    related_to: []
+    supersedes: []
   metadata:
     last_updated:
       reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
-  name: "TIED Methodology Setup"
+REQ-QUALITY_ASSURANCE_EVIDENCE:
+  category: "Non-Functional"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+  description: "Every behavior-changing change selects applicable quality attributes from a bounded risk profile and records reproducible evidence, limitations, and accepted residual risk without imposing irrelevant checks."
+  detail_file: "requirements/REQ-QUALITY_ASSURANCE_EVIDENCE.yaml"
+  name: "Risk-triggered quality assurance evidence"
   priority: "P0"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    implementation:
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
   related_requirements:
-    depends_on: []
+    depends_on:
+      - "REQ-MODULE_VALIDATION"
+      - "REQ-TIED_SETUP"
     related_to: []
     supersedes: []
+# ---
+# Template Record - Copy this block to create new requirements
+# ---
+#
+# REQ-IDENTIFIER:
+#   name: Requirement Name
+#   category: Functional
+#   priority: P1
+#   status: "Planned"
+#   rationale:
+#     why: "Primary reason for this requirement"
+#     problems_solved:
+#       - "Problem 1"
+#       - "Problem 2"
+#     benefits:
+#       - "Benefit 1"
+#       - "Benefit 2"
+#   satisfaction_criteria:
+#     - criterion: "Criterion description 1"
+#       metric: "Measurable target (optional)"
+#     - criterion: "Criterion description 2"
+#   validation_criteria:
+#     - method: "Unit tests"
+#       coverage: "All core functions"
+#     - method: "Integration tests"
+#       coverage: "End-to-end flows"
+#     - method: "Manual testing"
+#       coverage: "QA checklist"
+#   traceability:
+#     architecture:
+#       - ARCH-IDENTIFIER
+#     implementation:
+#       - IMPL-IDENTIFIER
+#     tests:
+#       - testFeatureName_REQ_IDENTIFIER
+#     code_annotations:
+#       - REQ-IDENTIFIER
+#   related_requirements:
+#     depends_on: []
+#     related_to: []
+#     supersedes: []
+#   detail_file: requirements/REQ-IDENTIFIER.yaml
+#   metadata:
+#     created:
+#       date: YYYY-MM-DD
+#       author: "agent/contributor"
+#     last_updated:
+#       date: YYYY-MM-DD
+#       author: "agent/contributor"
+#       reason: "Initial creation"
+#     last_validated:
+#       date: YYYY-MM-DD
+#       validator: "agent/contributor"
+#       result: "pass"
+
+REQ-TIED_SETUP:
+  name: "TIED Methodology Setup"
+  category: "Functional"
+  priority: "P0"
   status: "Implemented"
+  detail_file: "null"
   traceability:
     architecture:
       - "ARCH-TIED_STRUCTURE"
     implementation:
       - "IMPL-TIED_FILES"
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  metadata:
+    last_updated:
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"

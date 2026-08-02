@@ -29,9 +29,11 @@ Use these **nicknames** in tickets, PRs, and agent prompts.
 | 1 | **Rules** | [`../../AGENTS.md`](../../AGENTS.md) | Session start; defines obligations, MCP base path, vocab touchpoints. |
 | 2 | **Checklist** | [agent-req-implementation-checklist.md](agent-req-implementation-checklist.md) | **Every** new feature, change, or bug fix — the executable procedure. |
 | 3 | **Tracker** | [agent-req-implementation-checklist.yaml](agent-req-implementation-checklist.yaml) | Copy to a working folder per task; record step completion (see YAML header). |
-| 4 | **Processes** | [processes.md](processes.md) | Need the **definition** behind a checklist step. Read these sections only: `[PROC-CITDP]`, `[PROC-LEAP]`, `[PROC-TIED_DEV_CYCLE]`, `[PROC-IMPL_CODE_TEST_SYNC]`, `[PROC-TEST_STRATEGY]`, `[PROC-VOCABULARY_INDEX]`. |
+| 4 | **Processes** | [processes.md](processes.md) | Need the **definition** behind a checklist step. Read these sections only: `[PROC-CITDP]`, `[PROC-LEAP]`, `[PROC-TIED_DEV_CYCLE]`, `[PROC-IMPL_CODE_TEST_SYNC]`, `[PROC-TEST_STRATEGY]`, `[PROC-QUALITY_ASSURANCE]`, `[PROC-QUALITY_EVIDENCE_PROVENANCE]`, `[PROC-TEST_ADEQUACY]`, `[PROC-VOCABULARY_INDEX]`. |
 | 5 | **Pseudo-code** | [pseudocode-writing-and-validation.md](pseudocode-writing-and-validation.md) | Authoring or repairing IMPL `essence_pseudocode`; three-way alignment; LEAP micro-cycle. Tracks: **new feature** (A), **post-fix** (B), **code without spec** (C). |
-| 6 | **Change records** | [citdp-policy.md](citdp-policy.md) + [citdp-record-template.yaml](citdp-record-template.yaml) | When to write a CITDP file; shape for `tied/citdp/CITDP-*.yaml`. |
+| 6 | **Change records** | [citdp-policy.md](citdp-policy.md) + [citdp-record-template.yaml](citdp-record-template.yaml) | When to write a CITDP file; shape for `tied/citdp/CITDP-*.yaml`, quality evidence matrix, and residual-risk decisions. |
+
+Quality assurance references: [quality-assurance-commands.md](quality-assurance-commands.md), [quality-evidence-manifest.md](quality-evidence-manifest.md), [quality-assurance-pilot.md](quality-assurance-pilot.md), and [composition-coverage.md](composition-coverage.md).
 
 **Session pairing**: read **Rules** and [ai-principles.md](ai-principles.md) (**Principles**) together at bootstrap — Principles expands the same mandates in checklist form.
 
@@ -53,6 +55,7 @@ Use these **nicknames** in tickets, PRs, and agent prompts.
 | --- | --- | --- |
 | New requirement | **Checklist** → `session-bootstrap` | **Pseudo-code** Track A; project YAML indexes below |
 | Change existing behavior | **Checklist** → `change-definition` | **Processes** § `[PROC-CITDP]`; **Change records** |
+| Upgrade TIED methodology | **methodology-migration.md** → Phase 0 | **Rules**, refreshed TIED YAML MCP, and the per-request Tracker |
 | TIED already updated; code/tests lag | [tied-first-implementation-procedure.md](tied-first-implementation-procedure.md) (**TIED-first**) | **Checklist** with verify-only REQ/ARCH/IMPL steps |
 | Bug fix | **Checklist** → `session-bootstrap` | Add REQ at `author-requirement` if missing |
 | Tests/code diverged from IMPL | **Pseudo-code** § LEAP micro-cycle | **Processes** § `[PROC-LEAP]`; checklist `sub-leap-micro-cycle` |

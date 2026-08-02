@@ -1,0 +1,58 @@
+IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK:
+  code_locations:
+    files:
+      - path: "pilot/webhook-inbox/src/server.mjs"
+        description: "Authenticated HTTP webhook handler and retry worker"
+      - path: "pilot/webhook-inbox/src/sqlite-store.mjs"
+        description: "SQLite CLI inbox persistence and state transitions"
+      - path: "pilot/webhook-inbox/test/webhook-inbox.test.mjs"
+        description: "Pilot authentication, idempotency, and retry tests"
+    functions:
+      - name: "createWebhookInboxServer"
+        description: "Create bounded authenticated webhook HTTP server"
+        file: "pilot/webhook-inbox/src/server.mjs"
+      - name: "processDueEvents"
+        description: "Process pending events with bounded retries"
+        file: "pilot/webhook-inbox/src/server.mjs"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  implementation_approach:
+    details:
+      - "Keep secrets and payload contents out of diagnostics."
+      - "Persist accepted events with an idempotency key and unique constraint."
+      - "Retry failed worker attempts with bounded exponential backoff."
+      - "Use HMAC signature verification over timestamped raw payloads."
+    summary: "Provide signature verification, bounded request parsing, SQLite idempotency, replay protection, and retryable worker modules behind a thin HTTP handler."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Synchronize literal block leads"
+  name: "Authenticated webhook inbox pilot"
+  rationale:
+    benefits:
+      - "Reproducible pilot evidence."
+      - "Thin entry point with independently validated modules."
+    problems_solved:
+      - "Security, replay, migration, and retry evidence lacked an executable cohort."
+      - "The quality framework had no representative authenticated persistence workflow."
+    why: "A boundary-rich but small pilot tests whether the quality gates find actionable risks without universal ceremony."
+  related_decisions:
+    composed_with:
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+    depends_on:
+      - "IMPL-QUALITY_SECURITY_PROFILE_VALIDATION"
+    see_also:
+      - "PROC-QUALITY_ASSURANCE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    code_annotations:
+      - "IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK"
+    requirements:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    tests:
+      - "pilot/webhook-inbox/test/webhook-inbox.test.mjs"

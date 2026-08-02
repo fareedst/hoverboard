@@ -11,6 +11,10 @@ change_definition:
   unchanged_behavior: "~"
 completion_criteria:
   verification_gate_notes: "~"
+evidence:
+  commands: []
+  manifest_reference: "~"
+  proof_boundaries: []
 impact_analysis:
   impl_inventory_notes: "~"
   modules_or_boundaries: "~"
@@ -25,7 +29,30 @@ record_identity:
   recorded_at: "YYYY-MM-DD"
   title: "~"
 risk_analysis:
+  abuse_cases: []
+  quality_evidence_matrix:
+    - attribute: "baseline-functional"
+      applicability: "applicable"
+      command_or_test: "~"
+      evidence_method: "~"
+      limitation: "~"
+      owner: "~"
+      rationale: "~"
+      result: "~"
+      risk: "~"
+      threshold: "~"
+      waiver:
+        expiry: "~"
+        owner: "~"
+        reason: "~"
+        required: "false"
+  quality_profiles: []
+  residual_risk:
+    expiry: "~"
+    owner: "~"
+    summary: "~"
   risks: []
+  scenarios: []
 tdd_sequence:
   summary: "~"
 test_strategy:

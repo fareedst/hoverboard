@@ -29,7 +29,7 @@ In a typical codebase:
 
 ### 2.2 What IMPL pseudo-code provides
 
-- **One place per decision**: Each IMPL has a single detail file with `essence_pseudocode`. The **logical** behavior of that decision is written there in language-agnostic, step-wise form (INPUT/OUTPUT/DATA, control flow, procedure names). No need to open 10 source files to guess.
+- **One place per decision**: Each IMPL has a single detail file with `essence_pseudocode`. The **logical** behavior of that decision is written there in language-agnostic, step-wise form (INPUT/OUTPUT/DATA/CONTROL, PRE/POST/EFFECTS and applicable FAILURE_MODES/DATA_TRANSITION/TERMINATION, control flow, procedure names). No need to open 10 source files to guess.
 - **Bounded by R/A/I**: REQ and ARCH tokens tell the agent *why* this IMPL exists and *what* requirement/architecture it satisfies. The agent can read REQ → ARCH → IMPL in order and get the full chain of intent before touching code.
 - **Stable vocabulary**: IMPL pseudo-code uses a consistent vocabulary (see `implementation-decisions.md` § Mandatory essence_pseudocode). That makes blocks comparable and reduces ambiguity (e.g. "RETURN error" vs "ON error" vs ad-hoc prose).
 - **Collision detection**: When multiple IMPLs interact, comparing their `essence_pseudocode` blocks reveals overlapping steps, shared data, and ordering dependencies. Doing the same from raw source requires deep execution tracing.
@@ -57,7 +57,7 @@ the LEAP rules apply: keep the stack consistent; elevate logic into IMPL; propag
 
 ### 3.2 Bottom-up (refinement from tests/code)
 
-When code or tests written during TDD or E2E **differ** from the IMPL pseudo-code:
+When code or tests written during unit TDD, composition testing, or E2E **differ** from the IMPL pseudo-code:
 
 1. **Elevate** the new logic into IMPL (update `essence_pseudocode` and any IMPL detail fields).
 2. If the change affects architecture or requirement scope, **propagate** to ARCH, then to REQ, in the same work item.
@@ -68,7 +68,7 @@ When code or tests written during TDD or E2E **differ** from the IMPL pseudo-cod
 When creating a new feature or decision:
 
 1. Add or update REQ; then ARCH; then IMPL with full pseudo-code **before** writing tests or code.
-2. Implement and test (TDD); if tests force a behavior change, apply bottom-up (above) so IMPL stays the logical representation.
+2. Implement and test in mandatory order: unit TDD → composition tests/code for bindings → justified UI-only E2E; if tests force a behavior change, apply bottom-up (above) so IMPL stays the logical representation.
 
 ### 3.4 YAML and MCP
 

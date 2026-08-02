@@ -6,7 +6,13 @@ IMPL-MODULE_VALIDATION:
       - path: "*_validation_test.[ext]"
         description: "Module validation test files (alternate pattern)"
       - path: "*_integration_test.[ext]"
-        description: "Integration test files"
+        description: "Integration / composition test files"
+      - path: "tied/docs/composition-coverage.md"
+        description: "Binding inventory shape and composition vs E2E exclusion rule"
+      - path: "tools/agentstream/checklist/*_test.go"
+        description: "Checklist ordering and composition instruction coverage"
+      - path: "tools/agentstream/pipeline/*_test.go"
+        description: "Pipeline binding composition coverage"
     functions:
       - name: "testModuleName_IndependentValidation_REQ_MODULE_VALIDATION"
         description: "Module validation test function pattern"
@@ -17,20 +23,21 @@ IMPL-MODULE_VALIDATION:
   detail_file: "implementation-decisions/IMPL-MODULE_VALIDATION.yaml"
   implementation_approach:
     details:
-      - "Phase 1: Identify modules and document boundaries, interfaces, contracts, dependencies, validation criteria"
-      - "Phase 2: Develop module independently with dependency injection"
-      - "Phase 3: Validate independently with unit tests (mocked dependencies), contract validation, edge cases, error handling, integration tests with test doubles"
-      - "Phase 4: Document validation results including passed tests, limitations, assumptions"
-      - "Phase 5: Integrate only after validation passes, with integration tests validating combined behavior"
-    summary: "Five-phase approach: module identification, independent development, independent validation, documentation, and integration"
+      - Phase 1: "Identify modules and document boundaries, interfaces, contracts, dependencies, validation criteria, and initial binding inventory"
+      - Phase 2: "Develop module independently with dependency injection"
+      - Phase 3: "Validate independently with unit tests (mocked dependencies), contract validation, edge cases, error handling"
+      - Phase 4: "Document validation results including passed tests, limitations, assumptions"
+      - Phase 5: "COMPOSITION_BINDING_VALIDATION — one failing UI-free composition test per binding (trigger, callee, arguments, effect), then minimal wiring; E2E only with named platform constraint"
+      - Phase 6: "Integrate only after independent and composition gates pass; integration tests validate combined behavior"
+    summary: "Six-phase approach — module identification, independent development, independent validation, documentation, composition binding validation (UI-free), and integration only when both gates pass"
   metadata:
     created:
       author: "AI Agent"
       date: "2025-12-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-06"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+      date: "2026-07-31"
+      reason: "Contract-precise MODULE_VALIDATION_LIFECYCLE and COMPOSITION_BINDING_VALIDATION blocks"
     last_validated:
       date: "2026-02-06"
       result: "pass"
@@ -64,3 +71,5 @@ IMPL-MODULE_VALIDATION:
       - "REQ-MODULE_VALIDATION"
     tests:
       - "testModuleName_IndependentValidation_REQ_MODULE_VALIDATION"
+      - "tools/agentstream/checklist composition ordering and binding evidence tests"
+      - "tools/agentstream/pipeline composition binding tests"

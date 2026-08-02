@@ -27,24 +27,27 @@ ARCH-MODULE_VALIDATION:
   detail_file: "architecture-decisions/ARCH-MODULE_VALIDATION.yaml"
   implementation_approach:
     details:
-      - "Define module interfaces and contracts explicitly"
-      - "Document validation results before integration"
+      - "Allowed collaborators for a binding are only independently validated modules (or explicit test doubles)"
+      - "Define module interfaces and contracts explicitly (INPUT/OUTPUT plus PRE/POST/EFFECTS at IMPL layer)"
+      - "Document validation and composition results before integration"
+      - "E2E-only classification requires a named platform constraint; bindings via events, messages, or function calls are composition-testable, not E2E-only"
+      - "Every composition-testable binding must be UI-free testable — fire trigger programmatically and observe callee, arguments, and effect without browser/UI"
       - "Identify modules and document boundaries before development"
-      - "Integration test with test doubles (mocks, stubs, fakes)"
-      - "Only integrate after validation passes"
+      - "Integration test with test doubles where full peers are unavailable; validate combined behavior against documented contracts"
+      - "Maintain a binding inventory for composition boundaries — each row names Binding ID, Trigger, Callee/collaborator, Arguments asserted, Effect asserted, Ordering/PRE, Failure behavior, Composition test locus, and E2E flag"
+      - "Only integrate after independent validation and composition gates pass"
       - "Specify validation criteria for each module"
-      - "Test edge cases and error handling"
-      - "Unit test modules with mocked dependencies"
-      - "Validate contracts (input/output validation)"
-    summary: "Independent module validation before integration with comprehensive testing strategy"
+      - "Unit test modules with mocked dependencies; validate contracts, edge cases, and error handling"
+      - "Write failing composition tests before composition/wiring code; implement minimal wiring only to satisfy those tests"
+    summary: "Independent module validation before integration, then UI-free composition validation of every binding, with E2E reserved for named platform constraints"
   metadata:
     created:
       author: "AI Agent"
       date: "2025-12-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-06"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+      date: "2026-07-31"
+      reason: "Define composition boundaries via binding inventory and UI-free composition gates"
     last_validated:
       date: "2026-02-06"
       result: "pass"

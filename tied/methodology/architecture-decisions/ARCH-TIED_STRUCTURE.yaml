@@ -13,16 +13,22 @@ ARCH-TIED_STRUCTURE:
         - "Too generic for methodology-specific files"
       pros:
         - "Common convention for documentation"
-      rejected_reason: "tied/ is more specific to the methodology"
+      rejected_reason: "./tied/ is more specific to the methodology"
   cross_references:
     - "REQ-TIED_SETUP"
   detail_file: "architecture-decisions/ARCH-TIED_STRUCTURE.yaml"
   implementation_approach:
     details:
       - "Add guide files: semantic-tokens.md, processes.md"
+      - "Bootstrap installs bundled tied-yaml skill to .cursor/skills/tied-yaml/ and bakes TIED_REPO_ROOT into tied-cli.sh for client MCP binary resolution"
       - "Create detail subdirectories: requirements/, architecture-decisions/, implementation-decisions/"
       - "Create tied/ directory at project root"
+      - "Create tied/vocab/ for project-scoped domain vocabulary (plain Markdown *.md; writable; seeded by copy_files.sh when absent; not under tied/methodology/)"
       - "Populate with YAML index files: requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml"
+      - "Refresh tied/methodology/ as an inherited read-only snapshot with exact template parity and stale-file pruning"
+      - "Never overwrite project YAML indexes or detail directories under the tied/ root during bootstrap"
+      - "Use copy_files.sh --merge-vocab to add absent glossary basenames without replacing existing client vocabulary"
+      - "Install promoted quality REQ/ARCH/IMPL detail files and pseudo-code sidecars into the inherited methodology snapshot"
     summary: "Create dedicated tied/ directory with YAML indexes and detail subdirectories"
   metadata:
     created:
@@ -31,7 +37,7 @@ ARCH-TIED_STRUCTURE:
     last_updated:
       author: "AI Agent"
       date: "2026-02-06"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+      reason: "LEAP: document inherited methodology refresh and project-data preservation boundaries"
     last_validated:
       date: "2026-02-06"
       result: "pass"

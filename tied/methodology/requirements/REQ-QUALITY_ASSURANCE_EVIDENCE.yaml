@@ -1,0 +1,67 @@
+REQ-QUALITY_ASSURANCE_EVIDENCE:
+  category: "Non-Functional"
+  description: "Every behavior-changing change selects applicable quality attributes from a bounded risk profile and records reproducible evidence, limitations, and accepted residual risk without imposing irrelevant checks."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-02"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Formalize quality module ownership and complete unit/composition/pilot traceability"
+  name: "Risk-triggered quality assurance evidence"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Evidence provenance and residual-risk decisions remain auditable."
+      - "Risk-triggered quality work with explicit N/A rationale."
+    problems_solved:
+      - "Quality checks are currently described without a common applicability and evidence contract."
+      - "TIED consistency and marker scans can be mistaken for proof of runtime quality."
+    why: "TIED needs quality claims to be scoped, reproducible, and reviewable beyond functional traceability."
+  related_requirements:
+    depends_on:
+      - "REQ-MODULE_VALIDATION"
+      - "REQ-TIED_SETUP"
+    related_to: []
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Each behavior-changing change records applicable or N/A quality attributes with rationale, evidence method, threshold, owner, and limitation."
+      metric: "Every selected quality row has a reproducible evidence reference or an owned, expiring waiver."
+    - criterion: "Evidence distinguishes TIED artifact integrity from runtime quality claims."
+      metric: "Verification output labels proof boundaries and does not claim universal correctness."
+    - criterion: "The existing IMPL-before-RED-before-code and module/composition test order remains mandatory."
+      metric: "Checklist and pilot tests preserve the existing sequence."
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    code_annotations:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    implementation:
+      - "IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK"
+      - "IMPL-QUALITY_BINDING_INVENTORY"
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+      - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+      - "IMPL-QUALITY_PSEUDOCODE_VALIDATOR"
+      - "IMPL-QUALITY_SECURITY_PROFILE_VALIDATION"
+      - "IMPL-QUALITY_TEST_ADEQUACY"
+    tests:
+      - "mcp-server/src/analysis/binding-inventory.test.ts"
+      - "mcp-server/src/analysis/pseudocode-validator.test.ts"
+      - "mcp-server/src/analysis/traceability-gap.test.ts"
+      - "mcp-server/src/quality-adequacy.test.ts"
+      - "mcp-server/src/quality-command-runner.test.ts"
+      - "mcp-server/src/quality-evidence-collection.test.ts"
+      - "mcp-server/src/quality-evidence.test.ts"
+      - "mcp-server/src/quality-security.test.ts"
+      - "mcp-server/src/tools/quality-validation-mcp.test.ts"
+      - "pilot/webhook-inbox/test/webhook-inbox.test.mjs"
+  validation_criteria:
+    - method: "CITDP quality evidence matrix review"
+      coverage: "Applicability, risk, scenarios, abuse cases, evidence, waivers, and residual risk."
+    - method: "Unit and composition tests"
+      coverage: "Evidence and validator modules plus their bindings."
+    - method: "tied_validate_consistency"
+      coverage: "REQ to ARCH to IMPL traceability and token-commented pseudo-code."

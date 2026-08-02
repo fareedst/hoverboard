@@ -39,6 +39,8 @@ Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with 
 | **LEAP** | stack update | Reverse order IMPL → ARCH → REQ when scope changes |
 | **block-lead bracket format** | token comment line | Exact pattern: `[IMPL-*] [ARCH-*] [REQ-*]` then `How: …` (IMPL, ARCH, REQ order when all three appear) |
 | **contract precision** | precise contracts, extended contract | Active-block PRE/POST/EFFECTS (+ FAILURE_MODES/DATA_TRANSITION/TERMINATION when applicable); Layer B SHAPE-003..006 |
+| **binding inventory** | glue list (alone) | Trigger→callee→arguments→effect table; see [`../docs/composition-coverage.md`](../docs/composition-coverage.md) and [`tied-methodology.md`](tied-methodology.md) |
+| **composition evidence** | E2E covers wiring | UI-free composition test proving a binding before integration |
 | **SHAPE-003** | — | Schema check: Active procedure blocks declare PRE, POST, EFFECTS |
 | **SHAPE-004** | — | Schema check: FAILURE_MODES closed set when errors are possible |
 | **SHAPE-005** | — | Schema check: DATA_TRANSITION when mutable DATA or State effects |
@@ -60,8 +62,7 @@ Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with 
 | Pseudo-code template | `templates/impl-essence-pseudocode-template.md` | [PROC-PSEUDOCODE_VALIDATION](../docs/processes.md) |
 | CITDP record | `tied/citdp/CITDP-REQ-{TOKEN}.yaml` (pattern) | [PROC-CITDP](../docs/processes.md) |
 | Validation checklist | `tied/docs/pseudocode-validation-checklist.yaml` | [PROC-PSEUDOCODE_VALIDATION](../docs/processes.md) |
-| Source-file IMPL traceability policy | `tied/docs/source-file-impl-traceability.md` | [PROC-IMPL_CODE_TEST_SYNC](../docs/processes.md) |
-| Full-block sync script | `scripts/sync_impl_full_blocks.py` | [PROC-IMPL_CODE_TEST_SYNC](../docs/processes.md) |
+| Composition coverage guide | `tied/docs/composition-coverage.md` | [REQ-MODULE_VALIDATION](../requirements/REQ-MODULE_VALIDATION.yaml) / [PROC-TEST_STRATEGY](../docs/processes.md) |
 | Domain vocab index | `tied/vocab/*.md` | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
 | Vocab routing index (PRELOAD) | `tied/vocab/routing.md` | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
 
@@ -116,9 +117,12 @@ Prefer in `essence_pseudocode` (not domain terms):
 
 | Term | Section |
 |------|---------|
+| binding inventory | Preferred terms |
 | block lead comment | Preferred terms |
 | block-lead bracket format | Preferred terms |
 | CITDP record | Preferred terms |
+| composition evidence | Preferred terms |
+| composition-coverage.md | Naming bridge |
 | contract precision | Preferred terms |
 | CONTROL | IMPL grammar keywords |
 | DATA_TRANSITION | IMPL grammar keywords |

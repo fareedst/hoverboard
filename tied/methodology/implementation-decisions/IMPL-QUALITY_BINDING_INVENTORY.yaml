@@ -1,0 +1,57 @@
+IMPL-QUALITY_BINDING_INVENTORY:
+  code_locations:
+    files:
+      - path: "mcp-server/src/analysis/binding-inventory.ts"
+        description: "Binding inventory row validator"
+      - path: "mcp-server/src/analysis/binding-inventory.test.ts"
+        description: "Unit coverage for valid, duplicate, malformed, and unsupported bindings"
+      - path: "mcp-server/src/tools/index.ts"
+        description: "MCP binding_inventory_validate handler"
+    functions:
+      - name: "validateBindingInventory"
+        description: "Validate composition binding inventory rows and diagnostics"
+        file: "mcp-server/src/analysis/binding-inventory.ts"
+  cross_references:
+    - "ARCH-MODULE_VALIDATION"
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "REQ-MODULE_VALIDATION"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  implementation_approach:
+    details:
+      - "Preserve proof-boundary diagnostics for rows that lack composition evidence."
+      - "Reject duplicate IDs and unsupported or incomplete rows."
+      - "Treat inventory validation as pure structural analysis."
+    summary: "Validate binding inventory rows for required fields, unique identifiers, supported binding types, and evidence references."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Synchronize literal block leads"
+  name: "Quality binding inventory validator"
+  rationale:
+    benefits:
+      - "Every binding has a declared source, target, mechanism, and proof reference."
+      - "UI-free composition evidence is distinguishable from unit and browser evidence."
+    problems_solved:
+      - "Binding inventory ownership was ambiguous."
+      - "Missing or malformed composition rows could pass without a deterministic diagnostic."
+    why: "Composition bindings require an explicit validator and evidence boundary separate from unit validators."
+  related_decisions:
+    depends_on: []
+    see_also:
+      - "PROC-TEST_STRATEGY"
+    supersedes: []
+  status: "Active"
+  testability: "unit and composition"
+  traceability:
+    architecture:
+      - "ARCH-MODULE_VALIDATION"
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    code_annotations:
+      - "IMPL-QUALITY_BINDING_INVENTORY"
+    requirements:
+      - "REQ-MODULE_VALIDATION"
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    tests:
+      - "mcp-server/src/analysis/binding-inventory.test.ts"
+      - "mcp-server/src/tools/quality-validation-mcp.test.ts"

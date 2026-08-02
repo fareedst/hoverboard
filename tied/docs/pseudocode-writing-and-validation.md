@@ -522,7 +522,7 @@ Validation is **two layers**, complementary: **Layer A (TIED)** = repository/tra
 
 **Layer A — `tied_validate_consistency`** — After editing the sidecar or merged essence, with default **`include_pseudocode`**. Validates token comments and cross-references. See [mcp-server README](../mcp-server/README.md).
 
-**Layer B — [pseudocode-validation-checklist.yaml](pseudocode-validation-checklist.yaml)** — Parse, schema, symbol resolution, contracts, dependency graph, behavioral coverage, traceability, optional lint/simulation/generation, reporting. Apply to **`IMPL-{TOKEN}-pseudocode.md`** or merged `yaml_detail_read` text.
+**Layer B — [pseudocode-validation-checklist.yaml](pseudocode-validation-checklist.yaml)** — Use the executable `pseudocode_validate` MCP/CLI handler for deterministic parsing, source-located diagnostics, block discovery, schema/contract shape, token linkage, symbol closure, and dependency graph; then apply the checklist for behavioral coverage, traceability, optional lint/simulation/generation, and reporting. Apply to **`IMPL-{TOKEN}-pseudocode.md`** or merged `yaml_detail_read` text. The executable validator proves structural pseudo-code properties only, not runtime correctness or complete behavioral coverage.
 
 ### Pre-RED vs post-test
 
@@ -577,7 +577,7 @@ Manual walk of checklist categories in order; document pass/fail/waived per item
 ## When to run validation
 
 - **Layer A** — After any change to **`IMPL-*-pseudocode.md`** or merged essence; before commits affecting TIED.
-- **Layer B** — Pre-RED structural pass at `gate-pseudocode-validation`; full pass at `verification-gate` when tests exist.
+- **Layer B** — Pre-RED structural pass at `gate-pseudocode-validation` using `pseudocode_validate` plus the checklist; full pass at `verification-gate` when tests exist.
 - **Agent flow** — After authoring/updating pseudo-code and token comments: Layer A + pre-RED structural Layer B **before** RED tests (`gate-pseudocode-validation`).
 - **Post-fix** — Re-run Layer A after IMPL edits; full Layer B at verification-gate when tests exist.
 

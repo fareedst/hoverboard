@@ -1,0 +1,59 @@
+IMPL-QUALITY_EVIDENCE_COLLECTION:
+  code_locations:
+    files:
+      - path: "mcp-server/src/quality-evidence-collection.ts"
+        description: "Command execution and manifest composition"
+      - path: "mcp-server/src/quality-evidence-collection.test.ts"
+        description: "Unit and composition coverage for collection and failure propagation"
+      - path: "mcp-server/src/tools/index.ts"
+        description: "MCP quality_evidence_collect handler"
+    functions:
+      - name: "collectVerificationEvidence"
+        description: "Compose declared command execution with manifest generation"
+        file: "mcp-server/src/quality-evidence-collection.ts"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+    - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  implementation_approach:
+    details:
+      - "Keep command execution shell-free and bounded."
+      - "Pass every normalized result to manifest generation."
+      - "Preserve partial failures and artifact references in the manifest."
+    summary: "Validate collection input, execute declared commands through the runner, then build the verification evidence manifest from normalized results."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Synchronize literal block leads"
+  name: "Command-to-manifest evidence collector"
+  rationale:
+    benefits:
+      - "Runner is upstream of manifest generation."
+      - "The collector exposes command, environment, artifact, and proof-boundary provenance."
+    problems_solved:
+      - "Collection could not be traced as a bounded composition step."
+      - "The runner/manifest dependency direction was ambiguous."
+    why: "Executing declared quality commands and building a provenance manifest are distinct units whose composition needs an explicit owner."
+  related_decisions:
+    depends_on:
+      - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+    see_also:
+      - "PROC-QUALITY_EVIDENCE_PROVENANCE"
+    supersedes: []
+  status: "Active"
+  testability: "unit and composition"
+  traceability:
+    architecture:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    code_annotations:
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+    requirements:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    tests:
+      - "mcp-server/src/quality-command-runner.test.ts"
+      - "mcp-server/src/quality-evidence-collection.test.ts"
+      - "mcp-server/src/quality-evidence.test.ts"
+      - "mcp-server/src/tools/quality-validation-mcp.test.ts"
