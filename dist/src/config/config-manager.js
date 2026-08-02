@@ -779,7 +779,7 @@ const mergedConfigSchema = z.object({
   aiTagLimit: z.number().int().min(0).optional(),
   // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
   iconClickOpensSidePanel: z.boolean().optional(),
-  // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Opt-in outbound Index link health checks (default false).
+  // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Outbound Index link health checks; absent setting defaults effectively enabled and explicit false remains an opt-out.
   linkHealthChecksEnabled: z.boolean().optional()
 }).passthrough()
 
@@ -882,8 +882,8 @@ export class ConfigManager {
       // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
       iconClickOpensSidePanel: true,
 
-      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first: outbound link checks off until user enables in Options.
-      linkHealthChecksEnabled: false
+      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Enabled by default for new/absent settings; users can explicitly opt out in Options.
+      linkHealthChecksEnabled: true
     }
   }
 

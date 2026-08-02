@@ -8,7 +8,8 @@
 import {
   ARCHIVE_METADATA_MUTATION_ACTIONS,
   isArchiveMetadataMutationAllowed,
-  isArchiveScopeValue
+  isArchiveScopeValue,
+  isCrossResourceScopeValue
 } from '../../src/ui/bookmarks-table/bookmarks-table-archive-scope.js'
 
 describe('[REQ-ARCHIVED_CONTENT_SEARCH] archived-content scope isolation', () => {
@@ -23,6 +24,17 @@ describe('[REQ-ARCHIVED_CONTENT_SEARCH] archived-content scope isolation', () =>
     expect(isArchiveScopeValue('metadata')).toBe(false)
     for (const action of ARCHIVE_METADATA_MUTATION_ACTIONS) {
       expect(isArchiveMetadataMutationAllowed('metadata', action)).toBe(true)
+    }
+  })
+
+  /**
+   * ## APPLY_ALL_RESOURCES_READ_ONLY_CONTROL_GATE
+   * - [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL] How: keep the Local Bookmarks Index All resources result surface read-only while preserving source-aware navigation.
+   */
+  test('[REQ-CROSS_RESOURCE_RETRIEVAL] All resources scope blocks metadata mutation actions', () => {
+    expect(isCrossResourceScopeValue('all-resources')).toBe(true)
+    for (const action of ARCHIVE_METADATA_MUTATION_ACTIONS) {
+      expect(isArchiveMetadataMutationAllowed('all-resources', action)).toBe(false)
     }
   })
 })

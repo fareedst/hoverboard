@@ -53,7 +53,28 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
  */
-import { prefillSearchFromQuery } from '../../src/ui/bookmarks-table/bookmarks-table-library-search.js'
+/**
+ * ## SEARCH_LIBRARY_RESOURCES_MESSAGE
+ * - [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL] How: expose the query contract through a new message while keeping SEARCH_TITLE compatibility explicit.
+ * - Contract:
+ *   - INPUT: message with type SEARCH_LIBRARY_RESOURCES and query data
+ *   - PRE: message handler has the retrieval service and response channel
+ *   - OUTPUT: retrieval result or structured error response
+ *   - POST: one response is returned; no source write occurs
+ *   - FAILURE_MODES: InvalidQuery, InvalidScope, InvalidPagination
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: SEARCH_LIBRARY_RESOURCES_MESSAGE
+ *   - response = AWAIT QUERY_CROSS_RESOURCES(message.data)
+ *   - RETURN response
+ *   - SEARCH_TITLE remains a compatibility route returning its documented legacy shape until a separate deprecation change updates callers and tests
+ *   - Local Bookmarks Index ALL_RESOURCES scope sets the read-only control gate: disable selection, mutation, CSV export, and package import/export controls while the scope is active
+ */
+import {
+  prefillSearchFromQuery,
+  buildCrossResourceSearchMessage,
+  mapCrossResourceResults
+} from '../../src/ui/bookmarks-table/bookmarks-table-library-search.js'
 
 describe('[REQ-LIBRARY_SEARCH_ENTRY] prefillSearchFromQuery', () => {
   test('sets input from q param', () => {
@@ -72,5 +93,39 @@ describe('[REQ-LIBRARY_SEARCH_ENTRY] prefillSearchFromQuery', () => {
 
   test('null input is a no-op', () => {
     expect(prefillSearchFromQuery(new URLSearchParams('q=x'), null)).toBe('')
+  })
+
+  /**
+   * ## APPLY_ALL_RESOURCES_READ_ONLY_CONTROL_GATE
+   * - [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL] How: keep the Local Bookmarks Index All resources result surface read-only while preserving source-aware navigation.
+   */
+  test('[REQ-CROSS_RESOURCE_RETRIEVAL] builds a read-only aggregate search message', () => {
+    expect(buildCrossResourceSearchMessage(' offline ')).toEqual({
+      type: 'searchLibraryResources',
+      data: { query: 'offline' }
+    })
+  })
+
+  test('[REQ-CROSS_RESOURCE_RETRIEVAL] maps source identity and actions without exposing archive HTML', () => {
+    expect(mapCrossResourceResults([{
+      source: 'archive',
+      url: 'https://example.test',
+      title: 'Saved page',
+      snippet: 'bounded text',
+      backend: 'local',
+      archiveId: 'a-1',
+      action: { kind: 'openReader', readerTarget: 'reader.html?archiveId=a-1' },
+      html: '<script>secret</script>'
+    }])).toEqual([expect.objectContaining({
+      source: 'archive',
+      description: 'Saved page',
+      archiveSnippet: 'bounded text',
+      readerTarget: 'reader.html?archiveId=a-1',
+      storage: 'local'
+    })])
+    expect(mapCrossResourceResults([{
+      source: 'archive',
+      html: '<script>secret</script>'
+    }])[0]).not.toHaveProperty('html')
   })
 })

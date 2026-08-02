@@ -24,6 +24,7 @@
 | **URL inhibition** | inhibit on load | Implementation of disabled sites (`INHIBIT_URL`) |
 | **feature flags** | toggles | Config booleans such as `showHoverOnPageLoad` |
 | **backup / restore** | export settings | Config portability |
+| **portable library package** | full-library backup, raw archive | Versioned, checksum-verified package for lossless non-secret library state; it composes with configuration backup/restore without exporting secrets by default |
 | **config migration** | settings upgrade | Schema/key migrations across versions |
 | **Pinboard API Token** | auth token (UI) | `username:XXXXXXXX`; key `hoverboard_auth_token` |
 | **AI API key** | provider secret | `aiApiKey`; empty disables AI tagging |
@@ -39,6 +40,7 @@
 | Auth token | Authentication | `hoverboard_auth_token` | — |
 | Default backend | Storage Mode (Local / Pinboard / File / Sync / Browser) | `hoverboard_storage_mode` / `storageMode` | `local` (`pinboard`\|`local`\|`file`\|`sync`\|`browser`; [REQ-BROWSER_BOOKMARK_STORAGE](../requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml)) |
 | Disabled sites | Site Management | `hoverboard_inhibit_urls` | — |
+| Portable library package | Export / Import library package | `EXPORT_LIBRARY_PACKAGE` / `IMPORT_LIBRARY_PACKAGE` | `LibraryPackage` / `LIBRARY_PORTABILITY` |
 | Legacy recent tags key | — | `hoverboard_recent_tags` | — |
 | Tag frequency | — | `hoverboard_tag_frequency` | — |
 | Shared recent tags | — | `recentTagsSharedMemoryKey` → `hoverboard_recent_tags_shared` | — |
@@ -63,6 +65,7 @@
 - **privacy controls** — Defaults and UI favoring private bookmarks and minimal auto-show.
 - **feature flags** — Boolean and numeric settings controlling overlay, recent rows, badge, AI, icon click.
 - **backup / restore** — Portable config export/import ([REQ-CONFIG_PORTABILITY](../requirements/REQ-CONFIG_PORTABILITY.yaml)).
+- **portable library package** — A versioned package containing non-secret bookmark/library state and durable Local/File artifacts, with checksums and safe restoration boundaries; it does not replace configuration backup/restore.
 - **config migration** — Upgrades older key shapes to current schema.
 - **Test API key** — Options control validating AI credentials without tagging a page.
 - **archive privacy boundary** — Page archives and screenshot artifacts stay Local/File-only and honor the existing inhibit URL list.
@@ -75,6 +78,7 @@
 |--------------------------|------------------------------|-------------|
 | Default configuration | `getDefaultConfiguration` | [IMPL-CONFIG_STRUCT](../implementation-decisions/IMPL-CONFIG_STRUCT.yaml) / [IMPL-FEATURE_FLAGS](../implementation-decisions/IMPL-FEATURE_FLAGS.yaml) |
 | Backup/restore | `(proposed) CONFIG_BACKUP_RESTORE` | [IMPL-CONFIG_BACKUP_RESTORE](../implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml) |
+| Portable library package | `LIBRARY_PORTABILITY` | [IMPL-LIBRARY_PORTABILITY](../implementation-decisions/IMPL-LIBRARY_PORTABILITY.yaml) |
 | Migration | `(proposed) CONFIG_MIGRATE` | [IMPL-CONFIG_MIGRATION](../implementation-decisions/IMPL-CONFIG_MIGRATION.yaml) |
 | Inhibit URL | `(proposed) INHIBIT_URL_APPLY` | [IMPL-URL_INHIBITION](../implementation-decisions/IMPL-URL_INHIBITION.yaml) |
 | Archive privacy gate | `ARCHIVE_PRIVACY_GATE` | [IMPL-PAGE_ARCHIVE_STORAGE](../implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE.yaml) |
@@ -87,6 +91,7 @@
 |------|---------|
 | AI API key | Preferred terms |
 | backup / restore | Preferred terms |
+| portable library package | Preferred terms / Naming bridge / Named concepts / Pseudo-code block names |
 | ConfigManager | Preferred terms |
 | config migration | Preferred terms |
 | feature flags | Preferred terms |

@@ -14381,7 +14381,7 @@ var init_config_manager = __esm({
       aiTagLimit: external_exports.number().int().min(0).optional(),
       // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
       iconClickOpensSidePanel: external_exports.boolean().optional(),
-      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Opt-in outbound Index link health checks (default false).
+      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Outbound Index link health checks; absent setting defaults effectively enabled and explicit false remains an opt-out.
       linkHealthChecksEnabled: external_exports.boolean().optional()
     }).passthrough();
     ConfigManager = class {
@@ -14509,8 +14509,8 @@ var init_config_manager = __esm({
           aiTagLimit: 64,
           // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
           iconClickOpensSidePanel: true,
-          // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first: outbound link checks off until user enables in Options.
-          linkHealthChecksEnabled: false
+          // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Enabled by default for new/absent settings; users can explicitly opt out in Options.
+          linkHealthChecksEnabled: true
         };
       }
       /**
@@ -22298,7 +22298,7 @@ var OptionsController = class {
         this.elements.iconClickOpensSidePanel.checked = config2.iconClickOpensSidePanel !== false;
       }
       if (this.elements.linkHealthChecksEnabled) {
-        this.elements.linkHealthChecksEnabled.checked = config2.linkHealthChecksEnabled === true;
+        this.elements.linkHealthChecksEnabled.checked = config2?.linkHealthChecksEnabled !== false;
       }
       this.currentTheme = config2.defaultVisibilityTheme;
       this.updateThemeDisplay();
@@ -22350,8 +22350,8 @@ var OptionsController = class {
         aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64,
         // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on icon: side panel (true) or popup (false)
         iconClickOpensSidePanel: this.elements.iconClickOpensSidePanel ? this.elements.iconClickOpensSidePanel.checked : true,
-        // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first opt-in for Index link checks
-        linkHealthChecksEnabled: this.elements.linkHealthChecksEnabled ? this.elements.linkHealthChecksEnabled.checked : false
+        // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Persist explicit user choice; default enabled when the setting is absent.
+        linkHealthChecksEnabled: this.elements.linkHealthChecksEnabled ? this.elements.linkHealthChecksEnabled.checked : true
       };
       await this.configManager.updateConfig(settings);
       const authToken = this.elements.authToken.value.trim();

@@ -1,0 +1,86 @@
+IMPL-CROSS_RESOURCE_RETRIEVAL:
+  code_locations:
+    functions:
+      - name: "normalizeRetrievalQuery"
+        description: "Normalize query, scopes, caps, and pagination"
+        file: "src/features/search/cross-resource-retrieval.js"
+      - name: "validateRetrievalScopes"
+        description: "Validate requested scopes against the canonical source registry before any adapter read"
+        file: "src/features/search/cross-resource-retrieval.js"
+      - name: "mapRetrievalAction"
+        description: "Map source candidates to source-specific navigation actions"
+        file: "src/features/search/cross-resource-retrieval.js"
+      - name: "queryCrossResources"
+        description: "Run bounded read-only retrieval and return deterministic result page"
+        file: "src/features/search/cross-resource-retrieval.js"
+      - name: "handleSearchLibraryResources"
+        description: "Dispatch the new library retrieval message"
+        file: "src/core/message-handler.js"
+  cross_references:
+    - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+    - "IMPL-ARCHIVED_CONTENT_SEARCH"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-BOOKMARK_USAGE_TRACKING"
+    - "IMPL-MESSAGE_HANDLING"
+    - "IMPL-SEARCH"
+    - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+    - "IMPL-SIDE_PANEL_BROWSER_TABS"
+    - "REQ-CROSS_RESOURCE_RETRIEVAL"
+  implementation_approach:
+    details:
+      - "Archive adapters return snippets and Reader targets, never sanitized HTML."
+      - "Exact source identity is part of deduplication; Local and File archive identities never collapse."
+      - "History adapter returns local usage records only; no remote analytics."
+      - "Message handler exposes SEARCH_LIBRARY_RESOURCES while SEARCH_TITLE remains a compatibility path until explicitly retired."
+      - "Query model caps limit at 100 and uses offset pagination with stable tie-breaking."
+      - "VALIDATE_RETRIEVAL_SCOPES checks the canonical source registry before bounded reads; permission-denied sources remain selected so READ_RETRIEVAL_SOURCE reports isolated source state."
+    summary: "Normalize and validate query, adapt each read-only source, fan out with a bounded concurrency limit, merge/dedupe/rank deterministically, and map source-specific actions."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Align scope validation and adapter permission outcomes with source and test contracts"
+  name: "Cross-Resource Retrieval Implementation"
+  rationale:
+    benefits:
+      - "Deterministic bounded results."
+      - "Isolated source failures and explicit availability states."
+      - "Thin message/UI entry points."
+    problems_solved:
+      - "Non-deterministic or privacy-expanding aggregate search."
+      - "Source-specific navigation and backend identity loss."
+    why: "Keep the cross-resource contract in pure query, adapter, and orchestration modules so each boundary is independently testable."
+  related_decisions:
+    composed_with:
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-MESSAGE_HANDLING"
+    depends_on:
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BOOKMARK_USAGE_TRACKING"
+      - "IMPL-SEARCH"
+      - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "IMPL-SIDE_PANEL_BROWSER_TABS"
+    see_also:
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-MESSAGE_HANDLING"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+    code_annotations:
+      - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+      - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+      - "REQ-CROSS_RESOURCE_RETRIEVAL"
+    requirements:
+      - "REQ-CROSS_RESOURCE_RETRIEVAL"
+    tests:
+      - "tests/integration/bookmarks-table-archive-scope-composition.integration.test.js"
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/bookmarks-table-library-search.test.js"
+      - "tests/unit/cross-resource-retrieval.test.js"

@@ -101,6 +101,7 @@ describe('[REQ-THIS_PAGE_TAG_SORT] This Page tag sort composition', () => {
       popupController.loadSuggestedTags = jest.fn().mockResolvedValue()
       popupController.getStorageBackendForUrl = jest.fn().mockResolvedValue('local')
       popupController.refreshUsageSection = jest.fn().mockResolvedValue()
+      popupController.refreshLinkHealthHint = jest.fn().mockResolvedValue()
       popupController.sendToTab = jest.fn().mockResolvedValue({})
 
       const seq = []
@@ -191,6 +192,7 @@ describe('[REQ-THIS_PAGE_TAG_SORT] This Page tag sort composition', () => {
       popupController.loadShowHoverOnPageLoadSetting = jest.fn().mockResolvedValue()
       popupController.getStorageBackendForUrl = jest.fn().mockResolvedValue('local')
       popupController.refreshUsageSection = jest.fn().mockResolvedValue()
+      popupController.refreshLinkHealthHint = jest.fn().mockResolvedValue()
       popupController.sendToTab = jest.fn().mockResolvedValue({})
       jest.spyOn(popupController, 'refreshTagFrequencyMapForSort').mockResolvedValue()
 

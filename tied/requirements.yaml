@@ -645,6 +645,58 @@ REQ-CROSS_BROWSER:
       coverage: "isSafari false; getPlatform chrome/firefox/unknown"
     - method: "Unit tests that mock safari-shim module"
       coverage: "Service worker and message-client Chrome messaging paths"
+REQ-CROSS_RESOURCE_RETRIEVAL:
+  category: "Functional"
+  detail_file: "requirements/REQ-CROSS_RESOURCE_RETRIEVAL.yaml"
+  name: "Cross-Resource Retrieval"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Deterministic retrieval across existing local sources."
+      - "Explicit privacy and storage-backend boundaries."
+    problems_solved:
+      - "Existing search results cannot preserve source-specific navigation actions in one result set."
+      - "Users must search bookmark metadata, archive text, tabs, Browser Bookmarks (page), and Visit History (page) separately."
+    why: "Provide one read-only, source-aware query contract without changing existing per-surface search behavior."
+  related_requirements:
+    depends_on:
+      - "REQ-ARCHIVED_CONTENT_SEARCH"
+      - "REQ-BOOKMARK_USAGE_TRACKING"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-SEARCH_FUNCTIONALITY"
+      - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "REQ-SIDE_PANEL_BROWSER_TABS"
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "A normalized query with explicit source scopes returns source-attributed results with deterministic ranking, caps, and pagination."
+    - criterion: "Archive HTML and remote history are not included in the aggregate result payload."
+    - criterion: "Bookmark metadata preserves storage backend identity and archive results preserve backend-scoped archive identity."
+    - criterion: "Existing metadata search, archive-content search, SEARCH_TABS, Browser Bookmarks (page), and Visit History (page) contracts remain compatible."
+    - criterion: "Tabs, Browser Bookmarks (page), and Visit History (page) results expose navigation actions distinct from bookmark and Reader actions."
+    - criterion: "Unavailable, stale, and permission-denied sources are reported without failing available sources."
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+    code_annotations:
+      - "REQ-CROSS_RESOURCE_RETRIEVAL"
+    implementation:
+      - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+    tests:
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/bookmarks-table-library-search.test.js"
+      - "tests/unit/cross-resource-retrieval.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Query normalization, scope validation, matching, deterministic ranking, caps, pagination, action mapping, deduplication, and failure modes."
+    - method: "Integration tests"
+      coverage: "Source adapters, bounded fan-out/fan-in, message dispatch, and Local Bookmarks Index orchestration."
+    - method: "Regression tests"
+      coverage: "Existing per-surface search and archive-content tests plus explicit SEARCH_TITLE compatibility path."
 REQ-DARK_THEME:
   category: "Functional"
   detail_file: "requirements/REQ-DARK_THEME.yaml"
@@ -924,6 +976,57 @@ REQ-ICON_CLICK_BEHAVIOR:
       coverage: "SW action.onClicked reads config and calls sidePanel.open or action.openPopup; options load/save iconClickOpensSidePanel"
     - method: "Manual verification"
       coverage: "Click icon with default → side panel; set \"open popup\" in options → icon click opens popup"
+REQ-LIBRARY_PORTABILITY:
+  category: "Functional"
+  detail_file: "requirements/REQ-LIBRARY_PORTABILITY.yaml"
+  name: "Portable Library Package"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Dry-run restore planning and recoverable writes."
+      - "Versioned and verifiable library portability."
+    problems_solved:
+      - "CSV and Netscape HTML projections cannot preserve full backend, archive, screenshot, and index state."
+      - "Direct per-row import cannot validate conflicts, checksums, paths, quotas, or rollback before mutation."
+    why: "Provide a lossless non-secret package for moving library state and durable artifacts across extension profiles or machines."
+  related_requirements:
+    depends_on:
+      - "REQ-CONFIG_PORTABILITY"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+      - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Derived archive-content search state is rebuilt from restored artifacts rather than trusted as authoritative package data."
+    - criterion: "Dry-run restore detects version, malformed data, unsafe paths, checksum, conflict, quota, artifact, backend, and target-path problems before mutation."
+    - criterion: "Existing CSV, Netscape HTML, and configuration import/export behavior remains compatible and separately tested."
+    - criterion: "Export produces a versioned package with a manifest, deterministic entries, checksums, bookmark/index state, durable Local/File archives, and screenshot artifacts."
+    - criterion: "Restore verifies writes, protects prior state with backup/rollback boundaries, and reports partial outcomes without false success."
+    - criterion: "Secrets such as hoverboard_auth_token and API keys are excluded by default and reported explicitly."
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-LIBRARY_PORTABILITY"
+    code_annotations:
+      - "REQ-LIBRARY_PORTABILITY"
+    implementation:
+      - "IMPL-LIBRARY_PORTABILITY"
+    tests:
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/library-portability.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Package schema, manifest ordering, migration, checksum validation, safe paths, secret exclusion, conflict planning, and restore state transitions."
+    - method: "Integration tests"
+      coverage: "Existing storage/archive adapters, backup-before-rewrite, artifact verification, native/file callback, and derived search rebuild."
+    - method: "E2E tests"
+      coverage: "Only browser file selection/download and real extension-profile restore boundaries."
 REQ-LIBRARY_SEARCH_ENTRY:
   category: "Functional"
   detail_file: "requirements/REQ-LIBRARY_SEARCH_ENTRY.yaml"
@@ -937,7 +1040,7 @@ REQ-LINK_HEALTH:
   name: "Link Health Monitoring"
   priority: "P2"
   status: "Implemented"
-  summary: "Optional direct HEAD/GET checks of bookmarked URLs; Index column and filter; no third-party uptime service."
+  summary: "Users can manually run private batch link health checks; absent linkHealthChecksEnabled is effectively enabled, explicit false remains disabled, and enabling never starts network checks."
 REQ-LOCAL_BOOKMARKS_INDEX:
   category: "Functional"
   detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml"
@@ -983,7 +1086,7 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     - criterion: "The Local Bookmarks Index has a fixed footer with accessible Actions, Import, and Export tabs; exactly one footer group is visible at a time and Actions is the default."
     - criterion: "The Local Bookmarks Index has a fixed head control panel with accessible tabs for Stores (L / F / S / B), Show only, Hide, and Table Display; exactly one head group is visible at a time."
   status: "Implemented"
-  summary: "A dedicated Local Bookmarks Index page shows local, file, sync, and browser bookmarks. A fixed head control panel switches between Stores (L/F/S/B), Show only, Hide, and Table Display; a fixed footer switches between Actions, Import, and Export while the bookmark list occupies the remaining viewport. Existing filtering, selection, move, delete, import, export, snapshot, and link-health behavior is preserved."
+  summary: "Dedicated Local Bookmarks Index with aggregated Local/File/Sync/Browser rows, checked Stores defaults, and per-store filtered / total provider-row counts before store selection."
   traceability:
     architecture:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"

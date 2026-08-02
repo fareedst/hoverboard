@@ -1093,6 +1093,97 @@ IMPL-CROSS_BROWSER:
       - "tests/unit/message-client.test.js"
       - "tests/unit/native-host-ping.test.js"
       - "tests/unit/service-worker-quick-access.test.js"
+IMPL-CROSS_RESOURCE_RETRIEVAL:
+  code_locations:
+    files:
+      - path: "src/features/search/cross-resource-retrieval.js"
+        description: "Query model, source adapters, orchestration, ranking, and actions"
+      - path: "src/core/message-handler.js"
+        description: "SEARCH_LIBRARY_RESOURCES message dispatch and SEARCH_TITLE compatibility boundary"
+      - path: "src/ui/bookmarks-table/bookmarks-table-library-search.js"
+        description: "Local Bookmarks Index query trigger and result mapping"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "First unified-results surface composition"
+    functions:
+      - name: "queryCrossResources"
+        description: "Run bounded read-only retrieval and return deterministic result page"
+        file: "src/features/search/cross-resource-retrieval.js"
+      - name: "normalizeRetrievalQuery"
+        description: "Normalize query, scopes, caps, and pagination"
+        file: "src/features/search/cross-resource-retrieval.js"
+      - name: "handleSearchLibraryResources"
+        description: "Dispatch the new library retrieval message"
+        file: "src/core/message-handler.js"
+  cross_references:
+    - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+    - "IMPL-ARCHIVED_CONTENT_SEARCH"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-BOOKMARK_USAGE_TRACKING"
+    - "IMPL-MESSAGE_HANDLING"
+    - "IMPL-SEARCH"
+    - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+    - "IMPL-SIDE_PANEL_BROWSER_TABS"
+    - "REQ-CROSS_RESOURCE_RETRIEVAL"
+  detail_file: "implementation-decisions/IMPL-CROSS_RESOURCE_RETRIEVAL.yaml"
+  implementation_approach:
+    details:
+      - "Archive adapters return snippets and Reader targets, never sanitized HTML."
+      - "Exact source identity is part of deduplication; Local and File archive identities never collapse."
+      - "History adapter returns local usage records only; no remote analytics."
+      - "Message handler exposes SEARCH_LIBRARY_RESOURCES while SEARCH_TITLE remains a compatibility path until explicitly retired."
+      - "Query model caps limit at 100 and uses offset pagination with stable tie-breaking."
+    summary: "Normalize and validate query, adapt each read-only source, fan out with a bounded concurrency limit, merge/dedupe/rank deterministically, and map source-specific actions."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-01T00:00:00.000Z"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01T00:00:00.000Z"
+      reason: "Define query, adapters, orchestration, and message boundaries before TDD"
+  name: "Cross-Resource Retrieval Implementation"
+  rationale:
+    benefits:
+      - "Deterministic bounded results."
+      - "Isolated source failures and explicit availability states."
+      - "Thin message/UI entry points."
+    problems_solved:
+      - "Non-deterministic or privacy-expanding aggregate search."
+      - "Source-specific navigation and backend identity loss."
+    why: "Keep the cross-resource contract in pure query, adapter, and orchestration modules so each boundary is independently testable."
+  related_decisions:
+    composed_with:
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-MESSAGE_HANDLING"
+    depends_on:
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BOOKMARK_USAGE_TRACKING"
+      - "IMPL-SEARCH"
+      - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "IMPL-SIDE_PANEL_BROWSER_TABS"
+    see_also:
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-MESSAGE_HANDLING"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+    code_annotations:
+      - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+      - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+      - "REQ-CROSS_RESOURCE_RETRIEVAL"
+    requirements:
+      - "REQ-CROSS_RESOURCE_RETRIEVAL"
+    tests:
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/bookmarks-table-library-search.test.js"
+      - "tests/unit/cross-resource-retrieval.test.js"
 IMPL-DEBUG_PANEL:
   code_locations:
     files:
@@ -1678,6 +1769,95 @@ IMPL-ICON_CLICK_BEHAVIOR:
       - "tests/playwright/extension-icon-click.spec.js"
       - "tests/unit/service-worker-quick-access.test.js"
       - "tests/unit/side-panel-icon-toggle.test.js"
+IMPL-LIBRARY_PORTABILITY:
+  code_locations:
+    files:
+      - path: "src/features/portability/library-package.js"
+        description: "Package schema, manifest, checksums, validation, restore planning, execution, and rollback"
+      - path: "src/core/message-handler.js"
+        description: "Export/import package message dispatch"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "Existing Local Bookmarks Index package controls and status composition"
+    functions:
+      - name: "collectLibraryPackage"
+        description: "Collect non-secret metadata and durable artifacts without mutation"
+        file: "src/features/portability/library-package.js"
+      - name: "planLibraryRestore"
+        description: "Produce a no-write restore plan with conflicts and failures"
+        file: "src/features/portability/library-package.js"
+      - name: "executeLibraryRestore"
+        description: "Apply validated operations with backup and compensation"
+        file: "src/features/portability/library-package.js"
+  cross_references:
+    - "ARCH-LIBRARY_PORTABILITY"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-CONFIG_BACKUP_RESTORE"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    - "IMPL-STORAGE_INDEX"
+    - "REQ-LIBRARY_PORTABILITY"
+  detail_file: "implementation-decisions/IMPL-LIBRARY_PORTABILITY.yaml"
+  implementation_approach:
+    details:
+      - "Existing CSV/HTML/config import/export paths remain separate projections."
+      - "Machine-specific File storage paths require an explicit target path map."
+      - "Metadata and binary artifacts are separate manifest entries with safe relative paths."
+      - "Restore verifies checksums and rebuilds derived archive-content search state from durable artifacts."
+      - "Secret configuration is excluded by an allowlist and reported, never silently copied."
+    summary: "Collect allowlisted library state and artifacts, build a deterministic checksummed package, validate it, plan restore without mutation, then execute with backup and compensation."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-01T00:00:00.000Z"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01T00:00:00.000Z"
+      reason: "Define package schema, security, planning, restore, and rollback before TDD"
+  name: "Portable Library Package Implementation"
+  rationale:
+    benefits:
+      - "Deterministic manifest and checksums."
+      - "Explicit conflict and security outcomes."
+      - "Verified and recoverable restore."
+    problems_solved:
+      - "Lossy or secret-bearing library export."
+      - "Mutation before package validation and inability to recover interrupted restore."
+    why: "Keep package serialization, validation, planning, and restore compensation in testable modules before adding UI or native/file bindings."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+      - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+      - "IMPL-STORAGE_INDEX"
+    depends_on:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-CONFIG_BACKUP_RESTORE"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+      - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+      - "IMPL-STORAGE_INDEX"
+    see_also:
+      - "IMPL-FILE_STORAGE_TYPED_PATH"
+      - "IMPL-NATIVE_HOST_WRAPPER"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-LIBRARY_PORTABILITY"
+    code_annotations:
+      - "ARCH-LIBRARY_PORTABILITY"
+      - "IMPL-LIBRARY_PORTABILITY"
+      - "REQ-LIBRARY_PORTABILITY"
+    requirements:
+      - "REQ-LIBRARY_PORTABILITY"
+    tests:
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/library-portability.test.js"
 IMPL-LIBRARY_SEARCH_ENTRY:
   cross_references:
     - "ARCH-LIBRARY_SEARCH_ENTRY"
@@ -1716,7 +1896,7 @@ IMPL-LINK_HEALTH:
       reason: "Coverage-gaps closeout: index tests + Index Check UI extract"
   name: "Link Health"
   status: "Active"
-  summary: "Pure helpers + SW batch check + Index UI via runCheckLinkHealth; composition covers CHECK/GET and Index orchestrator."
+  summary: "Pure helpers, SW batch check, Index UI, and capture hint with enabled-by-absence semantics, explicit false preservation, and manual-only network dispatch."
   traceability:
     architecture:
       - "ARCH-LINK_HEALTH"
@@ -1872,7 +2052,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
     supersedes: []
   status: "Active"
-  summary: "Bookmarks Index aggregates local+file+sync+browser; Store B filter; preferredBackend on delete."
+  summary: "Fixed accessible Local Bookmarks Index controls with checked Stores defaults and pure pre-store filtered / total per-store provider-row counts."
   traceability:
     architecture:
       - "ARCH-BROWSER_BOOKMARK_PROVIDER"

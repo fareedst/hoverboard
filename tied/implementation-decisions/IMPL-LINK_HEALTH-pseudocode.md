@@ -119,14 +119,33 @@
 
 ## Link health checks enabled flag
 
-- [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Privacy-first opt-in; config key linkHealthChecksEnabled defaults false.
+- [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Resolve the effective link-health setting with an enabled-by-absence default while preserving an explicit false opt-out.
 - Contract:
-  - INPUT: config (MergedConfig|null)
-  - OUTPUT: boolean (true only when linkHealthChecksEnabled === true)
+  - INPUT: config (MergedConfig|null|undefined)
+  - PRE: missing linkHealthChecksEnabled means no explicit user choice; false is an explicit opt-out
+  - OUTPUT: boolean (true when linkHealthChecksEnabled is absent or true; false only when it is explicitly false)
+  - POST:
+    - null, undefined, or absent setting => true
+    - explicit false => false
+    - any other present value => true
   - EFFECTS: pure
   - TERMINATION: total
 - PROCEDURE: IS_LINK_HEALTH_CHECKS_ENABLED
-  - 1. RETURN config.linkHealthChecksEnabled === true
+  - 1. IF config is null or linkHealthChecksEnabled is absent THEN RETURN true
+  - 2. RETURN config.linkHealthChecksEnabled !== false
+
+## Manual-only link health dispatch
+
+- [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Keep network checks behind the existing explicit Index Check action; resolving or enabling the setting never dispatches CHECK_LINK_HEALTH.
+- Contract:
+  - INPUT: configuration lifecycle events (install, load, enable, save)
+  - PRE: CHECK_LINK_HEALTH remains owned by the user-triggered Index action
+  - OUTPUT: configuration/UI state with no network request
+  - EFFECTS: State
+  - TERMINATION: total
+- PROCEDURE: PRESERVE_MANUAL_ONLY_LINK_HEALTH
+  - 1. ON install, page load, options load, or setting enable: resolve IS_LINK_HEALTH_CHECKS_ENABLED; DO NOT SEND CHECK_LINK_HEALTH
+  - 2. ON explicit Check link health action: SEND CHECK_LINK_HEALTH through RUN_CHECK_LINK_HEALTH_UI
 
 ## Format capture-UI health hint
 
@@ -144,9 +163,14 @@
 
 ## Gate Index check controls
 
-- [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Hide/disable Check link health controls when opt-in off; Health column may remain read-only.
+- [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Hide/disable Check link health controls only when the effective setting is false; Health column may remain read-only.
 - Contract:
   - INPUT: enabled (boolean), checkButton (element|null)
+  - PRE: enabled is the effective setting; checkButton may be null
+  - OUTPUT: control state with hidden and disabled values
+  - POST:
+    - null button => no DOM mutation
+    - button present => hidden and disabled equal NOT enabled
   - EFFECTS: State (DOM hidden/disabled)
   - TERMINATION: total
 - PROCEDURE: APPLY_LINK_HEALTH_CONTROLS_GATE

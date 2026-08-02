@@ -1,6 +1,6 @@
 /**
  * [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH]
- * Options checkbox load/save for linkHealthChecksEnabled (default off).
+ * Options checkbox load/save for linkHealthChecksEnabled (enabled when absent; explicit false preserved).
  * No options.html Playwright E2E — unit covers bind/load/save wiring.
  */
 
@@ -76,8 +76,7 @@ describe('[REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Options linkHealthChecksEnabled',
         fontSizeTags: 12,
         fontSizeBase: 14,
         fontSizeInputs: 14,
-        iconClickOpensSidePanel: true,
-        linkHealthChecksEnabled: false
+        iconClickOpensSidePanel: true
       }),
       updateConfig: jest.fn().mockResolvedValue(undefined),
       getAuthToken: jest.fn().mockResolvedValue(''),
@@ -102,7 +101,21 @@ describe('[REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Options linkHealthChecksEnabled',
     }
   })
 
-  test('loadSettings leaves checkbox unchecked when default false', async () => {
+  test('loadSettings checks checkbox when setting is absent', async () => {
+    const controller = new OptionsController({ skipInit: true, configManager })
+    controller.bindElements()
+    await controller.loadSettings()
+    expect(checkbox.checked).toBe(true)
+    expect(global.chrome.runtime.sendMessage).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'CHECK_LINK_HEALTH' })
+    )
+  })
+
+  test('loadSettings preserves explicit false opt-out', async () => {
+    configManager.getConfig.mockResolvedValue({
+      storageMode: 'local',
+      linkHealthChecksEnabled: false
+    })
     const controller = new OptionsController({ skipInit: true, configManager })
     controller.bindElements()
     await controller.loadSettings()

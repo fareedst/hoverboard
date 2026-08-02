@@ -23,8 +23,8 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-31"
-      reason: "Align REQ behavior and validation evidence with fixed head/footer control panels and measured sticky offsets"
+      date: "2026-08-02"
+      reason: "Make Stores discoverable by default and add pre-store filtered/total row counts"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -34,8 +34,9 @@ REQ-LOCAL_BOOKMARKS_INDEX:
   purpose:
     - "Allow bulk delete of selected bookmarks from the index (confirmation with count and optionally titles; preferredBackend from Storage column; #delete-result pending/final)."
     - "Allow bulk move of selected bookmarks to another storage (Local | File | Sync | Browser) via REQ-MOVE_BOOKMARK_STORAGE_UI."
+    - "Each Stores control shows filtered / total provider-row counts. Total is all loaded rows for that store; filtered applies search, Show only, Hide, and Health before the Stores checkbox filter. Counts remain informative when a store is unchecked."
     - "Give users a single place to browse and search all non-Pinboard bookmarks (local + file + sync + browser)."
-    - "Recover from a failed or empty first index fetch when the user checks a store: re-run load without a full page reload (store-change reload); Stores remain default-unchecked."
+    - "Recover from a failed or empty first index fetch when the user checks a store: re-run load without a full page reload (store-change reload). Stores default checked."
     - "Show where each bookmark is stored (Local | File | Sync | Browser) via a Storage column."
     - "Support finding and opening bookmarks without leaving the extension."
     - "The bookmark count (# bookmarks) must always appear at the bottom of the page."
@@ -61,9 +62,9 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     - criterion: "Actions contains Refresh API snapshot and Check link health; Import remains a dedicated group; Export is a sibling dedicated group with all, displayed, and selected scopes."
     - criterion: "Bulk Delete confirms selected records, sends preferredBackend from the Storage column, announces pending/final #delete-result status, refreshes the table, and clears selection."
     - criterion: "Canonical Local Bookmarks Index and interchange terms remain defined in tied/vocab/bookmarks-index.md."
-    - criterion: "Checking a Stores checkbox when allBookmarks is empty and at least one store is checked re-runs LOAD_LOCAL_BOOKMARKS_INDEX without a full page reload; Stores remain default-unchecked."
+    - criterion: "Checking a Stores checkbox when allBookmarks is empty and at least one store is checked re-runs LOAD_LOCAL_BOOKMARKS_INDEX without a full page reload; Stores default checked."
     - criterion: "Dedicated extension page displays the Local Bookmarks Index with search, Stores L/F/S/B, Show only/Hide filters, sortable columns including Storage, and launchable URL links."
-    - criterion: "Entry points from popup, extension command, and context menu open the Local Bookmarks Index in a new tab; Options may use a direct href."
+    - criterion: "Each Local/File/Sync/Browser Stores control displays filtered / total loaded provider-row counts after search, Show only, Hide, and Health filters but before store selection; counts include duplicate rows and remain visible when a store is unchecked."
     - criterion: "Existing filter semantics, import/export behavior, result announcements, snapshot behavior, link-health gating, and control IDs remain unchanged."
     - criterion: "Opening the Local Bookmarks Index through popup, command, or context menu sends REQUEST_SIDE_PANEL_CLOSE after tab creation; index page initialization does not send that message."
     - criterion: "Primary data uses getAggregatedBookmarksForIndex for local, file, sync, and browser bookmarks with storage fields, with getLocalBookmarksForIndex as the LocalBookmarkService fallback."

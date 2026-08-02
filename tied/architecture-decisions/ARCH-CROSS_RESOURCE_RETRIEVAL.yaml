@@ -1,0 +1,75 @@
+ARCH-CROSS_RESOURCE_RETRIEVAL:
+  alternatives_considered:
+    - name: "Broaden ARCH-SEARCH into a universal engine"
+      cons:
+        - "Would silently change existing per-surface contracts"
+      pros:
+        - "One nominal search owner"
+      rejected_reason: "Existing ARCH-SEARCH explicitly says there is no cross-surface search engine."
+    - name: "Expose every source through one generic URL result"
+      cons:
+        - "Loses storage/archive identity and navigation semantics"
+      pros:
+        - "Simple result shape"
+      rejected_reason: "Violates source-specific action and privacy requirements."
+  cross_references:
+    - "REQ-ARCHIVED_CONTENT_SEARCH"
+    - "REQ-BOOKMARK_USAGE_TRACKING"
+    - "REQ-CROSS_RESOURCE_RETRIEVAL"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
+    - "REQ-SEARCH_FUNCTIONALITY"
+    - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+    - "REQ-SIDE_PANEL_BROWSER_TABS"
+  decision: "Add a read-only CrossResourceRetrieval orchestration layer with explicit source adapters, a normalized query/result model, deterministic ranking, bounded pagination, and source-specific actions. Keep existing per-surface search contracts and archive-content scope as separate child capabilities."
+  implementation_approach:
+    details:
+      - "Adapters are read-only and return source availability/staleness/permission state."
+      - "Archive text comes from ArchiveContentSearch and returns snippets/Reader targets only."
+      - "Bookmark metadata comes from BookmarkRouter/Index aggregation with storage identity."
+      - "Tabs, Browser Bookmarks (page), and Visit History (page) return navigation actions, not bookmark metadata."
+      - "The Local Bookmarks Index All resources scope is read-only; selection, metadata mutation, CSV export, and portable library package import/export controls are gated while it is active."
+      - "The new library-search message is additive; SEARCH_TITLE receives an explicit compatibility/deprecation path."
+    summary: "Query model + source adapter + fan-out/fan-in orchestrator + message binding + Local Bookmarks Index surface."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-01"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Bound additive retrieval architecture and compatibility boundaries"
+  name: "Cross-Resource Retrieval Architecture"
+  rationale:
+    benefits:
+      - "Clear source ownership and privacy boundaries."
+      - "Deterministic behavior suitable for unit and composition testing."
+      - "Independent module validation before message/UI composition."
+    problems_solved:
+      - "Cross-source queries otherwise duplicate surface-specific logic."
+      - "Shared result payloads could erase backend, archive, tab, browser-bookmark, or usage distinctions."
+    why: "An additive orchestration boundary avoids silently changing ARCH-SEARCH while allowing one source-aware retrieval contract."
+  related_decisions:
+    depends_on:
+      - "ARCH-ARCHIVED_CONTENT_SEARCH"
+      - "ARCH-SEARCH"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    informs:
+      - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+    see_also:
+      - "ARCH-BOOKMARK_USAGE_TRACKING_UI"
+      - "ARCH-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "ARCH-SIDE_PANEL_TABS"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+    implementation:
+      - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+    requirements:
+      - "REQ-CROSS_RESOURCE_RETRIEVAL"
+    tests:
+      - "tests/integration/bookmarks-table-archive-scope-composition.integration.test.js"
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/bookmarks-table-library-search.test.js"
+      - "tests/unit/cross-resource-retrieval.test.js"

@@ -96,7 +96,7 @@ export interface MergedConfig {
   aiTagLimit?: number
   /** [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon opens side panel (true) or popup (false). Default true. */
   iconClickOpensSidePanel?: boolean
-  /** [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Opt-in Index/SW link health checks. Default false. */
+  /** [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Index/SW link health checks. Absent defaults effectively true; explicit false opts out. */
   linkHealthChecksEnabled?: boolean
   [key: string]: unknown
 }

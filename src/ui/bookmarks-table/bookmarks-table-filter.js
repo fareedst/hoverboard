@@ -92,9 +92,55 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE ===
  */
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Known Stores used by the Local Bookmarks Index count and filter model. */
+export const INDEX_STORE_KEYS = ['local', 'file', 'sync', 'browser']
+
+/**
+ * ## COUNT_INDEX_ROWS_BY_STORE
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: Normalize provider storage values, count rows directly, and derive filtered / total counts before applying Store checkbox selection.
+ * - Contract:
+ *   - INPUT: allBookmarks (provider-row[]), metadataFilteredBookmarks (provider-row[])
+ *   - PRE: arrays may be empty; rows may omit storage; storage values may vary in case or contain whitespace; duplicate URLs remain distinct rows
+ *   - OUTPUT: { local: { filtered, total }, file: { filtered, total }, sync: { filtered, total }, browser: { filtered, total } }
+ *   - POST:
+ *     - success => total counts include every loaded row assigned to a known Store
+ *     - success => filtered counts include rows surviving search, Show only, Hide, and Health filters, before Store checkbox selection
+ *     - success => unknown storage is not attributed to a named Store; missing storage uses Local only for Local fallback rows
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: COUNT_INDEX_ROWS_BY_STORE
+ *   - 1. INITIALIZE counts for local, file, sync, browser with filtered = 0 and total = 0
+ *   - 2. FOR each row IN allBookmarks: store = NORMALIZE_INDEX_STORAGE(row.storage); IF store is known THEN counts[store].total += 1
+ *   - 3. FOR each row IN metadataFilteredBookmarks: store = NORMALIZE_INDEX_STORAGE(row.storage); IF store is known THEN counts[store].filtered += 1
+ *   - 4. RETURN counts
+ *   - How (sub-block): NORMALIZE_INDEX_STORAGE trims and lowercases local|file|sync|browser; missing storage becomes local only for explicitly marked Local fallback rows; unknown values remain unassigned.
+ */
+export function normalizeIndexStorage (storage, options = {}) {
+  const value = String(storage ?? '').trim().toLowerCase()
+  if (INDEX_STORE_KEYS.includes(value)) return value
+  if (!value && options.fallbackLocal === true) return 'local'
+  return null
+}
+
+export function getIndexStoreCounts (allBookmarks, metadataFilteredBookmarks, options = {}) {
+  const counts = Object.fromEntries(
+    INDEX_STORE_KEYS.map((store) => [store, { filtered: 0, total: 0 }])
+  )
+  const countRows = (rows, field) => {
+    if (!Array.isArray(rows)) return
+    for (const row of rows) {
+      const store = normalizeIndexStorage(row?.storage, options)
+      if (store) counts[store][field] += 1
+    }
+  }
+  countRows(allBookmarks, 'total')
+  countRows(metadataFilteredBookmarks, 'filtered')
+  return counts
+}
+
 export function matchStorageFilter (bookmark, storageFilterValue) {
   if (!storageFilterValue || !storageFilterValue.trim()) return true
-  const effective = (bookmark.storage || 'local').trim().toLowerCase()
+  const effective = normalizeIndexStorage(bookmark?.storage, { fallbackLocal: true })
   const value = storageFilterValue.trim().toLowerCase()
   return effective === value
 }
@@ -108,7 +154,7 @@ export function matchStorageFilter (bookmark, storageFilterValue) {
  */
 export function matchStoresFilter (bookmark, allowedStores) {
   if (!allowedStores || allowedStores.size === 0) return false
-  const effective = (bookmark.storage || 'local').trim().toLowerCase()
+  const effective = normalizeIndexStorage(bookmark?.storage, { fallbackLocal: true })
   return allowedStores.has(effective)
 }
 

@@ -1,0 +1,61 @@
+REQ-LIBRARY_PORTABILITY:
+  category: "Functional"
+  description: "The extension exports and restores a versioned portable library package containing lossless non-secret library state: bookmark records, tags, storage/backend metadata, storage index state, durable Local/File archive artifacts, screenshot artifacts, and safe configuration needed to restore behavior. A manifest and checksums protect every entry; restore is dry-run planned, conflict-aware, target-path-aware, verified, and recoverable."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-01"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Define non-secret library package scope before implementation"
+  name: "Portable Library Package"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Explicit conflict, artifact, quota, and rollback outcomes."
+      - "Fail-closed validation before mutation."
+      - "Lossless non-secret library migration."
+    problems_solved:
+      - "Accidental credential or machine-specific path export."
+      - "Loss of backend ownership and archive identity during interchange."
+      - "Unvalidated import mutation and incomplete rollback behavior."
+    why: "The existing CSV, Netscape HTML, and configuration exports are intentionally separate projections and cannot safely carry the complete library state."
+  related_requirements:
+    depends_on:
+      - "REQ-CONFIG_PORTABILITY"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+      - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Derived archive-content search state is rebuilt from restored artifacts rather than trusted as authoritative package data."
+    - criterion: "Dry-run restore detects version, malformed data, unsafe paths, checksum, conflict, quota, artifact, backend, and target-path problems before mutation."
+    - criterion: "Existing CSV, Netscape HTML, and configuration import/export behavior remains compatible and separately tested."
+    - criterion: "Export produces a versioned package with a manifest, deterministic entries, checksums, bookmark/index state, durable Local/File archives, and screenshot artifacts."
+    - criterion: "Restore verifies writes, protects prior state with backup/rollback boundaries, and reports partial outcomes without false success."
+    - criterion: "Secrets such as hoverboard_auth_token and API keys are excluded by default and reported explicitly."
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-LIBRARY_PORTABILITY"
+    code_annotations:
+      - "REQ-LIBRARY_PORTABILITY"
+    implementation:
+      - "IMPL-LIBRARY_PORTABILITY"
+    tests:
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/library-portability.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Package schema, manifest ordering, migration, checksum validation, safe paths, secret exclusion, conflict planning, and restore state transitions."
+    - method: "Integration tests"
+      coverage: "Existing storage/archive adapters, backup-before-rewrite, artifact verification, native/file callback, and derived search rebuild."
+    - method: "E2E tests"
+      coverage: "Only browser file selection/download and real extension-profile restore boundaries."

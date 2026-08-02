@@ -18,6 +18,10 @@ test.describe('[IMPL-LOCAL_BOOKMARKS_INDEX] fixed index control panels', () => {
     await expect(footerTabs).toHaveCount(3)
     await expect(page.locator('#head-panel-stores')).toBeVisible()
     await expect(page.locator('#footer-panel-actions')).toBeVisible()
+    for (const store of ['local', 'file', 'sync', 'browser']) {
+      await expect(page.locator(`#store-${store}`)).toBeChecked()
+      await expect(page.locator(`#store-${store}-count`)).toHaveText(/\d+ \/ \d+|n\/a/)
+    }
 
     await page.locator('#head-tab-show-only').click()
     await expect(page.locator('#head-tab-show-only')).toHaveAttribute('aria-selected', 'true')

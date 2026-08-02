@@ -15478,7 +15478,7 @@ var init_config_manager = __esm({
       aiTagLimit: external_exports.number().int().min(0).optional(),
       // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
       iconClickOpensSidePanel: external_exports.boolean().optional(),
-      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Opt-in outbound Index link health checks (default false).
+      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Outbound Index link health checks; absent setting defaults effectively enabled and explicit false remains an opt-out.
       linkHealthChecksEnabled: external_exports.boolean().optional()
     }).passthrough();
     ConfigManager = class {
@@ -15606,8 +15606,8 @@ var init_config_manager = __esm({
           aiTagLimit: 64,
           // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
           iconClickOpensSidePanel: true,
-          // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first: outbound link checks off until user enables in Options.
-          linkHealthChecksEnabled: false
+          // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Enabled by default for new/absent settings; users can explicitly opt out in Options.
+          linkHealthChecksEnabled: true
         };
       }
       /**
@@ -19500,7 +19500,7 @@ function syncBookmarkNotesFields({
 
 // src/shared/link-health.js
 function isLinkHealthChecksEnabled(config2) {
-  return config2?.linkHealthChecksEnabled === true;
+  return config2?.linkHealthChecksEnabled !== false;
 }
 function formatLinkHealthHint(rec, opts = {}) {
   if (!opts.enabled) return "";
@@ -21434,6 +21434,34 @@ var DEFAULT_SCREENSHOT_LIMITS = Object.freeze({
   maxHeight: 2e4
 });
 
+// src/features/search/cross-resource-retrieval.js
+var SUPPORTED_RETRIEVAL_SOURCES = Object.freeze([
+  "bookmark",
+  "archive",
+  "tabs",
+  "browserBookmarks",
+  "visitHistory"
+]);
+var SOURCE_PRIORITY = Object.freeze(
+  Object.fromEntries(SUPPORTED_RETRIEVAL_SOURCES.map((source, index) => [source, index]))
+);
+var SOURCE_FIELDS = Object.freeze({
+  bookmark: ["url", "title", "tags", "description", "backend", "storage", "time", "updated_at"],
+  archive: ["url", "title", "snippet", "archiveStatus", "storage", "backend", "archiveId", "readerTarget", "capturedAt", "position"],
+  tabs: ["tabId", "url", "title", "windowId", "active"],
+  browserBookmarks: ["targetId", "url", "title", "parentId"],
+  visitHistory: ["url", "title", "visitedAt", "lastVisitTime", "visitCount"]
+});
+
+// src/features/portability/library-package.js
+var DEFAULT_LIMITS = Object.freeze({
+  maxBytes: 50 * 1024 * 1024,
+  maxEntries: 1e4
+});
+
+// src/features/storage/storage-index.js
+init_utils();
+
 // src/core/message-handler.js
 var MESSAGE_TYPES = {
   // Data retrieval
@@ -21471,6 +21499,11 @@ var MESSAGE_TYPES = {
   // Search operations
   SEARCH_TITLE: "searchTitle",
   SEARCH_TITLE_TEXT: "searchTitleText",
+  // [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL] Read-only aggregate library query.
+  SEARCH_LIBRARY_RESOURCES: "searchLibraryResources",
+  // [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY] Package export/import bindings.
+  EXPORT_LIBRARY_PACKAGE: "exportLibraryPackage",
+  IMPORT_LIBRARY_PACKAGE: "importLibraryPackage",
   // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tab search operations
   SEARCH_TABS: "searchTabs",
   GET_SEARCH_HISTORY: "getSearchHistory",

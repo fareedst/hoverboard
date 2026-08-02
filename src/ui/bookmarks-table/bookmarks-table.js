@@ -62,7 +62,7 @@
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
- * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column; Stores L/F/S/B. Contract: page load and user actions; displayed table and filtered list; state data.
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), metadata-first filter pipeline, table with Storage column, and per-store filtered / total provider-row counts; Stores L/F/S/B.
  *
  * ## LOAD_LOCAL_BOOKMARKS_INDEX
  *
@@ -121,7 +121,43 @@
  *   - TERMINATION: total
  * - PROCEDURE: GET_ALLOWED_STORES
  *   - SET from checked #store-local|#store-file|#store-sync|#store-browser → { local, file, sync, browser }
- *   - How (sub-block): Apply stores filter, search, show-only, exclude tags; sort and render.
+ *   - How (sub-block): Apply Stores selection only after metadata-filtered rows and Store counts are derived.
+ *
+ * ## INITIALIZE_STORE_FILTERS
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: The Local Bookmarks Index starts with Local, File, Sync, and Browser Store controls checked so loaded rows are visible without an extra discovery step.
+ * - Contract:
+ *   - INPUT: Store checkbox elements
+ *   - PRE: #store-local, #store-file, #store-sync, and #store-browser exist or are safely skipped
+ *   - OUTPUT: initialized Store controls and count labels
+ *   - POST:
+ *     - success => all four Store checkboxes are checked unless the user changes them
+ *     - success => each count label is available for filtered / total row-count updates
+ *   - EFFECTS: State, DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: INITIALIZE_STORE_FILTERS
+ *   - 1. SET checked = true on #store-local, #store-file, #store-sync, and #store-browser
+ *   - 2. KEEP user changes to checked state; do not reload solely to refresh counts
+ *
+ * ## COUNT_INDEX_ROWS_BY_STORE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: Normalize provider storage values, count rows directly, and derive filtered / total counts before applying Store checkbox selection.
+ * - Contract:
+ *   - INPUT: allBookmarks (provider-row[]), metadataFilteredBookmarks (provider-row[])
+ *   - PRE: arrays may be empty; rows may omit storage; storage values may vary in case or contain whitespace; duplicate URLs remain distinct rows
+ *   - OUTPUT: { local: { filtered, total }, file: { filtered, total }, sync: { filtered, total }, browser: { filtered, total } }
+ *   - POST:
+ *     - success => total counts include every loaded row assigned to a known Store
+ *     - success => filtered counts include rows surviving search, Show only, Hide, and Health filters, before Store checkbox selection
+ *     - success => unknown storage is not attributed to a named Store; missing storage uses Local only for Local fallback rows
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: COUNT_INDEX_ROWS_BY_STORE
+ *   - 1. INITIALIZE counts for local, file, sync, browser with filtered = 0 and total = 0
+ *   - 2. FOR each row IN allBookmarks: store = NORMALIZE_INDEX_STORAGE(row.storage); IF store is known THEN counts[store].total += 1
+ *   - 3. FOR each row IN metadataFilteredBookmarks: store = NORMALIZE_INDEX_STORAGE(row.storage); IF store is known THEN counts[store].filtered += 1
+ *   - 4. RETURN counts
+ *   - How (sub-block): NORMALIZE_INDEX_STORAGE trims and lowercases local|file|sync|browser; missing storage becomes local only for explicitly marked Local fallback rows; unknown values remain unassigned.
  *
  * ## APPLY_SEARCH_AND_FILTER
  *
@@ -129,20 +165,24 @@
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
- *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list; Store counts
  *   - POST:
  *     - success => block outputs match OUTPUT shape
- *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA: allBookmarks (array with storage field), metadataFilteredBookmarks, filteredBookmarks, storeCounts, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
  *   - EFFECTS: IO
  *   - TERMINATION: total
  * - PROCEDURE: APPLY_SEARCH_AND_FILTER
- *   - filteredBookmarks = allBookmarks
- *   - APPLY stores filter (matchStoresFilter, getAllowedStores)
+ *   - metadataFilteredBookmarks = allBookmarks
  *   - APPLY search (text)
  *   - APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)
  *   - APPLY exclude tags (matchExcludeTags)
+ *   - APPLY Health status filter (FILTER_BOOKMARKS_BY_HEALTH)
+ *   - storeCounts = COUNT_INDEX_ROWS_BY_STORE(allBookmarks, metadataFilteredBookmarks)
+ *   - UPDATE Store count labels with storeCounts filtered / total
+ *   - filteredBookmarks = metadataFilteredBookmarks filtered by Stores selection (matchStoresFilter, getAllowedStores)
  *   - SORT by sortKey (e.g. time desc)
  *   - renderTableBody(filteredBookmarks); updateRowCount()
+ *   - How (sub-block): Archived and All resources scopes do not update named Store counts from stale metadata rows; clear or mark them non-applicable.
  *
  * ## HEAD_CONTROL_PANEL
  *
@@ -649,14 +689,15 @@
  *
  * ## Link health checks enabled flag
  *
- * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Privacy-first opt-in; config key linkHealthChecksEnabled defaults false.
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Resolve link health as enabled when the setting is absent while preserving explicit false.
  * - Contract:
  *   - INPUT: config (MergedConfig|null)
- *   - OUTPUT: boolean (true only when linkHealthChecksEnabled === true)
+ *   - OUTPUT: boolean (true when linkHealthChecksEnabled is absent or true; false only when explicitly false)
  *   - EFFECTS: pure
  *   - TERMINATION: total
  * - PROCEDURE: IS_LINK_HEALTH_CHECKS_ENABLED
- *   - 1. RETURN config.linkHealthChecksEnabled === true
+ *   - 1. IF config is null or linkHealthChecksEnabled is absent THEN RETURN true
+ *   - 2. RETURN config.linkHealthChecksEnabled !== false
  *
  * ## Format capture-UI health hint
  *
@@ -972,16 +1013,16 @@
  * === END IMPL-FULL-BLOCK: IMPL-ARCHIVED_CONTENT_SEARCH ===
  */
 import { initToolPageVersion } from '../styles/tool-page-version.js'
-import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
+import { matchStoresFilter, getIndexStoreCounts, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
 import { setImportResultPending, setImportResultFinal, setImportResultError, formatImportResultMessage } from './bookmarks-table-import-status.js'
 import { runBulkDelete } from './bookmarks-table-bulk-delete.js'
-import { prefillSearchFromQuery } from './bookmarks-table-library-search.js'
+import { prefillSearchFromQuery, buildCrossResourceSearchMessage, mapCrossResourceResults } from './bookmarks-table-library-search.js'
 import { runCheckLinkHealth, formatHealthCellLabel } from './bookmarks-table-link-health.js'
 import { runRefreshApiSnapshot } from './bookmarks-table-api-snapshot.js'
 import { buildArchiveSearchMessage, mapArchiveSearchResults } from './bookmarks-table-archive-search.js'
-import { isArchiveScopeValue } from './bookmarks-table-archive-scope.js'
+import { isArchiveScopeValue, isCrossResourceScopeValue } from './bookmarks-table-archive-scope.js'
 import { createControlTabState, selectControlGroup } from './bookmarks-table-controls.js'
 import { filterBookmarksByHealth, isLinkHealthChecksEnabled, applyLinkHealthControlsGate } from '../../shared/link-health.js'
 import {
@@ -999,6 +1040,8 @@ const MESSAGE_TYPE_USAGE = 'getBookmarkUsage'
 
 let allBookmarks = []
 let filteredBookmarks = []
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Per-Store filtered / total provider-row counts, derived before Store selection. */
+let storeCounts = null
 let sortKey = 'time'
 let sortAsc = false
 /** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] Time column: which value to show (time = create, updated_at = last updated). Default: last updated. */
@@ -1007,6 +1050,8 @@ let timeColumnSource = 'updated_at'
 let timeDisplayMode = 'age'
 /** [REQ-ARCHIVED_CONTENT_SEARCH] Explicit search scope; metadata remains the default. */
 let archiveSearchRequestId = 0
+/** [REQ-CROSS_RESOURCE_RETRIEVAL] Ignore stale aggregate-search responses. */
+let crossResourceSearchRequestId = 0
 /** [REQ-LOCAL_BOOKMARKS_INDEX] Selected bookmark URLs for bulk operations (e.g. move to storage). */
 const selectedUrls = new Set()
 /** [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] url -> health record */
@@ -1018,6 +1063,18 @@ function isArchiveScope () {
   return isArchiveScopeValue(elements.searchScope?.value)
 }
 
+function isCrossResourceScope () {
+  return isCrossResourceScopeValue(elements.searchScope?.value)
+}
+
+/**
+ * ## APPLY_ALL_RESOURCES_READ_ONLY_CONTROL_GATE
+ * - [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL] How: keep the Local Bookmarks Index All resources result surface read-only while preserving source-aware navigation.
+ */
+function isReadOnlySearchScope () {
+  return isArchiveScope() || isCrossResourceScope()
+}
+
 const elements = {
   searchInput: document.getElementById('search-input'),
   searchScope: document.getElementById('search-scope'),
@@ -1026,6 +1083,10 @@ const elements = {
   storeFile: document.getElementById('store-file'),
   storeSync: document.getElementById('store-sync'),
   storeBrowser: document.getElementById('store-browser'),
+  storeLocalCount: document.getElementById('store-local-count'),
+  storeFileCount: document.getElementById('store-file-count'),
+  storeSyncCount: document.getElementById('store-sync-count'),
+  storeBrowserCount: document.getElementById('store-browser-count'),
   filterTags: document.getElementById('filter-tags'),
   filterToread: document.getElementById('filter-toread'),
   filterPrivate: document.getElementById('filter-private'),
@@ -1039,6 +1100,10 @@ const elements = {
   exportAll: document.getElementById('export-all'),
   exportDisplayed: document.getElementById('export-displayed'),
   exportSelected: document.getElementById('export-selected'),
+  exportLibraryPackage: document.getElementById('export-library-package'),
+  importLibraryPackage: document.getElementById('import-library-package'),
+  importLibraryPackageFile: document.getElementById('import-library-package-file'),
+  libraryPackageResult: document.getElementById('library-package-result'),
   refreshApiSnapshot: document.getElementById('refresh-api-snapshot'),
   apiSnapshotResult: document.getElementById('api-snapshot-result'),
   checkLinkHealth: document.getElementById('check-link-health'),
@@ -1105,6 +1170,38 @@ function getAllowedStores () {
   return set
 }
 
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Metadata filters applied before Store counts (search, Show only, Hide, Health). */
+function deriveMetadataFilteredBookmarks () {
+  let metadataFilteredBookmarks = allBookmarks
+  const q = elements.searchInput?.value?.trim() || ''
+  metadataFilteredBookmarks = metadataFilteredBookmarks.filter(b => matchSearch(b, q) && matchFilters(b))
+  metadataFilteredBookmarks = metadataFilteredBookmarks.filter(matchExcludeTags)
+  metadataFilteredBookmarks = filterBookmarksByHealth(
+    metadataFilteredBookmarks,
+    linkHealthMap,
+    elements.filterHealth?.value || ''
+  )
+  return metadataFilteredBookmarks
+}
+
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Render filtered / total counts without applying Store checkbox selection to the count source. */
+function updateStoreCountLabels (counts = storeCounts) {
+  const labels = [
+    ['local', elements.storeLocalCount],
+    ['file', elements.storeFileCount],
+    ['sync', elements.storeSyncCount],
+    ['browser', elements.storeBrowserCount]
+  ]
+  for (const [store, label] of labels) {
+    if (!label) continue
+    const count = counts?.[store]
+    label.textContent = count ? `${count.filtered} / ${count.total}` : 'n/a'
+    label.setAttribute('aria-label', count
+      ? `${store} filtered / total provider rows: ${count.filtered} / ${count.total}`
+      : `${store} provider-row counts not applicable for this scope`)
+  }
+}
+
 function matchSearch (bookmark, q) {
   if (!q || !q.trim()) return true
   const lower = q.trim().toLowerCase()
@@ -1141,19 +1238,26 @@ function matchExcludeTags (bookmark) {
 }
 
 function applySearchAndFilter () {
+  const metadataFilteredBookmarks = deriveMetadataFilteredBookmarks()
+  const countOptions = { fallbackLocal: true }
+  if (allBookmarks.length > 0) {
+    storeCounts = getIndexStoreCounts(allBookmarks, metadataFilteredBookmarks, countOptions)
+    updateStoreCountLabels()
+  } else {
+    storeCounts = null
+    updateStoreCountLabels(null)
+  }
   // [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] APPLY_ARCHIVE_CONTENT_SCOPE keeps archive browse/search independent from metadata filtering.
   if (isArchiveScope()) {
     loadArchiveSearchResults(elements.searchInput?.value || '')
     return
   }
+  if (isCrossResourceScope()) {
+    loadCrossResourceResults(elements.searchInput?.value || '')
+    return
+  }
   const allowedStores = getAllowedStores()
-  let list = allBookmarks.filter(b => matchStoresFilter(b, allowedStores))
-  const q = elements.searchInput.value.trim()
-  list = list.filter(b => matchSearch(b, q) && matchFilters(b))
-  list = list.filter(matchExcludeTags)
-  // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
-  list = filterBookmarksByHealth(list, linkHealthMap, elements.filterHealth?.value || '')
-  filteredBookmarks = list
+  filteredBookmarks = metadataFilteredBookmarks.filter(b => matchStoresFilter(b, allowedStores))
   sortTable()
   renderTableBody()
   updateRowCount()
@@ -1180,6 +1284,50 @@ async function loadArchiveSearchResults (query) {
     updateMoveControlsState()
   } catch (error) {
     console.warn('[IMPL-ARCHIVED_CONTENT_SEARCH] archive query failed:', error)
+    filteredBookmarks = []
+    renderTableBody()
+    updateRowCount()
+    toggleEmptyState()
+    updateMoveControlsState()
+  }
+}
+
+/**
+ * ## SEARCH_LIBRARY_RESOURCES_MESSAGE
+ * - [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL] How: expose the query contract through a new message while keeping SEARCH_TITLE compatibility explicit.
+ * - Contract:
+ *   - INPUT: message with type SEARCH_LIBRARY_RESOURCES and query data
+ *   - PRE: message handler has the retrieval service and response channel
+ *   - OUTPUT: retrieval result or structured error response
+ *   - POST: one response is returned; no source write occurs
+ *   - FAILURE_MODES: InvalidQuery, InvalidScope, InvalidPagination
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: SEARCH_LIBRARY_RESOURCES_MESSAGE
+ *   - response = AWAIT QUERY_CROSS_RESOURCES(message.data)
+ *   - RETURN response
+ *   - SEARCH_TITLE remains a compatibility route returning its documented legacy shape until a separate deprecation change updates callers and tests
+ *   - Local Bookmarks Index ALL_RESOURCES scope sets the read-only control gate: disable selection, mutation, CSV export, and package import/export controls while the scope is active
+ */
+/**
+ * [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL]
+ * Query the aggregate service and render source-aware results read-only.
+ */
+async function loadCrossResourceResults (query) {
+  const requestId = ++crossResourceSearchRequestId
+  try {
+    const response = await chrome.runtime.sendMessage(buildCrossResourceSearchMessage(query))
+    if (requestId !== crossResourceSearchRequestId) return
+    const results = Array.isArray(response?.results)
+      ? response.results
+      : (Array.isArray(response?.data?.results) ? response.data.results : [])
+    filteredBookmarks = mapCrossResourceResults(results)
+    renderTableBody()
+    updateRowCount()
+    toggleEmptyState()
+    updateMoveControlsState()
+  } catch (error) {
+    console.warn('[IMPL-CROSS_RESOURCE_RETRIEVAL] aggregate query failed:', error)
     filteredBookmarks = []
     renderTableBody()
     updateRowCount()
@@ -1231,7 +1379,7 @@ function sortTable () {
 
 function renderTableBody () {
   elements.tableBody.innerHTML = ''
-  const archiveScope = isArchiveScope()
+  const archiveScope = isReadOnlySearchScope()
   for (const b of filteredBookmarks) {
     const tr = document.createElement('tr')
     const url = b.url || ''
@@ -1289,7 +1437,7 @@ function renderTableBody () {
 
 /** [REQ-LOCAL_BOOKMARKS_INDEX] Toggle selection for one row; call after checkbox change. */
 function onRowSelectChange (url, checked) {
-  if (isArchiveScope()) return
+  if (isReadOnlySearchScope()) return
   if (checked) selectedUrls.add(url)
   else selectedUrls.delete(url)
   updateMoveControlsState()
@@ -1298,7 +1446,7 @@ function onRowSelectChange (url, checked) {
 /** [REQ-LOCAL_BOOKMARKS_INDEX] Update header "select all" checkbox to reflect current visible selection. */
 function updateSelectAllState () {
   if (!elements.selectAll) return
-  if (isArchiveScope()) {
+  if (isReadOnlySearchScope()) {
     elements.selectAll.checked = false
     elements.selectAll.indeterminate = false
     elements.selectAll.disabled = true
@@ -1315,7 +1463,7 @@ function updateSelectAllState () {
 
 /** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Enable/disable move, delete, add-tags, and regex-replace controls based on selection. [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] */
 function updateMoveControlsState () {
-  const hasSelection = !isArchiveScope() && selectedUrls.size > 0
+  const hasSelection = !isReadOnlySearchScope() && selectedUrls.size > 0
   if (elements.moveTargetSelect) elements.moveTargetSelect.disabled = !hasSelection
   if (elements.moveButton) elements.moveButton.disabled = !hasSelection
   if (elements.deleteSelectedBtn) elements.deleteSelectedBtn.disabled = !hasSelection
@@ -1332,7 +1480,7 @@ function updateMoveControlsState () {
  * Uses existing moveBookmarkToStorage message per URL; then refreshes table and clears selection.
  */
 async function moveSelectedToStorage () {
-  if (isArchiveScope()) return
+  if (isReadOnlySearchScope()) return
   const target = elements.moveTargetSelect && elements.moveTargetSelect.value
   if (!target || selectedUrls.size === 0) return
   const urls = Array.from(selectedUrls)
@@ -1361,7 +1509,7 @@ async function moveSelectedToStorage () {
  * Sends preferredBackend from row Storage column so File/Sync imports delete from the correct provider.
  */
 async function deleteSelectedBookmarks () {
-  if (isArchiveScope()) return
+  if (isReadOnlySearchScope()) return
   if (selectedUrls.size === 0) return
   const urls = Array.from(selectedUrls)
   const byUrl = new Map(filteredBookmarks.filter(b => b.url).map(b => [b.url, b]))
@@ -1385,7 +1533,7 @@ async function deleteSelectedBookmarks () {
  * Add parsed tags from input to all selected bookmarks; merge with existing (case-insensitive dedupe); save via saveBookmark with preferredBackend; refresh; retain selection for still-visible rows.
  */
 async function addTagsToSelected () {
-  if (isArchiveScope()) return
+  if (isReadOnlySearchScope()) return
   const newTags = parseTagsInput(elements.addTagsInput && elements.addTagsInput.value)
   if (newTags.length === 0) return
   if (selectedUrls.size === 0) return
@@ -1425,7 +1573,7 @@ async function addTagsToSelected () {
  * Remove parsed tags from input from all selected bookmarks; save via saveBookmark with reduced tags and preferredBackend; refresh; retain selection for still-visible rows.
  */
 async function deleteTagsFromSelected () {
-  if (isArchiveScope()) return
+  if (isReadOnlySearchScope()) return
   const tagsToRemove = parseTagsInput(elements.addTagsInput && elements.addTagsInput.value)
   if (tagsToRemove.length === 0) return
   if (selectedUrls.size === 0) return
@@ -1465,7 +1613,7 @@ async function deleteTagsFromSelected () {
  * Run regex find-and-replace on selected bookmarks for checked fields (Title, URL, Tags, Notes); save via saveBookmark; refresh; retain selection for still-visible rows.
  */
 async function regexReplaceSelected () {
-  if (isArchiveScope()) return
+  if (isReadOnlySearchScope()) return
   const patternStr = elements.regexReplaceInput && (elements.regexReplaceInput.value || '').trim()
   if (!patternStr || selectedUrls.size === 0) return
   const replacementStr = elements.regexReplacementInput ? (elements.regexReplacementInput.value || '') : ''
@@ -1540,12 +1688,14 @@ function updateRowCount () {
 
 /** [IMPL-LOCAL_BOOKMARKS_INDEX] Empty state: when no store checked show "Select at least one store…"; when no data show default message. */
 function toggleEmptyState () {
-  const isArchiveScope = elements.searchScope?.value === 'archive'
-  if (isArchiveScope) {
+  const isReadOnlyScope = isReadOnlySearchScope()
+  if (isReadOnlyScope) {
     const showEmpty = filteredBookmarks.length === 0
     if (elements.emptyStateMessage) {
       elements.emptyStateMessage.textContent = showEmpty
-        ? 'No saved page archives yet. Use Save page archive on a Local or File page, then return here with search scope Archived content.'
+        ? (isCrossResourceScope()
+            ? 'No matching library resources.'
+            : 'No saved page archives yet. Use Save page archive on a Local or File page, then return here with search scope Archived content.')
         : elements.emptyStateMessage.textContent
     }
     elements.emptyState.classList.toggle('hidden', !showEmpty)
@@ -1569,9 +1719,11 @@ function toggleEmptyState () {
 function updateSearchScopeUi () {
   const isArchiveScope = elements.searchScope?.value === 'archive'
   if (elements.searchInput) {
-    elements.searchInput.placeholder = isArchiveScope
-      ? 'Filter archived pages (leave empty to list all)…'
-      : 'Search title, URL, tags, notes…'
+    elements.searchInput.placeholder = isCrossResourceScope()
+      ? 'Search bookmarks, archives, tabs, browser bookmarks, and history…'
+      : isArchiveScope
+        ? 'Filter archived pages (leave empty to list all)…'
+        : 'Search title, URL, tags, notes…'
   }
 }
 
@@ -1614,11 +1766,84 @@ function downloadBlob (blob, filename) {
 }
 
 /**
+ * ## LIBRARY_PORTABILITY_MESSAGE
+ * - [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY] How: expose export, dry-run planning, and restore operations through thin message/UI bindings without changing existing CSV, HTML, or config controls.
+ * - Contract:
+ *   - INPUT: package operation message and operation-specific data
+ *   - PRE: message handler has the portability service and response channel
+ *   - OUTPUT: package, dry-run plan, or restore report
+ *   - POST: one response is returned and UI status distinguishes pending, success, warning, and failure
+ *   - FAILURE_MODES: InvalidPackage, PlanFailed, RestoreFailed
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LIBRARY_PORTABILITY_MESSAGE
+ *   - IF operation = export: RETURN AWAIT COLLECT_LIBRARY_PACKAGE()
+ *   - IF operation = plan: validated = VALIDATE_LIBRARY_PACKAGE(input.package); RETURN PLAN_LIBRARY_RESTORE(validated, input.current, input.policy, input.targets)
+ *   - IF operation = restore: validated = VALIDATE_LIBRARY_PACKAGE(input.package); plan = PLAN_LIBRARY_RESTORE(validated, input.current, input.policy, input.targets); RETURN EXECUTE_LIBRARY_RESTORE(validated, plan, input.adapters, input.backupStore, input.policy)
+ */
+/**
+ * [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY]
+ * Export the versioned package as a separate JSON container; CSV export remains unchanged.
+ */
+async function exportLibraryPackage () {
+  if (!elements.libraryPackageResult) return
+  elements.libraryPackageResult.textContent = 'Exporting library package…'
+  try {
+    const response = await chrome.runtime.sendMessage({
+      type: 'exportLibraryPackage',
+      data: {}
+    })
+    if (response?.error) throw new Error(response.error)
+    const packageValue = response?.data || response
+    const blob = new Blob([JSON.stringify(packageValue)], { type: 'application/json' })
+    downloadBlob(blob, `hoverboard-library-package-${new Date().toISOString().slice(0, 10)}.json`)
+    elements.libraryPackageResult.textContent = 'Library package exported; excluded secrets are listed in the manifest.'
+  } catch (error) {
+    elements.libraryPackageResult.textContent = `Package export failed: ${error.message}`
+  }
+}
+
+/**
+ * [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY]
+ * Validate and preview an imported package before asking the service to restore it.
+ */
+async function importLibraryPackage (file) {
+  if (!file || !elements.libraryPackageResult) return
+  elements.libraryPackageResult.textContent = 'Validating library package…'
+  try {
+    const packageValue = JSON.parse(await file.text())
+    const planResponse = await chrome.runtime.sendMessage({
+      type: 'importLibraryPackage',
+      data: { mode: 'plan', package: packageValue, conflictPolicy: 'replace', targets: {} }
+    })
+    const plan = planResponse?.data || planResponse
+    if (plan?.error) throw new Error(plan.error)
+    const count = Array.isArray(plan?.actions) ? plan.actions.length : 0
+    if (!window.confirm(`Restore ${count} library package entries?`)) {
+      elements.libraryPackageResult.textContent = 'Library package restore cancelled.'
+      return
+    }
+    const restoredResponse = await chrome.runtime.sendMessage({
+      type: 'importLibraryPackage',
+      data: { mode: 'restore', package: packageValue, conflictPolicy: 'replace', targets: {} }
+    })
+    const restored = restoredResponse?.data || restoredResponse
+    if (restored?.success !== true) throw new Error(restored?.failed?.join(', ') || 'restore failed')
+    elements.libraryPackageResult.textContent = `Library package restored: ${restored.restored.length} entries.`
+    await loadBookmarks()
+  } catch (error) {
+    elements.libraryPackageResult.textContent = `Package import failed: ${error.message}`
+  } finally {
+    if (elements.importLibraryPackageFile) elements.importLibraryPackageFile.value = ''
+  }
+}
+
+/**
  * [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT]
  * Export bookmarks to CSV. scope: 'all' | 'displayed' | 'selected'.
  */
 function exportBookmarks (scope) {
-  if (isArchiveScope()) return
+  if (isReadOnlySearchScope()) return
   let list
   if (scope === 'all') list = allBookmarks
   else if (scope === 'displayed') list = filteredBookmarks
@@ -1637,15 +1862,19 @@ function exportBookmarks (scope) {
  * Enable/disable export buttons; Export selected enabled only when at least one bookmark is selected.
  */
 function updateExportButtonState () {
-  if (isArchiveScope()) {
+  if (isReadOnlySearchScope()) {
     if (elements.exportAll) elements.exportAll.disabled = true
     if (elements.exportDisplayed) elements.exportDisplayed.disabled = true
     if (elements.exportSelected) elements.exportSelected.disabled = true
+    if (elements.exportLibraryPackage) elements.exportLibraryPackage.disabled = true
+    if (elements.importLibraryPackage) elements.importLibraryPackage.disabled = true
     return
   }
   if (elements.exportAll) elements.exportAll.disabled = allBookmarks.length === 0
   if (elements.exportDisplayed) elements.exportDisplayed.disabled = filteredBookmarks.length === 0
   if (elements.exportSelected) elements.exportSelected.disabled = selectedUrls.size === 0
+  if (elements.exportLibraryPackage) elements.exportLibraryPackage.disabled = false
+  if (elements.importLibraryPackage) elements.importLibraryPackage.disabled = false
 }
 
 /**
@@ -1766,6 +1995,7 @@ async function loadBookmarks () {
   } catch (err) {
     console.error('[IMPL-LOCAL_BOOKMARKS_INDEX] loadBookmarks failed:', err)
     allBookmarks = []
+    applySearchAndFilter()
     elements.emptyState.innerHTML = '<p>Failed to load bookmarks. Try again later.</p>'
     elements.emptyState.classList.remove('hidden')
     elements.tableWrapper.classList.add('hidden')
@@ -1869,8 +2099,13 @@ function init () {
   initToolPageVersion()
   initControlTabs()
   elements.searchInput.addEventListener('input', applySearchAndFilter)
+  elements.exportLibraryPackage?.addEventListener('click', exportLibraryPackage)
+  elements.importLibraryPackage?.addEventListener('click', () => elements.importLibraryPackageFile?.click())
+  elements.importLibraryPackageFile?.addEventListener('change', event => {
+    importLibraryPackage(event.target.files?.[0])
+  })
   elements.searchScope?.addEventListener('change', () => {
-    if (isArchiveScope()) selectedUrls.clear()
+    if (isReadOnlySearchScope()) selectedUrls.clear()
     updateSearchScopeUi()
     applySearchAndFilter()
   })

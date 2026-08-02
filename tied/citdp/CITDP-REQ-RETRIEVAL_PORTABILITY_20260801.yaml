@@ -1,0 +1,148 @@
+CITDP-REQ-RETRIEVAL_PORTABILITY_20260801:
+  change_definition:
+    architecture:
+      - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+      - "ARCH-LIBRARY_PORTABILITY"
+    implementation:
+      - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+      - "IMPL-LIBRARY_PORTABILITY"
+    requirements:
+      - "REQ-CROSS_RESOURCE_RETRIEVAL"
+      - "REQ-LIBRARY_PORTABILITY"
+    scope:
+      in_scope:
+        - "All-resources Local Bookmarks Index search scope with source-aware actions and read-only control gating."
+        - "Explicit canonical source-registry validation and isolated adapter permission/availability outcomes."
+        - "Extension-page coverage for aggregate scope controls and package download/file-selection boundaries."
+        - "Fail-closed validation, no-write restore planning, backup-before-write execution, and compensation reporting."
+        - "MessageHandler bindings for retrieval, package export, package planning, and package restore."
+        - "Read-only retrieval over bookmark metadata, archive text, Tabs, Browser Bookmarks, and Visit History."
+        - "Versioned deterministic package manifest with checksums, safe relative paths, durable archive and screenshot artifacts, and allowlisted configuration."
+      out_of_scope:
+        - "Automatic migration or retirement of SEARCH_TITLE."
+        - "Remote analytics or synchronization of Visit History."
+        - "Replacing existing CSV, browser HTML, or configuration backup formats."
+        - "Silent restoration of machine-specific File paths."
+      summary: "Add cross-resource retrieval and a non-secret, lossless portable library package without changing legacy metadata search, CSV/HTML export, or configuration backup contracts."
+  deferred_proposals:
+    - "Add a dedicated user-facing File target picker and native adapter binding for package restore on machines with File storage."
+    - "Add browser bookmark node navigation and tab focusing controls as dedicated UI actions rather than URL fallback links."
+    - "Add explicit source-state telemetry UI (available, stale, unavailable, permissionDenied) to the All resources result surface."
+    - "Retire SEARCH_TITLE only through a separate compatibility/deprecation change with caller migration and tests."
+  impact_discovery:
+    compatibility:
+      additive_messages:
+        - "EXPORT_LIBRARY_PACKAGE"
+        - "IMPORT_LIBRARY_PACKAGE"
+        - "SEARCH_LIBRARY_RESOURCES"
+      preserved:
+        - "Existing archive-content scope and Reader navigation."
+        - "Existing CSV/HTML/config backup paths."
+        - "Metadata search as the default Index scope."
+        - "SEARCH_TITLE legacy route and shape."
+    modules:
+      - module: "cross-resource-retrieval"
+        boundary: "Pure query/ranking plus canonical scope validation, MessageHandler, and Local Bookmarks Index UI bindings."
+        paths:
+          - "src/core/message-handler.js"
+          - "src/features/search/cross-resource-retrieval.js"
+          - "src/ui/bookmarks-table/bookmarks-table-library-search.js"
+          - "src/ui/bookmarks-table/bookmarks-table.html"
+          - "src/ui/bookmarks-table/bookmarks-table.js"
+          - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+          - "tests/playwright/extension-retrieval-portability.spec.js"
+          - "tests/unit/bookmarks-table-library-search.test.js"
+          - "tests/unit/cross-resource-retrieval.test.js"
+        validation: "Unit tests, combined MessageHandler composition tests, and extension-page scope tests pass."
+      - module: "library-portability"
+        boundary: "Pure package primitives plus injectable restore adapters; export and validation do not mutate source state."
+        paths:
+          - "src/core/message-handler.js"
+          - "src/features/portability/library-package.js"
+          - "src/ui/bookmarks-table/bookmarks-table.html"
+          - "src/ui/bookmarks-table/bookmarks-table.js"
+          - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+          - "tests/playwright/extension-retrieval-portability.spec.js"
+          - "tests/unit/library-portability.test.js"
+        validation: "Unit tests, combined MessageHandler composition tests, and extension-page download/file-selection boundary tests pass."
+      - module: "existing-archive-boundary"
+        boundary: "Existing Local/File archive identity and Reader target behavior remain source-specific."
+        paths:
+          - "src/features/archive/archive-content-search.js"
+          - "src/features/archive/page-archive-store.js"
+        validation: "Full regression suite and extension archive suite pass."
+  implementation_result:
+    divergences:
+      - "Per-source permission denial is isolated in sourceStates rather than aborting an otherwise valid aggregate query, preserving available sources."
+      - "Restore remains injectable; the default extension service fails closed unless backup and target adapters are configured."
+      - "Scope validation is now an explicit pure boundary against the canonical source registry; missing or failing adapters remain isolated source states rather than invalid scopes."
+      - "The All resources scope disables selection, mutation, CSV export, and package import/export controls."
+    extension_tests: "54 passed; 2 skipped"
+    focused_tests: "28 passed"
+    full_tests: "167 suites passed; 1,640 tests passed; 1 skipped"
+    lint: "passed"
+    manifest: "passed with existing sessions permission warning"
+    status: "implemented"
+    tied_consistency: "passed"
+    token_validation: "passed"
+    typecheck: "passed"
+  risk_assessment:
+    method: "Risk was assessed against source privacy boundaries, untrusted package input, deterministic output, storage failure, and legacy compatibility."
+    risks:
+      - id: "RISK-RETRIEVAL-001"
+        mitigation: "Allowlisted per-source fields; archives return bounded snippets and Reader targets only; Visit History uses local browser history API and strips undeclared fields."
+        residual: "Browser-provided history permissions remain user-controlled."
+        risk: "Aggregate retrieval could leak archive HTML or remote history data."
+        severity: "high"
+      - id: "RISK-RETRIEVAL-002"
+        mitigation: "Deduplication identity includes source and backend/archive identity; stable source-specific actions are preserved."
+        residual: "Malformed source records without stable identifiers fall back to a deterministic serialized identity."
+        risk: "Duplicate URLs could collapse distinct Local/File archive identities."
+        severity: "medium"
+      - id: "RISK-PORTABILITY-001"
+        mitigation: "Reject absolute/traversal paths, validate every manifest checksum and backend, scan configuration keys, and require explicit File target paths."
+        residual: "A caller-provided restore adapter remains responsible for its own filesystem API boundary."
+        risk: "Package import could write outside its target or restore a secret."
+        severity: "critical"
+      - id: "RISK-PORTABILITY-002"
+        mitigation: "Require backup before first mutation, verify each action, rebuild derived archive search after writes, and compensate on write/verification/rebuild failure."
+        residual: "Rollback failure is reported explicitly as retained partial state."
+        risk: "Interrupted restore could leave partial library state."
+        severity: "high"
+      - id: "RISK-COMPATIBILITY-001"
+        mitigation: "All-resources scope is read-only, disables selection/mutation/export controls, and metadata remains default."
+        residual: "Future UI actions must use the read-only scope guard."
+        risk: "New aggregate scope could enable metadata mutations or alter default search."
+        severity: "medium"
+  security_mitigations:
+    - "Archive HTML is never included in aggregate result payloads."
+    - "Configuration portability uses an allowlist and reports excluded keys."
+    - "Package entries are size-limited, version-checked, backend-checked, identity-checked, and checksum-verified before planning."
+    - "Package paths are normalized and traversal/absolute paths are rejected."
+    - "Read-only retrieval has no source write path."
+    - "Restore creates a backup before mutation and never claims success after failed compensation."
+  test_strategy:
+    composition:
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js dispatches SEARCH_LIBRARY_RESOURCES, package export, package plan, and package restore without invoking UI."
+      - "The same composition suite verifies constructor initialization of both additive services before optional setters."
+    e2e:
+      - "tests/playwright/extension-retrieval-portability.spec.js verifies package download and malformed file selection fails closed at the real extension-page boundary."
+      - "tests/playwright/extension-retrieval-portability.spec.js verifies the real All resources scope read-only control gate."
+    rationale: "Browser file selection/download and extension-profile DOM/control boundaries require Playwright; algorithms and IPC bindings remain unit/composition coverage."
+    regression:
+      command: "npm test -- --runInBand"
+      result: "167 suites passed; 1,640 tests passed; 1 skipped."
+    static_validation:
+      - "npm run lint (passed)"
+      - "npm run typecheck (passed)"
+      - "npm run validate:manifest (passed with existing sessions permission warning)"
+      - "TIED semantic token index validation (passed)"
+      - "tied_validate_consistency (passed)"
+    unit:
+      - "Adapt archive, Tabs, Browser Bookmarks, and Visit History APIs through the service boundary."
+      - "Normalize query text, source scopes, caps, and pagination; reject empty/unsupported inputs before reads."
+      - "Rank, deduplicate, paginate, map source-specific actions, isolate permission/stale/source failures, and bound source fields."
+      - "Reject malformed, unsupported-version, duplicate-identity, unsupported-backend, secret, checksum, size, and missing-entry failures."
+      - "Reject unsafe package paths, filter/report excluded configuration, build deterministic manifest/checksums, and detect tampering."
+      - "Require File target paths, detect conflict/quota failures, generate no-write restore plans, and compensate backup/write/verification/rebuild/rollback failures."
+      - "Validate requested scopes against the canonical source registry before bounded reads; retain denied sources for isolated state reporting."

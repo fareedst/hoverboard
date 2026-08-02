@@ -64,19 +64,20 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX-pseudocode.md"
   implementation_approach:
     details:
-      - "bookmarks-table-controls.js owns pure active-group validation and independent head/footer tab state for unit testing"
-      - "bookmarks-table.css reserves head/footer space, offsets sticky table headers, keeps focus-visible tab styles, and prevents the list from being obscured"
-      - "bookmarks-table.html groups Stores, Show only, Hide, and Table Display behind a head tablist with one visible panel; the footer tablist exposes Actions, Import, and Export with one visible panel"
-      - "bookmarks-table.js wires tab activation and ARIA/hidden state without changing existing filter, import, export, snapshot, or link-health handlers"
-    summary: "Fixed accessible head/footer control panels around a viewport-filling bookmark list; preserve existing index data, filter, selection, and action wiring."
+      - "bookmarks-table-filter.js owns pure storage normalization and per-store total/filtered row count derivation for Local/File/Sync/Browser, including empty, unknown, duplicate-row, and Local-only fallback data."
+      - "bookmarks-table.css keeps count labels compact, readable, responsive, and keyboard-compatible; Archived and All resources scopes do not show stale metadata counts."
+      - "bookmarks-table.html starts all Stores checkboxes checked and exposes accessible filtered / total count elements beside each label."
+      - "bookmarks-table.js derives the metadata-filtered list once, refreshes Store counts on load and filter/health changes, then applies Stores selection for rendering without unnecessary reloads."
+      - "INITIALIZE_STORE_FILTERS and COUNT_INDEX_ROWS_BY_STORE are documented as separate testable boundaries; count labels remain based on pre-Store metadata-filtered rows."
+    summary: "Fixed accessible Local Bookmarks Index controls with checked Stores defaults and pure pre-store filtered / total provider-row counts."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-31"
-      reason: "Add fixed accessible head/footer control panels and viewport-filling bookmark list"
+      date: "2026-08-02"
+      reason: "Align Store initialization and pre-selection count contracts with source and tests"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -103,6 +104,15 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
     supersedes: []
   status: "Active"
+  tests:
+    - "tests/integration/message-handler-router-storage.integration.test.js"
+    - "tests/playwright/extension-bookmarks-index-controls.spec.js (runtime tab activation, keyboard navigation, checked Stores defaults, and count labels)"
+    - "tests/unit/bookmarks-table-controls.test.js"
+    - "tests/unit/bookmarks-table-filter.test.js (per-store count helper)"
+    - "tests/unit/bookmarks-table-index.test.js (filtering, fixed head/footer layout, checked Stores, and count DOM)"
+    - "tests/unit/bookmarks-table-load.test.js"
+    - "tests/unit/bookmarks-table-time.test.js"
+    - "tests/unit/message-handler-bookmarks-index.test.js"
   traceability:
     architecture:
       - "ARCH-BROWSER_BOOKMARK_PROVIDER"

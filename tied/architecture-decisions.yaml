@@ -601,6 +601,72 @@ ARCH-CROSS_BROWSER:
       - "tests/unit/message-client.test.js"
       - "tests/unit/native-host-ping.test.js"
       - "tests/unit/service-worker-quick-access.test.js"
+ARCH-CROSS_RESOURCE_RETRIEVAL:
+  alternatives_considered:
+    - name: "Broaden ARCH-SEARCH into a universal engine"
+      cons:
+        - "Would silently change existing per-surface contracts"
+      pros:
+        - "One nominal search owner"
+      rejected_reason: "Existing ARCH-SEARCH explicitly says there is no cross-surface search engine."
+    - name: "Expose every source through one generic URL result"
+      cons:
+        - "Loses storage/archive identity and navigation semantics"
+      pros:
+        - "Simple result shape"
+      rejected_reason: "Violates source-specific action and privacy requirements."
+  cross_references:
+    - "REQ-ARCHIVED_CONTENT_SEARCH"
+    - "REQ-BOOKMARK_USAGE_TRACKING"
+    - "REQ-CROSS_RESOURCE_RETRIEVAL"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
+    - "REQ-SEARCH_FUNCTIONALITY"
+    - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+    - "REQ-SIDE_PANEL_BROWSER_TABS"
+  decision: "Add a read-only CrossResourceRetrieval orchestration layer with explicit source adapters, a normalized query/result model, deterministic ranking, bounded pagination, and source-specific actions. Keep existing per-surface search contracts and archive-content scope as separate child capabilities."
+  detail_file: "architecture-decisions/ARCH-CROSS_RESOURCE_RETRIEVAL.yaml"
+  implementation_approach:
+    details:
+      - "Adapters are read-only and return source availability/staleness/permission state."
+      - "Archive text comes from ArchiveContentSearch and returns snippets/Reader targets only."
+      - "Bookmark metadata comes from BookmarkRouter/Index aggregation with storage identity."
+      - "Tabs, Browser Bookmarks (page), and Visit History (page) return navigation actions, not bookmark metadata."
+      - "The new library-search message is additive; SEARCH_TITLE receives an explicit compatibility/deprecation path."
+    summary: "Query model + source adapter + fan-out/fan-in orchestrator + message binding + Local Bookmarks Index surface."
+  name: "Cross-Resource Retrieval Architecture"
+  rationale:
+    benefits:
+      - "Clear source ownership and privacy boundaries."
+      - "Deterministic behavior suitable for unit and composition testing."
+      - "Independent module validation before message/UI composition."
+    problems_solved:
+      - "Cross-source queries otherwise duplicate surface-specific logic."
+      - "Shared result payloads could erase backend, archive, tab, browser-bookmark, or usage distinctions."
+    why: "An additive orchestration boundary avoids silently changing ARCH-SEARCH while allowing one source-aware retrieval contract."
+  related_decisions:
+    depends_on:
+      - "ARCH-ARCHIVED_CONTENT_SEARCH"
+      - "ARCH-SEARCH"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    informs:
+      - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+    see_also:
+      - "ARCH-BOOKMARK_USAGE_TRACKING_UI"
+      - "ARCH-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "ARCH-SIDE_PANEL_TABS"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+    implementation:
+      - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+    requirements:
+      - "REQ-CROSS_RESOURCE_RETRIEVAL"
+    tests:
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/bookmarks-table-library-search.test.js"
+      - "tests/unit/cross-resource-retrieval.test.js"
 ARCH-ERROR_HANDLING:
   alternatives_considered:
     - name: "Exceptions"
@@ -991,6 +1057,73 @@ ARCH-LANGUAGE_SELECTION:
     tests:
       - "npm run typecheck (validates type-checked .js and .d.ts)"
       - "npm run validate (lint + typecheck + validate:manifest + security:check)"
+ARCH-LIBRARY_PORTABILITY:
+  alternatives_considered:
+    - name: "Reuse CSV/JSON row import"
+      cons:
+        - "No artifacts, manifest, checksums, rollback, or lossless backend identity"
+      pros:
+        - "Existing controls and parser"
+      rejected_reason: "The new package is a distinct lossless portability contract."
+    - name: "Archive everything in a single opaque blob"
+      cons:
+        - "Hard to validate, migrate, inspect, or apply artifact-specific conflict policy"
+      pros:
+        - "Simple container"
+      rejected_reason: "Manifest entries and separate metadata/binary artifacts are required."
+  cross_references:
+    - "REQ-CONFIG_PORTABILITY"
+    - "REQ-LIBRARY_PORTABILITY"
+    - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  decision: "Add a package/manifest boundary that serializes non-secret library state and separate archive artifacts into deterministic entries with checksums, then restores through dry-run planning, conflict policy, target-path remapping, backup-before-mutation, verification, and compensation."
+  detail_file: "architecture-decisions/ARCH-LIBRARY_PORTABILITY.yaml"
+  implementation_approach:
+    details:
+      - "Backup-before-rewrite and compensation preserve prior state; derived archive search is rebuilt after durable artifacts restore."
+      - "Configuration is allowlisted; hoverboard_auth_token and API keys are excluded by default and exclusion is reported."
+      - "File storage paths are never blindly restored; target path remapping/confirmation is required."
+      - "Package manifest lists every metadata and binary artifact entry with safe relative path, size, and SHA-256."
+      - "Restore plans all conflicts, migrations, missing artifacts, unsupported backends, quotas, and checksum failures before mutation."
+    summary: "Deterministic package schema + collector + validator + dry-run restore planner + verified executor + UI/native composition."
+  name: "Portable Library Package Architecture"
+  rationale:
+    benefits:
+      - "Fail-closed package validation."
+      - "Lossless non-secret state migration."
+      - "Recoverable restore with explicit partial outcomes."
+    problems_solved:
+      - "Configuration and credentials have different portability and privacy rules."
+      - "CSV/HTML projections omit backend and durable artifact state."
+      - "Unvalidated restore can mutate data before discovering corruption, unsafe paths, or quota conflicts."
+    why: "A dedicated package boundary can preserve full library identity without weakening existing lossy interchange formats or blindly replaying per-row saves."
+  related_decisions:
+    depends_on:
+      - "ARCH-CONFIG_STRUCTURE"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+      - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    informs:
+      - "IMPL-LIBRARY_PORTABILITY"
+    see_also:
+      - "ARCH-FILE_BOOKMARK_PROVIDER"
+      - "ARCH-NATIVE_HOST"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-LIBRARY_PORTABILITY"
+    implementation:
+      - "IMPL-LIBRARY_PORTABILITY"
+    requirements:
+      - "REQ-LIBRARY_PORTABILITY"
+    tests:
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/library-portability.test.js"
 ARCH-LIBRARY_SEARCH_ENTRY:
   cross_references:
     - "IMPL-LIBRARY_SEARCH_ENTRY"
@@ -1006,7 +1139,7 @@ ARCH-LINK_HEALTH:
   detail_file: "architecture-decisions/ARCH-LINK_HEALTH.yaml"
   name: "Link Health Architecture"
   status: "Accepted"
-  summary: "SW fetch HEAD/GET; storage map; Index UI."
+  summary: "Direct service-worker HEAD→GET checks with effective enabled-by-absence setting, explicit false opt-out, stored results, and manual-only dispatch."
 ARCH-LOCAL_BOOKMARKS_INDEX:
   alternatives_considered:
     - name: "Include Pinboard in index aggregate"
@@ -1061,7 +1194,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
       - "ARCH-MESSAGE_HANDLING"
   status: "Active"
   sticky_table_display: "The head control panel remains fixed at the viewport head. The selected Table Display panel and table column headers remain aligned below it while scrolling; the bookmark-list body occupies the space between the head and footer. At the initial table position, column headers remain at the table top; once the list scrolls beneath the head panel, the headers use the measured head offset. The selected footer panel remains fixed at the viewport bottom, and list padding prevents the controls from obscuring rows."
-  summary: "Single Local Bookmarks Index page with accessible fixed head/footer control tabs, a viewport-filling bookmark list, and preserved Stores/Show only/Hide/Table Display, Actions/Import/Export behavior."
+  summary: "Fixed Local Bookmarks Index controls with checked Stores defaults and pre-store per-store filtered / total provider-row counts."
   traceability:
     code_annotations:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"

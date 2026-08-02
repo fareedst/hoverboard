@@ -1,6 +1,6 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
- * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column; Stores L/F/S/B. Contract: page load and user actions; displayed table and filtered list; state data.
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), metadata-first filter pipeline, table with Storage column, and per-store filtered / total provider-row counts; Stores L/F/S/B.
  *
  * ## LOAD_LOCAL_BOOKMARKS_INDEX
  *
@@ -59,7 +59,43 @@
  *   - TERMINATION: total
  * - PROCEDURE: GET_ALLOWED_STORES
  *   - SET from checked #store-local|#store-file|#store-sync|#store-browser → { local, file, sync, browser }
- *   - How (sub-block): Apply stores filter, search, show-only, exclude tags; sort and render.
+ *   - How (sub-block): Apply Stores selection only after metadata-filtered rows and Store counts are derived.
+ *
+ * ## INITIALIZE_STORE_FILTERS
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: The Local Bookmarks Index starts with Local, File, Sync, and Browser Store controls checked so loaded rows are visible without an extra discovery step.
+ * - Contract:
+ *   - INPUT: Store checkbox elements
+ *   - PRE: #store-local, #store-file, #store-sync, and #store-browser exist or are safely skipped
+ *   - OUTPUT: initialized Store controls and count labels
+ *   - POST:
+ *     - success => all four Store checkboxes are checked unless the user changes them
+ *     - success => each count label is available for filtered / total row-count updates
+ *   - EFFECTS: State, DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: INITIALIZE_STORE_FILTERS
+ *   - 1. SET checked = true on #store-local, #store-file, #store-sync, and #store-browser
+ *   - 2. KEEP user changes to checked state; do not reload solely to refresh counts
+ *
+ * ## COUNT_INDEX_ROWS_BY_STORE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: Normalize provider storage values, count rows directly, and derive filtered / total counts before applying Store checkbox selection.
+ * - Contract:
+ *   - INPUT: allBookmarks (provider-row[]), metadataFilteredBookmarks (provider-row[])
+ *   - PRE: arrays may be empty; rows may omit storage; storage values may vary in case or contain whitespace; duplicate URLs remain distinct rows
+ *   - OUTPUT: { local: { filtered, total }, file: { filtered, total }, sync: { filtered, total }, browser: { filtered, total } }
+ *   - POST:
+ *     - success => total counts include every loaded row assigned to a known Store
+ *     - success => filtered counts include rows surviving search, Show only, Hide, and Health filters, before Store checkbox selection
+ *     - success => unknown storage is not attributed to a named Store; missing storage uses Local only for Local fallback rows
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: COUNT_INDEX_ROWS_BY_STORE
+ *   - 1. INITIALIZE counts for local, file, sync, browser with filtered = 0 and total = 0
+ *   - 2. FOR each row IN allBookmarks: store = NORMALIZE_INDEX_STORAGE(row.storage); IF store is known THEN counts[store].total += 1
+ *   - 3. FOR each row IN metadataFilteredBookmarks: store = NORMALIZE_INDEX_STORAGE(row.storage); IF store is known THEN counts[store].filtered += 1
+ *   - 4. RETURN counts
+ *   - How (sub-block): NORMALIZE_INDEX_STORAGE trims and lowercases local|file|sync|browser; missing storage becomes local only for explicitly marked Local fallback rows; unknown values remain unassigned.
  *
  * ## APPLY_SEARCH_AND_FILTER
  *
@@ -67,20 +103,24 @@
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
- *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list; Store counts
  *   - POST:
  *     - success => block outputs match OUTPUT shape
- *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA: allBookmarks (array with storage field), metadataFilteredBookmarks, filteredBookmarks, storeCounts, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
  *   - EFFECTS: IO
  *   - TERMINATION: total
  * - PROCEDURE: APPLY_SEARCH_AND_FILTER
- *   - filteredBookmarks = allBookmarks
- *   - APPLY stores filter (matchStoresFilter, getAllowedStores)
+ *   - metadataFilteredBookmarks = allBookmarks
  *   - APPLY search (text)
  *   - APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)
  *   - APPLY exclude tags (matchExcludeTags)
+ *   - APPLY Health status filter (FILTER_BOOKMARKS_BY_HEALTH)
+ *   - storeCounts = COUNT_INDEX_ROWS_BY_STORE(allBookmarks, metadataFilteredBookmarks)
+ *   - UPDATE Store count labels with storeCounts filtered / total
+ *   - filteredBookmarks = metadataFilteredBookmarks filtered by Stores selection (matchStoresFilter, getAllowedStores)
  *   - SORT by sortKey (e.g. time desc)
  *   - renderTableBody(filteredBookmarks); updateRowCount()
+ *   - How (sub-block): Archived and All resources scopes do not update named Store counts from stale metadata rows; clear or mark them non-applicable.
  *
  * ## HEAD_CONTROL_PANEL
  *

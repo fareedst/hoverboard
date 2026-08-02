@@ -93,8 +93,16 @@ Exact constant keys and string values from `src/core/message-handler.js`:
 | `SEARCH_TITLE` | `searchTitle` |
 | `SEARCH_TITLE_TEXT` | `searchTitleText` |
 | `SEARCH_TABS` | `searchTabs` |
+| `SEARCH_LIBRARY_RESOURCES` | `searchLibraryResources` |
 | `GET_SEARCH_HISTORY` | `getSearchHistory` |
 | `CLEAR_SEARCH_STATE` | `clearSearchState` |
+
+### Library portability
+
+| Constant | Value |
+|----------|-------|
+| `EXPORT_LIBRARY_PACKAGE` | `exportLibraryPackage` |
+| `IMPORT_LIBRARY_PACKAGE` | `importLibraryPackage` |
 
 ### Tags / AI / session
 
@@ -173,6 +181,8 @@ Handled in content-main (names as strings): `TOGGLE_HOVER`, `HIDE_OVERLAY`, `REF
 - **archive messages** — `CAPTURE_PAGE_ARCHIVE`, `GET_PAGE_ARCHIVE`, and `DELETE_PAGE_ARCHIVE` carry readable archive lifecycle requests; `SEARCH_ARCHIVED_CONTENT` is an explicit Index scope.
 - **archive association result** — `CAPTURE_PAGE_ARCHIVE` response data carrying `bookmarkCreated` and explicit archive compensation diagnostics for popup/This Page consumers.
 - **screenshot messages** — `CAPTURE_PAGE_SCREENSHOT`, `GET_PAGE_SCREENSHOTS`, and `DELETE_PAGE_SCREENSHOTS` carry separate product screenshot artifacts and do not reuse demo capture messages.
+- **cross-resource retrieval message** — `SEARCH_LIBRARY_RESOURCES` carries a read-only normalized query over explicit resource scopes; it returns source states and source-specific actions without source writes.
+- **library portability messages** — `EXPORT_LIBRARY_PACKAGE` returns a versioned package; `IMPORT_LIBRARY_PACKAGE` performs a no-write plan or verified restore according to `data.mode`.
 
 ---
 
@@ -192,6 +202,8 @@ Handled in content-main (names as strings): `TOGGLE_HOVER`, `HIDE_OVERLAY`, `REF
 | Archive association result boundary | `ARCHIVE_ASSOCIATION_RESULT_BOUNDARY` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
 | Archive content query | `SEARCH_ARCHIVED_CONTENT` | [IMPL-ARCHIVED_CONTENT_SEARCH](../implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH.yaml) |
 | Screenshot artifact dispatch | `CAPTURE_PAGE_SCREENSHOT` / `GET_PAGE_SCREENSHOTS` / `DELETE_PAGE_SCREENSHOTS` | [IMPL-PAGE_SCREENSHOT_ARCHIVE](../implementation-decisions/IMPL-PAGE_SCREENSHOT_ARCHIVE.yaml) |
+| Cross-resource retrieval dispatch | `SEARCH_LIBRARY_RESOURCES` | [IMPL-CROSS_RESOURCE_RETRIEVAL] |
+| Library portability dispatch | `EXPORT_LIBRARY_PACKAGE` / `IMPORT_LIBRARY_PACKAGE` | [IMPL-LIBRARY_PORTABILITY] |
 
 ---
 
@@ -203,14 +215,18 @@ Handled in content-main (names as strings): `TOGGLE_HOVER`, `HIDE_OVERLAY`, `REF
 | BOOKMARK_UPDATED | Catalog |
 | CAPTURE_PAGE_ARCHIVE | Catalog / Named concepts |
 | CAPTURE_PAGE_SCREENSHOT | Catalog / Named concepts |
+| cross-resource retrieval message | Named concepts |
 | DELETE_PAGE_ARCHIVE | Catalog |
 | DELETE_PAGE_SCREENSHOTS | Catalog |
 | CHECK_LINK_HEALTH | Catalog / Named concepts |
 | CONTENT_MESSAGE_TYPES | Content script types |
 | envelope | Preferred terms |
+| EXPORT_LIBRARY_PACKAGE | Catalog |
 | GET_LINK_HEALTH | Catalog / Named concepts |
 | GET_PAGE_ARCHIVE | Catalog |
 | GET_PAGE_SCREENSHOTS | Catalog |
+| IMPORT_LIBRARY_PACKAGE | Catalog |
+| library portability messages | Named concepts |
 | MESSAGE_TYPES | Preferred terms |
 | MessageHandler | Named concepts |
 | missing response | Named concepts |
@@ -227,3 +243,4 @@ Handled in content-main (names as strings): `TOGGLE_HOVER`, `HIDE_OVERLAY`, `REF
 | service worker (SW) | Preferred terms |
 | TAG_UPDATED | Catalog |
 | SEARCH_ARCHIVED_CONTENT | Catalog / Named concepts |
+| SEARCH_LIBRARY_RESOURCES | Catalog / Named concepts |

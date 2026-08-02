@@ -108,7 +108,7 @@
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
- * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column; Stores L/F/S/B. Contract: page load and user actions; displayed table and filtered list; state data.
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), metadata-first filter pipeline, table with Storage column, and per-store filtered / total provider-row counts; Stores L/F/S/B.
  *
  * ## LOAD_LOCAL_BOOKMARKS_INDEX
  *
@@ -167,7 +167,43 @@
  *   - TERMINATION: total
  * - PROCEDURE: GET_ALLOWED_STORES
  *   - SET from checked #store-local|#store-file|#store-sync|#store-browser → { local, file, sync, browser }
- *   - How (sub-block): Apply stores filter, search, show-only, exclude tags; sort and render.
+ *   - How (sub-block): Apply Stores selection only after metadata-filtered rows and Store counts are derived.
+ *
+ * ## INITIALIZE_STORE_FILTERS
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: The Local Bookmarks Index starts with Local, File, Sync, and Browser Store controls checked so loaded rows are visible without an extra discovery step.
+ * - Contract:
+ *   - INPUT: Store checkbox elements
+ *   - PRE: #store-local, #store-file, #store-sync, and #store-browser exist or are safely skipped
+ *   - OUTPUT: initialized Store controls and count labels
+ *   - POST:
+ *     - success => all four Store checkboxes are checked unless the user changes them
+ *     - success => each count label is available for filtered / total row-count updates
+ *   - EFFECTS: State, DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: INITIALIZE_STORE_FILTERS
+ *   - 1. SET checked = true on #store-local, #store-file, #store-sync, and #store-browser
+ *   - 2. KEEP user changes to checked state; do not reload solely to refresh counts
+ *
+ * ## COUNT_INDEX_ROWS_BY_STORE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: Normalize provider storage values, count rows directly, and derive filtered / total counts before applying Store checkbox selection.
+ * - Contract:
+ *   - INPUT: allBookmarks (provider-row[]), metadataFilteredBookmarks (provider-row[])
+ *   - PRE: arrays may be empty; rows may omit storage; storage values may vary in case or contain whitespace; duplicate URLs remain distinct rows
+ *   - OUTPUT: { local: { filtered, total }, file: { filtered, total }, sync: { filtered, total }, browser: { filtered, total } }
+ *   - POST:
+ *     - success => total counts include every loaded row assigned to a known Store
+ *     - success => filtered counts include rows surviving search, Show only, Hide, and Health filters, before Store checkbox selection
+ *     - success => unknown storage is not attributed to a named Store; missing storage uses Local only for Local fallback rows
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: COUNT_INDEX_ROWS_BY_STORE
+ *   - 1. INITIALIZE counts for local, file, sync, browser with filtered = 0 and total = 0
+ *   - 2. FOR each row IN allBookmarks: store = NORMALIZE_INDEX_STORAGE(row.storage); IF store is known THEN counts[store].total += 1
+ *   - 3. FOR each row IN metadataFilteredBookmarks: store = NORMALIZE_INDEX_STORAGE(row.storage); IF store is known THEN counts[store].filtered += 1
+ *   - 4. RETURN counts
+ *   - How (sub-block): NORMALIZE_INDEX_STORAGE trims and lowercases local|file|sync|browser; missing storage becomes local only for explicitly marked Local fallback rows; unknown values remain unassigned.
  *
  * ## APPLY_SEARCH_AND_FILTER
  *
@@ -175,20 +211,124 @@
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
- *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list; Store counts
  *   - POST:
  *     - success => block outputs match OUTPUT shape
- *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA: allBookmarks (array with storage field), metadataFilteredBookmarks, filteredBookmarks, storeCounts, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
  *   - EFFECTS: IO
  *   - TERMINATION: total
  * - PROCEDURE: APPLY_SEARCH_AND_FILTER
- *   - filteredBookmarks = allBookmarks
- *   - APPLY stores filter (matchStoresFilter, getAllowedStores)
+ *   - metadataFilteredBookmarks = allBookmarks
  *   - APPLY search (text)
  *   - APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)
  *   - APPLY exclude tags (matchExcludeTags)
+ *   - APPLY Health status filter (FILTER_BOOKMARKS_BY_HEALTH)
+ *   - storeCounts = COUNT_INDEX_ROWS_BY_STORE(allBookmarks, metadataFilteredBookmarks)
+ *   - UPDATE Store count labels with storeCounts filtered / total
+ *   - filteredBookmarks = metadataFilteredBookmarks filtered by Stores selection (matchStoresFilter, getAllowedStores)
  *   - SORT by sortKey (e.g. time desc)
  *   - renderTableBody(filteredBookmarks); updateRowCount()
+ *   - How (sub-block): Archived and All resources scopes do not update named Store counts from stale metadata rows; clear or mark them non-applicable.
+ *
+ * ## HEAD_CONTROL_PANEL
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: HEAD_CONTROL_PANEL keeps the filter controls fixed at the viewport head and exposes one of Stores, Show only, Hide, or Table Display at a time.
+ * - Contract:
+ *   - INPUT: requestedGroup (string), currentGroup (string)
+ *   - PRE: requestedGroup is one of stores | show-only | hide | table-display
+ *   - OUTPUT: active head group and corresponding visible panel
+ *   - POST:
+ *     - success => exactly one head panel is visible and its tab is selected
+ *     - invalid group => currentGroup and panel visibility remain unchanged
+ *   - FAILURE_MODES: InvalidGroup
+ *   - DATA: activeHeadGroup
+ *   - DATA_TRANSITION: activeHeadGroup changes only to a valid head group
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SET_HEAD_CONTROL_GROUP
+ *   - IF requestedGroup is not a valid head group: RETURN { activeGroup: currentGroup, error: InvalidGroup }
+ *   - SET activeHeadGroup = requestedGroup
+ *   - SET selected tab state for requestedGroup
+ *   - SET hidden = false only for requestedGroup panel
+ *   - SET hidden = true for every other head panel
+ *   - RETURN { activeGroup: activeHeadGroup }
+ *
+ * ## FOOTER_CONTROL_PANEL
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: FOOTER_CONTROL_PANEL keeps Actions, Import, and Export fixed at the viewport bottom and displays one control group at a time.
+ * - Contract:
+ *   - INPUT: requestedGroup (string), currentGroup (string)
+ *   - PRE: requestedGroup is one of actions | import | export
+ *   - OUTPUT: active footer group and corresponding visible panel
+ *   - POST:
+ *     - success => exactly one footer panel is visible and its tab is selected
+ *     - invalid group => currentGroup and panel visibility remain unchanged
+ *   - FAILURE_MODES: InvalidGroup
+ *   - DATA: activeFooterGroup
+ *   - DATA_TRANSITION: activeFooterGroup changes only to a valid footer group
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SET_FOOTER_CONTROL_GROUP
+ *   - IF requestedGroup is not a valid footer group: RETURN { activeGroup: currentGroup, error: InvalidGroup }
+ *   - SET activeFooterGroup = requestedGroup
+ *   - SET selected tab state for requestedGroup
+ *   - SET hidden = false only for requestedGroup panel
+ *   - SET hidden = true for every other footer panel
+ *   - RETURN { activeGroup: activeFooterGroup }
+ *
+ * ## INITIALIZE_INDEX_CONTROL_TABS
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS defaults to Stores at the head and Actions at the footer, then binds accessible tab activation without changing control behavior.
+ * - Contract:
+ *   - INPUT: headTabList, headPanels, footerTabList, footerPanels
+ *   - PRE: each tab references a known panel through aria-controls
+ *   - OUTPUT: initialized head and footer control panels
+ *   - POST:
+ *     - success => Stores and Actions are selected; exactly one panel in each region is visible
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: INITIALIZE_INDEX_CONTROL_TABS
+ *   - CALL SET_HEAD_CONTROL_GROUP("stores", "stores")
+ *   - CALL SET_FOOTER_CONTROL_GROUP("actions", "actions")
+ *   - ON head tab activation: CALL SET_HEAD_CONTROL_GROUP(requestedGroup, activeHeadGroup)
+ *   - ON footer tab activation: CALL SET_FOOTER_CONTROL_GROUP(requestedGroup, activeFooterGroup)
+ *
+ * ## SYNC_CONTROL_PANEL_OFFSETS
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SYNC_CONTROL_PANEL_OFFSETS measures the fixed head and footer regions so sticky table headers and list spacing avoid control overlap.
+ * - Contract:
+ *   - INPUT: headPanel (element), footerPanel (element), root (element)
+ *   - PRE: root exists; missing panel elements are allowed
+ *   - OUTPUT: root CSS variables for head offset and footer spacing
+ *   - POST:
+ *     - success => CSS variables equal the current measured panel heights
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SYNC_CONTROL_PANEL_OFFSETS
+ *   - IF root is missing: RETURN
+ *   - IF headPanel exists: SET --index-head-sticky-height = headPanel.offsetHeight pixels
+ *   - IF footerPanel exists: SET --index-footer-sticky-height = footerPanel.offsetHeight pixels
+ *   - CALL APPLY_STICKY_THEAD_OFFSET
+ *   - ON panel resize: REPEAT SYNC_CONTROL_PANEL_OFFSETS
+ *
+ * ## APPLY_STICKY_THEAD_OFFSET
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: APPLY_STICKY_THEAD_OFFSET keeps table headings at the table top initially and offsets them below the fixed head controls only after the bookmark list scrolls underneath.
+ * - Contract:
+ *   - INPUT: tableWrapper (element), headPanel (element), root (element)
+ *   - PRE: root, tableWrapper, and headPanel exist
+ *   - OUTPUT: root sticky-thead-offset class state
+ *   - POST:
+ *     - tableWrapper top >= headPanel height => root does not have sticky-thead-offset
+ *     - tableWrapper top < headPanel height => root has sticky-thead-offset
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_STICKY_THEAD_OFFSET
+ *   - tableTop = tableWrapper.getBoundingClientRect().top
+ *   - headHeight = headPanel.offsetHeight
+ *   - IF tableTop < headHeight: ADD sticky-thead-offset to root
+ *   - ELSE: REMOVE sticky-thead-offset from root
+ *   - ON scroll, table visibility change, or IntersectionObserver callback: REPEAT APPLY_STICKY_THEAD_OFFSET
  *
  * ## BULK_DELETE
  *
@@ -1231,14 +1371,15 @@
  *
  * ## Link health checks enabled flag
  *
- * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Privacy-first opt-in; config key linkHealthChecksEnabled defaults false.
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Resolve link health as enabled when the setting is absent while preserving explicit false.
  * - Contract:
  *   - INPUT: config (MergedConfig|null)
- *   - OUTPUT: boolean (true only when linkHealthChecksEnabled === true)
+ *   - OUTPUT: boolean (true when linkHealthChecksEnabled is absent or true; false only when explicitly false)
  *   - EFFECTS: pure
  *   - TERMINATION: total
  * - PROCEDURE: IS_LINK_HEALTH_CHECKS_ENABLED
- *   - 1. RETURN config.linkHealthChecksEnabled === true
+ *   - 1. IF config is null or linkHealthChecksEnabled is absent THEN RETURN true
+ *   - 2. RETURN config.linkHealthChecksEnabled !== false
  *
  * ## Format capture-UI health hint
  *
@@ -1847,6 +1988,9 @@ import { captureArchiveAndAssociateBookmark } from '../features/archive/page-arc
 import { ArchiveContentSearch } from '../features/archive/archive-content-search.js'
 import { normalizeScreenshotArtifact, validateScreenshotRequest } from '../features/archive/page-screenshot-capture.js'
 import { captureProductScreenshot } from '../features/archive/browser-screenshot-capture.js'
+import { CrossResourceRetrievalService } from '../features/search/cross-resource-retrieval.js'
+import { LibraryPortabilityService } from '../features/portability/library-package.js'
+import { StorageIndex } from '../features/storage/storage-index.js'
 
 // Message type constants - migrated from config.js
 export const MESSAGE_TYPES = {
@@ -1886,6 +2030,11 @@ export const MESSAGE_TYPES = {
   // Search operations
   SEARCH_TITLE: 'searchTitle',
   SEARCH_TITLE_TEXT: 'searchTitleText',
+  // [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL] Read-only aggregate library query.
+  SEARCH_LIBRARY_RESOURCES: 'searchLibraryResources',
+  // [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY] Package export/import bindings.
+  EXPORT_LIBRARY_PACKAGE: 'exportLibraryPackage',
+  IMPORT_LIBRARY_PACKAGE: 'importLibraryPackage',
 
   // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tab search operations
   SEARCH_TABS: 'searchTabs',
@@ -1960,6 +2109,19 @@ export class MessageHandler {
     this.archiveSearch = new ArchiveContentSearch()
     this.archiveStore = archiveStore || new PageArchiveStore({ archiveSearch: this.archiveSearch })
     this.screenshotStore = screenshotStore || null
+    this.crossResourceRetrievalService = new CrossResourceRetrievalService({
+      bookmarkReader: this.bookmarkProvider,
+      archiveStore: this.archiveStore,
+      archiveSearch: this.archiveSearch,
+      browserApi: browser
+    })
+    this.libraryPortabilityService = new LibraryPortabilityService({
+      bookmarkReader: this.bookmarkProvider,
+      storageIndexReader: new StorageIndex(),
+      configReader: this.configManager,
+      archiveReader: this.archiveStore,
+      screenshotReader: this.screenshotStore
+    })
 
     // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Initialize tab search service
     this.tabSearchService = new TabSearchService()
@@ -1972,6 +2134,8 @@ export class MessageHandler {
   setBookmarkProvider (provider) {
     this.bookmarkProvider = provider
     this.tagService.pinboardService = provider
+    if (this.crossResourceRetrievalService) this.crossResourceRetrievalService.bookmarkReader = provider
+    if (this.libraryPortabilityService) this.libraryPortabilityService.bookmarkReader = provider
   }
 
   /**
@@ -1983,6 +2147,30 @@ export class MessageHandler {
     this.archiveStore = archiveStore || this.archiveStore
     this.screenshotStore = screenshotStore || this.screenshotStore
     if (this.archiveStore) this.archiveStore.archiveSearch = this.archiveSearch
+    if (this.crossResourceRetrievalService) {
+      this.crossResourceRetrievalService.archiveStore = this.archiveStore
+      this.crossResourceRetrievalService.archiveSearch = this.archiveSearch
+    }
+    if (this.libraryPortabilityService) {
+      this.libraryPortabilityService.archiveReader = this.archiveStore
+      this.libraryPortabilityService.screenshotReader = this.screenshotStore
+    }
+  }
+
+  /**
+   * [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL]
+   * Bind the read-only retrieval service after source providers are initialized.
+   */
+  setCrossResourceRetrievalService (service) {
+    this.crossResourceRetrievalService = service || null
+  }
+
+  /**
+   * [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY]
+   * Bind package export/import orchestration after durable storage providers are initialized.
+   */
+  setLibraryPortabilityService (service) {
+    this.libraryPortabilityService = service || null
   }
 
   /**
@@ -2116,6 +2304,15 @@ export class MessageHandler {
           break
         case MESSAGE_TYPES.SEARCH_TITLE:
           response = await this.handleSearchTitle(data, tabId)
+          break
+        case MESSAGE_TYPES.SEARCH_LIBRARY_RESOURCES:
+          response = await this.handleSearchLibraryResources(data)
+          break
+        case MESSAGE_TYPES.EXPORT_LIBRARY_PACKAGE:
+          response = await this.handleExportLibraryPackage(data)
+          break
+        case MESSAGE_TYPES.IMPORT_LIBRARY_PACKAGE:
+          response = await this.handleImportLibraryPackage(data)
           break
         case MESSAGE_TYPES.SEARCH_TABS:
           response = await this.handleSearchTabs(data, tabId)
@@ -2904,6 +3101,73 @@ export class MessageHandler {
     // TODO: Implement title search functionality
     // This was a complex feature in the original code
     return { searchCount: 0, tabId }
+  }
+
+  /**
+   * ## SEARCH_LIBRARY_RESOURCES_MESSAGE
+   * - [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL] How: expose the query contract through a new message while keeping SEARCH_TITLE compatibility explicit.
+   * - Contract:
+   *   - INPUT: message with type SEARCH_LIBRARY_RESOURCES and query data
+   *   - PRE: message handler has the retrieval service and response channel
+   *   - OUTPUT: retrieval result or structured error response
+   *   - POST: one response is returned; no source write occurs
+   *   - FAILURE_MODES: InvalidQuery, InvalidScope, InvalidPagination
+   *   - EFFECTS: Async, IO
+   *   - TERMINATION: total
+   * - PROCEDURE: SEARCH_LIBRARY_RESOURCES_MESSAGE
+   *   - response = AWAIT QUERY_CROSS_RESOURCES(message.data)
+   *   - RETURN response
+   *   - SEARCH_TITLE remains a compatibility route returning its documented legacy shape until a separate deprecation change updates callers and tests
+   */
+  /**
+   * [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL]
+   * Dispatch one read-only cross-resource query without mutating any source.
+   */
+  async handleSearchLibraryResources (data) {
+    if (typeof this.crossResourceRetrievalService?.query !== 'function') {
+      return { error: 'Retrieval service unavailable' }
+    }
+    return this.crossResourceRetrievalService.query(data || {})
+  }
+
+  /**
+   * ## LIBRARY_PORTABILITY_MESSAGE
+   * - [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY] How: expose export, dry-run planning, and restore operations through thin message/UI bindings without changing existing CSV, HTML, or config controls.
+   * - Contract:
+   *   - INPUT: package operation message and operation-specific data
+   *   - PRE: message handler has the portability service and response channel
+   *   - OUTPUT: package, dry-run plan, or restore report
+   *   - POST: one response is returned and UI status distinguishes pending, success, warning, and failure
+   *   - FAILURE_MODES: InvalidPackage, PlanFailed, RestoreFailed
+   *   - EFFECTS: Async, IO
+   *   - TERMINATION: total
+   * - PROCEDURE: LIBRARY_PORTABILITY_MESSAGE
+   *   - IF operation = export: RETURN AWAIT COLLECT_LIBRARY_PACKAGE()
+   *   - IF operation = plan: validated = VALIDATE_LIBRARY_PACKAGE(input.package); RETURN PLAN_LIBRARY_RESTORE(validated, input.current, input.policy, input.targets)
+   *   - IF operation = restore: validated = VALIDATE_LIBRARY_PACKAGE(input.package); plan = PLAN_LIBRARY_RESTORE(validated, input.current, input.policy, input.targets); RETURN EXECUTE_LIBRARY_RESTORE(validated, plan, input.adapters, input.backupStore, input.policy)
+   */
+  /**
+   * [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY]
+   * Dispatch package export, dry-run planning, or verified restore through a thin binding.
+   */
+  async handleExportLibraryPackage (data) {
+    if (typeof this.libraryPortabilityService?.export !== 'function') {
+      return { error: 'Library portability service unavailable' }
+    }
+    return this.libraryPortabilityService.export(data || {})
+  }
+
+  async handleImportLibraryPackage (data = {}) {
+    if (!this.libraryPortabilityService) {
+      return { error: 'Library portability service unavailable' }
+    }
+    if (data.mode === 'plan' && typeof this.libraryPortabilityService.plan === 'function') {
+      return this.libraryPortabilityService.plan(data)
+    }
+    if (data.mode === 'restore' && typeof this.libraryPortabilityService.restore === 'function') {
+      return this.libraryPortabilityService.restore(data)
+    }
+    return { error: 'Invalid library package operation' }
   }
 
   /**

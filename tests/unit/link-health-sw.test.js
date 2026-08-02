@@ -121,14 +121,20 @@
  *
  * ## Link health checks enabled flag
  *
- * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Privacy-first opt-in; config key linkHealthChecksEnabled defaults false.
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Resolve the effective link-health setting with an enabled-by-absence default while preserving an explicit false opt-out.
  * - Contract:
- *   - INPUT: config (MergedConfig|null)
- *   - OUTPUT: boolean (true only when linkHealthChecksEnabled === true)
+ *   - INPUT: config (MergedConfig|null|undefined)
+ *   - PRE: missing linkHealthChecksEnabled means no explicit user choice; false is an explicit opt-out
+ *   - OUTPUT: boolean (true when linkHealthChecksEnabled is absent or true; false only when explicitly false)
+ *   - POST:
+ *     - null, undefined, or absent setting => true
+ *     - explicit false => false
+ *     - any other present value => true
  *   - EFFECTS: pure
  *   - TERMINATION: total
  * - PROCEDURE: IS_LINK_HEALTH_CHECKS_ENABLED
- *   - 1. RETURN config.linkHealthChecksEnabled === true
+ *   - 1. IF config is null or linkHealthChecksEnabled is absent THEN RETURN true
+ *   - 2. RETURN config.linkHealthChecksEnabled !== false
  *
  * ## Format capture-UI health hint
  *
@@ -146,9 +152,14 @@
  *
  * ## Gate Index check controls
  *
- * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Hide/disable Check link health controls when opt-in off; Health column may remain read-only.
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Hide/disable Check link health controls only when the effective setting is false; Health column may remain read-only.
  * - Contract:
  *   - INPUT: enabled (boolean), checkButton (element|null)
+ *   - PRE: enabled is the effective setting; checkButton may be null
+ *   - OUTPUT: control state with hidden and disabled values
+ *   - POST:
+ *     - null button => no DOM mutation
+ *     - button present => hidden and disabled equal NOT enabled
  *   - EFFECTS: State (DOM hidden/disabled)
  *   - TERMINATION: total
  * - PROCEDURE: APPLY_LINK_HEALTH_CONTROLS_GATE
@@ -216,7 +227,7 @@ describe('[REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] SW _checkLinkHealth', () => {
       Object.assign(storage, obj)
     })
     sw = new HoverboardServiceWorker()
-    // R1b: opt-in default is false; enable for existing CHECK path tests
+    // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Existing CHECK path tests use explicit enabled configuration.
     jest.spyOn(sw.configManager, 'getConfig').mockResolvedValue({ linkHealthChecksEnabled: true })
     jest.spyOn(sw.configManager, 'getInhibitUrls').mockResolvedValue([])
   })
@@ -233,6 +244,14 @@ describe('[REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] SW _checkLinkHealth', () => {
     expect(result.checked).toBe(1)
     expect(storage[LINK_HEALTH_STORAGE_KEY]['https://ok.example/'].status).toBe('ok')
     expect(global.fetch).toHaveBeenCalledWith('https://ok.example/', expect.objectContaining({ method: 'HEAD' }))
+  })
+
+  test('missing setting allows an explicitly invoked CHECK without automatic dispatch', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 })
+    sw.configManager.getConfig.mockResolvedValue({})
+    const result = await sw._checkLinkHealth(['https://absent-setting.example/'])
+    expect(result.success).toBe(true)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
   })
 
   test('HEAD 405 falls back to GET', async () => {

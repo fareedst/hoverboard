@@ -183,6 +183,7 @@ describe('[REQ-SELECTION_TO_TAG_INPUT] [IMPL-SELECTION_TO_TAG_INPUT] Popup selec
     popupController.loadShowHoverOnPageLoadSetting = jest.fn().mockResolvedValue()
     popupController.getStorageBackendForUrl = jest.fn().mockResolvedValue('local')
     popupController.refreshUsageSection = jest.fn().mockResolvedValue()
+    popupController.refreshLinkHealthHint = jest.fn().mockResolvedValue()
   })
 
   test('calls setTagInputValue with normalized selection when sendToTab returns selection', async () => {

@@ -1,0 +1,64 @@
+REQ-CROSS_RESOURCE_RETRIEVAL:
+  category: "Functional"
+  description: "The extension provides a read-only cross-resource retrieval contract over bookmark metadata, extracted archive text, open and recently closed Tabs, Browser Bookmarks (page), and Visit History (page). The contract normalizes queries, validates explicit source scopes, returns deterministic source-attributed results with bounded payloads and source-specific actions, and isolates unavailable or stale sources."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-01"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Define additive cross-resource retrieval scope before implementation"
+  name: "Cross-Resource Retrieval"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Composability with BookmarkRouter, ArchiveContentSearch, Tabs panel, Browser Bookmarks (page), and Visit History (page)."
+      - "One deterministic read-only retrieval model."
+      - "Source failures remain visible without suppressing successful sources."
+    problems_solved:
+      - "A broad search could accidentally expose archive HTML or remote history."
+      - "Aggregate results could otherwise lose storage/backend, archive, tab, browser-bookmark, or usage identity."
+      - "Separate search surfaces require repeated queries."
+    why: "Users need one bounded discovery operation while each source retains its existing ownership, privacy boundary, and navigation semantics."
+  related_requirements:
+    depends_on:
+      - "REQ-ARCHIVED_CONTENT_SEARCH"
+      - "REQ-BOOKMARK_USAGE_TRACKING"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-SEARCH_FUNCTIONALITY"
+      - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "REQ-SIDE_PANEL_BROWSER_TABS"
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "A normalized query with explicit source scopes returns source-attributed results with deterministic ranking, caps, and pagination."
+    - criterion: "Archive HTML and remote history are not included in the aggregate result payload."
+    - criterion: "Bookmark metadata preserves storage backend identity and archive results preserve backend-scoped archive identity."
+    - criterion: "Existing metadata search, archive-content search, SEARCH_TABS, Browser Bookmarks (page), and Visit History (page) contracts remain compatible."
+    - criterion: "Tabs, Browser Bookmarks (page), and Visit History (page) results expose navigation actions distinct from bookmark and Reader actions."
+    - criterion: "The Local Bookmarks Index All resources scope disables selection, mutation, CSV export, and package import/export while active."
+    - criterion: "Unavailable, stale, and permission-denied sources are reported without failing available sources."
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+    code_annotations:
+      - "REQ-CROSS_RESOURCE_RETRIEVAL"
+    implementation:
+      - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+    tests:
+      - "tests/integration/bookmarks-table-archive-scope-composition.integration.test.js"
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/bookmarks-table-library-search.test.js"
+      - "tests/unit/cross-resource-retrieval.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Query normalization, scope validation, matching, deterministic ranking, caps, pagination, action mapping, deduplication, and failure modes."
+    - method: "Integration tests"
+      coverage: "Source adapters, bounded fan-out/fan-in, message dispatch, and Local Bookmarks Index orchestration."
+    - method: "Regression tests"
+      coverage: "Existing per-surface search and archive-content tests plus explicit SEARCH_TITLE compatibility path."

@@ -16,7 +16,6 @@ CITDP-REQ-BOOKMARK_MANAGER_COMPLETENESS-r1c-collections-na:
   completion_criteria:
     docs_updated:
       - "docs/COLLECTIONS_AND_COLLABORATION.md"
-      - "docs/DEFERRED_BOOKMARK_MANAGER_FEATURES.md"
       - "docs/LOCAL_API.md"
     verification_gate_notes: "Documentation-only closeout; no product code or test changes; no TIED REQ/ARCH/IMPL mutation required."
   impact_analysis:

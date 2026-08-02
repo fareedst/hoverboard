@@ -1,0 +1,62 @@
+CITDP-REQ-HEALTH_STORE_COUNTS_20260802_CLOSEOUT:
+  change_definition:
+    desired_behavior: "An absent linkHealthChecksEnabled setting is effectively enabled, explicit false remains disabled, and no automatic CHECK_LINK_HEALTH dispatch occurs. Stores L/F/S/B start checked. Each Store control shows filtered / total loaded provider-row counts before Store selection."
+    success_criteria:
+      - "All four Stores are checked in initial markup."
+      - "Counts are row-based, normalize known storage values, preserve duplicates, and support Local fallback rows."
+      - "Counts refresh through the metadata-first filter path and remain informative when a Store is unchecked."
+      - "Missing setting resolves true; explicit false resolves false; explicit true resolves true."
+      - "No automatic CHECK_LINK_HEALTH dispatch is introduced."
+      - "The Store count and link-health control contracts are represented by explicit PRE/POST/EFFECTS pseudocode and literal source/test block comments."
+  divergences:
+    - "Counts are marked n/a for Archived and All resources scopes rather than retaining metadata counts."
+    - "Full repository regression remains blocked by pre-existing unrelated test timeouts; focused change coverage is green."
+    - "The link-health gate explicitly preserves null-button no-op behavior, while retrieval scope validation remains isolated in the retrieval CITDP."
+  implementation_result:
+    build: "npm run build:only passed; tracked dist bundles rebuilt."
+    e2e_scope: "Focused Index Playwright coverage asserts all four Store checkboxes are checked and filtered / total count labels are rendered."
+    focused_tests: "218 passed across 10 health/Store unit and composition suites."
+    full_regression: "npm test -- --runInBand reached 166 suites passed, 1 skipped, 1,642 tests passed, and 7 unrelated timeout failures in selection-to-tag-input.test.js and this-page-tag-sort-composition.integration.test.js; both failure groups reproduced directly and do not touch this change."
+    lint: "passed"
+    manifest: "passed with existing sessions permission warning"
+    playwright: "2 passed in extension-bookmarks-index-controls.spec.js."
+    semantic_token_validation: "passed"
+    status: "implemented"
+    tied_consistency: "passed with detail files and pseudo-code"
+    tied_index_yaml_validation: "passed"
+    typecheck: "passed"
+  record_identity:
+    analysis_record: "tied/citdp/CITDP-REQ-HEALTH_STORE_COUNTS_20260802.yaml"
+    change_request_id: "REQ-HEALTH_STORE_COUNTS-20260802"
+    primary_tokens:
+      - "ARCH-LINK_HEALTH"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LINK_HEALTH"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LINK_HEALTH"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-08-02"
+    title: "Enable link health by absence and expose Local Bookmarks Index Store counts — closeout"
+  record_status: "complete"
+  risk_status: "mitigated by absent/false/true, duplicate-row, unknown-storage, fallback, empty-data, manual-only, and UI-control tests"
+  test_strategy:
+    composition:
+      - "bookmarks-table-link-health-composition.integration.test.js"
+      - "link-health.integration.test.js"
+      - "popup-link-health-hint-composition.integration.test.js"
+    e2e:
+      - "extension-bookmarks-index-controls.spec.js"
+    unit:
+      - "bookmarks-table-filter.test.js"
+      - "bookmarks-table-index.test.js"
+      - "bookmarks-table-load.test.js"
+      - "config-manager.test.js"
+      - "link-health-sw.test.js"
+      - "link-health.test.js"
+      - "options-link-health.test.js"
+  tied_stack_updates:
+    - "bookmarks-index vocabulary updated with effective default, count, and normalization terms."
+    - "IMPL-LINK_HEALTH-pseudocode.md and IMPL-LOCAL_BOOKMARKS_INDEX-pseudocode.md updated before RED tests."
+    - "REQ/ARCH/IMPL detail and index records updated through TIED tooling."
+    - "Source and test full-block comments now mirror the effective link-health control and Store-count contracts."

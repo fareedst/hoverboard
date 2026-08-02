@@ -1,0 +1,149 @@
+CITDP-REQ-HEALTH_STORE_COUNTS_20260802:
+  change_definition:
+    current_behavior: "linkHealthChecksEnabled defaults false when absent; Stores default unchecked; the Index applies the Stores filter before metadata filters and has no per-store count controls."
+    desired_behavior: "An absent linkHealthChecksEnabled setting is effectively enabled, explicit false remains disabled, and no automatic CHECK_LINK_HEALTH dispatch is introduced. Stores L/F/S/B start checked. Each Store control shows filtered / total loaded provider-row counts, with filtered calculated after search, Show only, Hide, and Health but before Stores selection; counts remain informative when unchecked."
+    in_scope:
+      - "ConfigManager effective default, Options copy/load/save semantics, and manual-only link-health dispatch boundary."
+      - "Local Bookmarks Index Store checkbox markup/defaults, pure per-store count helper, metadata-before-Store filter composition, count refresh and styling."
+      - "REQ/ARCH/IMPL and pseudo-code updates, vocabulary, unit/composition/UI tests, generated dist, changelog, and TIED validation."
+    non_goals:
+      - "Changing explicit stored false to true."
+      - "Changing link-health request/response protocol."
+      - "Removing the prior store-load-retry CITDP; it remains historical evidence."
+    out_of_scope:
+      - "Automatic install-time or page-load network checks."
+      - "Counts for Archived or All resources scopes when provider-row metadata is not applicable."
+      - "New semantic tokens unless existing tokens cannot express the behavior."
+      - "Unique-URL deduplication for Store counts."
+    success_criteria:
+      - "All four Stores are checked in initial Index markup."
+      - "Counts refresh after load, search, Show only, Hide, Health, and Store changes without unnecessary reloads."
+      - "Counts report total rows by normalized storage and filtered rows after non-Store filters, including duplicates and Local fallback rows."
+      - "Missing linkHealthChecksEnabled resolves to true; explicit false resolves to false; explicit true resolves to true."
+      - "No CHECK_LINK_HEALTH message is dispatched merely by enabling or loading the UI."
+  impact_analysis:
+    tied_tokens_affected:
+      - "ARCH-LINK_HEALTH"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LINK_HEALTH"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "PROC-AGENT_REQ_CHECKLIST"
+      - "REQ-LINK_HEALTH"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    tied_tokens_new: []
+    vocabulary_terms:
+      - "filtered / total provider-row counts"
+      - "link health"
+      - "linkHealthChecksEnabled"
+      - "Local-only fallback data"
+      - "storage normalization"
+      - "Stores (L / F / S / B)"
+  impact_discovery:
+    modules:
+      - module: "link-health-config"
+        boundary: "ConfigManager, shared flag helper, Options UI, service-worker and Index gates."
+        paths:
+          - "src/config/config-manager.js"
+          - "src/core/service-worker.js"
+          - "src/shared/config-types.d.ts"
+          - "src/shared/link-health.js"
+          - "src/ui/bookmarks-table/bookmarks-table.js"
+          - "src/ui/options/options.html"
+          - "src/ui/options/options.js"
+          - "tests/unit/config-manager.test.js"
+          - "tests/unit/link-health.test.js"
+          - "tests/unit/options-link-health.test.js"
+      - module: "index-store-counts"
+        boundary: "Local Bookmarks Index filter composition, Store controls, count renderer, and CSS."
+        paths:
+          - "src/ui/bookmarks-table/bookmarks-table-filter.js"
+          - "src/ui/bookmarks-table/bookmarks-table.css"
+          - "src/ui/bookmarks-table/bookmarks-table.html"
+          - "src/ui/bookmarks-table/bookmarks-table.js"
+          - "tests/playwright/extension-bookmarks-index-controls.spec.js"
+          - "tests/unit/bookmarks-table-filter.test.js"
+          - "tests/unit/bookmarks-table-index.test.js"
+          - "tests/unit/bookmarks-table-load.test.js"
+      - module: "release-and-traceability"
+        boundary: "TIED detail/index records, pseudo-code, vocabulary, dist, changelog, validation."
+        paths:
+          - "tied/architecture-decisions/ARCH-LINK_HEALTH.yaml"
+          - "tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml"
+          - "tied/implementation-decisions/IMPL-LINK_HEALTH.yaml"
+          - "tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml"
+          - "tied/requirements/REQ-LINK_HEALTH.yaml"
+          - "tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml"
+          - "tied/vocab/bookmarks-index.md"
+  leap_feedback:
+    divergences_from_analysis: "none before implementation"
+    tied_stack_updates_required:
+      - "Implement pseudo-code before RED tests."
+      - "Update CITDP implementation_result after verification."
+  record_identity:
+    change_request_id: "REQ-HEALTH_STORE_COUNTS-20260802"
+    primary_tokens:
+      - "ARCH-LINK_HEALTH"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LINK_HEALTH"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LINK_HEALTH"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-08-02"
+    title: "Enable link health by absence and expose Local Bookmarks Index Store counts"
+  record_status: "planned"
+  risk_analysis:
+    method: "Assess compatibility, stale count metadata, provider-row identity, filter-order regressions, accessibility, and generated-output drift."
+    risks:
+      - id: "RISK-HEALTH-001"
+        likelihood: "medium"
+        mitigation: "Use nullish/own-property-aware defaulting; preserve stored false; test absent/false/true."
+        residual: "low"
+        risk: "Absent-setting semantics could accidentally overwrite an explicit false."
+        severity: "high"
+      - id: "RISK-INDEX-001"
+        likelihood: "medium"
+        mitigation: "Derive metadata-filtered rows first, calculate counts, then apply Stores only for rendering."
+        residual: "low"
+        risk: "Applying Stores before counts would make unchecked controls show zero or stale counts."
+        severity: "high"
+      - id: "RISK-INDEX-002"
+        likelihood: "medium"
+        mitigation: "Normalize known values case-insensitively; exclude unknown from named Stores and test fallback separately."
+        residual: "low"
+        risk: "Unknown or missing storage values disappear from counts or are mislabelled."
+        severity: "medium"
+      - id: "RISK-INDEX-003"
+        likelihood: "medium"
+        mitigation: "Count rows directly; never use URL Set for Store counts."
+        residual: "low"
+        risk: "Duplicate URLs are incorrectly deduplicated."
+        severity: "medium"
+      - id: "RISK-INDEX-004"
+        likelihood: "medium"
+        mitigation: "Use compact inline text with responsive wrapping and preserve focus-visible styles."
+        residual: "low"
+        risk: "Count DOM updates make Store controls unusable on narrow screens."
+        severity: "low"
+  tdd_sequence:
+    composition:
+      - "Verify manual-only link-health dispatch and count renderer/filter binding without invoking UI where feasible."
+    e2e:
+      - "Verify checked Store controls and count labels at the real extension-page boundary; use deterministic fixture data only if available."
+    summary: "TIED/IMPL pseudo-code → RED unit tests for effective defaults and count helper → implementation → composition bindings → Playwright UI assertions → lint/build/TIED validation."
+    unit:
+      - "ConfigManager absent/false/true and Options persistence tests."
+      - "Pure per-store count helper tests for all stores, filter semantics, normalization, empty/unknown/duplicate/fallback data."
+  test_strategy:
+    composition:
+      - "Existing link-health and Store-load composition suites plus a focused count-renderer binding test if required."
+    e2e:
+      - "tests/playwright/extension-bookmarks-index-controls.spec.js"
+    summary: "Targeted unit tests first, then composition/UI coverage, full regression, lint/typecheck/build, changed-YAML validation, and tied_validate_consistency."
+    unit:
+      - "tests/unit/bookmarks-table-filter.test.js"
+      - "tests/unit/bookmarks-table-index.test.js"
+      - "tests/unit/bookmarks-table-load.test.js"
+      - "tests/unit/config-manager.test.js"
+      - "tests/unit/link-health.test.js"
+      - "tests/unit/options-link-health.test.js"

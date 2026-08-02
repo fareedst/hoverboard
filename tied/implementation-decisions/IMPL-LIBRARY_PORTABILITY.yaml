@@ -1,0 +1,100 @@
+IMPL-LIBRARY_PORTABILITY:
+  code_locations:
+    files:
+      - path: "src/features/portability/library-package.js"
+        description: "Package schema, manifest, checksums, validation, restore planning, execution, and rollback"
+      - path: "src/core/message-handler.js"
+        description: "Export/import package message dispatch and initialized service wiring"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "Local Bookmarks Index package controls and status composition"
+      - path: "src/ui/bookmarks-table/bookmarks-table.html"
+        description: "Package export/download and file-selection controls"
+    functions:
+      - name: "normalizePackagePath"
+        description: "Reject unsafe artifact paths"
+        file: "src/features/portability/library-package.js"
+      - name: "buildPackageManifest"
+        description: "Build deterministic checksummed package entries"
+        file: "src/features/portability/library-package.js"
+      - name: "validateLibraryPackage"
+        description: "Fail closed on untrusted package input"
+        file: "src/features/portability/library-package.js"
+      - name: "planLibraryRestore"
+        description: "Produce a no-write restore plan"
+        file: "src/features/portability/library-package.js"
+      - name: "executeLibraryRestore"
+        description: "Apply validated operations with backup and compensation"
+        file: "src/features/portability/library-package.js"
+      - name: "handleExportLibraryPackage"
+        description: "Dispatch package export"
+        file: "src/core/message-handler.js"
+      - name: "handleImportLibraryPackage"
+        description: "Dispatch package planning and restore"
+        file: "src/core/message-handler.js"
+  cross_references:
+    - "ARCH-LIBRARY_PORTABILITY"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-CONFIG_BACKUP_RESTORE"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    - "IMPL-PAGE_ARCHIVE_STORAGE"
+    - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+    - "IMPL-STORAGE_INDEX"
+    - "REQ-LIBRARY_PORTABILITY"
+  implementation_approach:
+    details:
+      - "BUILD_PACKAGE_MANIFEST returns a { manifest, artifacts } package so validation and restore operate on the same checksummed artifact map."
+      - "Existing CSV/HTML/config import/export paths remain separate projections."
+      - "Machine-specific File storage paths require an explicit target path map."
+      - "Metadata and binary artifacts are separate manifest entries with safe relative paths."
+      - "Restore verifies checksums and rebuilds derived archive-content search state from durable artifacts."
+      - "Secret configuration is excluded by an allowlist and reported, never silently copied."
+    summary: "Collect allowlisted library state and artifacts, build a deterministic checksummed package, validate it, plan restore without mutation, then execute with backup and compensation."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Align package manifest shape and restore contracts with source and unit tests"
+  name: "Portable Library Package Implementation"
+  rationale:
+    benefits:
+      - "Deterministic manifest and checksums."
+      - "Explicit conflict and security outcomes."
+      - "Verified and recoverable restore."
+    problems_solved:
+      - "Lossy or secret-bearing library export."
+      - "Mutation before package validation and inability to recover interrupted restore."
+    why: "Keep package serialization, validation, planning, and restore compensation in testable modules before adding UI or native/file bindings."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+      - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+      - "IMPL-STORAGE_INDEX"
+    depends_on:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-CONFIG_BACKUP_RESTORE"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+      - "IMPL-PAGE_SCREENSHOT_ARCHIVE"
+      - "IMPL-STORAGE_INDEX"
+    see_also:
+      - "IMPL-FILE_STORAGE_TYPED_PATH"
+      - "IMPL-NATIVE_HOST_WRAPPER"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-LIBRARY_PORTABILITY"
+    code_annotations:
+      - "ARCH-LIBRARY_PORTABILITY"
+      - "IMPL-LIBRARY_PORTABILITY"
+      - "REQ-LIBRARY_PORTABILITY"
+    requirements:
+      - "REQ-LIBRARY_PORTABILITY"
+    tests:
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/library-portability.test.js"

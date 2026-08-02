@@ -42,16 +42,17 @@ IMPL-LINK_HEALTH:
   essence_pseudocode_path: "implementation-decisions/IMPL-LINK_HEALTH-pseudocode.md"
   implementation_approach:
     details:
-      - "linkHealthChecksEnabled default false in ConfigManager/Options"
+      - "linkHealthChecksEnabled is enabled when absent and preserves explicit false in ConfigManager/Options"
       - "Popup/This Page refreshLinkHealthHint via GET_LINK_HEALTH"
+      - "Source adapters and control gates preserve explicit permission/disabled outcomes without dispatching network checks during configuration lifecycle events."
       - "src/shared/link-health.js: IS_LINK_HEALTH_CHECKS_ENABLED, FORMAT_LINK_HEALTH_HINT, APPLY_LINK_HEALTH_CONTROLS_GATE, inhibit/timeout helpers"
-      - "SW CHECK_LINK_HEALTH rejects when opt-in off; Index Check button gated"
-    summary: "Shared classify/filter/inhibit/timeout/opt-in/hint; SW fetch gated; Index Health column; capture UI hint"
+      - "SW CHECK_LINK_HEALTH rejects only when the effective setting is disabled; Index Check button remains user-triggered"
+    summary: "Shared classify/filter/inhibit/timeout/opt-in/hint; SW fetch gated by effective configuration; Index Health column; capture UI hint; no automatic CHECK_LINK_HEALTH dispatch."
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-07-30"
-      reason: "Restore code_locations.files; add capture-UI composition and Options load/save tests"
+      date: "2026-08-02"
+      reason: "Align enabled-by-absence and manual-only control contracts with source and tests"
   name: "Link Health"
   related_decisions:
     composed_with:
@@ -62,7 +63,7 @@ IMPL-LINK_HEALTH:
     supersedes: []
   status: "Active"
   summary: "Pure helpers + SW batch check + Index UI via runCheckLinkHealth."
-  test_coverage_note: "No Playwright E2E: unit + composition cover inhibit/timeout/opt-in/Index gate/capture hint; Options load/save covered at unit level without options.html invocation."
+  test_coverage_note: "Unit + composition cover absent/false/true setting semantics, no automatic check dispatch, inhibit/timeout/opt-in/Index gate/capture hint; Options load/save covered at unit level without options.html invocation."
   traceability:
     architecture:
       - "ARCH-LINK_HEALTH"

@@ -14408,7 +14408,7 @@ var init_config_manager = __esm({
       aiTagLimit: external_exports.number().int().min(0).optional(),
       // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
       iconClickOpensSidePanel: external_exports.boolean().optional(),
-      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Opt-in outbound Index link health checks (default false).
+      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Outbound Index link health checks; absent setting defaults effectively enabled and explicit false remains an opt-out.
       linkHealthChecksEnabled: external_exports.boolean().optional()
     }).passthrough();
     ConfigManager = class {
@@ -14536,8 +14536,8 @@ var init_config_manager = __esm({
           aiTagLimit: 64,
           // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
           iconClickOpensSidePanel: true,
-          // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Privacy-first: outbound link checks off until user enables in Options.
-          linkHealthChecksEnabled: false
+          // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] Enabled by default for new/absent settings; users can explicitly opt out in Options.
+          linkHealthChecksEnabled: true
         };
       }
       /**
@@ -24238,7 +24238,7 @@ async function fetchWithLinkHealthTimeout(url2, init = {}, options = {}) {
   }
 }
 function isLinkHealthChecksEnabled(config2) {
-  return config2?.linkHealthChecksEnabled === true;
+  return config2?.linkHealthChecksEnabled !== false;
 }
 function formatLinkHealthHint(rec, opts = {}) {
   if (!opts.enabled) return "";
@@ -25790,6 +25790,730 @@ async function captureProductScreenshot({
   }
 }
 
+// src/features/search/cross-resource-retrieval.js
+var SUPPORTED_RETRIEVAL_SOURCES = Object.freeze([
+  "bookmark",
+  "archive",
+  "tabs",
+  "browserBookmarks",
+  "visitHistory"
+]);
+var SOURCE_PRIORITY = Object.freeze(
+  Object.fromEntries(SUPPORTED_RETRIEVAL_SOURCES.map((source, index) => [source, index]))
+);
+var SOURCE_FIELDS = Object.freeze({
+  bookmark: ["url", "title", "tags", "description", "backend", "storage", "time", "updated_at"],
+  archive: ["url", "title", "snippet", "archiveStatus", "storage", "backend", "archiveId", "readerTarget", "capturedAt", "position"],
+  tabs: ["tabId", "url", "title", "windowId", "active"],
+  browserBookmarks: ["targetId", "url", "title", "parentId"],
+  visitHistory: ["url", "title", "visitedAt", "lastVisitTime", "visitCount"]
+});
+function collapseWhitespace(value) {
+  return String(value).trim().replace(/\s+/g, " ");
+}
+function normalizeRetrievalQuery(input = {}) {
+  const rawQuery = input.query ?? input.text;
+  if (typeof rawQuery !== "string") return { error: "InvalidQuery" };
+  const text = collapseWhitespace(rawQuery).toLowerCase();
+  if (!text) return { error: "InvalidQuery" };
+  const requestedScopes = input.scopes == null ? [...SUPPORTED_RETRIEVAL_SOURCES] : input.scopes;
+  if (!Array.isArray(requestedScopes) || requestedScopes.length === 0) {
+    return { error: "InvalidScope" };
+  }
+  const scopes = [...new Set(requestedScopes)];
+  if (scopes.some((source) => !SUPPORTED_RETRIEVAL_SOURCES.includes(source))) {
+    return { error: "InvalidScope" };
+  }
+  scopes.sort((left, right) => SOURCE_PRIORITY[left] - SOURCE_PRIORITY[right]);
+  const limit = input.limit == null ? 25 : Number(input.limit);
+  const offset = input.offset == null ? 0 : Number(input.offset);
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100 || !Number.isInteger(offset) || offset < 0) {
+    return { error: "InvalidPagination" };
+  }
+  return { text, scopes, limit, offset };
+}
+function validateRetrievalScopes(requestedScopes, registry2 = SUPPORTED_RETRIEVAL_SOURCES) {
+  if (!Array.isArray(requestedScopes) || requestedScopes.length === 0) {
+    return { error: "InvalidScope" };
+  }
+  const registryValues = registry2 instanceof Set ? [...registry2] : Array.isArray(registry2) ? registry2 : Object.keys(registry2 || {});
+  const scopes = [...new Set(requestedScopes)];
+  if (scopes.some((source) => !registryValues.includes(source))) {
+    return { error: "InvalidScope" };
+  }
+  scopes.sort((left, right) => (SOURCE_PRIORITY[left] ?? Number.MAX_SAFE_INTEGER) - (SOURCE_PRIORITY[right] ?? Number.MAX_SAFE_INTEGER));
+  return scopes;
+}
+function sourceAllowedFields(source) {
+  return SOURCE_FIELDS[source] || [];
+}
+function stableIdentity(candidate) {
+  const identity = candidate.archiveId || candidate.tabId || candidate.targetId || candidate.url || candidate.id || JSON.stringify(candidate);
+  const backend = candidate.backend || candidate.storage || "";
+  return `${candidate.source}:${backend}:${identity}`;
+}
+function sanitizeCandidate(source, candidate) {
+  const safe = { source };
+  for (const field of sourceAllowedFields(source)) {
+    if (candidate?.[field] !== void 0) safe[field] = candidate[field];
+  }
+  safe.stableIdentity = stableIdentity(safe);
+  return safe;
+}
+function matchCandidate(candidate, query) {
+  const values = sourceAllowedFields(candidate.source).map((field) => candidate[field]).filter((value) => value != null).map((value) => String(value).toLowerCase());
+  const exact = values.some((value) => value === query);
+  const starts = !exact && values.some((value) => value.startsWith(query));
+  const contains = !exact && !starts && values.some((value) => value.includes(query));
+  if (!exact && !starts && !contains) return null;
+  return exact ? 0 : starts ? 1 : 2;
+}
+function mapRetrievalAction(candidate = {}) {
+  switch (candidate.source) {
+    case "bookmark":
+      return { kind: "openBookmark", url: candidate.url, backend: candidate.backend || candidate.storage || "local" };
+    case "archive":
+      return {
+        kind: "openReader",
+        readerTarget: candidate.readerTarget,
+        backend: candidate.backend || candidate.storage || "local",
+        archiveId: candidate.archiveId
+      };
+    case "tabs":
+      return { kind: "focusTab", tabId: candidate.tabId };
+    case "browserBookmarks":
+      return { kind: "openBrowserBookmarks", targetId: candidate.targetId };
+    case "visitHistory":
+      return { kind: "openVisitHistory", url: candidate.url };
+    default:
+      return { kind: "unsupported" };
+  }
+}
+function rankCandidates(request, candidates) {
+  const matched = [];
+  const identities = /* @__PURE__ */ new Set();
+  for (const input of candidates) {
+    const candidate = sanitizeCandidate(input.source, input);
+    const matchKind = matchCandidate(candidate, request.text);
+    if (matchKind == null || identities.has(candidate.stableIdentity)) continue;
+    identities.add(candidate.stableIdentity);
+    matched.push({
+      ...candidate,
+      action: mapRetrievalAction(candidate),
+      rank: {
+        matchKind,
+        sourcePriority: SOURCE_PRIORITY[candidate.source],
+        position: Number.isFinite(candidate.position) ? candidate.position : Number.MAX_SAFE_INTEGER,
+        recency: String(candidate.capturedAt || candidate.lastVisitTime || candidate.visitedAt || candidate.time || ""),
+        stableIdentity: candidate.stableIdentity
+      }
+    });
+  }
+  matched.sort((left, right) => left.rank.matchKind - right.rank.matchKind || left.rank.sourcePriority - right.rank.sourcePriority || left.rank.position - right.rank.position || right.rank.recency.localeCompare(left.rank.recency) || left.rank.stableIdentity.localeCompare(right.rank.stableIdentity));
+  const results = matched.slice(request.offset, request.offset + request.limit).map(({ rank, stableIdentity: _stableIdentity, ...candidate }) => candidate);
+  return {
+    results,
+    total: matched.length,
+    nextOffset: request.offset + results.length < matched.length ? request.offset + results.length : null
+  };
+}
+async function readSource(source, request, adapter, permissionState) {
+  if (permissionState?.[source] === false) {
+    return { candidates: [], state: "permissionDenied" };
+  }
+  if (!adapter || typeof adapter.read !== "function") {
+    return { candidates: [], state: "unavailable" };
+  }
+  try {
+    const response = await adapter.read(request);
+    if (response?.permissionDenied) {
+      return { candidates: [], state: "permissionDenied" };
+    }
+    if (response?.unavailable) {
+      return { candidates: [], state: "unavailable" };
+    }
+    if (response?.failed) {
+      return { candidates: [], state: "unavailable", error: "SourceFailed" };
+    }
+    const candidates = Array.isArray(response) ? response : response?.candidates || response?.results || [];
+    const state = response?.state || (response?.stale ? "stale" : "available");
+    return {
+      candidates: Array.isArray(candidates) ? candidates.map((candidate) => ({ ...candidate, source })) : [],
+      state
+    };
+  } catch (error48) {
+    return { candidates: [], state: "unavailable", error: error48.message || "SourceFailed" };
+  }
+}
+async function boundedParallelMap(items, worker, concurrency) {
+  const results = new Array(items.length);
+  let next = 0;
+  async function consume() {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await worker(items[index]);
+    }
+  }
+  const workers = Array.from(
+    { length: Math.min(Math.max(1, concurrency), items.length || 1) },
+    () => consume()
+  );
+  await Promise.all(workers);
+  return results;
+}
+async function queryCrossResources(input = {}, {
+  adapters = {},
+  permissionState = {},
+  concurrency = 3
+} = {}) {
+  const request = normalizeRetrievalQuery(input);
+  if (request.error) return request;
+  const sources = validateRetrievalScopes(request.scopes, SUPPORTED_RETRIEVAL_SOURCES);
+  if (sources.error) return sources;
+  const sourceResults = await boundedParallelMap(
+    sources,
+    (source) => readSource(source, request, adapters[source], permissionState),
+    concurrency
+  );
+  const candidates = [];
+  const sourceStates = {};
+  sources.forEach((source, index) => {
+    const result = sourceResults[index];
+    sourceStates[source] = {
+      state: result.state,
+      ...result.error ? { error: result.error } : {}
+    };
+    candidates.push(...result.candidates);
+  });
+  return { ...rankCandidates(request, candidates), sourceStates };
+}
+var CrossResourceRetrievalService = class {
+  constructor({
+    bookmarkReader = null,
+    archiveStore = null,
+    archiveSearch = null,
+    browserApi = globalThis.browser || globalThis.chrome,
+    permissionState = {},
+    concurrency = 3
+  } = {}) {
+    this.bookmarkReader = bookmarkReader;
+    this.archiveStore = archiveStore;
+    this.archiveSearch = archiveSearch;
+    this.browserApi = browserApi;
+    this.permissionState = permissionState;
+    this.concurrency = concurrency;
+  }
+  async query(input) {
+    const adapters = {
+      bookmark: {
+        read: async () => {
+          const reader = this.bookmarkReader;
+          if (!reader) return [];
+          if (typeof reader.getAllBookmarksForIndex === "function") return reader.getAllBookmarksForIndex();
+          if (typeof reader.getAllBookmarks === "function") return reader.getAllBookmarks();
+          return [];
+        }
+      },
+      archive: {
+        read: async (request) => {
+          const archives = await this.archiveStore?.listArchives?.() || [];
+          const search = this.archiveSearch || this.archiveStore?.archiveSearch;
+          if (search) {
+            await search.seed(archives);
+            return search.queryArchivedContent(request.text);
+          }
+          return archives.map((archive) => ({
+            url: archive.url,
+            title: archive.sourceTitle || archive.title,
+            snippet: String(archive.textContent || "").slice(0, 180),
+            archiveStatus: archive.status,
+            storage: archive.storage,
+            archiveId: archive.archiveId,
+            capturedAt: archive.capturedAt,
+            readerTarget: archive.readerTarget
+          }));
+        }
+      },
+      tabs: {
+        read: async () => this.browserApi?.tabs?.query?.({}) || []
+      },
+      browserBookmarks: {
+        read: async (request) => this.browserApi?.bookmarks?.search ? this.browserApi.bookmarks.search({ query: request.text }) : []
+      },
+      visitHistory: {
+        read: async (request) => this.browserApi?.history?.search ? this.browserApi.history.search({ text: request.text, maxResults: 100 }) : []
+      }
+    };
+    return queryCrossResources(input, {
+      adapters,
+      permissionState: this.permissionState,
+      concurrency: this.concurrency
+    });
+  }
+};
+
+// src/features/portability/library-package.js
+var DEFAULT_LIMITS = Object.freeze({
+  maxBytes: 50 * 1024 * 1024,
+  maxEntries: 1e4
+});
+var SECRET_KEY = /(secret|token|password|credential|api.?key|private.?key)/i;
+var SUPPORTED_BACKENDS = /* @__PURE__ */ new Set(["local", "file"]);
+function encodeText(value) {
+  if (typeof TextEncoder === "function") return new TextEncoder().encode(value);
+  const encoded = encodeURIComponent(value);
+  const bytes = [];
+  for (let index = 0; index < encoded.length; ) {
+    if (encoded[index] === "%") {
+      bytes.push(Number.parseInt(encoded.slice(index + 1, index + 3), 16));
+      index += 3;
+    } else {
+      bytes.push(encoded.charCodeAt(index++));
+    }
+  }
+  return new Uint8Array(bytes);
+}
+function decodeText(bytes) {
+  if (typeof TextDecoder === "function") return new TextDecoder().decode(bytes);
+  return decodeURIComponent([...bytes].map((byte) => `%${byte.toString(16).padStart(2, "0")}`).join(""));
+}
+function toBytes(value) {
+  if (value instanceof Uint8Array) return value;
+  if (value instanceof ArrayBuffer) return new Uint8Array(value);
+  if (Array.isArray(value)) return new Uint8Array(value);
+  return encodeText(String(value ?? ""));
+}
+function stableValue(value) {
+  if (Array.isArray(value)) return value.map(stableValue);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, stableValue(value[key])]));
+  }
+  return value;
+}
+function serialize(value) {
+  return JSON.stringify(stableValue(value));
+}
+async function defaultChecksum(bytes) {
+  if (!globalThis.crypto?.subtle) throw new Error("SHA-256 unavailable");
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", toBytes(bytes));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+function normalizePackagePath(candidate) {
+  if (typeof candidate !== "string" || !candidate.trim()) return { error: "UnsafePath" };
+  const path = candidate.replaceAll("\\", "/");
+  if (path.startsWith("/") || /^[A-Za-z]:\//.test(path)) return { error: "UnsafePath" };
+  const segments = path.split("/");
+  if (segments.some((segment) => segment === ".." || segment === "")) return { error: "UnsafePath" };
+  const normalized = segments.filter((segment) => segment !== ".").join("/");
+  return normalized ? normalized : { error: "UnsafePath" };
+}
+function filterNonSecretConfiguration(configuration = {}, allowlistedKeys = []) {
+  const safeConfiguration = {};
+  const excludedKeys = [];
+  const allowed = new Set(allowlistedKeys);
+  for (const key of Object.keys(configuration || {})) {
+    if (allowed.has(key) && !SECRET_KEY.test(key)) safeConfiguration[key] = configuration[key];
+    else excludedKeys.push(key);
+  }
+  excludedKeys.sort();
+  return { safeConfiguration, excludedKeys };
+}
+function metadataEntries(metadata, safeConfiguration) {
+  return [
+    { path: "metadata/bookmarks.json", identity: "metadata:bookmarks", bytes: serialize(metadata.bookmarks || []) },
+    { path: "metadata/configuration.json", identity: "metadata:configuration", bytes: serialize(safeConfiguration || {}) },
+    { path: "metadata/storage-index.json", identity: "metadata:storage-index", bytes: serialize(metadata.storageIndex || {}) }
+  ];
+}
+async function buildPackageManifest({
+  metadata = {},
+  artifacts = [],
+  safeConfiguration = metadata.configuration || {},
+  excludedKeys = []
+} = {}, {
+  checksum = defaultChecksum,
+  limits = DEFAULT_LIMITS
+} = {}) {
+  const entries = metadataEntries(metadata, safeConfiguration);
+  const packageArtifacts = {};
+  for (const artifact of artifacts) {
+    const path = normalizePackagePath(artifact.path);
+    if (path.error) return path;
+    const bytes = toBytes(artifact.bytes);
+    packageArtifacts[path] = bytes;
+    entries.push({
+      path,
+      kind: "artifact",
+      backend: artifact.backend,
+      identity: artifact.identity || `${artifact.backend || "unknown"}:${path}`,
+      bytes
+    });
+  }
+  const totalBytes = entries.reduce((total, entry) => total + toBytes(entry.bytes).byteLength, 0);
+  if (entries.length > limits.maxEntries || totalBytes > limits.maxBytes) {
+    return { error: "PackageTooLarge" };
+  }
+  const manifestEntries = [];
+  for (const entry of entries) {
+    const bytes = toBytes(entry.bytes);
+    try {
+      manifestEntries.push({
+        path: entry.path,
+        kind: entry.kind || "metadata",
+        ...entry.backend ? { backend: entry.backend } : {},
+        identity: entry.identity || entry.path,
+        size: bytes.byteLength,
+        sha256: await checksum(bytes)
+      });
+    } catch {
+      return { error: "ChecksumFailed" };
+    }
+  }
+  manifestEntries.sort((left, right) => left.kind.localeCompare(right.kind) || left.path.localeCompare(right.path));
+  return {
+    manifest: {
+      schemaVersion: 1,
+      packageVersion: 1,
+      entries: manifestEntries,
+      excludedKeys: [...excludedKeys].sort()
+    },
+    artifacts: {
+      ...Object.fromEntries(
+        metadataEntries(metadata, safeConfiguration).map((entry) => [entry.path, [...toBytes(entry.bytes)]])
+      ),
+      ...Object.fromEntries(Object.entries(packageArtifacts).map(([path, bytes]) => [path, [...bytes]]))
+    }
+  };
+}
+function walkKeys(value, prefix = "") {
+  const keys = [];
+  if (!value || typeof value !== "object") return keys;
+  for (const [key, child] of Object.entries(value)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    keys.push(fullKey);
+    keys.push(...walkKeys(child, fullKey));
+  }
+  return keys;
+}
+async function validateLibraryPackage(packageValue, {
+  checksum = defaultChecksum,
+  limits = DEFAULT_LIMITS,
+  supportedVersions = [1]
+} = {}) {
+  const manifest = packageValue?.manifest;
+  if (!manifest || !Array.isArray(manifest.entries)) return { error: "MalformedManifest" };
+  if (!supportedVersions.includes(manifest.schemaVersion) || !supportedVersions.includes(manifest.packageVersion)) {
+    return { error: "UnsupportedVersion" };
+  }
+  if (manifest.entries.length > limits.maxEntries) return { error: "PackageTooLarge" };
+  const seenIdentities = /* @__PURE__ */ new Set();
+  let totalBytes = 0;
+  for (const entry of manifest.entries) {
+    const safePath = normalizePackagePath(entry.path);
+    if (safePath.error) return safePath;
+    if (safePath !== entry.path) return { error: "UnsafePath" };
+    const identity = `${entry.backend || ""}:${entry.identity || entry.path}`;
+    if (seenIdentities.has(identity)) return { error: "DuplicateIdentity" };
+    seenIdentities.add(identity);
+    if (entry.backend && !SUPPORTED_BACKENDS.has(entry.backend)) return { error: "UnsupportedBackend" };
+    const bytes = packageValue.artifacts?.[entry.path];
+    if (bytes == null) return { error: "MalformedManifest" };
+    const actualBytes = toBytes(bytes);
+    totalBytes += actualBytes.byteLength;
+    if (actualBytes.byteLength !== entry.size) return { error: "ChecksumMismatch" };
+    try {
+      if (await checksum(actualBytes) !== entry.sha256) return { error: "ChecksumMismatch" };
+    } catch {
+      return { error: "ChecksumMismatch" };
+    }
+  }
+  if (totalBytes > limits.maxBytes) return { error: "PackageTooLarge" };
+  const configurationBytes = packageValue.artifacts?.["metadata/configuration.json"];
+  if (configurationBytes != null) {
+    try {
+      const configuration = JSON.parse(decodeText(toBytes(configurationBytes)));
+      if (walkKeys(configuration).some((key) => SECRET_KEY.test(key))) return { error: "SecretPresent" };
+    } catch {
+      return { error: "MalformedManifest" };
+    }
+  }
+  return packageValue;
+}
+function planLibraryRestore(packageValue, {
+  current = {},
+  targets = {},
+  conflictPolicy = null,
+  availableBytes = Number.POSITIVE_INFINITY
+} = {}) {
+  if (packageValue?.error) return packageValue;
+  const entries = packageValue?.manifest?.entries;
+  if (!Array.isArray(entries)) return { error: "MalformedManifest" };
+  if (entries.some((entry) => entry.backend === "file") && !targets.file) {
+    return { error: "MissingTargetPath" };
+  }
+  const conflicts = entries.filter((entry) => current.identities?.includes?.(entry.identity)).map((entry) => entry.identity);
+  if (conflicts.length && !conflictPolicy) return { error: "ConflictPolicyRequired" };
+  const restoreBytes = entries.reduce((total, entry) => total + Number(entry.size || 0), 0);
+  if (restoreBytes > availableBytes) return { error: "QuotaExceeded" };
+  return {
+    actions: entries.map((entry) => ({
+      type: entry.kind === "artifact" ? "writeArtifact" : "writeMetadata",
+      path: entry.path,
+      entry
+    })),
+    conflicts,
+    migrations: [],
+    warnings: packageValue.manifest.excludedKeys || [],
+    quota: { restoreBytes, availableBytes },
+    rollback: "backupBeforeRewrite"
+  };
+}
+async function compensate(backupStore, backup, failure) {
+  try {
+    await backupStore.restore(backup);
+    return {
+      success: false,
+      rollback: "restored",
+      failed: [failure]
+    };
+  } catch {
+    return {
+      success: false,
+      rollback: "failed",
+      failed: [failure, "RollbackFailed"]
+    };
+  }
+}
+async function executeLibraryRestore({
+  package: packageValue,
+  plan,
+  currentState = {},
+  backupStore,
+  applyRestoreAction,
+  verifyRestoreAction = async () => true,
+  rebuildArchiveContentSearch = async () => true
+} = {}) {
+  if (!packageValue || !plan?.actions || !backupStore?.create || !backupStore?.restore) {
+    return { success: false, failed: ["InvalidRestoreRequest"] };
+  }
+  let backup;
+  try {
+    backup = await backupStore.create(currentState);
+  } catch {
+    return { success: false, failed: ["BackupFailed"] };
+  }
+  const restored = [];
+  for (const action of plan.actions) {
+    try {
+      if (typeof applyRestoreAction !== "function") throw new Error("write unavailable");
+      await applyRestoreAction(action, packageValue);
+      if (!await verifyRestoreAction(action, packageValue)) throw new Error("verification failed");
+      restored.push(action.path);
+    } catch (error48) {
+      const failure = error48.message === "verification failed" ? "VerificationFailed" : "WriteFailed";
+      return compensate(backupStore, backup, failure);
+    }
+  }
+  try {
+    if (!await rebuildArchiveContentSearch(packageValue)) throw new Error("rebuild failed");
+  } catch {
+    return compensate(backupStore, backup, "RebuildFailed");
+  }
+  return {
+    success: true,
+    restored,
+    skipped: [],
+    warnings: packageValue.manifest.excludedKeys || []
+  };
+}
+var LibraryPortabilityService = class {
+  constructor({
+    bookmarkReader = null,
+    storageIndexReader = null,
+    configReader = null,
+    archiveReader = null,
+    screenshotReader = null,
+    allowlistedConfigurationKeys = ["settings", "inhibitUrls"],
+    checksum = defaultChecksum,
+    limits = DEFAULT_LIMITS,
+    currentStateReader = async () => ({}),
+    backupStore = null,
+    applyRestoreAction = null,
+    verifyRestoreAction,
+    rebuildArchiveContentSearch
+  } = {}) {
+    this.bookmarkReader = bookmarkReader;
+    this.storageIndexReader = storageIndexReader;
+    this.configReader = configReader;
+    this.archiveReader = archiveReader;
+    this.screenshotReader = screenshotReader;
+    this.allowlistedConfigurationKeys = allowlistedConfigurationKeys;
+    this.checksum = checksum;
+    this.limits = limits;
+    this.currentStateReader = currentStateReader;
+    this.backupStore = backupStore;
+    this.applyRestoreAction = applyRestoreAction;
+    this.verifyRestoreAction = verifyRestoreAction;
+    this.rebuildArchiveContentSearch = rebuildArchiveContentSearch;
+  }
+  async export() {
+    const bookmarks = this.bookmarkReader?.getAllBookmarksForIndex ? await this.bookmarkReader.getAllBookmarksForIndex() : await this.bookmarkReader?.getAllBookmarks?.() || [];
+    const storageIndex = await this.storageIndexReader?.getIndex?.() || {};
+    const rawConfiguration = await this.configReader?.exportConfig?.() || {};
+    const { safeConfiguration, excludedKeys } = filterNonSecretConfiguration(
+      rawConfiguration,
+      this.allowlistedConfigurationKeys
+    );
+    const archives = await this.archiveReader?.listArchives?.() || [];
+    const screenshots = await this.screenshotReader?.listScreenshots?.() || [];
+    const artifacts = [
+      ...archives.map((archive) => ({
+        path: `archives/${archive.storage || "local"}/${encodeURIComponent(archive.archiveId || archive.url)}.json`,
+        backend: archive.storage || "local",
+        identity: archive.archiveId || archive.url,
+        bytes: serialize(archive)
+      })),
+      ...screenshots.map((screenshot) => ({
+        path: `screenshots/${screenshot.storage || "local"}/${encodeURIComponent(screenshot.artifactId || screenshot.url)}.json`,
+        backend: screenshot.storage || "local",
+        identity: screenshot.artifactId || screenshot.url,
+        bytes: serialize(screenshot)
+      }))
+    ];
+    return buildPackageManifest({
+      metadata: { bookmarks, storageIndex },
+      safeConfiguration,
+      artifacts,
+      excludedKeys
+    }, {
+      checksum: this.checksum,
+      limits: this.limits
+    });
+  }
+  async plan(data = {}) {
+    const validated = await validateLibraryPackage(data.package, {
+      checksum: this.checksum,
+      limits: this.limits
+    });
+    return planLibraryRestore(validated, {
+      current: data.current || await this.currentStateReader(),
+      targets: data.targets || {},
+      conflictPolicy: data.conflictPolicy,
+      availableBytes: data.availableBytes
+    });
+  }
+  async restore(data = {}) {
+    const validated = await validateLibraryPackage(data.package, {
+      checksum: this.checksum,
+      limits: this.limits
+    });
+    if (validated?.error) return validated;
+    const plan = planLibraryRestore(validated, {
+      current: data.current || await this.currentStateReader(),
+      targets: data.targets || {},
+      conflictPolicy: data.conflictPolicy,
+      availableBytes: data.availableBytes
+    });
+    if (plan.error) return plan;
+    return executeLibraryRestore({
+      package: validated,
+      plan,
+      currentState: data.current || await this.currentStateReader(),
+      backupStore: data.backupStore || this.backupStore,
+      applyRestoreAction: data.applyRestoreAction || this.applyRestoreAction,
+      verifyRestoreAction: data.verifyRestoreAction || this.verifyRestoreAction,
+      rebuildArchiveContentSearch: data.rebuildArchiveContentSearch || this.rebuildArchiveContentSearch
+    });
+  }
+};
+
+// src/features/storage/storage-index.js
+init_utils();
+var STORAGE_INDEX_KEY = "hoverboard_storage_index";
+var VALID_BACKENDS = ["pinboard", "local", "file", "sync", "browser"];
+function cleanUrl(url2) {
+  if (!url2) return "";
+  return url2.trim().replace(/\/+$/, "");
+}
+var StorageIndex = class {
+  /**
+   * [IMPL-STORAGE_INDEX] Get full index from chrome.storage.local.
+   * @returns {Promise<Object>} { [url]: 'pinboard'|'local'|'file'|'sync'|'browser' }
+   */
+  async getIndex() {
+    try {
+      const result = await chrome.storage.local.get(STORAGE_INDEX_KEY);
+      const raw = result[STORAGE_INDEX_KEY];
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+      return { ...raw };
+    } catch (e) {
+      debugError("[IMPL-STORAGE_INDEX] getIndex failed:", e);
+      return {};
+    }
+  }
+  /**
+   * [IMPL-STORAGE_INDEX] Set backend for URL.
+   * @param {string} url
+   * @param {string} backend - 'pinboard'|'local'|'file'|'sync'|'browser'
+   */
+  async setBackendForUrl(url2, backend) {
+    if (!VALID_BACKENDS.includes(backend)) {
+      throw new Error(`Invalid backend: ${backend}. Use pinboard, local, file, sync, or browser.`);
+    }
+    const key = cleanUrl(url2);
+    if (!key) return;
+    const index = await this.getIndex();
+    index[key] = backend;
+    await chrome.storage.local.set({ [STORAGE_INDEX_KEY]: index });
+    debugLog("[IMPL-STORAGE_INDEX] setBackendForUrl:", key, backend);
+  }
+  /**
+   * [IMPL-STORAGE_INDEX] Get backend for URL, or null if not in index.
+   * @param {string} url
+   * @returns {Promise<string|null>} 'pinboard'|'local'|'file'|'sync'|'browser' or null
+   */
+  async getBackendForUrl(url2) {
+    const index = await this.getIndex();
+    const key = cleanUrl(url2);
+    const backend = index[key];
+    return VALID_BACKENDS.includes(backend) ? backend : null;
+  }
+  /**
+   * [IMPL-STORAGE_INDEX] Remove URL from index.
+   * @param {string} url
+   */
+  async removeUrl(url2) {
+    const key = cleanUrl(url2);
+    if (!key) return;
+    const index = await this.getIndex();
+    if (!(key in index)) return;
+    delete index[key];
+    await chrome.storage.local.set({ [STORAGE_INDEX_KEY]: index });
+    debugLog("[IMPL-STORAGE_INDEX] removeUrl:", key);
+  }
+  /**
+   * [IMPL-STORAGE_INDEX] Migration: seed index from existing local bookmarks (each URL -> 'local').
+   * Call when index is empty so existing local bookmarks get an index entry.
+   * @param {Object} localBookmarkService - instance with getAllBookmarks()
+   */
+  async ensureMigrationFromLocal(localBookmarkService) {
+    const index = await this.getIndex();
+    if (Object.keys(index).length > 0) {
+      debugLog("[IMPL-STORAGE_INDEX] Migration skipped: index not empty");
+      return;
+    }
+    try {
+      const bookmarks = await localBookmarkService.getAllBookmarks();
+      for (const b of bookmarks) {
+        if (b && b.url) await this.setBackendForUrl(b.url, "local");
+      }
+      debugLog("[IMPL-STORAGE_INDEX] Migration done: seeded", bookmarks.length, "URLs as local");
+    } catch (e) {
+      debugError("[IMPL-STORAGE_INDEX] Migration failed:", e);
+    }
+  }
+};
+
 // src/core/message-handler.js
 var MESSAGE_TYPES = {
   // Data retrieval
@@ -25827,6 +26551,11 @@ var MESSAGE_TYPES = {
   // Search operations
   SEARCH_TITLE: "searchTitle",
   SEARCH_TITLE_TEXT: "searchTitleText",
+  // [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL] Read-only aggregate library query.
+  SEARCH_LIBRARY_RESOURCES: "searchLibraryResources",
+  // [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY] Package export/import bindings.
+  EXPORT_LIBRARY_PACKAGE: "exportLibraryPackage",
+  IMPORT_LIBRARY_PACKAGE: "importLibraryPackage",
   // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tab search operations
   SEARCH_TABS: "searchTabs",
   GET_SEARCH_HISTORY: "getSearchHistory",
@@ -25891,6 +26620,19 @@ var MessageHandler = class {
     this.archiveSearch = new ArchiveContentSearch();
     this.archiveStore = archiveStore || new PageArchiveStore({ archiveSearch: this.archiveSearch });
     this.screenshotStore = screenshotStore || null;
+    this.crossResourceRetrievalService = new CrossResourceRetrievalService({
+      bookmarkReader: this.bookmarkProvider,
+      archiveStore: this.archiveStore,
+      archiveSearch: this.archiveSearch,
+      browserApi: safariEnhancements
+    });
+    this.libraryPortabilityService = new LibraryPortabilityService({
+      bookmarkReader: this.bookmarkProvider,
+      storageIndexReader: new StorageIndex(),
+      configReader: this.configManager,
+      archiveReader: this.archiveStore,
+      screenshotReader: this.screenshotStore
+    });
     this.tabSearchService = new TabSearchService();
   }
   /**
@@ -25900,6 +26642,8 @@ var MessageHandler = class {
   setBookmarkProvider(provider) {
     this.bookmarkProvider = provider;
     this.tagService.pinboardService = provider;
+    if (this.crossResourceRetrievalService) this.crossResourceRetrievalService.bookmarkReader = provider;
+    if (this.libraryPortabilityService) this.libraryPortabilityService.bookmarkReader = provider;
   }
   /**
    * [IMPL-PAGE_ARCHIVE_STORAGE] [ARCH-PAGE_ARCHIVE_STORAGE] [REQ-PAGE_ARCHIVE_STORAGE]
@@ -25910,6 +26654,28 @@ var MessageHandler = class {
     this.archiveStore = archiveStore || this.archiveStore;
     this.screenshotStore = screenshotStore || this.screenshotStore;
     if (this.archiveStore) this.archiveStore.archiveSearch = this.archiveSearch;
+    if (this.crossResourceRetrievalService) {
+      this.crossResourceRetrievalService.archiveStore = this.archiveStore;
+      this.crossResourceRetrievalService.archiveSearch = this.archiveSearch;
+    }
+    if (this.libraryPortabilityService) {
+      this.libraryPortabilityService.archiveReader = this.archiveStore;
+      this.libraryPortabilityService.screenshotReader = this.screenshotStore;
+    }
+  }
+  /**
+   * [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL]
+   * Bind the read-only retrieval service after source providers are initialized.
+   */
+  setCrossResourceRetrievalService(service) {
+    this.crossResourceRetrievalService = service || null;
+  }
+  /**
+   * [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY]
+   * Bind package export/import orchestration after durable storage providers are initialized.
+   */
+  setLibraryPortabilityService(service) {
+    this.libraryPortabilityService = service || null;
   }
   /**
    * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION]
@@ -26025,6 +26791,15 @@ var MessageHandler = class {
           break;
         case MESSAGE_TYPES.SEARCH_TITLE:
           response = await this.handleSearchTitle(data, tabId);
+          break;
+        case MESSAGE_TYPES.SEARCH_LIBRARY_RESOURCES:
+          response = await this.handleSearchLibraryResources(data);
+          break;
+        case MESSAGE_TYPES.EXPORT_LIBRARY_PACKAGE:
+          response = await this.handleExportLibraryPackage(data);
+          break;
+        case MESSAGE_TYPES.IMPORT_LIBRARY_PACKAGE:
+          response = await this.handleImportLibraryPackage(data);
           break;
         case MESSAGE_TYPES.SEARCH_TABS:
           response = await this.handleSearchTabs(data, tabId);
@@ -26683,6 +27458,70 @@ var MessageHandler = class {
   }
   async handleSearchTitle(data, tabId) {
     return { searchCount: 0, tabId };
+  }
+  /**
+   * ## SEARCH_LIBRARY_RESOURCES_MESSAGE
+   * - [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL] How: expose the query contract through a new message while keeping SEARCH_TITLE compatibility explicit.
+   * - Contract:
+   *   - INPUT: message with type SEARCH_LIBRARY_RESOURCES and query data
+   *   - PRE: message handler has the retrieval service and response channel
+   *   - OUTPUT: retrieval result or structured error response
+   *   - POST: one response is returned; no source write occurs
+   *   - FAILURE_MODES: InvalidQuery, InvalidScope, InvalidPagination
+   *   - EFFECTS: Async, IO
+   *   - TERMINATION: total
+   * - PROCEDURE: SEARCH_LIBRARY_RESOURCES_MESSAGE
+   *   - response = AWAIT QUERY_CROSS_RESOURCES(message.data)
+   *   - RETURN response
+   *   - SEARCH_TITLE remains a compatibility route returning its documented legacy shape until a separate deprecation change updates callers and tests
+   */
+  /**
+   * [IMPL-CROSS_RESOURCE_RETRIEVAL] [ARCH-CROSS_RESOURCE_RETRIEVAL] [REQ-CROSS_RESOURCE_RETRIEVAL]
+   * Dispatch one read-only cross-resource query without mutating any source.
+   */
+  async handleSearchLibraryResources(data) {
+    if (typeof this.crossResourceRetrievalService?.query !== "function") {
+      return { error: "Retrieval service unavailable" };
+    }
+    return this.crossResourceRetrievalService.query(data || {});
+  }
+  /**
+   * ## LIBRARY_PORTABILITY_MESSAGE
+   * - [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY] How: expose export, dry-run planning, and restore operations through thin message/UI bindings without changing existing CSV, HTML, or config controls.
+   * - Contract:
+   *   - INPUT: package operation message and operation-specific data
+   *   - PRE: message handler has the portability service and response channel
+   *   - OUTPUT: package, dry-run plan, or restore report
+   *   - POST: one response is returned and UI status distinguishes pending, success, warning, and failure
+   *   - FAILURE_MODES: InvalidPackage, PlanFailed, RestoreFailed
+   *   - EFFECTS: Async, IO
+   *   - TERMINATION: total
+   * - PROCEDURE: LIBRARY_PORTABILITY_MESSAGE
+   *   - IF operation = export: RETURN AWAIT COLLECT_LIBRARY_PACKAGE()
+   *   - IF operation = plan: validated = VALIDATE_LIBRARY_PACKAGE(input.package); RETURN PLAN_LIBRARY_RESTORE(validated, input.current, input.policy, input.targets)
+   *   - IF operation = restore: validated = VALIDATE_LIBRARY_PACKAGE(input.package); plan = PLAN_LIBRARY_RESTORE(validated, input.current, input.policy, input.targets); RETURN EXECUTE_LIBRARY_RESTORE(validated, plan, input.adapters, input.backupStore, input.policy)
+   */
+  /**
+   * [IMPL-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [REQ-LIBRARY_PORTABILITY]
+   * Dispatch package export, dry-run planning, or verified restore through a thin binding.
+   */
+  async handleExportLibraryPackage(data) {
+    if (typeof this.libraryPortabilityService?.export !== "function") {
+      return { error: "Library portability service unavailable" };
+    }
+    return this.libraryPortabilityService.export(data || {});
+  }
+  async handleImportLibraryPackage(data = {}) {
+    if (!this.libraryPortabilityService) {
+      return { error: "Library portability service unavailable" };
+    }
+    if (data.mode === "plan" && typeof this.libraryPortabilityService.plan === "function") {
+      return this.libraryPortabilityService.plan(data);
+    }
+    if (data.mode === "restore" && typeof this.libraryPortabilityService.restore === "function") {
+      return this.libraryPortabilityService.restore(data);
+    }
+    return { error: "Invalid library package operation" };
   }
   /**
    * [TAB-SEARCH-CORE] Handle tab search request
@@ -27846,93 +28685,6 @@ var NativeHostFileBookmarkAdapter = class extends FileBookmarkStorageAdapter {
     if (response.type === "error") throw new Error(response.message || "Native host error");
     if (response.type === "writeArchiveFile" && response.success) return;
     throw new Error("Invalid native host response for writeArchiveFile");
-  }
-};
-
-// src/features/storage/storage-index.js
-init_utils();
-var STORAGE_INDEX_KEY = "hoverboard_storage_index";
-var VALID_BACKENDS = ["pinboard", "local", "file", "sync", "browser"];
-function cleanUrl(url2) {
-  if (!url2) return "";
-  return url2.trim().replace(/\/+$/, "");
-}
-var StorageIndex = class {
-  /**
-   * [IMPL-STORAGE_INDEX] Get full index from chrome.storage.local.
-   * @returns {Promise<Object>} { [url]: 'pinboard'|'local'|'file'|'sync'|'browser' }
-   */
-  async getIndex() {
-    try {
-      const result = await chrome.storage.local.get(STORAGE_INDEX_KEY);
-      const raw = result[STORAGE_INDEX_KEY];
-      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
-      return { ...raw };
-    } catch (e) {
-      debugError("[IMPL-STORAGE_INDEX] getIndex failed:", e);
-      return {};
-    }
-  }
-  /**
-   * [IMPL-STORAGE_INDEX] Set backend for URL.
-   * @param {string} url
-   * @param {string} backend - 'pinboard'|'local'|'file'|'sync'|'browser'
-   */
-  async setBackendForUrl(url2, backend) {
-    if (!VALID_BACKENDS.includes(backend)) {
-      throw new Error(`Invalid backend: ${backend}. Use pinboard, local, file, sync, or browser.`);
-    }
-    const key = cleanUrl(url2);
-    if (!key) return;
-    const index = await this.getIndex();
-    index[key] = backend;
-    await chrome.storage.local.set({ [STORAGE_INDEX_KEY]: index });
-    debugLog("[IMPL-STORAGE_INDEX] setBackendForUrl:", key, backend);
-  }
-  /**
-   * [IMPL-STORAGE_INDEX] Get backend for URL, or null if not in index.
-   * @param {string} url
-   * @returns {Promise<string|null>} 'pinboard'|'local'|'file'|'sync'|'browser' or null
-   */
-  async getBackendForUrl(url2) {
-    const index = await this.getIndex();
-    const key = cleanUrl(url2);
-    const backend = index[key];
-    return VALID_BACKENDS.includes(backend) ? backend : null;
-  }
-  /**
-   * [IMPL-STORAGE_INDEX] Remove URL from index.
-   * @param {string} url
-   */
-  async removeUrl(url2) {
-    const key = cleanUrl(url2);
-    if (!key) return;
-    const index = await this.getIndex();
-    if (!(key in index)) return;
-    delete index[key];
-    await chrome.storage.local.set({ [STORAGE_INDEX_KEY]: index });
-    debugLog("[IMPL-STORAGE_INDEX] removeUrl:", key);
-  }
-  /**
-   * [IMPL-STORAGE_INDEX] Migration: seed index from existing local bookmarks (each URL -> 'local').
-   * Call when index is empty so existing local bookmarks get an index entry.
-   * @param {Object} localBookmarkService - instance with getAllBookmarks()
-   */
-  async ensureMigrationFromLocal(localBookmarkService) {
-    const index = await this.getIndex();
-    if (Object.keys(index).length > 0) {
-      debugLog("[IMPL-STORAGE_INDEX] Migration skipped: index not empty");
-      return;
-    }
-    try {
-      const bookmarks = await localBookmarkService.getAllBookmarks();
-      for (const b of bookmarks) {
-        if (b && b.url) await this.setBackendForUrl(b.url, "local");
-      }
-      debugLog("[IMPL-STORAGE_INDEX] Migration done: seeded", bookmarks.length, "URLs as local");
-    } catch (e) {
-      debugError("[IMPL-STORAGE_INDEX] Migration failed:", e);
-    }
   }
 };
 

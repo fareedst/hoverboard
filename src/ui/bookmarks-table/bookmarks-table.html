@@ -30,25 +30,25 @@
         <button type="button" id="head-tab-table-display" class="control-tab" role="tab" data-control-tab="head" data-control-group="table-display" aria-controls="head-panel-table-display" aria-selected="false" tabindex="-1">Table Display</button>
       </div>
       <div class="control-panels">
-        <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Stores: which storage backends to include; default none checked -->
+        <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Stores: all provider backends start checked; each label shows filtered / total row counts before Store selection. -->
         <fieldset id="head-panel-stores" class="toolbar-group control-panel" data-control-panel="head" data-control-group="stores" role="tabpanel" aria-labelledby="head-tab-stores">
           <legend id="stores-legend" class="group-legend">Stores</legend>
           <div class="filters-row">
             <label class="filter-checkbox">
-              <input type="checkbox" id="store-local" value="local" aria-label="Include Local store">
-              <span>Local (L)</span>
+              <input type="checkbox" id="store-local" value="local" checked aria-label="Include Local store">
+              <span>Local (L) <span id="store-local-count" class="store-count" aria-live="polite" aria-label="Local filtered / total provider rows: 0 / 0">0 / 0</span></span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" id="store-file" value="file" aria-label="Include File store">
-              <span>File (F)</span>
+              <input type="checkbox" id="store-file" value="file" checked aria-label="Include File store">
+              <span>File (F) <span id="store-file-count" class="store-count" aria-live="polite" aria-label="File filtered / total provider rows: 0 / 0">0 / 0</span></span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" id="store-sync" value="sync" aria-label="Include Sync store">
-              <span>Sync (S)</span>
+              <input type="checkbox" id="store-sync" value="sync" checked aria-label="Include Sync store">
+              <span>Sync (S) <span id="store-sync-count" class="store-count" aria-live="polite" aria-label="Sync filtered / total provider rows: 0 / 0">0 / 0</span></span>
             </label>
             <label class="filter-checkbox">
-              <input type="checkbox" id="store-browser" value="browser" aria-label="Include Browser store (native Chrome bookmarks)">
-              <span>Browser (B)</span>
+              <input type="checkbox" id="store-browser" value="browser" checked aria-label="Include Browser store (native Chrome bookmarks)">
+              <span>Browser (B) <span id="store-browser-count" class="store-count" aria-live="polite" aria-label="Browser filtered / total provider rows: 0 / 0">0 / 0</span></span>
             </label>
           </div>
         </fieldset>
@@ -97,6 +97,7 @@
             <select id="search-scope" class="filter-select" aria-label="Search scope">
               <option value="metadata" selected>Metadata</option>
               <option value="archive">Archived content</option>
+              <option value="all-resources">All resources</option>
             </select>
             <button type="button" id="search-clear" class="btn btn-secondary btn-sm" title="Clear search" aria-label="Clear search">Clear</button>
             <label for="time-column-source">Time column:</label>
@@ -252,6 +253,13 @@
         <button type="button" id="export-all" class="btn btn-secondary btn-sm" title="Export all bookmarks to CSV" aria-label="Export all bookmarks">Export all</button>
         <button type="button" id="export-displayed" class="btn btn-secondary btn-sm" title="Export currently displayed (filtered) bookmarks to CSV" aria-label="Export displayed bookmarks">Export displayed</button>
         <button type="button" id="export-selected" class="btn btn-secondary btn-sm" title="Export selected bookmarks to CSV" aria-label="Export selected bookmarks" disabled>Export selected</button>
+      </div>
+      <!-- [REQ-LIBRARY_PORTABILITY] [ARCH-LIBRARY_PORTABILITY] [IMPL-LIBRARY_PORTABILITY] Versioned non-secret package controls remain separate from CSV export. -->
+      <div class="export-row">
+        <button type="button" id="export-library-package" class="btn btn-secondary btn-sm" title="Export a checksummed non-secret library package" aria-label="Export library package">Export library package</button>
+        <input type="file" id="import-library-package-file" accept=".json" style="display: none;" aria-label="Choose a Hoverboard library package">
+        <button type="button" id="import-library-package" class="btn btn-secondary btn-sm" title="Validate and restore a library package" aria-label="Import library package">Import library package</button>
+        <span id="library-package-result" class="help-text" aria-live="polite"></span>
       </div>
     </fieldset>
       </div>

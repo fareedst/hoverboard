@@ -5,6 +5,7 @@
  */
 
 export const ARCHIVE_SEARCH_SCOPE = 'archive'
+export const CROSS_RESOURCE_SEARCH_SCOPE = 'all-resources'
 
 export const ARCHIVE_METADATA_MUTATION_ACTIONS = Object.freeze([
   'select',
@@ -20,7 +21,12 @@ export function isArchiveScopeValue (scope) {
   return scope === ARCHIVE_SEARCH_SCOPE
 }
 
+export function isCrossResourceScopeValue (scope) {
+  return scope === CROSS_RESOURCE_SEARCH_SCOPE
+}
+
 export function isArchiveMetadataMutationAllowed (scope, action) {
-  if (isArchiveScopeValue(scope) && ARCHIVE_METADATA_MUTATION_ACTIONS.includes(action)) return false
+  if ((isArchiveScopeValue(scope) || isCrossResourceScopeValue(scope)) &&
+      ARCHIVE_METADATA_MUTATION_ACTIONS.includes(action)) return false
   return true
 }

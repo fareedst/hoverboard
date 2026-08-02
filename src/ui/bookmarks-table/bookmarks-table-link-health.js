@@ -121,14 +121,15 @@
  *
  * ## Link health checks enabled flag
  *
- * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Privacy-first opt-in; config key linkHealthChecksEnabled defaults false.
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Resolve link health as enabled when the setting is absent while preserving explicit false.
  * - Contract:
  *   - INPUT: config (MergedConfig|null)
- *   - OUTPUT: boolean (true only when linkHealthChecksEnabled === true)
+ *   - OUTPUT: boolean (true when linkHealthChecksEnabled is absent or true; false only when explicitly false)
  *   - EFFECTS: pure
  *   - TERMINATION: total
  * - PROCEDURE: IS_LINK_HEALTH_CHECKS_ENABLED
- *   - 1. RETURN config.linkHealthChecksEnabled === true
+ *   - 1. IF config is null or linkHealthChecksEnabled is absent THEN RETURN true
+ *   - 2. RETURN config.linkHealthChecksEnabled !== false
  *
  * ## Format capture-UI health hint
  *

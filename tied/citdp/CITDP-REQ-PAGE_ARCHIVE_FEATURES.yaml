@@ -2,7 +2,6 @@ CITDP-REQ-PAGE_ARCHIVE_FEATURES:
   change_definition:
     completion_criteria:
       docs_updated:
-        - "docs/DEFERRED_BOOKMARK_MANAGER_FEATURES.md"
         - "tied/implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH-pseudocode.md"
         - "tied/implementation-decisions/IMPL-OFFLINE_READER_MODE-pseudocode.md"
         - "tied/implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION-pseudocode.md"

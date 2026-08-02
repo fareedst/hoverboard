@@ -1,0 +1,74 @@
+ARCH-LIBRARY_PORTABILITY:
+  alternatives_considered:
+    - name: "Reuse CSV/JSON row import"
+      cons:
+        - "No artifacts, manifest, checksums, rollback, or lossless backend identity"
+      pros:
+        - "Existing controls and parser"
+      rejected_reason: "The new package is a distinct lossless portability contract."
+    - name: "Archive everything in a single opaque blob"
+      cons:
+        - "Hard to validate, migrate, inspect, or apply artifact-specific conflict policy"
+      pros:
+        - "Simple container"
+      rejected_reason: "Manifest entries and separate metadata/binary artifacts are required."
+  cross_references:
+    - "REQ-CONFIG_PORTABILITY"
+    - "REQ-LIBRARY_PORTABILITY"
+    - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    - "REQ-PAGE_ARCHIVE_STORAGE"
+    - "REQ-PAGE_SCREENSHOT_ARCHIVE"
+  decision: "Add a package/manifest boundary that serializes non-secret library state and separate archive artifacts into deterministic entries with checksums, then restores through dry-run planning, conflict policy, target-path remapping, backup-before-mutation, verification, and compensation."
+  implementation_approach:
+    details:
+      - "Backup-before-rewrite and compensation preserve prior state; derived archive search is rebuilt after durable artifacts restore."
+      - "Configuration is allowlisted; hoverboard_auth_token and API keys are excluded by default and exclusion is reported."
+      - "File storage paths are never blindly restored; target path remapping/confirmation is required."
+      - "Package manifest lists every metadata and binary artifact entry with safe relative path, size, and SHA-256."
+      - "Restore plans all conflicts, migrations, missing artifacts, unsupported backends, quotas, and checksum failures before mutation."
+    summary: "Deterministic package schema + collector + validator + dry-run restore planner + verified executor + UI/native composition."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-01"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-01"
+      reason: "Bound package, security, and rollback architecture"
+  name: "Portable Library Package Architecture"
+  rationale:
+    benefits:
+      - "Fail-closed package validation."
+      - "Lossless non-secret state migration."
+      - "Recoverable restore with explicit partial outcomes."
+    problems_solved:
+      - "Configuration and credentials have different portability and privacy rules."
+      - "CSV/HTML projections omit backend and durable artifact state."
+      - "Unvalidated restore can mutate data before discovering corruption, unsafe paths, or quota conflicts."
+    why: "A dedicated package boundary can preserve full library identity without weakening existing lossy interchange formats or blindly replaying per-row saves."
+  related_decisions:
+    depends_on:
+      - "ARCH-CONFIG_STRUCTURE"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+      - "ARCH-PAGE_SCREENSHOT_ARCHIVE"
+    informs:
+      - "IMPL-LIBRARY_PORTABILITY"
+    see_also:
+      - "ARCH-FILE_BOOKMARK_PROVIDER"
+      - "ARCH-NATIVE_HOST"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-LIBRARY_PORTABILITY"
+    implementation:
+      - "IMPL-LIBRARY_PORTABILITY"
+    requirements:
+      - "REQ-LIBRARY_PORTABILITY"
+    tests:
+      - "tests/integration/retrieval-portability-message-dispatch-composition.integration.test.js"
+      - "tests/playwright/extension-retrieval-portability.spec.js"
+      - "tests/unit/library-portability.test.js"

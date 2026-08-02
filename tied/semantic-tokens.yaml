@@ -183,6 +183,15 @@ ARCH-CROSS_BROWSER:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-CROSS_RESOURCE_RETRIEVAL:
+  cross_references:
+    - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+    - "REQ-CROSS_RESOURCE_RETRIEVAL"
+  description: "Additive query model, source adapters, deterministic ranking, bounded pagination, and source-specific actions."
+  name: "Cross-Resource Retrieval Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
 ARCH-ERROR_HANDLING:
   cross_references:
     - "REQ-ERROR_HANDLING"
@@ -281,6 +290,15 @@ ARCH-LANGUAGE_SELECTION:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Language and Static Typing Strategy"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-LIBRARY_PORTABILITY:
+  cross_references:
+    - "IMPL-LIBRARY_PORTABILITY"
+    - "REQ-LIBRARY_PORTABILITY"
+  description: "Separate deterministic package serialization, fail-closed validation, no-write planning, and compensating restore execution."
+  name: "Portable Library Package Architecture"
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
@@ -1272,6 +1290,15 @@ IMPL-CROSS_BROWSER:
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
+IMPL-CROSS_RESOURCE_RETRIEVAL:
+  cross_references:
+    - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+    - "REQ-CROSS_RESOURCE_RETRIEVAL"
+  description: "Normalize, validate, fan out, rank, deduplicate, paginate, and dispatch read-only cross-resource retrieval."
+  name: "Cross-Resource Retrieval Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-DEBUG_PANEL:
   cross_references:
     - "ai-principles.md"
@@ -1442,6 +1469,15 @@ IMPL-ICON_CLICK_BEHAVIOR:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Extension Icon Single-Click Behavior"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LIBRARY_PORTABILITY:
+  cross_references:
+    - "ARCH-LIBRARY_PORTABILITY"
+    - "REQ-LIBRARY_PORTABILITY"
+  description: "Collect allowlisted library state, build checksummed packages, validate and plan restores, then execute with backup and compensation."
+  name: "Portable Library Package Implementation"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -2922,6 +2958,15 @@ REQ-CROSS_BROWSER:
   source_index: "requirements.yaml"
   status: "Active"
   type: "REQ"
+REQ-CROSS_RESOURCE_RETRIEVAL:
+  cross_references:
+    - "ARCH-CROSS_RESOURCE_RETRIEVAL"
+    - "IMPL-CROSS_RESOURCE_RETRIEVAL"
+  description: "Read-only source-aware retrieval across bookmark metadata, archive text, Tabs, Browser Bookmarks (page), and Visit History (page)."
+  name: "Cross-Resource Retrieval"
+  source_index: "requirements.yaml"
+  status: "Planned"
+  type: "REQ"
 REQ-DARK_THEME:
   cross_references:
     - "ARCH-THEME"
@@ -3023,6 +3068,15 @@ REQ-ICON_CLICK_BEHAVIOR:
   name: "Extension Icon Single-Click Behavior"
   source_index: "requirements.yaml"
   status: "Implemented"
+  type: "REQ"
+REQ-LIBRARY_PORTABILITY:
+  cross_references:
+    - "ARCH-LIBRARY_PORTABILITY"
+    - "IMPL-LIBRARY_PORTABILITY"
+  description: "Export and restore a versioned, checksum-verified package for lossless non-secret library state and durable artifacts."
+  name: "Portable Library Package"
+  source_index: "requirements.yaml"
+  status: "Planned"
   type: "REQ"
 REQ-LIBRARY_SEARCH_ENTRY:
   cross_references: []

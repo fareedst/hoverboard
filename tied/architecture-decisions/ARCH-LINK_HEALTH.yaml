@@ -1,13 +1,13 @@
 ARCH-LINK_HEALTH:
-  decision: "Direct fetch from SW (no SaaS); privacy-first opt-in default off; skip hoverboard_inhibit_urls; bounded AbortController per HEAD/GET; store side table not on pin; optional This Page/popup hint from stored map."
+  decision: "Direct fetch from SW (no SaaS); link health is effectively enabled when linkHealthChecksEnabled is absent, while an explicit false is preserved as an opt-out; skip hoverboard_inhibit_urls; bounded AbortController per HEAD/GET; chrome.storage.local map; Index column; optional This Page/popup hint. Enabling the setting never initiates a network check."
   metadata:
     last_updated:
-      author: "agent"
-      date: "2026-07-30"
-      reason: "R1b: document opt-in + capture hint"
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Define absent-setting default and retain explicit false/manual-only boundary"
   name: "Link Health Architecture"
   status: "Accepted"
-  summary: "SW checks URLs behind linkHealthChecksEnabled opt-in; inhibit skip + AbortController timeout; chrome.storage.local map; Index column; capture UI hint."
+  summary: "SW checks URLs through direct fetch behind an effective enabled default when the setting is absent; an explicit false remains disabled. Index and capture hints remain gated, and CHECK_LINK_HEALTH is dispatched only by explicit user action."
   traceability:
     implementation:
       - "IMPL-LINK_HEALTH"
