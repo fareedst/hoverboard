@@ -36,6 +36,8 @@
 | **Offline Reader** | archive reader | Dedicated extension page rendering stored sanitized archive content |
 | **Save page archive** | archive capture | Explicit Quick Action for Local/File readable archive capture |
 | **archive association feedback** | archive result message | Popup/This Page feedback distinguishing “archive saved” from “bookmark and archive saved” |
+| **informational action feedback** | info message | Non-error action banner shown by `showInfo`; independent from archive-status feedback — [REQ-READ_LATER_BROWSER_FALLBACK] |
+| **readLater event** | Read Later event | UIManager event routed to `PopupController.handleReadLater` in popup and scoped This Page surfaces — [IMPL-MOVE_BOOKMARK_UI] |
 | **Save page screenshot** | screenshot capture | Explicit Quick Action for separate Local/File product screenshot capture |
 | **archive artifact status** | archive saved indicator | Selected-backend presence state for readable archive and screenshot artifact legs — [IMPL-PAGE_ARCHIVE_STATUS_UI] |
 | **saved-state indicator** | saved button color | Non-color and accessible state for each archive capture action — [IMPL-PAGE_ARCHIVE_STATUS_UI] |
@@ -104,6 +106,8 @@
 - **Title/Notes Details** — Editable Title and Notes bound to `currentPin.description` / `currentPin.extended`; Notes disabled for Browser backend.
 - **Offline Reader** — Full-page tool surface that renders only stored sanitized archive content and presents screenshot artifacts separately.
 - **archive association feedback** — Popup/This Page result messaging for the archive action, including explicit cleanup failure rather than masked success.
+- **informational action feedback** — Non-error action feedback rendered through `UIManager.showInfo` and the `info` feedback style; it explains a successful Read Later backend fallback without changing archive status ([REQ-READ_LATER_BROWSER_FALLBACK](../requirements/REQ-READ_LATER_BROWSER_FALLBACK.yaml)).
+- **readLater event** — Shared UIManager event whose binding invokes `PopupController.handleReadLater` for popup and scoped This Page contexts ([IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml)).
 - **archive artifact status** — Selected-backend presence state for the readable archive and screenshot artifact legs on the current tab URL.
 - **saved-state indicator** — Independent visual and accessible state applied to the Save page archive and Save page screenshot actions.
 - **archive status description** — Live accessible explanation for why Offline Reader is unavailable until a readable archive is saved.
@@ -149,6 +153,7 @@
 | hover | Preferred terms |
 | icon click opens side panel | Preferred terms |
 | injectionOutcome | Preferred terms |
+| informational action feedback | Preferred terms / Named concepts |
 | non-scriptable URL | Preferred terms |
 | Offline Reader | Preferred terms / Named concepts |
 | overlay | Preferred terms |
@@ -158,6 +163,7 @@
 | popup | Preferred terms |
 | Quick Actions | Preferred terms |
 | quick access | Preferred terms |
+| readLater event | Preferred terms / Named concepts |
 | SAVE_BOOKMARK_DETAILS | Pseudo-code block names |
 | Search Bookmarks | Preferred terms / Named concepts |
 | Save page archive | Preferred terms / Naming bridge |

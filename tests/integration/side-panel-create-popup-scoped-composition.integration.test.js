@@ -1,6 +1,6 @@
 /**
- * [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-UIManager_SCOPED_ROOT] [IMPL-COMPOSITION_TEST_PATTERNS]
- * [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-COMPOSITION_TEST_RECOGNITION]
+ * [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-UIManager_SCOPED_ROOT] [IMPL-MOVE_BOOKMARK_UI] [IMPL-COMPOSITION_TEST_PATTERNS]
+ * [ARCH-SIDE_PANEL_TABS] [ARCH-MOVE_BOOKMARK_UI] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-READ_LATER_BROWSER_FALLBACK] [REQ-COMPOSITION_TEST_RECOGNITION]
  * Pattern: SCOPED_DOM_BINDING
  *
  * Composition: UISystem.createPopup({ container }) → UIManager resolves data-popup-ref under container
@@ -77,6 +77,26 @@ describe('[IMPL-SIDE_PANEL_BOOKMARK] [IMPL-UIManager_SCOPED_ROOT] createPopup sc
       container.querySelector('[data-popup-ref="loadingState"]')
     )
     expect(components.controller.uiManager).toBe(components.uiManager)
+  })
+
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK] shared readLater event reaches PopupController.handleReadLater', () => {
+    const handleReadLater = jest.spyOn(PopupController.prototype, 'handleReadLater')
+      .mockImplementation(() => {})
+    const uiSystem = new UISystem()
+    uiSystem.isInitialized = true
+
+    const components = uiSystem.createPopup({
+      container,
+      errorHandler: { handleError: jest.fn() },
+      config: {},
+      enableKeyboard: false
+    })
+
+    // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] [REQ-READ_LATER_BROWSER_FALLBACK] How: Route the shared UIManager readLater event through PopupController.handleReadLater for both popup and scoped This Page surfaces.
+    components.uiManager.emit('readLater')
+
+    expect(handleReadLater).toHaveBeenCalledTimes(1)
+    handleReadLater.mockRestore()
   })
 
   test('createPopup without panel container does not scope UIManager to document.body', () => {

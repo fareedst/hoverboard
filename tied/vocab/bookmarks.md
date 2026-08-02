@@ -27,6 +27,8 @@
 | **bookmark state synchronization** | live sync | Propagating pin/tag changes across popup/overlay/SW — **not** Sync backend |
 | **usage tracking** | analytics (alone) | Local visit counts and nav edges for bookmarks |
 | **empty / stub bookmark** | incomplete pin | Missing time, tags, and description |
+| **persisted bookmark** | saved bookmark record | Bookmark with a non-empty `time`; distinct from a URL-only empty / stub bookmark |
+| **new Read Later save** | Read Later create | Creation path for an unbookmarked HTTP(S) URL with `toread: 'yes'`; Browser selection uses the metadata fallback |
 | **archive-bookmark association** | archive link | Bookmark-side association with a separately stored archive artifact |
 | **bookmark creation result** | bookmark saved status | Boolean result key `bookmarkCreated` indicating whether the archive action created a bookmark |
 
@@ -60,6 +62,8 @@
 - **archive-bookmark association** — Association between a bookmark record and a separately stored archive artifact.
 - **bookmark creation result** — Boolean response field `bookmarkCreated`; it distinguishes archive recapture from creation of a missing bookmark.
 - **currentPin** — In-memory pin for the active tab in popup / This Page.
+- **persisted bookmark** — A `currentPin` with a non-empty `time`, which uses the existing update path rather than new-bookmark creation ([IS_PERSISTED_BOOKMARK](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml)).
+- **new Read Later save** — Creation of a bookmark for an unbookmarked HTTP(S) URL with `toread: 'yes'`; selected Browser storage is resolved through the metadata-capable backend rule ([REQ-READ_LATER_BROWSER_FALLBACK](../requirements/REQ-READ_LATER_BROWSER_FALLBACK.yaml)).
 - **Pinboard API endpoints** — `/posts/get`, `/posts/add`, `/posts/delete`, `/posts/recent` (v1).
 - **BOOKMARK_UPDATED** — Message broadcasting pin changes for cross-surface sync.
 - **badge display value** — Computed toolbar badge text (tag count and/or private/to-read markers).
@@ -97,10 +101,12 @@
 | empty / stub bookmark | Preferred terms |
 | extended | Preferred terms |
 | inbound links | Named concepts |
+| new Read Later save | Preferred terms / Named concepts |
 | Not marked | Preferred terms |
 | pin | Preferred terms |
 | Pinboard | Preferred terms |
 | Private / Public | Preferred terms |
 | Read Later | Preferred terms |
+| persisted bookmark | Preferred terms / Named concepts |
 | Toggle Privacy | Preferred terms |
 | usage tracking | Named concepts |

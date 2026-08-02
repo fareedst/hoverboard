@@ -2807,9 +2807,11 @@ IMPL-MOVE_BOOKMARK_UI:
       - "REQ-STORAGE_MODE_DEFAULT"
     tests:
       - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
-      - "tests/unit/bookmark-router.test.js"
+      - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
       - "tests/unit/move-bookmark-ui.test.js"
       - "tests/unit/popup-move-bookmark.test.js"
+      - "tests/unit/read-later-browser-fallback.test.js"
+      - "tests/unit/ui-manager-action-feedback.test.js"
 IMPL-MV3_MIGRATION:
   cross_references: []
   decision: "Manifest V3 service worker background; preserve messaging contracts"

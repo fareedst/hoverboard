@@ -1,0 +1,105 @@
+CITDP-REQ-READ_LATER_BROWSER_FALLBACK_20260802:
+  change_definition:
+    completion_criteria:
+      current_behavior: "New Read Later actions treated any truthy currentPin as persisted and passed Browser as preferredBackend, so URL-only lookup stubs could update instead of create and Browser could not retain Read Later metadata."
+      desired_behavior: "Distinguish persisted bookmarks by time; for new Read Later saves resolve Browser through the normalized default storage mode and fall back to Local when necessary; pass the effective backend to creation; reflect it in Save to and show independent informational feedback after success."
+      docs_updated:
+        - "tied/architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml"
+        - "tied/implementation-decisions/IMPL-MOVE_BOOKMARK_UI-pseudocode.md"
+        - "tied/implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml"
+        - "tied/requirements/REQ-READ_LATER_BROWSER_FALLBACK.yaml"
+        - "tied/requirements/REQ-STORAGE_MODE_DEFAULT.yaml"
+        - "tied/vocab/bookmarks.md"
+        - "tied/vocab/routing.md"
+        - "tied/vocab/storage-backends.md"
+        - "tied/vocab/ui-surfaces.md"
+    impact_analysis:
+      excluded_paths:
+        - "Archive capture handlers and archive storage providers"
+        - "Existing persisted-bookmark Read Later update routing"
+      modules_or_boundaries:
+        - "src/ui/popup/popup.css"
+        - "src/ui/popup/PopupController.js"
+        - "src/ui/popup/UIManager.js"
+        - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
+        - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
+        - "tests/unit/read-later-browser-fallback.test.js"
+        - "tests/unit/ui-manager-action-feedback.test.js"
+      tied_tokens_affected:
+        - "ARCH-MOVE_BOOKMARK_UI"
+        - "IMPL-MOVE_BOOKMARK_UI"
+        - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+        - "REQ-STORAGE_MODE_DEFAULT"
+      tied_tokens_new:
+        - "REQ-READ_LATER_BROWSER_FALLBACK"
+    leap_feedback:
+      divergences_from_analysis: "The initial plan treated fallback as a controller-only feedback path; RED UI coverage showed showInfo was log-only, so UIManager and popup.css were elevated to render visible informational feedback. Final LEAP also clarified that success feedback is shown for every successful new save before optional fallback information."
+      notes: "Vocabulary PRELOAD/RECORD/VALIDATE completed. Token-commented pseudo-code passed structural validation before RED tests. Focused and full Jest tests, scoped composition, extension Playwright E2E, lint, TypeScript typecheck, semantic token validation, YAML index validation, and TIED consistency passed."
+      record_status: "completed"
+    non_goals:
+      - "Changing archive capture, archive status, or Offline Reader behavior"
+      - "Changing Browser bookmark provider behavior"
+      - "Changing ConfigManager normalization rules"
+      - "Changing persisted-bookmark Read Later updates"
+    record_identity:
+      change_request_id: "REQ-READ_LATER_BROWSER_FALLBACK"
+      primary_tokens:
+        - "ARCH-MOVE_BOOKMARK_UI"
+        - "IMPL-MOVE_BOOKMARK_UI"
+        - "REQ-READ_LATER_BROWSER_FALLBACK"
+      procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+      recorded_at: "2026-08-02"
+      title: "Read Later Browser metadata fallback"
+    risk_analysis:
+      risks:
+        - id: "RISK-READ-LATER-001"
+          description: "URL-only provider lookup stubs could be treated as existing bookmarks."
+          mitigation: "Require non-empty time in the persisted-bookmark predicate and test URL-only and persisted cases."
+          residual: "low"
+          severity: "high"
+        - id: "RISK-READ-LATER-002"
+          description: "Browser selection could reach the save payload or fallback could mutate UI before persistence succeeds."
+          mitigation: "Allowlist selected and override backends and mutate Save to only after successful save."
+          residual: "low"
+          severity: "high"
+        - id: "RISK-READ-LATER-003"
+          description: "Bookmark fallback messaging could overwrite or imply archive-status feedback."
+          mitigation: "Use dedicated UIManager informational feedback and do not call archive-status handlers from Read Later result application."
+          residual: "low"
+          severity: "medium"
+    success_criteria:
+      - "Browser-selected new Read Later saves use configured metadata-capable storage or Local when configured mode is Browser."
+      - "Fallback feedback is visible informational action feedback and does not mutate archive-status state."
+      - "Persisted toggles and ordinary selected-backend saves preserve existing behavior."
+      - "Save to reflects the effective backend only after successful fallback persistence."
+      - "URL-only currentPin stubs create one new Read Later bookmark with toread=yes."
+    tdd_sequence:
+      summary: "Validated pseudo-code; wrote RED unit tests; implemented controller and UI feedback; added scoped composition coverage."
+      tests:
+        - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
+        - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
+        - "tests/unit/read-later-browser-fallback.test.js"
+        - "tests/unit/ui-manager-action-feedback.test.js"
+    test_strategy:
+      matrix_notes: "Unit covers persisted identity, Browser configured Local, Browser configured Browser, metadata-capable preservation, save payload, success feedback, failure non-mutation, and persisted toggle preservation. Composition covers shared UIManager readLater binding in This Page."
+      security_mitigations:
+        - "Allowlist selected and override backends before constructing save payloads."
+        - "Do not mutate Save to or show fallback information until persistence succeeds."
+        - "Keep archive-status and Offline Reader state outside Read Later result application."
+        - "Use ConfigManager normalization and default to Local for unsupported or Browser configuration."
+      summary: "Strict RED-before-GREEN unit coverage followed by scoped composition coverage, full Jest, extension Playwright E2E, lint, TypeScript typecheck, and semantic token validation."
+    unchanged_behavior:
+      - "Archive capture/status and Offline Reader handlers remain unchanged."
+      - "Ordinary bookmark operations continue to follow selected Save to backend."
+      - "Persisted bookmark Read Later toggles continue through the existing update path."
+    validation_evidence:
+      composition: "Scoped side-panel popup and existing preferredBackend composition passed."
+      extension_playwright: "npm run test:e2e:extension passed 54 tests with 2 skipped after a successful extension build."
+      focused_unit: "Read Later fallback unit suite passed 10 tests; UIManager action feedback suite passed 4 tests."
+      full_test_suite: "169 Jest suites passed; 1 unit test skipped; 1,663 tests passed."
+      lint: "npm run lint passed."
+      semantic_tokens: "npm run validate:tokens passed."
+      tied_consistency: "tied_validate_consistency returned ok=true with index, detail, traceability, and pseudo-code checks passing."
+      tied_index_validation: "yaml_index_validate returned valid for requirements, architecture, implementation, and semantic-tokens indexes."
+      typecheck: "npm run typecheck passed."
+      verification_gate_notes: "No feature-specific E2E was added because callable fallback branches, UI feedback, and shared event binding were covered below E2E; the existing extension Playwright suite passed 54 tests with 2 skipped."

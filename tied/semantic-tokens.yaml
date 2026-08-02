@@ -3412,6 +3412,23 @@ REQ-QUICK_ACCESS_ENTRY:
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"
+REQ-READ_LATER_BROWSER_FALLBACK:
+  cross_references:
+    - "ARCH-MOVE_BOOKMARK_UI"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-SMART_BOOKMARKING"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  description: "New Read Later bookmarks selected for Browser storage resolve to a metadata-capable backend before save."
+  detail_file: "requirements/REQ-READ_LATER_BROWSER_FALLBACK.yaml"
+  metadata:
+    last_updated: "2026-08-02T00:00:00.000Z"
+    registered: "2026-08-02T00:00:00.000Z"
+  name: "Read Later Browser Metadata Fallback"
+  source_index: "requirements.yaml"
+  status: "Planned"
+  type: "REQ"
 REQ-RECENT_TAGS_SYSTEM:
   category: "Immutable"
   cross_references:

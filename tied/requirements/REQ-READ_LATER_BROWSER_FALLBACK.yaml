@@ -1,0 +1,58 @@
+REQ-READ_LATER_BROWSER_FALLBACK:
+  category: "Functional"
+  description: "When a user invokes Read Later for an unbookmarked HTTP(S) URL, the action must not create a metadata-bearing bookmark through Browser storage. The selected Save to backend is preserved for every non-Browser selection. When Browser is selected, the configured default storage mode is used if it is pinboard, local, file, or sync; when the configured mode is browser, local is used. The effective backend is sent as preferredBackend on the new save request. Existing persisted bookmarks, including Browser bookmarks, continue through their existing update path."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-02"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Close out implemented Read Later Browser metadata fallback after pseudocode and test alignment"
+  name: "Read Later Browser Metadata Fallback"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Archive-status and Offline Reader state remain independent from bookmark-action feedback."
+      - "Every new Read Later bookmark retains its toread metadata."
+      - "The effective backend is explicit and visible after a successful save."
+    problems_solved:
+      - "A new Read Later save can route metadata to Browser storage where toread is discarded."
+      - "A truthy empty/stub currentPin is misclassified as an existing bookmark."
+      - "Save to can report Browser even when the new Read Later bookmark was stored elsewhere."
+    why: "Browser storage cannot persist the toread, shared, or extended fields required for a true Read Later bookmark."
+  related_requirements:
+    depends_on:
+      - "REQ-STORAGE_MODE_DEFAULT"
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-SMART_BOOKMARKING"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "A failed new Read Later save leaves Save to unchanged, omits fallback-success feedback, and does not invoke archive-status or Offline Reader commands."
+    - criterion: "A persisted bookmark is distinguished from the empty/stub currentPin by bookmark identity such as persisted time; existing Browser bookmarks keep their current update behavior without fallback."
+    - criterion: "For an unbookmarked HTTP(S) URL with Browser selected, configured pinboard, local, file, or sync resolves to that metadata-capable backend before save; configured browser resolves to local."
+    - criterion: "For an unbookmarked HTTP(S) URL, a selected pinboard, local, file, or sync backend is sent unchanged as preferredBackend on the new Read Later save."
+    - criterion: "The new Read Later save payload contains toread: 'yes' and the resolved preferredBackend, and the resulting Save to selection reflects that backend only after save succeeds."
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-MOVE_BOOKMARK_UI"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    code_annotations:
+      - "REQ-READ_LATER_BROWSER_FALLBACK"
+    implementation:
+      - "IMPL-MOVE_BOOKMARK_UI"
+    tests:
+      - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
+      - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
+      - "tests/unit/read-later-browser-fallback.test.js"
+      - "tests/unit/ui-manager-action-feedback.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Resolver decisions, persisted-bookmark predicate, new-save payload, success and failure UI branches, existing Browser update branch, and no archive command coupling."
+    - method: "Composition tests"
+      coverage: "Shared UIManager readLater event reaches PopupController in popup and scoped This Page contexts with the effective preferredBackend."
+    - method: "Integration tests"
+      coverage: "saveBookmark preserves preferredBackend through MessageHandler and BookmarkRouter without changing generic createBookmark routing."

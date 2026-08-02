@@ -4,7 +4,7 @@
 
 **Excludes:** Pinboard-shaped pin field names (see [`bookmarks.md`](bookmarks.md)); Local Bookmarks Index UI (see [`bookmarks-index.md`](bookmarks-index.md)); overlay/popup chrome (see [`ui-surfaces.md`](ui-surfaces.md)).
 
-**Traceability:** [REQ-PER_BOOKMARK_STORAGE_BACKEND](../requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml) · [REQ-BROWSER_BOOKMARK_STORAGE](../requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml) · [REQ-STORAGE_MODE_DEFAULT](../requirements/REQ-STORAGE_MODE_DEFAULT.yaml) · [REQ-MOVE_BOOKMARK_STORAGE_UI](../requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml) · [REQ-FILE_BOOKMARK_STORAGE](../requirements/REQ-FILE_BOOKMARK_STORAGE.yaml) · [REQ-NATIVE_HOST_WRAPPER](../requirements/REQ-NATIVE_HOST_WRAPPER.yaml) · [REQ-PAGE_ARCHIVE_STORAGE](../requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml) · [ARCH-STORAGE_INDEX_AND_ROUTER](../architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml) · [ARCH-BROWSER_BOOKMARK_PROVIDER](../architecture-decisions/ARCH-BROWSER_BOOKMARK_PROVIDER.yaml) · [ARCH-FILE_BOOKMARK_PROVIDER](../architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.yaml) · [ARCH-NATIVE_HOST](../architecture-decisions/ARCH-NATIVE_HOST.yaml) · [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION](../architecture-decisions/ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml) · [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) · [IMPL-BROWSER_BOOKMARK_SERVICE](../implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE.yaml) · [IMPL-STORAGE_INDEX](../implementation-decisions/IMPL-STORAGE_INDEX.yaml) · [IMPL-NATIVE_HOST_WRAPPER](../implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml) · [IMPL-FILE_STORAGE_TYPED_PATH](../implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml) · [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION](../implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml)
+**Traceability:** [REQ-PER_BOOKMARK_STORAGE_BACKEND](../requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml) · [REQ-BROWSER_BOOKMARK_STORAGE](../requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml) · [REQ-STORAGE_MODE_DEFAULT](../requirements/REQ-STORAGE_MODE_DEFAULT.yaml) · [REQ-MOVE_BOOKMARK_STORAGE_UI](../requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml) · [REQ-READ_LATER_BROWSER_FALLBACK](../requirements/REQ-READ_LATER_BROWSER_FALLBACK.yaml) · [REQ-FILE_BOOKMARK_STORAGE](../requirements/REQ-FILE_BOOKMARK_STORAGE.yaml) · [REQ-NATIVE_HOST_WRAPPER](../requirements/REQ-NATIVE_HOST_WRAPPER.yaml) · [REQ-PAGE_ARCHIVE_STORAGE](../requirements/REQ-PAGE_ARCHIVE_STORAGE.yaml) · [ARCH-MOVE_BOOKMARK_UI](../architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml) · [ARCH-STORAGE_INDEX_AND_ROUTER](../architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml) · [ARCH-BROWSER_BOOKMARK_PROVIDER](../architecture-decisions/ARCH-BROWSER_BOOKMARK_PROVIDER.yaml) · [ARCH-FILE_BOOKMARK_PROVIDER](../architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.yaml) · [ARCH-NATIVE_HOST](../architecture-decisions/ARCH-NATIVE_HOST.yaml) · [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION](../architecture-decisions/ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml) · [IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml) · [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) · [IMPL-BROWSER_BOOKMARK_SERVICE](../implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE.yaml) · [IMPL-STORAGE_INDEX](../implementation-decisions/IMPL-STORAGE_INDEX.yaml) · [IMPL-NATIVE_HOST_WRAPPER](../implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml) · [IMPL-FILE_STORAGE_TYPED_PATH](../implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml) · [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION](../implementation-decisions/IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION.yaml)
 
 **See also:** [`bookmarks.md`](bookmarks.md) · [`bookmarks-index.md`](bookmarks-index.md) · [`ipc-messaging.md`](ipc-messaging.md) · [`config-and-privacy.md`](config-and-privacy.md) · [`domain-references.md`](domain-references.md)
 
@@ -23,12 +23,15 @@
 | **getSelectedStorageBackend** | selected storage, highlighted backend | Popup/side-panel helper: returns the **Save to** button with `aria-pressed="true"` when `data-backend` is in `pinboard` \| `local` \| `file` \| `sync` \| `browser`; otherwise `null`. Feeds `preferredBackend` on save ([IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml)) |
 | **default storage mode** | global storage mode | Config `storageMode` / key `hoverboard_storage_mode` |
 | **Save to** | storage picker, backend buttons; file ↔ browser toggle; Move to browser | UI label for five select-one buttons (Pinboard, Local, File, Sync, Browser); click moves via `moveBookmarkToStorage` when a bookmark exists. Do not invent a separate Local/File toggle control |
+| **effective backend** | resolved store, actual storage method | Backend sent as `preferredBackend` for a specific save after Read Later fallback resolution; ordinary saves preserve the selected backend |
+| **Read Later metadata fallback** | Browser Read Later workaround | New Read Later save rule: selected Browser resolves through the configured default storage mode, then to Local if that mode is Browser |
 | **move bookmark to storage** | migrate bookmark, copy backend | Copy to target, delete source, update index |
 | **native host** | native messaging host, helper process | Local process for File storage I/O |
 | **File storage** | cloud-sync folder (Options marketing) | Backend `file`; path under `~/.hoverboard` by default |
 | **archive artifact** | saved page copy, cached page | Durable readable HTML/text or screenshot linked to a Local/File bookmark; separate from bookmark metadata |
 | **archive-bookmark association** | archive-to-bookmark link | Association boundary between an archive artifact and a bookmark record; owned by `CAPTURE_PAGE_ARCHIVE` |
 | **compensation outcome** | cleanup result | Diagnostic state describing archive cleanup or prior-version restoration after association failure |
+| **metadata-capable backend** | metadata-safe backend | Any bookmark backend other than `browser` that can persist the full Read Later metadata payload (`toread`, `shared`, and `extended`) |
 | **selected-backend lookup** | aggregate URL lookup | Bookmark existence query constrained to the explicit `preferredBackend`; it does not use 2C aggregate semantics |
 | **screenshot artifact** | demo screenshot, page image | Durable product capture with its own hash/version and Local/File lifecycle |
 | **archive-capable backend** | archive storage method | Only `local` and `file` support durable page archives in the current product scope |
@@ -83,6 +86,10 @@
 - **archive artifact** — Large sanitized page HTML/text or product screenshot kept outside bookmark metadata.
 - **archive-bookmark association** — Orchestration boundary connecting an archive artifact to a bookmark record without moving archive content into bookmark metadata.
 - **compensation outcome** — Explicit result state for archive cleanup or restoration after a bookmark-association failure.
+- **metadata-capable backend** — `pinboard`, `local`, `file`, or `sync`; a backend that can persist the full bookmark metadata needed for **Read Later**. This is distinct from an **archive-capable backend**, which is currently only `local` or `file`.
+- **effective backend** — The backend actually sent as `preferredBackend` for one save after any action-specific resolution; it is not necessarily the pressed Save to backend for a new Browser-selected Read Later action.
+- **Read Later metadata fallback** — The new-bookmark-only resolution that preserves a metadata-capable backend for `toread: 'yes'`; it does not alter updates to persisted Browser bookmarks.
+- **Read Later action** — The action boundary that keeps persisted-bookmark updates on the existing path and applies metadata fallback only to new Read Later bookmarks ([IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml)).
 - **selected-backend lookup** — Bookmark lookup through only the explicitly selected Local or File provider; a non-null empty/stub bookmark counts as existing.
 - **screenshot artifact** — Independently addressable image capture associated with a bookmark URL and archive lifecycle.
 - **archive-capable backend** — Local or File; Pinboard, Sync, and Browser remain metadata-only.
@@ -102,6 +109,12 @@
 | 2C get by URL | `getBookmarkForUrl` (2C) | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
 | Save with preferred backend | `saveBookmark` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
 | Read Save-to highlight | `getSelectedStorageBackend` | [IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml) |
+| Persisted bookmark predicate | `IS_PERSISTED_BOOKMARK` | [IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml) |
+| Resolve Read Later backend | `RESOLVE_READ_LATER_BACKEND` | [IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml) |
+| Create Read Later bookmark | `CREATE_READ_LATER_BOOKMARK` | [IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml) |
+| Apply Read Later result | `APPLY_READ_LATER_RESULT` | [IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml) |
+| Read Later event binding | `READ_LATER_EVENT_BINDING` | [IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml) |
+| Read Later action | `READ_LATER_ACTION` | [IMPL-MOVE_BOOKMARK_UI](../implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml) |
 | Delete with preferred backend | `deleteBookmark` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
 | Aggregate recent | `getRecentBookmarks` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
 | Move between backends | `moveBookmarkToStorage` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
@@ -133,6 +146,7 @@
 |------|---------|
 | 2C (browser race exclusion) | Named concepts |
 | aggregate-snapshot.json | Named concepts |
+| Apply Read Later result | Pseudo-code block names |
 | archive artifact | Preferred terms / Named concepts |
 | archive-bookmark association | Preferred terms / Named concepts |
 | archive-capable backend | Preferred terms / Named concepts |
@@ -144,8 +158,10 @@
 | COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE | Pseudo-code block names |
 | compensation outcome | Preferred terms / Named concepts |
 | CREATE_MINIMAL_BOOKMARK_IF_ABSENT | Pseudo-code block names |
+| Create Read Later bookmark | Pseudo-code block names |
 | default storage mode | Preferred terms |
 | Delete with preferred backend | Pseudo-code block names |
+| effective backend | Preferred terms / Named concepts |
 | ENSURE_TAG_FOLDERS | Pseudo-code block names |
 | ENSURE_TOKEN_AND_LISTEN | Pseudo-code block names |
 | File storage | Preferred terms |
@@ -155,13 +171,19 @@
 | LOAD_BOOKMARKS | Pseudo-code block names |
 | Local Query API | Named concepts |
 | Local storage (backend) | Preferred terms |
+| metadata-capable backend | Preferred terms / Named concepts |
 | move bookmark to storage | Preferred terms |
 | native host | Named concepts |
 | offscreen file I/O | Named concepts |
+| Persisted bookmark predicate | Pseudo-code block names |
 | preferredBackend | Naming bridge |
+| Read Later action | Named concepts / Pseudo-code block names |
+| Read Later event binding | Pseudo-code block names |
+| Read Later metadata fallback | Preferred terms / Named concepts |
 | Refresh API snapshot | Named concepts |
 | REFRESH_API_SNAPSHOT | Pseudo-code block names |
 | RESOLVE_ARCHIVE_BOOKMARK_CONTEXT | Pseudo-code block names |
+| Resolve Read Later backend | Pseudo-code block names |
 | resolveProvider | Pseudo-code block names |
 | Save to | Preferred terms |
 | storage backend | Preferred terms |

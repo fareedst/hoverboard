@@ -20433,7 +20433,7 @@ var UIManager = class {
   }
   /**
    * @param {string} message
-   * @param {'success'} variant
+   * @param {'success'|'info'} variant
    */
   _showActionFeedback(message, variant) {
     const el = this.elements.actionFeedback;
@@ -20444,6 +20444,7 @@ var UIManager = class {
       return;
     }
     el.classList.remove("hidden", "success", "error");
+    el.classList.remove("info");
     el.classList.add(variant);
     msgEl.textContent = message;
     this.hideError();
@@ -20464,9 +20465,14 @@ var UIManager = class {
     this.hideError();
   }
   /**
-   * Show info message
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK]
+   * Show informational feedback without conflating it with archive-status feedback.
    */
   showInfo(message) {
+    if (this.elements.actionFeedback && this.elements.actionFeedbackMessage) {
+      this._showActionFeedback(message, "info");
+      return;
+    }
     console.log("Info:", message);
   }
   /**
@@ -21782,6 +21788,8 @@ var EMPTY_ARCHIVE_ARTIFACT_STATUS = Object.freeze({
 
 // src/ui/popup/PopupController.js
 var SUGGESTED_TAGS_MAIN_WORLD_FILE = "src/features/tagging/suggested-tags-main-world-snippet.js";
+var SAVE_TO_BACKENDS = ["pinboard", "local", "file", "sync", "browser"];
+var READ_LATER_METADATA_BACKENDS = SAVE_TO_BACKENDS.filter((backend) => backend !== "browser");
 var PopupController = class {
   constructor(dependencies = {}) {
     this.errorHandler = dependencies.errorHandler || new ErrorHandler();
@@ -22370,7 +22378,80 @@ var PopupController = class {
   getSelectedStorageBackend() {
     const btn = this.uiManager.elements.storageBackendButtons?.querySelector('.storage-backend-btn[aria-pressed="true"]');
     const backend = btn?.getAttribute("data-backend") || null;
-    return backend && ["pinboard", "local", "file", "sync", "browser"].includes(backend) ? backend : null;
+    return backend && SAVE_TO_BACKENDS.includes(backend) ? backend : null;
+  }
+  /**
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] [REQ-READ_LATER_BROWSER_FALLBACK]
+   * PROCEDURE: IS_PERSISTED_BOOKMARK
+   * A URL-only currentPin is a provider lookup stub, not a persisted bookmark.
+   */
+  isPersistedBookmark(currentPin = this.currentPin) {
+    return Boolean(currentPin?.time && String(currentPin.time).trim());
+  }
+  /**
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] [REQ-READ_LATER_BROWSER_FALLBACK]
+   * PROCEDURE: RESOLVE_READ_LATER_BACKEND
+   * Browser cannot persist Read Later metadata, so resolve it through the
+   * normalized default and use Local when the normalized default is Browser.
+   */
+  async resolveReadLaterBackend(selectedBackend = this.getSelectedStorageBackend()) {
+    if (READ_LATER_METADATA_BACKENDS.includes(selectedBackend)) {
+      return { effectiveBackend: selectedBackend, fallbackApplied: false };
+    }
+    const configuredBackend = await this.configManager.getStorageMode();
+    const effectiveBackend = READ_LATER_METADATA_BACKENDS.includes(configuredBackend) ? configuredBackend : "local";
+    return { effectiveBackend, fallbackApplied: true };
+  }
+  /**
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] [REQ-READ_LATER_BROWSER_FALLBACK]
+   * PROCEDURE: CREATE_READ_LATER_BOOKMARK
+   * Reuse createBookmark while passing the resolved preferredBackend.
+   */
+  async createReadLaterBookmark(effectiveBackend) {
+    const result = await this.createBookmark([], "yes", "yes", effectiveBackend, {
+      suppressSuccess: true
+    });
+    if (result?.success === false) {
+      throw new Error(result.error || "Failed to create Read Later bookmark");
+    }
+    return {
+      success: true,
+      bookmark: result?.bookmark || this.currentPin,
+      effectiveBackend
+    };
+  }
+  /**
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] [REQ-READ_LATER_BROWSER_FALLBACK]
+   * PROCEDURE: APPLY_READ_LATER_RESULT
+   * Apply bookmark state first; fallback feedback is informational and does
+   * not invoke archive-status handlers.
+   */
+  applyReadLaterResult({ saveResult, effectiveBackend, fallbackApplied }) {
+    if (!saveResult?.success) {
+      throw new Error("Failed to create Read Later bookmark");
+    }
+    if (saveResult.bookmark) {
+      this.currentPin = {
+        ...this.currentPin || {},
+        ...saveResult.bookmark,
+        toread: "yes",
+        preferredBackend: effectiveBackend
+      };
+    } else if (this.currentPin) {
+      this.currentPin.toread = "yes";
+      this.currentPin.preferredBackend = effectiveBackend;
+    }
+    this.stateManager.setState({ currentPin: this.currentPin });
+    this.uiManager.updateReadLaterStatus(true);
+    this._resolvedStorageBackend = effectiveBackend;
+    this.uiManager.showSuccess("Bookmark created and added to read later");
+    if (fallbackApplied) {
+      this.uiManager.updateStorageBackendValue(effectiveBackend);
+      this.uiManager.showInfo(
+        `Browser storage cannot preserve Read Later metadata; saved to ${effectiveBackend} instead.`
+      );
+    }
+    return { success: true, effectiveBackend };
   }
   /**
    * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] Get storage backend for URL (pinboard | local | file | sync).
@@ -23141,11 +23222,12 @@ var PopupController = class {
    * Handle read later action - toggles the toread attribute
    */
   async handleReadLater() {
-    recordAction(POPUP_ACTION_IDS.readLater, { hasBookmark: !!this.currentPin }, "popup");
-    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.readLater, payload: { hasBookmark: !!this.currentPin } });
+    const hasPersistedBookmark = this.isPersistedBookmark();
+    recordAction(POPUP_ACTION_IDS.readLater, { hasBookmark: hasPersistedBookmark }, "popup");
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.readLater, payload: { hasBookmark: hasPersistedBookmark } });
     try {
       this.setLoading(true);
-      if (this.currentPin) {
+      if (hasPersistedBookmark) {
         const isCurrentlyToRead = this.currentPin.toread === "yes";
         const newToReadStatus = isCurrentlyToRead ? "no" : "yes";
         const updatedPin = {
@@ -23173,9 +23255,14 @@ var PopupController = class {
           debugError("[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to notify overlay:", error48);
         }
       } else {
-        await this.createBookmark([], "yes", "yes");
-        this.uiManager.updateReadLaterStatus(true);
-        this.uiManager.showSuccess("Bookmark created and added to read later");
+        const selectedBackend = this.getSelectedStorageBackend();
+        const resolution = await this.resolveReadLaterBackend(selectedBackend);
+        const saveResult = await this.createReadLaterBookmark(resolution.effectiveBackend);
+        this.applyReadLaterResult({
+          saveResult,
+          effectiveBackend: resolution.effectiveBackend,
+          fallbackApplied: resolution.fallbackApplied
+        });
       }
     } catch (error48) {
       this.errorHandler.handleError("Failed to toggle read later status", error48);
@@ -23340,7 +23427,7 @@ var PopupController = class {
    * Create new bookmark
    * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced with tag tracking and validation
    */
-  async createBookmark(tags, sharedStatus = "yes", toreadStatus = "no") {
+  async createBookmark(tags, sharedStatus = "yes", toreadStatus = "no", preferredBackendOverride = null, { suppressSuccess = false } = {}) {
     for (const tag of tags) {
       if (!this.isValidTag(tag)) {
         this.errorHandler.handleError(`Invalid tag: ${tag}`);
@@ -23355,19 +23442,25 @@ var PopupController = class {
       shared: sharedStatus,
       toread: toreadStatus
     };
-    const preferredBackend = this.getSelectedStorageBackend();
+    const preferredBackend = SAVE_TO_BACKENDS.includes(preferredBackendOverride) ? preferredBackendOverride : this.getSelectedStorageBackend();
     if (preferredBackend) pinData.preferredBackend = preferredBackend;
     const response = await this.sendMessage({
       type: "saveBookmark",
       data: pinData
     });
+    if (response?.success === false || response?.error) {
+      throw new Error(response.error || response.message || "Failed to create bookmark");
+    }
     this.currentPin = pinData;
     this.stateManager.setState({ currentPin: this.currentPin });
     this.uiManager.updateCurrentTags(tags);
-    this.uiManager.showSuccess("Bookmark created successfully");
+    if (!suppressSuccess) {
+      this.uiManager.showSuccess("Bookmark created successfully");
+    }
     await this.loadRecentTags();
     await this.refreshTagFrequencyMapForSort();
     this.uiManager.redrawTagChipsFromCache();
+    return { success: true, bookmark: this.currentPin, response };
   }
   /**
    * Handle search action - now uses tab search functionality

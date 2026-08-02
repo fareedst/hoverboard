@@ -2050,6 +2050,49 @@ REQ-QUICK_ACCESS_ENTRY:
       coverage: "SW command handler invokes correct API per command name; context menu creation and onClicked invokes same actions; KeyboardManager shortcuts emit correct events"
     - method: "Manual verification"
       coverage: "Assign shortcuts in chrome://extensions/shortcuts; trigger each command; right-click to Hoverboard to each item; in popup/panel press shortcuts and verify target opens"
+REQ-READ_LATER_BROWSER_FALLBACK:
+  category: "Functional"
+  cross_references:
+    - "ARCH-MOVE_BOOKMARK_UI"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-SMART_BOOKMARKING"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  detail_file: "requirements/REQ-READ_LATER_BROWSER_FALLBACK.yaml"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-08-02"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-08-02"
+      reason: "Define Browser-selected new Read Later metadata fallback before implementation"
+  name: "Read Later Browser Metadata Fallback"
+  priority: "P1"
+  related_requirements:
+    depends_on:
+      - "REQ-STORAGE_MODE_DEFAULT"
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-SMART_BOOKMARKING"
+    supersedes: []
+  status: "Implemented"
+  summary: "New Read Later bookmarks selected for Browser storage resolve to a metadata-capable backend before save, with local fallback when the configured mode is Browser."
+  traceability:
+    architecture:
+      - "ARCH-MOVE_BOOKMARK_UI"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    code_annotations:
+      - "REQ-READ_LATER_BROWSER_FALLBACK"
+    implementation:
+      - "IMPL-MOVE_BOOKMARK_UI"
+    tests:
+      - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
+      - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
+      - "tests/unit/read-later-browser-fallback.test.js"
+      - "tests/unit/ui-manager-action-feedback.test.js"
 REQ-RECENT_TAGS_SYSTEM:
   category: "Immutable"
   detail_file: "requirements/REQ-RECENT_TAGS_SYSTEM.yaml"
@@ -2756,8 +2799,8 @@ REQ-STORAGE_MODE_DEFAULT:
       date: "2026-02-13"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "Save-follows-highlight criterion"
+      date: "2026-08-02"
+      reason: "LEAP: clarify Read Later Browser exception and link focused requirement"
   name: "Storage Mode Default and Dual-Use"
   priority: "P1"
   rationale:
@@ -2772,24 +2815,36 @@ REQ-STORAGE_MODE_DEFAULT:
   related_requirements:
     depends_on: []
     related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-CHROME_STORAGE_USAGE"
+      - "REQ-READ_LATER_BROWSER_FALLBACK"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Default config has storageMode 'local'"
-    - criterion: "Options page allows switching between Local Storage and Pinboard (cloud)"
+    - criterion: "Default config has storageMode local"
+    - criterion: "New Read Later metadata fallback is validated independently under REQ-READ_LATER_BROWSER_FALLBACK"
+    - criterion: "Options page allows switching among Local, Pinboard, File, Sync, and Browser storage modes"
     - criterion: "Service worker uses active provider from config; no external service required for default path"
-    - criterion: "When popup shows a storage backend as selected, saving a bookmark uses that backend (save follows the highlight)"
+    - criterion: "When popup shows a storage backend as selected, saving an ordinary bookmark uses that backend (save follows the highlight); new Read Later saves selected for Browser follow REQ-READ_LATER_BROWSER_FALLBACK metadata fallback"
   status: "Implemented"
   summary: "Default storage mode local; Options/Save-to support pinboard|local|file|sync|browser; save follows preferredBackend highlight."
   traceability:
     architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-LOCAL_STORAGE_PROVIDER"
+      - "ARCH-MOVE_BOOKMARK_UI"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "REQ-STORAGE_MODE_DEFAULT"
     implementation:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
+      - "IMPL-MOVE_BOOKMARK_UI"
     tests:
-      - "ConfigManager Storage Mode describe block"
+      - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
+      - "tests/unit/config-manager.test.js"
+      - "tests/unit/move-bookmark-ui.test.js"
+      - "tests/unit/read-later-browser-fallback.test.js"
   validation_criteria:
     - method: "Unit tests"
       coverage: "ConfigManager default storageMode, getStorageMode, setStorageMode (tests/unit/config-manager.test.js)"

@@ -226,6 +226,12 @@ body {
   border: 1px solid rgba(76, 175, 80, 0.35);
 }
 
+.action-feedback.info {
+  background-color: rgba(33, 150, 243, 0.12);
+  color: #1565c0;
+  border: 1px solid rgba(33, 150, 243, 0.35);
+}
+
 /* Main interface */
 .main-interface {
   padding: var(--spacing-lg);

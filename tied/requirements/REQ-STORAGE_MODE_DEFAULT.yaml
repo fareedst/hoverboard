@@ -14,8 +14,8 @@ REQ-STORAGE_MODE_DEFAULT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "LEAP: Options Storage Mode includes Browser"
+      date: "2026-08-02"
+      reason: "LEAP: clarify Read Later Browser exception and link focused requirement"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -39,18 +39,22 @@ REQ-STORAGE_MODE_DEFAULT:
     depends_on: []
     related_to:
       - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-CHROME_STORAGE_USAGE"
+      - "REQ-READ_LATER_BROWSER_FALLBACK"
     supersedes: []
   satisfaction_criteria:
     - criterion: "Default config has storageMode local"
+    - criterion: "New Read Later metadata fallback is validated independently under REQ-READ_LATER_BROWSER_FALLBACK"
     - criterion: "Options page allows switching among Local, Pinboard, File, Sync, and Browser storage modes"
     - criterion: "Service worker uses active provider from config; no external service required for default path"
-    - criterion: "When popup shows a storage backend as selected, saving a bookmark uses that backend (save follows the highlight)"
+    - criterion: "When popup shows a storage backend as selected, saving an ordinary bookmark uses that backend (save follows the highlight); new Read Later saves selected for Browser follow REQ-READ_LATER_BROWSER_FALLBACK metadata fallback"
   status: "Implemented"
   summary: "The extension supports bookmark storage modes local, pinboard, file, sync, and browser. The default is local so most users need no account. Users may switch modes in Options (Storage Mode) and per-bookmark via Save to."
   traceability:
     architecture:
       - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-LOCAL_STORAGE_PROVIDER"
+      - "ARCH-MOVE_BOOKMARK_UI"
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "REQ-STORAGE_MODE_DEFAULT"
@@ -60,7 +64,10 @@ REQ-STORAGE_MODE_DEFAULT:
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
       - "IMPL-MOVE_BOOKMARK_UI"
     tests:
+      - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
       - "tests/unit/config-manager.test.js"
+      - "tests/unit/move-bookmark-ui.test.js"
+      - "tests/unit/read-later-browser-fallback.test.js"
   validation_criteria:
     - method: "Manual verification"
       coverage: "See detail file"

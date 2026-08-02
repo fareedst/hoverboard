@@ -26105,7 +26105,7 @@ function normalizePackagePath(candidate) {
   const segments = path.split("/");
   if (segments.some((segment) => segment === ".." || segment === "")) return { error: "UnsafePath" };
   const normalized = segments.filter((segment) => segment !== ".").join("/");
-  return normalized ? normalized : { error: "UnsafePath" };
+  return normalized || { error: "UnsafePath" };
 }
 function filterNonSecretConfiguration(configuration = {}, allowlistedKeys = []) {
   const safeConfiguration = {};

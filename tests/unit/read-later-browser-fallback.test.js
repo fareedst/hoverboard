@@ -149,82 +149,223 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-MOVE_BOOKMARK_UI ===
  */
-import { UIManager } from '../../src/ui/popup/UIManager.js'
 import { PopupController } from '../../src/ui/popup/PopupController.js'
 
-function makeStorageButtons () {
+function makeStorageButtons (backend) {
   const container = document.createElement('div')
-  container.id = 'storageBackendButtons'
-  for (const backend of ['pinboard', 'local', 'file', 'sync', 'browser']) {
-    const btn = document.createElement('button')
-    btn.className = 'storage-backend-btn'
-    btn.setAttribute('data-backend', backend)
-    btn.setAttribute('aria-pressed', 'false')
-    container.appendChild(btn)
-  }
+  const button = document.createElement('button')
+  button.className = 'storage-backend-btn'
+  button.dataset.backend = backend
+  button.setAttribute('aria-pressed', 'true')
+  container.appendChild(button)
   return container
 }
 
-describe('[IMPL-MOVE_BOOKMARK_UI] storage button highlight and preferredBackend', () => {
-  let container
+function makeController ({ selectedBackend = 'browser', configuredBackend = 'local' } = {}) {
+  const uiManager = {
+    elements: {
+      storageBackendButtons: makeStorageButtons(selectedBackend)
+    },
+    on: jest.fn(),
+    off: jest.fn(),
+    emit: jest.fn(),
+    showError: jest.fn(),
+    showSuccess: jest.fn(),
+    showInfo: jest.fn(),
+    setLoading: jest.fn(),
+    updateReadLaterStatus: jest.fn(),
+    updateStorageBackendValue: jest.fn(),
+    updateStorageLocalToggle: jest.fn(),
+    updateArchiveArtifactStatus: jest.fn()
+  }
+  const stateManager = { setState: jest.fn() }
+  const errorHandler = { handleError: jest.fn() }
+  const configManager = {
+    getStorageMode: jest.fn().mockResolvedValue(configuredBackend)
+  }
 
-  beforeEach(() => {
-    document.body.innerHTML = ''
-    container = makeStorageButtons()
-    document.body.appendChild(container)
-    global.chrome = {
-      runtime: {
-        sendMessage: jest.fn(),
-        onMessage: { addListener: jest.fn() },
-        getManifest: jest.fn().mockReturnValue({ version: '0.0.0' }),
-        lastError: null
-      },
-      tabs: { query: jest.fn().mockResolvedValue([]) }
+  global.chrome = {
+    runtime: {
+      sendMessage: jest.fn(),
+      onMessage: { addListener: jest.fn() },
+      getManifest: jest.fn().mockReturnValue({ version: '0.0.0' }),
+      lastError: null
+    },
+    tabs: { query: jest.fn().mockResolvedValue([]) }
+  }
+
+  const controller = new PopupController({
+    uiManager,
+    stateManager,
+    errorHandler,
+    configManager
+  })
+  controller.currentTab = {
+    id: 1,
+    url: 'https://example.com/read-later',
+    title: 'Read Later page'
+  }
+  controller.setLoading = jest.fn()
+  controller.sendToTab = jest.fn().mockResolvedValue({ success: true })
+  controller.refreshArchiveArtifactStatus = jest.fn()
+  controller.getSelectedStorageBackend = jest.fn().mockReturnValue(selectedBackend)
+
+  return { controller, uiManager, stateManager, errorHandler, configManager }
+}
+
+describe('[IMPL-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK] Read Later Browser metadata fallback', () => {
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK] treats URL-only currentPin as an unpersisted bookmark', () => {
+    const { controller } = makeController()
+
+    expect(controller.isPersistedBookmark({ url: 'https://example.com/read-later' })).toBe(false)
+    expect(controller.isPersistedBookmark({
+      url: 'https://example.com/read-later',
+      time: '2026-08-02T17:20:00.000Z'
+    })).toBe(true)
+  })
+
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-STORAGE_MODE_DEFAULT] [REQ-READ_LATER_BROWSER_FALLBACK] resolves Browser to configured Local', async () => {
+    const { controller, configManager } = makeController({
+      selectedBackend: 'browser',
+      configuredBackend: 'local'
+    })
+
+    await expect(controller.resolveReadLaterBackend('browser')).resolves.toEqual({
+      effectiveBackend: 'local',
+      fallbackApplied: true
+    })
+    expect(configManager.getStorageMode).toHaveBeenCalledTimes(1)
+  })
+
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK] falls back to Local when normalized default is Browser', async () => {
+    const { controller } = makeController({
+      selectedBackend: 'browser',
+      configuredBackend: 'browser'
+    })
+
+    await expect(controller.resolveReadLaterBackend('browser')).resolves.toEqual({
+      effectiveBackend: 'local',
+      fallbackApplied: true
+    })
+  })
+
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] preserves selected metadata-capable backend', async () => {
+    const { controller, configManager } = makeController({
+      selectedBackend: 'file',
+      configuredBackend: 'local'
+    })
+
+    await expect(controller.resolveReadLaterBackend('file')).resolves.toEqual({
+      effectiveBackend: 'file',
+      fallbackApplied: false
+    })
+    expect(configManager.getStorageMode).not.toHaveBeenCalled()
+  })
+
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK] creates a URL-only Read Later bookmark with effective backend', async () => {
+    const { controller, uiManager, stateManager } = makeController()
+    controller.currentPin = { url: controller.currentTab.url }
+    controller.createBookmark = jest.fn().mockResolvedValue({
+      success: true,
+      bookmark: {
+        url: controller.currentTab.url,
+        toread: 'yes',
+        preferredBackend: 'local',
+        time: '2026-08-02T17:20:00.000Z'
+      }
+    })
+
+    await controller.handleReadLater()
+
+    expect(controller.createBookmark).toHaveBeenCalledWith(
+      [], 'yes', 'yes', 'local', { suppressSuccess: true }
+    )
+    expect(controller.currentPin).toEqual(expect.objectContaining({
+      toread: 'yes',
+      preferredBackend: 'local'
+    }))
+    expect(stateManager.setState).toHaveBeenCalledWith({
+      currentPin: expect.objectContaining({ toread: 'yes' })
+    })
+    expect(uiManager.updateReadLaterStatus).toHaveBeenCalledWith(true)
+  })
+
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK] shows Read Later success feedback for a non-fallback new save', async () => {
+    const { controller, uiManager } = makeController({ selectedBackend: 'local' })
+    controller.currentPin = { url: controller.currentTab.url }
+    controller.createBookmark = jest.fn().mockResolvedValue({
+      success: true,
+      bookmark: { url: controller.currentTab.url, toread: 'yes' }
+    })
+
+    await controller.handleReadLater()
+
+    expect(uiManager.showSuccess).toHaveBeenCalledWith('Bookmark created and added to read later')
+    expect(uiManager.showInfo).not.toHaveBeenCalled()
+  })
+
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK] updates Save to and emits independent fallback info only after success', async () => {
+    const { controller, uiManager } = makeController()
+    controller.currentPin = { url: controller.currentTab.url }
+    controller.createBookmark = jest.fn().mockResolvedValue({
+      success: true,
+      bookmark: { url: controller.currentTab.url, toread: 'yes' }
+    })
+
+    await controller.handleReadLater()
+
+    expect(uiManager.updateStorageBackendValue).toHaveBeenCalledWith('local')
+    expect(uiManager.showInfo).toHaveBeenCalledWith(
+      expect.stringMatching(/Browser.*(metadata|Read Later).*local/i)
+    )
+    expect(controller.refreshArchiveArtifactStatus).not.toHaveBeenCalled()
+    expect(uiManager.updateArchiveArtifactStatus).not.toHaveBeenCalled()
+  })
+
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK] does not mutate Save to or archive status when save fails', async () => {
+    const { controller, uiManager, errorHandler } = makeController()
+    controller.currentPin = { url: controller.currentTab.url }
+    const saveError = new Error('save failed')
+    controller.createBookmark = jest.fn().mockRejectedValue(saveError)
+
+    await controller.handleReadLater()
+
+    expect(errorHandler.handleError).toHaveBeenCalledWith(
+      'Failed to toggle read later status',
+      saveError
+    )
+    expect(uiManager.updateStorageBackendValue).not.toHaveBeenCalled()
+    expect(uiManager.showInfo).not.toHaveBeenCalled()
+    expect(uiManager.updateArchiveArtifactStatus).not.toHaveBeenCalled()
+  })
+
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK] uses existing toggle path for persisted bookmarks', async () => {
+    const { controller, configManager, uiManager } = makeController()
+    controller.currentPin = {
+      url: controller.currentTab.url,
+      time: '2026-08-02T17:20:00.000Z',
+      toread: 'no'
     }
+    controller.sendMessage = jest.fn().mockResolvedValue({ success: true })
+
+    await controller.handleReadLater()
+
+    expect(controller.sendMessage).toHaveBeenCalledWith({
+      type: 'saveBookmark',
+      data: expect.objectContaining({
+        toread: 'yes',
+        preferredBackend: 'browser'
+      })
+    })
+    expect(configManager.getStorageMode).not.toHaveBeenCalled()
+    expect(uiManager.updateStorageBackendValue).not.toHaveBeenCalled()
+    expect(uiManager.showInfo).not.toHaveBeenCalled()
   })
 
-  test('updateStorageBackendValue sets aria-pressed on selected backend [IMPL-MOVE_BOOKMARK_UI]', () => {
-    const ui = new UIManager({
-      errorHandler: { handleError: jest.fn() },
-      stateManager: null,
-      config: {}
-    })
-    ui.elements.storageBackendButtons = container
-    ui.updateStorageBackendValue('sync')
-    const pressed = container.querySelectorAll('.storage-backend-btn[aria-pressed="true"]')
-    expect(pressed).toHaveLength(1)
-    expect(pressed[0].getAttribute('data-backend')).toBe('sync')
-  })
+  test('[IMPL-MOVE_BOOKMARK_UI] [REQ-READ_LATER_BROWSER_FALLBACK] binds shared readLater event to handleReadLater', () => {
+    const { controller, uiManager } = makeController()
+    const readLaterBinding = uiManager.on.mock.calls.find(([eventName]) => eventName === 'readLater')
 
-  test('getSelectedStorageBackend reads aria-pressed button [IMPL-MOVE_BOOKMARK_UI]', () => {
-    const ui = new UIManager({
-      errorHandler: { handleError: jest.fn() },
-      stateManager: null,
-      config: {}
-    })
-    ui.elements.storageBackendButtons = container
-    container.querySelector('[data-backend="browser"]').setAttribute('aria-pressed', 'true')
-    const controller = new PopupController({
-      uiManager: ui,
-      stateManager: { setState: jest.fn() },
-      errorHandler: { handleError: jest.fn() }
-    })
-    // Constructor may rebind uiManager; ensure elements point at our buttons
-    controller.uiManager.elements.storageBackendButtons = container
-    expect(controller.getSelectedStorageBackend()).toBe('browser')
-  })
-
-  test('updateStoragePinboardEnabled disables Pinboard without API key [IMPL-MOVE_BOOKMARK_UI]', () => {
-    const ui = new UIManager({
-      errorHandler: { handleError: jest.fn() },
-      stateManager: null,
-      config: {}
-    })
-    ui.elements.storageBackendButtons = container
-    ui.updateStoragePinboardEnabled(false)
-    const pin = container.querySelector('[data-backend="pinboard"]')
-    expect(pin.disabled).toBe(true)
-    ui.updateStoragePinboardEnabled(true)
-    expect(pin.disabled).toBe(false)
+    expect(readLaterBinding).toEqual(['readLater', controller.handleReadLater])
   })
 })

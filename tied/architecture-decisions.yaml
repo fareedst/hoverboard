@@ -1604,23 +1604,29 @@ ARCH-MODULE_VALIDATION:
 ARCH-MOVE_BOOKMARK_UI:
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "IMPL-MOVE_BOOKMARK_UI"
     - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-READ_LATER_BROWSER_FALLBACK"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  decision: "Popup displays the current storage backend for the current tab's bookmark via five Save to select-one buttons (Pinboard, Local, File, Sync, Browser) and allows the user to move it to another backend. Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index. For a new Read Later bookmark only, the controller resolves Browser selection to a metadata-capable backend before save; configured Browser resolves to Local. Existing persisted bookmark updates retain their current path."
   detail_file: "architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml"
   implementation_approach:
     details:
-      - "MessageHandler getStorageBackendForUrl and moveBookmarkToStorage"
-      - "Move = copy to target + delete from source + update StorageIndex"
+      - "MessageHandler already has getStorageBackendForUrl and moveBookmarkToStorage handlers"
+      - "Only successful new Read Later saves update Save to and show Browser limitation feedback; archive-status and Offline Reader state remain separate"
+      - "Read Later resolves selected Browser through ConfigManager.getStorageMode without provider I/O; metadata-capable backends are pinboard | local | file | sync; configured browser falls back to local"
+      - "Read Later uses a persisted-bookmark predicate based on bookmark identity such as time, not currentPin object truthiness"
       - "Save to backends: pinboard | local | file | sync | browser"
-      - "When not bookmarked: show default storage or disable move"
-    summary: "Popup Save to five backends (pinboard|local|file|sync|browser); getStorageBackendForUrl on load; moveBookmarkToStorage on change; preferredBackend on save."
+      - "When not bookmarked: show default storage or disable"
+    summary: "Popup: getStorageBackendForUrl on load; five Save to buttons; on change call moveBookmarkToStorage; ordinary saves send preferredBackend; new Read Later saves resolve Browser selection to pinboard|local|file|sync or local when configured Browser."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "ARCH corpus Phase 1: move UI index rationale five backends"
+      date: "2026-08-02"
+      reason: "Define new Read Later metadata backend resolution within shared popup architecture"
   name: "Move Bookmark Storage UI"
   rationale:
     benefits:
@@ -1638,12 +1644,24 @@ ARCH-MOVE_BOOKMARK_UI:
   status: "Active"
   summary: "Popup Save to five backends (pinboard/local/file/sync/browser); moveBookmarkToStorage; preferredBackend on save."
   traceability:
+    architecture:
+      - "ARCH-MOVE_BOOKMARK_UI"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "ARCH-MOVE_BOOKMARK_UI"
     implementation:
       - "IMPL-MOVE_BOOKMARK_UI"
     requirements:
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-READ_LATER_BROWSER_FALLBACK"
+      - "REQ-STORAGE_MODE_DEFAULT"
+    tests:
+      - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
+      - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
+      - "tests/unit/move-bookmark-ui.test.js"
+      - "tests/unit/popup-move-bookmark.test.js"
+      - "tests/unit/read-later-browser-fallback.test.js"
+      - "tests/unit/ui-manager-action-feedback.test.js"
 ARCH-MV3_MIGRATION:
   alternatives_considered:
     - name: "Stay on V2"

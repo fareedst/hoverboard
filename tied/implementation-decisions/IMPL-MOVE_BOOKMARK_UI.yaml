@@ -4,33 +4,39 @@ IMPL-MOVE_BOOKMARK_UI:
       - path: "src/ui/popup/popup.html"
         description: "Storage select markup"
       - path: "src/ui/popup/UIManager.js"
-        description: "updateStoragePinboardEnabled(hasApiKey)"
+        description: "updateStoragePinboardEnabled(hasApiKey) and informational action feedback"
       - path: "src/ui/popup/PopupController.js"
-        description: "Load backend, handle move, getSelectedStorageBackend, preferredBackend on save"
+        description: "Load backend, handle move, Read Later backend resolution, and preferredBackend on save"
+      - path: "src/ui/popup/popup.css"
+        description: "Informational action feedback banner styling"
     functions: []
   cross_references:
     - "ARCH-MOVE_BOOKMARK_UI"
     - "IMPL-BOOKMARK_ROUTER"
     - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-READ_LATER_BROWSER_FALLBACK"
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-MOVE_BOOKMARK_UI-pseudocode.md"
   implementation_approach:
     details:
+      - "Invoke the existing createBookmark path with toread=yes and the resolved preferredBackend; apply Save to fallback feedback only after successful persistence"
       - "No separate Local/File toggle control; Local↔File↔Browser moves use the same Save to buttons"
-      - "On save (createBookmark, addTagsToBookmark, handleTogglePrivate, handleReadLater): add data.preferredBackend = getSelectedStorageBackend() so save follows highlight"
+      - "On new Read Later save: distinguish persisted bookmark by currentPin.time, resolve Browser selection through ConfigManager.getStorageMode(), and use Local if the normalized mode is Browser"
+      - "On ordinary save (createBookmark, addTagsToBookmark, handleTogglePrivate, persisted handleReadLater): add data.preferredBackend = getSelectedStorageBackend() so save follows highlight"
       - "On select change: send moveBookmarkToStorage(url, targetBackend); refresh bookmark data"
       - "Pinboard storage option disabled in popup when no API token (updateStoragePinboardEnabled from getAuthToken)"
+      - "Popup and This Page share UIManager readLater event binding"
       - "PopupController: on load get storage backend for current URL (or default when no bookmark); set highlighted button"
-    summary: "Popup: storage section with five select-one buttons (Pinboard, File, Local, Sync, Browser); load backend on data load; on click send moveBookmarkToStorage; on save send preferredBackend so router uses highlighted storage."
+    summary: "Popup Save to five select-one buttons; new Read Later saves resolve Browser selection to a metadata-capable backend and reflect the effective backend after success."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus close-loop: five Save to buttons; drop file↔browser toggle"
+      date: "2026-08-02"
+      reason: "Align Read Later result feedback pseudo-code and record info banner styling location"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -38,12 +44,13 @@ IMPL-MOVE_BOOKMARK_UI:
   name: "Move Bookmark Storage UI"
   rationale:
     benefits:
-      - "Save follows highlight: getSelectedStorageBackend() and data.preferredBackend on createBookmark, addTagsToBookmark, toggle private/read-later (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)"
-      - "Storage select-one buttons (Pinboard, File, Local, Sync, Browser) in popup; current highlighted; click sends moveBookmarkToStorage"
+      - "Save follows highlight for ordinary bookmark operations while Read Later Browser selection remains metadata-capable"
+      - "Users see the effective backend and understand why Browser could not store Read Later metadata"
     problems_solved:
-      - "Save not following highlighted storage on create/update from popup"
-      - "User cannot move bookmark between backends"
-    why: "Popup control to show and change current bookmark storage backend across five backends; save must use highlighted backend."
+      - "Archive-status feedback must not be conflated with bookmark action feedback"
+      - "New Read Later saves previously passed Browser as preferredBackend and lost toread metadata"
+      - "Unbookmarked URLs were misclassified by a truthy currentPin stub"
+    why: "Preserve ordinary Save to behavior while making new Read Later persistence reliable for metadata-capable backends."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"
@@ -55,19 +62,23 @@ IMPL-MOVE_BOOKMARK_UI:
       - "IMPL-BOOKMARK_ROUTER"
     supersedes: []
   status: "Active"
-  summary: "Popup Save to five select-one buttons (Pinboard, Local, File, Sync, Browser); load backend on data load; on click send moveBookmarkToStorage; on save send preferredBackend so router uses highlighted storage."
-  test_coverage_note: "Unit: aria-pressed, getSelectedStorageBackend includes browser; composition: createBookmark preferredBackend"
+  summary: "Popup Save to five select-one buttons; load backend on data load; ordinary saves follow highlight; new Read Later saves resolve Browser to a metadata-capable backend and update UI after success."
+  test_coverage_note: "Unit: persisted-bookmark predicate, Browser/default backend resolution, fallback result UI, and failure independence; composition: shared UIManager readLater event binding and createBookmark preferredBackend for popup and This Page."
   traceability:
     architecture:
       - "ARCH-MOVE_BOOKMARK_UI"
     code_annotations:
       - "IMPL-MOVE_BOOKMARK_UI"
+      - "REQ-READ_LATER_BROWSER_FALLBACK"
     requirements:
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-READ_LATER_BROWSER_FALLBACK"
       - "REQ-STORAGE_MODE_DEFAULT"
-    test_coverage_note: "Unit + composition Save-to→preferredBackend incl. browser"
+    test_coverage_note: "Unit + composition Read Later Browser fallback, effective Save to UI, and independent archive feedback"
     tests:
       - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
-      - "tests/unit/bookmark-router.test.js"
+      - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
       - "tests/unit/move-bookmark-ui.test.js"
       - "tests/unit/popup-move-bookmark.test.js"
+      - "tests/unit/read-later-browser-fallback.test.js"
+      - "tests/unit/ui-manager-action-feedback.test.js"
