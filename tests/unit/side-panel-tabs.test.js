@@ -274,7 +274,7 @@
  * 
  * ## BIND_TAB_CHANGE_REFRESH
  * 
- * - [IMPL-SIDE_PANEL_TABS] [IMPL-POPUP_SESSION] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] How: onActivated/onUpdated → setRefreshAttribution(trigger=tabChange, surface=side_panel) then refreshPopupData. Bookmark path always refreshes; inject/suggested-tags use CLASSIFY_SCRIPT_INJECTION_URL so gallery/restricted tabs never call chrome.scripting. Exported bindTabChangeRefresh for composition tests (mirror bindWindowFocusRecentTagsRefresh). Observable: ui-inspector injectionOutcome with trigger tabChange.
+ * - [IMPL-SIDE_PANEL_TABS] [IMPL-POPUP_SESSION] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] How: onActivated/onUpdated → setRefreshAttribution(trigger=tabChange, surface=side-panel) then refreshPopupData. Bookmark path always refreshes; inject/suggested-tags use CLASSIFY_SCRIPT_INJECTION_URL so gallery/restricted tabs never call chrome.scripting. Exported bindTabChangeRefresh for composition tests (mirror bindWindowFocusRecentTagsRefresh). Observable: ui-inspector injectionOutcome with trigger tabChange.
  * - Contract:
  *   - INPUT: chrome.tabs.onActivated / onUpdated events; PopupController instance
  *   - PRE: controller and tabs APIs available when binding; refresh attribution helpers wired
@@ -283,13 +283,13 @@
  *     - success => refreshPopupData invoked with tabChange attribution
  *     - non-scriptable active tab => no chrome.scripting.executeScript / insertCSS; bookmark fields still update
  *   - FAILURE_MODES: RefreshFailed (controller path; logged)
- *   - DATA: controller._refreshTrigger ("tabChange"); controller._refreshSurface ("side_panel")
+ *   - DATA: controller._refreshTrigger ("tabChange"); controller._refreshSurface ("side-panel")
  *   - DATA_TRANSITION: on tab change, currentPin/tags refresh; suggested tags empty on expected skip
  *   - EFFECTS: Async, IO, State
  *   - TERMINATION: total
  * - PROCEDURE: BIND_TAB_CHANGE_REFRESH
  *   - ON tabs.onActivated OR (tabs.onUpdated status complete):
- *   -   controller.setRefreshAttribution({ trigger: "tabChange", surface: "side_panel" })
+ *   -   controller.setRefreshAttribution({ trigger: "tabChange", surface: "side-panel" })
  *   -   AWAIT controller.refreshPopupData()
  *   -   # inject prechecks inside loadSuggestedTags / updateOverlayState / injectContentScript
  * 

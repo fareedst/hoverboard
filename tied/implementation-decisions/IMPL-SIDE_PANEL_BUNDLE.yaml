@@ -1,0 +1,34 @@
+IMPL-SIDE_PANEL_BUNDLE:
+  code_locations:
+    files:
+      - path: "scripts/esbuild-bundle-core.js"
+        description: "Shared esbuild builder with production minify gate"
+      - path: "scripts/esbuild-bundle.js"
+        description: "CLI wrapper for the shared entry builder"
+      - path: "scripts/esbuild-entry-map.js"
+        description: "Manifest-backed source and dist entry map"
+      - path: "scripts/is-production-build.js"
+        description: "NODE_ENV production gate"
+      - path: "scripts/analyze-side-panel-bundle-core.js"
+        description: "Temporary bundle build, gzip measurement, and metafile contributor analysis"
+      - path: "scripts/analyze-side-panel-bundle.js"
+        description: "Bundle analysis CLI output"
+      - path: "scripts/build.js"
+        description: "Preserves production mode and invokes side-panel bundle after build-info generation"
+      - path: "package.json"
+        description: "Production build environment propagation and bundle scripts"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_BUNDLE-pseudocode.md"
+  implementation_approach:
+    summary: "scripts/esbuild-bundle.js uses a shared ENTRY_MAP builder with --minify only when NODE_ENV=production; build:prod preserves that environment through scripts/build.js; scripts/analyze-side-panel-bundle.js reports unminified, minified, gzip sizes, and top contributors without mutating dist/"
+  name: "Side Panel Bundle Build"
+  status: "Implemented"
+  testability: "unit"
+  traceability:
+    architecture:
+      - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
+      - "ARCH-SIDE_PANEL_BUNDLE"
+    requirements:
+      - "REQ-SIDE_PANEL_BUNDLE_SIZE"
+    tests:
+      - "tests/unit/analyze-side-panel-bundle.test.js"
+      - "tests/unit/esbuild-bundle.test.js"

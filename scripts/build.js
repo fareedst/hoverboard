@@ -56,7 +56,11 @@ execSync('npm run build:content', { stdio: 'inherit' });
 console.log('Building popup...');
 execSync('npm run build:popup', { stdio: 'inherit' });
 
-// [IMPL-SIDE_PANEL_TABS] Write build-info.js with BUILD_TIME_UTC (YYYY-MM-DD HH:mm) then build side panel bundle
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BUNDLE ===
+ * [IMPL-SIDE_PANEL_BUNDLE] [ARCH-SIDE_PANEL_BUNDLE] [REQ-SIDE_PANEL_BUNDLE_SIZE] [IMPL-SIDE_PANEL_TABS] How: scripts/build.js writes build-info.js with BUILD_TIME_UTC then invokes BUILD_EXTENSION_ENTRIES for side-panel.
+ * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BUNDLE ===
+ */
 const buildInfoPath = path.join(rootDir, 'src', 'ui', 'side-panel', 'build-info.js');
 const buildTimeUtc = new Date().toISOString().slice(0, 16).replace('T', ' ');
 fs.writeFileSync(buildInfoPath, `/**

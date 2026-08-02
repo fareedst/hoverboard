@@ -1,18 +1,25 @@
 IMPL-SIDE_PANEL_BOOKMARK:
   code_locations:
     files:
+      - path: "src/ui/side-panel/side-panel-bookmark-tab.js"
+        description: "createPopup with container bookmarkPanel; initialize PopupController/UIManager and wire panel context"
+      - path: "src/ui/side-panel/side-panel-controller.js"
+        description: "Owns Bookmark-tab init guard and delegates to side-panel-bookmark-tab"
       - path: "src/ui/side-panel/side-panel.html"
-        description: ""
-      - path: "src/ui/side-panel/side-panel.js"
-        description: "createPopup with container bookmarkPanel; wire openTagsTree to switch tab"
+        description: "Bookmark panel markup with data-popup-ref attributes"
       - path: "src/ui/popup/UIManager.js"
         description: "Optional container; cacheElements uses data-popup-ref when container set"
       - path: "src/ui/popup/PopupController.js"
         description: "No change; uses UIManager from dependency"
+      - path: "src/ui/index.js"
+        description: "createPopup accepts container and passes it to UIManager"
     functions:
       - name: "createPopup"
-        description: "Accept container option; pass to UIManager so it uses scoped root"
+        description: "Accept container option and pass it to UIManager so it uses scoped root"
         file: "src/ui/index.js"
+      - name: "initBookmarkTab"
+        description: "Initialize the side-panel Bookmark tab with a scoped popup, load initial data, register UI listeners, and enable keyboard navigation"
+        file: "src/ui/side-panel/side-panel-bookmark-tab.js"
   cross_references:
     - "ARCH-SIDE_PANEL_TABS"
     - "IMPL-UIManager_SCOPED_ROOT"
@@ -30,8 +37,8 @@ IMPL-SIDE_PANEL_BOOKMARK:
       date: "2026-02-25"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-30"
-      reason: "Add createPopup scoped and openTagsTree composition suites"
+      date: "2026-08-01"
+      reason: "LEAP: add INIT_BOOKMARK_TAB block for side-panel-bookmark-tab.js adapter"
   name: "Side Panel Bookmark Tab Implementation"
   rationale:
     benefits:
@@ -62,5 +69,7 @@ IMPL-SIDE_PANEL_BOOKMARK:
     tests:
       - "tests/integration/popup-open-tags-tree-composition.integration.test.js"
       - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
+      - "tests/unit/side-panel-bookmark-tab.test.js"
+      - "tests/unit/side-panel-initial-tab-init.test.js"
       - "tests/unit/side-panel-tabs.test.js"
       - "tests/unit/ui-manager-scoped-root.test.js"

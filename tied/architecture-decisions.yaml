@@ -2412,6 +2412,14 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
       - "tests/unit/browser-tabs-panel.test.js"
       - "tests/unit/service-worker-messaging-routing.test.js"
       - "tests/unit/side-panel-tabs.test.js"
+ARCH-SIDE_PANEL_BUNDLE:
+  cross_references:
+    - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
+    - "IMPL-SIDE_PANEL_BUNDLE"
+    - "REQ-SIDE_PANEL_BUNDLE_SIZE"
+  detail_file: "architecture-decisions/ARCH-SIDE_PANEL_BUNDLE.yaml"
+  name: "Side Panel Bundle Build"
+  status: "Active"
 ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS:
   cross_references:
     - "REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS"

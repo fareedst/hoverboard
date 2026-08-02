@@ -2379,6 +2379,15 @@ REQ-SIDE_PANEL_BROWSER_TABS:
       coverage: "Tabs tab list and display mode (assert list/empty state; switch Title/URL/Block and assert card content); Filter and Copy URLs (type filter, click Copy URLs, assert success message); Refresh (click Refresh, assert list re-renders; after remove-from-display, Refresh brings hidden tab back); Per-row close and remove-from-display (close one tab assert count/decrease; remove-from-display assert card gone; Refresh assert card reappears)"
     - method: "Composition (integration)"
       coverage: "tests/integration/browser-tabs-tab-composition.integration.test.js — side-panel runInitialTabInit/switchTabForTest(browserTabs) calls initBrowserTabsTab once (mocked); resetBrowserTabsTabInitedForTest; aligns IMPL-SIDE_PANEL_TABS Phase G with REQ visibility of Tabs tab"
+REQ-SIDE_PANEL_BUNDLE_SIZE:
+  category: "Non-Functional"
+  cross_references:
+    - "ARCH-SIDE_PANEL_BUNDLE"
+    - "IMPL-SIDE_PANEL_BUNDLE"
+  detail_file: "requirements/REQ-SIDE_PANEL_BUNDLE_SIZE.yaml"
+  name: "Side Panel Bundle Size"
+  priority: "P2"
+  status: "Implemented"
 REQ-SIDE_PANEL_POPUP_EQUIVALENT:
   category: "Functional"
   detail_file: "requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml"

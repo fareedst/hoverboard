@@ -9,7 +9,6 @@ IMPL-BOOKMARK_USAGE_TRACKING_UI:
       - path: "src/ui/popup/UIManager.js"
       - path: "src/ui/side-panel/side-panel-tab-state.js"
       - path: "src/ui/side-panel/side-panel.html"
-      - path: "src/ui/side-panel/side-panel.js"
       - path: "src/ui/tools-toolbar/tools-toolbar.html"
       - path: "src/ui/tools-toolbar/tools-toolbar.js"
       - path: "src/ui/visit-history/visit-history-panel.js"
@@ -40,8 +39,8 @@ IMPL-BOOKMARK_USAGE_TRACKING_UI:
       date: "2026-03-03"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-31"
-      reason: "LEAP: INIT_VISIT_HISTORY_PAGE H2 for standalone Visit History page"
+      date: "2026-08-01"
+      reason: "Remove the retired side-panel monolith locus; usage remains in This Page, index, and standalone Visit History surfaces"
     last_validated:
       date: "2026-03-03"
       result: "pass"

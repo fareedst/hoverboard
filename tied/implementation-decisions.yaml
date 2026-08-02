@@ -4043,6 +4043,15 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - "tests/unit/browser-tabs-panel.test.js"
       - "tests/unit/service-worker-messaging-routing.test.js"
       - "tests/unit/side-panel-tabs.test.js"
+IMPL-SIDE_PANEL_BUNDLE:
+  cross_references:
+    - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
+    - "ARCH-SIDE_PANEL_BUNDLE"
+    - "REQ-SIDE_PANEL_BUNDLE_SIZE"
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BUNDLE.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_BUNDLE-pseudocode.md"
+  name: "Side Panel Bundle Build"
+  status: "Active"
 IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS:
   code_locations:
     files:

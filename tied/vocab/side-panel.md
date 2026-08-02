@@ -4,7 +4,7 @@
 
 **Excludes:** Popup-only chrome when not shared with This Page (see [`ui-surfaces.md`](ui-surfaces.md)); pin/backend field semantics ([`bookmarks.md`](bookmarks.md), [`storage-backends.md`](storage-backends.md)); Local Bookmarks Index full page ([`bookmarks-index.md`](bookmarks-index.md)).
 
-**Traceability:** [REQ-SIDE_PANEL_POPUP_EQUIVALENT](../requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml) · [REQ-SIDE_PANEL_TAGS_TREE](../requirements/REQ-SIDE_PANEL_TAGS_TREE.yaml) · [REQ-SIDE_PANEL_BROWSER_TABS](../requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml) · [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS](../requirements/REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml) · [REQ-SIDE_PANEL_BROWSER_BOOKMARKS](../requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml) · [REQ-SIDE_PANEL_BOOKMARK_SEARCH](../requirements/REQ-SIDE_PANEL_BOOKMARK_SEARCH.yaml) · [REQ-TAB_SEARCH_NO_MATCH_UX](../requirements/REQ-TAB_SEARCH_NO_MATCH_UX.yaml) · [REQ-BOOKMARK_USAGE_TRACKING](../requirements/REQ-BOOKMARK_USAGE_TRACKING.yaml) · [ARCH-SIDE_PANEL_TABS](../architecture-decisions/ARCH-SIDE_PANEL_TABS.yaml) · [IMPL-SIDE_PANEL_TABS](../implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) · [IMPL-SIDE_PANEL_BROWSER_TABS](../implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml) · [IMPL-SIDE_PANEL_TAGS_TREE](../implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml) · [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS](../implementation-decisions/IMPL-SIDE_PANEL_BROWSER_BOOKMARKS.yaml) · [IMPL-TAB_SEARCH_SERVICE](../implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml)
+**Traceability:** [REQ-SIDE_PANEL_POPUP_EQUIVALENT](../requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml) · [REQ-SIDE_PANEL_BUNDLE_SIZE](../requirements/REQ-SIDE_PANEL_BUNDLE_SIZE.yaml) · [REQ-SIDE_PANEL_TAGS_TREE](../requirements/REQ-SIDE_PANEL_TAGS_TREE.yaml) · [REQ-SIDE_PANEL_BROWSER_TABS](../requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml) · [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS](../requirements/REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml) · [REQ-SIDE_PANEL_BROWSER_BOOKMARKS](../requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml) · [REQ-SIDE_PANEL_BOOKMARK_SEARCH](../requirements/REQ-SIDE_PANEL_BOOKMARK_SEARCH.yaml) · [REQ-TAB_SEARCH_NO_MATCH_UX](../requirements/REQ-TAB_SEARCH_NO_MATCH_UX.yaml) · [REQ-BOOKMARK_USAGE_TRACKING](../requirements/REQ-BOOKMARK_USAGE_TRACKING.yaml) · [ARCH-SIDE_PANEL_TABS](../architecture-decisions/ARCH-SIDE_PANEL_TABS.yaml) · [ARCH-SIDE_PANEL_BUNDLE](../architecture-decisions/ARCH-SIDE_PANEL_BUNDLE.yaml) · [IMPL-SIDE_PANEL_TABS](../implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) · [IMPL-SIDE_PANEL_BUNDLE](../implementation-decisions/IMPL-SIDE_PANEL_BUNDLE.yaml) · [IMPL-SIDE_PANEL_BROWSER_TABS](../implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml) · [IMPL-SIDE_PANEL_TAGS_TREE](../implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml) · [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS](../implementation-decisions/IMPL-SIDE_PANEL_BROWSER_BOOKMARKS.yaml) · [IMPL-TAB_SEARCH_SERVICE](../implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml)
 
 **See also:** [`ui-surfaces.md`](ui-surfaces.md) · [`tags.md`](tags.md) · [`bookmarks.md`](bookmarks.md) · [`bookmarks-index.md`](bookmarks-index.md) · [`ipc-messaging.md`](ipc-messaging.md) · [`domain-references.md`](domain-references.md)
 
@@ -47,6 +47,16 @@
 | **non-scriptable URL** | restricted URL (alone) | Browser forbids content scripting (restricted schemes + Chrome Web Store / extensions gallery hosts) — **not** user **inhibit URL** ([`config-and-privacy.md`](config-and-privacy.md)) |
 | **index-open dismisses side panel** | close on bookmarks index | See [`bookmarks-index.md`](bookmarks-index.md); SW sends `REQUEST_SIDE_PANEL_CLOSE` when creating the index tab |
 | **non-web dismisses side panel** | close on chrome:// | Active tab becomes non-**web protocol** → SW sends `REQUEST_SIDE_PANEL_CLOSE` ([REQ-NON_WEB_TOOLS_TOOLBAR](../requirements/REQ-NON_WEB_TOOLS_TOOLBAR.yaml)) |
+| **side-panel bundle** | side panel JS bundle (alone) | esbuild output `dist/src/ui/side-panel/side-panel.js`; [REQ-SIDE_PANEL_BUNDLE_SIZE] |
+| **production minify** | minified build (alone) | `NODE_ENV=production` → `scripts/esbuild-bundle.js` passes `--minify` for all entry points |
+| **bundle analyze** | analyze side panel (alone) | `npm run analyze:side-panel` — unminified, minified, gzip ([IMPL-SIDE_PANEL_BUNDLE]) |
+| **bundle contributor** | largest bundle file (alone) | Input file ranked by bytes in the esbuild metafile report ([IMPL-SIDE_PANEL_BUNDLE]) |
+| **gzip size** | compressed size (alone) | Gzip byte count reported for the minified side-panel bundle ([REQ-SIDE_PANEL_BUNDLE_SIZE]) |
+| **side-panel controller** | panel controller (alone) | Active-tab state, persistence, lazy init orchestration (`side-panel-controller.js`; [IMPL-SIDE_PANEL_TABS]) |
+| **side-panel shell** | panel chrome (alone) | Tab visibility, tab-button binding, version header (`side-panel-shell.js`; [IMPL-SIDE_PANEL_TABS]) |
+| **side-panel event bindings** | panel listeners (alone) | Tab-change refresh, window-focus Recent Tags, storage tab sync, toggle-close (`side-panel-event-bindings.js`; [IMPL-SIDE_PANEL_TABS]) |
+| **side-panel bookmark tab adapter** | bookmark tab module (alone) | Scoped `createPopup` init for This Page (`side-panel-bookmark-tab.js`; [IMPL-SIDE_PANEL_BOOKMARK]) |
+| **bootSidePanel** | panel boot (alone) | DOM-ready composition entry in `side-panel.js`; calls controller + shell + event bindings ([IMPL-SIDE_PANEL_TABS]) |
 
 ---
 
@@ -90,6 +100,16 @@
 - **tab-change This Page refresh** — Browser tab activate/navigate-complete refreshes This Page via shared `PopupController`; skips inject on **non-scriptable URL**.
 - **tabChangeRefresh** — Inspector action recorded when side-panel tab listeners schedule This Page refresh (`bindTabChangeRefresh`).
 - **non-scriptable URL** — URL where Chrome rejects scripting (schemes + extensions gallery); distinct from user **inhibit URL**.
+- **side-panel bundle** — Production esbuild artifact for `side-panel.html`; minified when `NODE_ENV=production` ([REQ-SIDE_PANEL_BUNDLE_SIZE]).
+- **production minify** — esbuild `--minify` on all five extension entry points in production builds only.
+- **bundle analyze** — `npm run analyze:side-panel` reports unminified, minified, and gzip sizes plus top contributors.
+- **bundle contributor** — Input file ranked by bytes in the side-panel metafile report.
+- **gzip size** — Compressed byte count for the minified side-panel bundle.
+- **side-panel controller** — Owns active-tab state, persistence, lazy init guards, and `switchTab` / `runInitialTabInit` orchestration (`side-panel-controller.js`).
+- **side-panel shell** — Panel visibility (`showPanel`), tab-button binding, and version header rendering (`side-panel-shell.js`).
+- **side-panel event bindings** — Browser and storage listeners: tab-change refresh, window-focus Recent Tags, storage-driven tab sync, toggle-close (`side-panel-event-bindings.js`).
+- **side-panel bookmark tab adapter** — Scoped Bookmark-tab `createPopup` initialization (`side-panel-bookmark-tab.js`; [IMPL-SIDE_PANEL_BOOKMARK]).
+- **bootSidePanel** — DOM-ready composition entry in `side-panel.js`; wires controller, shell, and event bindings then runs initial lazy init.
 
 ---
 
@@ -114,6 +134,12 @@
 | Open Browser Bookmarks page | `OPEN_BROWSER_BOOKMARKS_PAGE` | [IMPL-NON_WEB_TOOLS_TOOLBAR](../implementation-decisions/IMPL-NON_WEB_TOOLS_TOOLBAR.yaml) |
 | Visit History page init | `INIT_VISIT_HISTORY_PAGE` / `bindVisitHistoryPage` → `initVisitHistoryPage` | [IMPL-BOOKMARK_USAGE_TRACKING_UI](../implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING_UI.yaml) |
 | Tool page version | `initToolPageVersion` | Shared `src/ui/styles/tool-page-version.js` (used by standalone tool pages) |
+| Build extension entries | `BUILD_EXTENSION_ENTRIES` | [IMPL-SIDE_PANEL_BUNDLE](../implementation-decisions/IMPL-SIDE_PANEL_BUNDLE.yaml) |
+| Build side panel | `BUILD_SIDE_PANEL` | [IMPL-SIDE_PANEL_BUNDLE](../implementation-decisions/IMPL-SIDE_PANEL_BUNDLE.yaml) |
+| Analyze side-panel bundle | `ANALYZE_SIDE_PANEL_BUNDLE` | [IMPL-SIDE_PANEL_BUNDLE](../implementation-decisions/IMPL-SIDE_PANEL_BUNDLE.yaml) |
+| Boot side panel | `BOOT_SIDE_PANEL` | [IMPL-SIDE_PANEL_TABS](../implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) |
+| Init Bookmark tab | `INIT_BOOKMARK_TAB` | [IMPL-SIDE_PANEL_BOOKMARK](../implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml) |
+| Storage tab sync | `BIND_STORAGE_TAB_CHANGE` | [IMPL-SIDE_PANEL_TABS](../implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) |
 
 ---
 
@@ -121,13 +147,23 @@
 
 | Term | Section |
 |------|---------|
-| Browser Bookmarks (page) | Preferred terms |
+| ANALYZE_SIDE_PANEL_BUNDLE | Pseudo-code block names |
+| BIND_STORAGE_TAB_CHANGE | Pseudo-code block names |
+| BOOT_SIDE_PANEL | Pseudo-code block names |
+| bootSidePanel | Preferred terms / Named concepts |
 | archive status hooks | Preferred terms / Named concepts |
+| Browser Bookmarks (page) | Preferred terms |
 | Brave native sidebar | Preferred terms / Named concepts |
 | Brave side-panel window arrange bug | Preferred terms / Named concepts |
+| BUILD_EXTENSION_ENTRIES | Pseudo-code block names |
+| BUILD_SIDE_PANEL | Pseudo-code block names |
+| bundle analyze | Preferred terms / Named concepts |
+| bundle contributor | Preferred terms / Named concepts |
 | By Tag | Preferred terms |
 | Close tagged / Close untagged | Preferred terms |
 | Gather into this window | Preferred terms |
+| gzip size | Preferred terms / Named concepts |
+| INIT_BOOKMARK_TAB | Pseudo-code block names |
 | importantTagSources | Preferred terms |
 | list display mode | Preferred terms |
 | mergeBookmarkReplyIntoTab | Pseudo-code block names |
@@ -139,7 +175,10 @@
 | private indicator | Preferred terms |
 | Remove from list | Preferred terms |
 | search scope | Preferred terms |
-| side panel | Preferred terms |
+| side-panel bookmark tab adapter | Preferred terms / Named concepts |
+| side-panel controller | Preferred terms / Named concepts |
+| side-panel event bindings | Preferred terms / Named concepts |
+| side-panel shell | Preferred terms / Named concepts |
 | tab-change This Page refresh | Preferred terms |
 | tabChangeRefresh | Preferred terms |
 | tab source | Preferred terms |

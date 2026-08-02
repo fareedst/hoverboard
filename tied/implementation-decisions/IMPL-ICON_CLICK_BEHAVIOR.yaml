@@ -11,8 +11,8 @@ IMPL-ICON_CLICK_BEHAVIOR:
         description: "bind and load/save toggle"
       - path: "src/core/service-worker.js"
         description: "handleActionClick; non-web tools toolbar; _openSidePanelOrToolsToolbar; REQUEST_SIDE_PANEL_CLOSE"
-      - path: "src/ui/side-panel/side-panel.js"
-        description: "bindToggleCloseRequest"
+      - path: "src/ui/side-panel/side-panel-event-bindings.js"
+        description: "bindToggleCloseRequest and shouldClosePanelOnToggleMessage"
       - path: "src/core/message-handler.js"
         description: "MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE"
       - path: "src/shared/web-protocol.js"
@@ -43,8 +43,8 @@ IMPL-ICON_CLICK_BEHAVIOR:
       date: "2026-03-02"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-31"
-      reason: "LEAP: non-web tools toolbar path on icon click"
+      date: "2026-08-01"
+      reason: "Move side-panel toggle-close binding into the focused event adapter"
   name: "Extension Icon Single-Click Behavior"
   rationale:
     benefits:

@@ -702,6 +702,17 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-SIDE_PANEL_BUNDLE:
+  cross_references:
+    - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
+    - "IMPL-SIDE_PANEL_BUNDLE"
+    - "REQ-SIDE_PANEL_BUNDLE_SIZE"
+  description: "Central esbuild runner minifies all extension entry points when NODE_ENV=production; analyze script reports bundle sizes."
+  detail_file: "architecture-decisions/ARCH-SIDE_PANEL_BUNDLE.yaml"
+  name: "Side Panel Bundle Build"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
 ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS:
   cross_references:
     - "REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS"
@@ -2061,6 +2072,17 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
   name: "Side Panel Browser Tabs Implementation"
   source_index: "implementation-decisions.yaml"
   status: "Active"
+  type: "IMPL"
+IMPL-SIDE_PANEL_BUNDLE:
+  cross_references:
+    - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
+    - "ARCH-SIDE_PANEL_BUNDLE"
+    - "REQ-SIDE_PANEL_BUNDLE_SIZE"
+  description: "Shared esbuild builder with production minify gate and analyze:side-panel contributor reporting."
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BUNDLE.yaml"
+  name: "Side Panel Bundle Build"
+  source_index: "implementation-decisions.yaml"
+  status: "Implemented"
   type: "IMPL"
 IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS:
   cross_references:
@@ -3467,6 +3489,16 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     last_updated: "2026-03-28T00:00:00.000Z"
     registered: "2026-03-28T00:00:00.000Z"
   name: "Side Panel Browser Tabs List"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SIDE_PANEL_BUNDLE_SIZE:
+  cross_references:
+    - "ARCH-SIDE_PANEL_BUNDLE"
+    - "IMPL-SIDE_PANEL_BUNDLE"
+  description: "Side-panel bundle measurable (unminified, minified, gzip); production minifies all esbuild entry points."
+  detail_file: "requirements/REQ-SIDE_PANEL_BUNDLE_SIZE.yaml"
+  name: "Side Panel Bundle Size"
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"

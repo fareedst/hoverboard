@@ -82,7 +82,7 @@
 
 ## BIND_TAB_CHANGE_REFRESH
 
-- [IMPL-SIDE_PANEL_TABS] [IMPL-POPUP_SESSION] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] How: onActivated/onUpdated → setRefreshAttribution(trigger=tabChange, surface=side_panel) then refreshPopupData. Bookmark path always refreshes; inject/suggested-tags use CLASSIFY_SCRIPT_INJECTION_URL so gallery/restricted tabs never call chrome.scripting. Exported bindTabChangeRefresh for composition tests (mirror bindWindowFocusRecentTagsRefresh). Observable: ui-inspector injectionOutcome with trigger tabChange.
+- [IMPL-SIDE_PANEL_TABS] [IMPL-POPUP_SESSION] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] How: onActivated/onUpdated → setRefreshAttribution(trigger=tabChange, surface=side-panel) then refreshPopupData. Bookmark path always refreshes; inject/suggested-tags use CLASSIFY_SCRIPT_INJECTION_URL so gallery/restricted tabs never call chrome.scripting. Exported bindTabChangeRefresh for composition tests (mirror bindWindowFocusRecentTagsRefresh). Observable: ui-inspector injectionOutcome with trigger tabChange.
 - Contract:
   - INPUT: chrome.tabs.onActivated / onUpdated events; PopupController instance
   - PRE: controller and tabs APIs available when binding; refresh attribution helpers wired
@@ -91,13 +91,13 @@
     - success => refreshPopupData invoked with tabChange attribution
     - non-scriptable active tab => no chrome.scripting.executeScript / insertCSS; bookmark fields still update
   - FAILURE_MODES: RefreshFailed (controller path; logged)
-  - DATA: controller._refreshTrigger ("tabChange"); controller._refreshSurface ("side_panel")
+  - DATA: controller._refreshTrigger ("tabChange"); controller._refreshSurface ("side-panel")
   - DATA_TRANSITION: on tab change, currentPin/tags refresh; suggested tags empty on expected skip
   - EFFECTS: Async, IO, State
   - TERMINATION: total
 - PROCEDURE: BIND_TAB_CHANGE_REFRESH
   - ON tabs.onActivated OR (tabs.onUpdated status complete):
-  -   controller.setRefreshAttribution({ trigger: "tabChange", surface: "side_panel" })
+  -   controller.setRefreshAttribution({ trigger: "tabChange", surface: "side-panel" })
   -   AWAIT controller.refreshPopupData()
   -   # inject prechecks inside loadSuggestedTags / updateOverlayState / injectContentScript
 
@@ -137,10 +137,8 @@
 - PROCEDURE: INIT_TAB_IF_NEEDED
   - IF bookmarkTabInited RETURN
   - bookmarkTabInited = true
-  - uiSystem = AWAIT UISystem.init(); popupComponents = uiSystem.createPopup({ container: document.getElementById('bookmarkPanel'), errorHandler, config })
-  - AWAIT popupComponents.controller.loadInitialData()
-  - popupComponents.uiManager.setupEventListeners()
-  - // Wire "By Tag" in footer to switchTab("tagsTree") when in panel context
+  - popupComponents = AWAIT initBookmarkTab({ bookmarkPanelEl: document.getElementById('bookmarkPanel'), onOpenTagsTreeInPanel: () => switchTab('tagsTree') })  // side-panel-bookmark-tab.js; composed_with IMPL-SIDE_PANEL_BOOKMARK
+  - // initBookmarkTab: UISystem.init, createPopup({ container }), loadInitialData, setupEventListeners, keyboard navigation
 
 ## INIT_TAB_IF_NEEDED
 
@@ -179,9 +177,47 @@
   - initBrowserTabsTab()  // load tabs, referrers; render #browserTabsPanel list; bind search input, Copy button, Close button
   - How (sub-block): Phase G: switchTabForTest(tabId) and resetBrowserTabsTabInitedForTest() exported for composition tests — same switchTab → initTabIfNeeded("browserTabs") path without clicking .side-panel-tab (no UI).
 
+## BOOT_SIDE_PANEL
+
+- [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] How: DOM-ready entry (`bootSidePanel` in side-panel.js) composes controller, shell, and event-binding modules; restores persisted tab; binds shell tab buttons and browser/storage listeners; defers lazy tab init to `runInitialTabInit`. Facade re-exports compatibility test hooks.
+- Contract:
+  - INPUT: DOMContentLoaded on side-panel.html
+  - PRE: panel roots (#bookmarkPanel, #tagsTreePanel, #browserTabsPanel) present
+  - OUTPUT: active tab shown; bindings registered; initial tab lazy-init complete
+  - POST:
+    - success => one visible panel; hoverboard_sidepanel_active_tab restored or defaulted
+  - DATA: activeTab; shellElements; controller state (init guards)
+  - EFFECTS: IO, State
+  - TERMINATION: total
+- PROCEDURE: BOOT_SIDE_PANEL
+  - 1. initSidePanelVersion()
+  - 2. activeTab = AWAIT loadPersistedTab()
+  - 3. showPanel(activeTab); bindTabButtons → controller.switchTab
+  - 4. bindTabChangeRefresh(); bindWindowFocusRecentTagsRefresh(); bindStorageTabChange(); bindToggleCloseRequest()
+  - 5. AWAIT runInitialTabInit(activeTab)
+
+## BIND_STORAGE_TAB_CHANGE
+
+- [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] How: chrome.storage.onChanged watches hoverboard_sidepanel_active_tab; when another surface writes a valid tab id, switchTab without re-persisting the same value.
+- Contract:
+  - INPUT: storage.local change to hoverboard_sidepanel_active_tab
+  - PRE: chrome.storage.onChanged available; tabId in TAB_IDS
+  - OUTPUT: void; panel switches when new tab differs from activeTab
+  - POST:
+    - success => switchTab(tabId) when tabId !== activeTab
+  - DATA: validTabs = TAB_IDS
+  - EFFECTS: IO, State
+  - TERMINATION: total
+- PROCEDURE: BIND_STORAGE_TAB_CHANGE
+  - ON storage.onChanged(changes, areaName):
+  - IF areaName !== 'local' RETURN
+  - tabId = changes.hoverboard_sidepanel_active_tab?.newValue
+  - IF tabId not in validTabs OR tabId === activeTab RETURN
+  - switchTab(tabId)
+
 ## BLOCK_9
 
-- --- Composition: composed_with [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_TAGS_TREE] --- How: Ordering: runInitialTabInit may await initBookmarkTab before By Tag so controller exists for getTagsTreeInitOptions. Shared DATA: popupComponents.controller (currentPin, normalizeTags) for both This Page and By Tag sync. Collision: bindTabChangeRefresh refreshPopupData and bindWindowFocusRecentTagsRefresh loadRecentTags can run close together — both read currentPin; safe (idempotent UI updates). Cross-IMPL: loadRecentTags matches  message path to  / .
+- --- Composition: composed_with [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_TAGS_TREE] --- How: Ordering: runInitialTabInit may await initBookmarkTab before By Tag so controller exists for getTagsTreeInitOptions. Shared DATA: popupComponents.controller (currentPin, normalizeTags) for both This Page and By Tag sync. Collision: bindTabChangeRefresh refreshPopupData and bindWindowFocusRecentTagsRefresh loadRecentTags can run close together — both read currentPin; safe (idempotent UI updates). Cross-IMPL: loadRecentTags matches message path to popup. Module split: controller owns switchTab/init guards; shell owns showPanel/bindTabButtons; event-bindings owns bindTabChangeRefresh/bindWindowFocusRecentTagsRefresh/bindStorageTabChange; bookmark-tab owns initBookmarkTab.
 - Contract:
   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
   - PRE: caller supplies valid inputs for this block; dependencies wired

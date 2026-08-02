@@ -1,0 +1,54 @@
+CITDP-REQ-SIDE_PANEL_BUNDLE_SIZE:
+  change_definition:
+    current_behavior: "All esbuild entry points built unminified; placeholder minify npm script did nothing; no bundle size reporting for side-panel."
+    desired_behavior: "NODE_ENV=production minifies all five esbuild entry points via scripts/esbuild-bundle.js; dev builds unminified; npm run analyze:side-panel reports unminified, minified, and gzip sizes with top contributors; side-panel runtime split into controller, shell, event bindings, and bookmark-tab modules."
+    non_goals:
+      - "Lazy-load tab modules (P2 deferred)"
+      - "Zod Mini migration (deferred LEAP)"
+    success_criteria:
+      - "analyze:side-panel and unit tests pass"
+      - "Dev build remains ~1.03 MiB unminified"
+      - "Production build minifies side-panel to ~555 KiB / ~127 KiB gzip"
+      - "tied_validate_consistency ok"
+  execution_evidence:
+    - command: "npm run test:unit -- --runInBand"
+      result: "164 suites passed; 1,615 tests passed; 1 skipped"
+    - command: "npm run test:unit -- --runInBand tests/integration/side-panel-create-popup-scoped-composition.integration.test.js tests/integration/side-panel-tab-change-injection.integration.test.js tests/integration/window-focus-recent-tags-composition.integration.test.js tests/integration/browser-tabs-tab-composition.integration.test.js"
+      result: "4 composition suites passed; 14 tests"
+    - command: "npm run validate:tokens"
+      result: "passed"
+    - command: "tied_validate_consistency"
+      result: "passed"
+  impact_analysis:
+    modules_or_boundaries: "scripts/esbuild-bundle*.js, scripts/analyze-side-panel-bundle*.js, package.json, scripts/build.js, src/ui/side-panel/side-panel-{controller,shell,event-bindings,bookmark-tab}.js"
+    tied_tokens_affected:
+      - "ARCH-SIDE_PANEL_BUNDLE"
+      - "ARCH-SIDE_PANEL_TABS"
+      - "IMPL-SIDE_PANEL_BUNDLE"
+      - "IMPL-SIDE_PANEL_TABS"
+      - "REQ-SIDE_PANEL_BUNDLE_SIZE"
+    tied_tokens_new:
+      - "ARCH-SIDE_PANEL_BUNDLE"
+      - "IMPL-SIDE_PANEL_BUNDLE"
+      - "REQ-SIDE_PANEL_BUNDLE_SIZE"
+  leap_feedback:
+    divergences_from_analysis: "none"
+    record_status: "complete"
+  record_identity:
+    change_request_id: "REQ-SIDE_PANEL_BUNDLE_SIZE"
+    primary_tokens:
+      - "ARCH-SIDE_PANEL_BUNDLE"
+      - "IMPL-SIDE_PANEL_BUNDLE"
+      - "REQ-SIDE_PANEL_BUNDLE_SIZE"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-08-01"
+    title: "Side panel bundle production minify and analyze"
+  risk_analysis:
+    risks:
+      - id: "R1"
+        description: "Production minify breaks debugging"
+        likelihood: "low"
+        mitigation: "Dev builds omit --minify; only dist/ affected"
+        severity: "low"
+  test_strategy:
+    summary: "Unit tests for isProductionBuild, ENTRY_MAP, analyzeSidePanelBundle, and new side-panel module units; existing composition suites for tab bindings; full Jest suite green."

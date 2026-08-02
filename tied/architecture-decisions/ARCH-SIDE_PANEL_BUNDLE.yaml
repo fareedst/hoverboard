@@ -1,0 +1,19 @@
+ARCH-SIDE_PANEL_BUNDLE:
+  name: "Side Panel Bundle Build"
+  rationale:
+    benefits:
+      - "analyze:side-panel for contributor visibility"
+      - "Single minify gate for all esbuild entries"
+    problems_solved:
+      - "Inconsistent per-script esbuild flags"
+      - "Placeholder minify script did nothing"
+    why: "Uniform production minify across entry points; side-panel size is the largest UI bundle."
+  status: "Active"
+  summary: "Central esbuild runner (scripts/esbuild-bundle.js) minifies all extension entry points when NODE_ENV=production; dev builds unminified. Side-panel analyze script reports unminified, minified, gzip sizes."
+  traceability:
+    architecture:
+      - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
+    implementation:
+      - "IMPL-SIDE_PANEL_BUNDLE"
+    requirements:
+      - "REQ-SIDE_PANEL_BUNDLE_SIZE"

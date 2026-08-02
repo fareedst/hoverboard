@@ -1,0 +1,26 @@
+REQ-SIDE_PANEL_BUNDLE_SIZE:
+  category: "Non-Functional"
+  description: "The side-panel esbuild bundle MUST be measurable (unminified, minified, gzip). Production builds MUST minify all esbuild extension entry points including side-panel. Dev builds MUST remain unminified for debugging."
+  name: "Side Panel Bundle Size"
+  priority: "P2"
+  rationale:
+    benefits:
+      - "Repeatable analyze:side-panel script for regression tracking"
+      - "Smaller extension load for all users"
+    problems_solved:
+      - "No baseline for bundle contributor analysis"
+      - "Unminified production bundles waste transfer size"
+    why: "The side-panel bundle is ~1 MiB unminified; minification reduces transfer size ~47% with no behavior change."
+  satisfaction_criteria:
+    - criterion: "Production build minifies all five esbuild entry points (sw, popup, options, content, side-panel)"
+      metric: "NODE_ENV=production npm run build:only; dist artifacts minified"
+    - criterion: "analyze:side-panel reports unminified, minified, and gzip byte counts"
+      metric: "npm run analyze:side-panel -- --json"
+    - criterion: "Dev builds remain unminified"
+      metric: "npm run build:only without NODE_ENV=production"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-SIDE_PANEL_BUNDLE"
+    implementation:
+      - "IMPL-SIDE_PANEL_BUNDLE"

@@ -3,9 +3,8 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
     files:
       - path: "src/ui/popup/KeyboardManager.js"
         description: "shortcuts map extended with Ctrl+Shift+KeyB, KeyO, KeyM, KeyI → emit openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport"
-      - path: "src/ui/side-panel/side-panel.js"
-        description: "initBookmarkTab enableKeyboard true; keyboardManager.setupKeyboardNavigation() after setupEventListeners"
-    functions: []
+      - path: "src/ui/side-panel/side-panel-bookmark-tab.js"
+        description: "initBookmarkTab enables keyboard and calls keyboardManager.setupKeyboardNavigation() after UI listeners"
   cross_references:
     - "ARCH-QUICK_ACCESS_ENTRY"
     - "REQ-QUICK_ACCESS_ENTRY"
@@ -21,8 +20,8 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-01"
+      reason: "Move Bookmark-tab keyboard setup into the focused side-panel adapter"
   name: "In-Popup and In-Panel Keyboard Shortcuts for Quick Access"
   rationale:
     benefits:
