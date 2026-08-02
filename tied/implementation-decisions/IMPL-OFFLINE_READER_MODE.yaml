@@ -24,6 +24,9 @@ IMPL-OFFLINE_READER_MODE:
       - name: "applySourcePresentation"
         description: "Apply or clear extension-owned shell variables"
         file: "src/ui/reader/reader.js"
+      - name: "renderReaderError"
+        description: "Render code-specific missing, unsupported, storage, and invalid archive states"
+        file: "src/ui/reader/reader.js"
   cross_references:
     - "ARCH-OFFLINE_READER_MODE"
     - "IMPL-ARCHIVED_CONTENT_SEARCH"
@@ -37,10 +40,14 @@ IMPL-OFFLINE_READER_MODE:
     details:
       - "After archive lookup, Reader requests only persisted product screenshots for the resolved URL and renders validated image data URLs; demo screenshot assets are never queried."
       - "APPLY_SOURCE_PRESENTATION sets only fixed extension-owned CSS variables on the Reader shell and clears them for the Hoverboard Reader theme fallback."
+      - "Archive lookup response failures and rejected storage reads are rendered through the same structured Reader error state with stable failure codes."
       - "Existing archives without a profile use fallback colors without migration or recapture."
       - "Missing, stale, unsupported, and storage-error states render as accessible status panels."
+      - "Missing, stale, unsupported, storage-error, and malformed responses render distinct accessible states; stale content remains readable."
       - "Only sanitizedHtml from the archive store is assigned to a constrained reader container; scripts, inline event handlers, and unsafe URLs are removed at capture time and blocked by page policy."
       - "Reader chrome and content inherit the active profile; status semantics remain extension-owned and archive HTML is never modified with profile values."
+      - "Reader lookup and screenshot lookup pass the same selected backend and archive identity so duplicate Local/File URLs cannot cross-resolve."
+      - "Reader navigation carries backend and archiveId when available; URL remains a fallback only for explicitly unambiguous legacy targets."
       - "Reader parses archive identifier or normalized URL from query parameters and requests archive data through a dedicated message."
       - "The live URL action is explicit and never part of archive loading."
       - "VALIDATE_SOURCE_PRESENTATION normalizes persisted profile fields and requires WCAG AA 4.5:1 contrast for text and optional link against an opaque background."
@@ -52,7 +59,7 @@ IMPL-OFFLINE_READER_MODE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Add validated source presentation rendering and Reader fallback evidence"
+      reason: "Record structured Reader exception handling"
   name: "Offline Reader Mode Implementation"
   rationale:
     benefits:

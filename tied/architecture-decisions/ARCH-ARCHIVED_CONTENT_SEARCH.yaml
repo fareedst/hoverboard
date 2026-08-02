@@ -1,5 +1,5 @@
 ARCH-ARCHIVED_CONTENT_SEARCH:
-  decision: "Archive search is a deterministic module over extracted text from Local and File archive adapters. It is composed with, but does not replace, metadata search; the Index exposes an explicit archive-content scope and returns bounded snippets plus Reader targets."
+  decision: "Archive search is a deterministic module over extracted text from Local and File archive adapters. Derived entries are keyed by selected backend plus normalized URL, and results preserve backend/archiveId identity for Reader targets. It is composed with, but does not replace, metadata search; the Index exposes an explicit archive-content scope and returns bounded snippets plus Reader targets."
   detail_file: "architecture-decisions/ARCH-ARCHIVED_CONTENT_SEARCH.yaml"
   metadata:
     created:
@@ -8,7 +8,7 @@ ARCH-ARCHIVED_CONTENT_SEARCH:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Record archive scope wiring and Reader target resolution evidence"
+      reason: "Define backend-scoped archive search identity"
   name: "Archived Content Search Architecture"
   rationale:
     alternatives_considered:

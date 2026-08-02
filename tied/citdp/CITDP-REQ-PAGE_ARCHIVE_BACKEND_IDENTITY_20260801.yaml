@@ -1,0 +1,81 @@
+CITDP-REQ-PAGE_ARCHIVE_BACKEND_IDENTITY_20260801:
+  change_definition:
+    current_behavior: "Archive search, cleanup, and Offline Reader navigation could resolve same-URL Local and File artifacts through URL-only identity, and Reader lookup failures could collapse into a generic missing state."
+    desired_behavior: "Use backend-scoped archive identity consisting of selected backend, normalized URL, and optional archiveId across archive search, cleanup, Reader targets, and Reader lookup; preserve stable Reader error states."
+    non_goals:
+      - "Adding a dedicated Playwright case for same-URL backend collision when unit and composition coverage prove the binding"
+      - "Adding archive support for Pinboard, Sync, or Browser storage backends"
+      - "Changing metadata search semantics or Local Query API archive exposure"
+      - "Changing source presentation profile behavior already covered by CITDP-OFFLINE_READER_SOURCE_PRESENTATION_20260801"
+    success_criteria:
+      - "Reader preserves MissingArchive, UnsupportedBackend, StorageFailed, and InvalidArchive outcomes accessibly"
+      - "Reader targets and lookup requests carry backend and archiveId when available"
+      - "Same-URL Local and File archives remain separate in derived archive search and cleanup"
+      - "Unit, composition, and extension E2E coverage passes"
+    unchanged_behavior: "Metadata search remains unchanged; archive support remains limited to Local and File; source presentation profile behavior remains bounded and fallback-safe; screenshot artifacts remain separate."
+  completion_criteria:
+    docs_updated:
+      - "CHANGELOG.md"
+      - "tied/implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH-pseudocode.md"
+      - "tied/implementation-decisions/IMPL-OFFLINE_READER_MODE-pseudocode.md"
+      - "tied/implementation-decisions/IMPL-PAGE_ARCHIVE_STORAGE-pseudocode.md"
+      - "tied/vocab/page-archives.md"
+      - "tied/vocab/routing.md"
+    verification_gate_notes: "Full Jest passed 1,598 tests with 1 skipped across 158 suites. Targeted archive unit/composition coverage passed 51/51. Archive extension Playwright passed 8/8 using playwright.extension.config.js. npm run build:only, npm run lint, npm run typecheck, scripts/validate_tokens.sh, npm run validate:manifest, yaml_index_validate, and tied_validate_consistency all passed. npm run validate:manifest reported only the existing sessions permission compatibility warning. lint_yaml is not present in this client checkout and is not exposed by the available TIED MCP server; index and full consistency validation supplied the available YAML gate."
+  impact_analysis:
+    impl_inventory_notes: "IMPL-ARCHIVED_CONTENT_SEARCH, IMPL-OFFLINE_READER_MODE, and IMPL-PAGE_ARCHIVE_STORAGE share backend identity and archive lifecycle paths across search, storage, message handling, Reader, popup, and Index."
+    modules_or_boundaries: "Archive text index; page archive store and adapters; MessageHandler archive dispatch; Reader query/render/error boundary; Index Reader target mapping; popup Offline Reader launch."
+    tied_tokens_affected:
+      - "ARCH-ARCHIVED_CONTENT_SEARCH"
+      - "ARCH-OFFLINE_READER_MODE"
+      - "ARCH-PAGE_ARCHIVE_STORAGE"
+      - "IMPL-ARCHIVED_CONTENT_SEARCH"
+      - "IMPL-OFFLINE_READER_MODE"
+      - "IMPL-PAGE_ARCHIVE_STORAGE"
+      - "REQ-ARCHIVED_CONTENT_SEARCH"
+      - "REQ-OFFLINE_READER_MODE"
+      - "REQ-PAGE_ARCHIVE_STORAGE"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "Implementation refinement exposed the need to pass backend identity through derived search cleanup and Reader screenshot lookup, and to catch rejected archive reads as StorageFailed; these were elevated into IMPL and propagated to ARCH, REQ, and vocabulary."
+    record_status: "completed"
+    tied_stack_updates_required:
+      - "ARCH detail decisions for backend-scoped archive identity"
+      - "IMPL sidecars and full-block source/test comments"
+      - "page-archives vocabulary naming bridge and block index"
+      - "REQ criteria for backend-scoped lifecycle and Reader error states"
+  record_identity:
+    change_request_id: "REQ-PAGE_ARCHIVE_BACKEND_IDENTITY"
+    recorded_at: "2026-08-01"
+    title: "Backend-scoped archive and Reader identity closeout"
+  risk_analysis:
+    risks:
+      - risk: "Same URL can select the wrong archive backend during cleanup or Reader navigation"
+        mitigation: "Key derived entries and requests with selected backend plus normalized URL and archiveId."
+        severity: "high"
+        tied_token_references:
+          - "REQ-ARCHIVED_CONTENT_SEARCH"
+          - "REQ-OFFLINE_READER_MODE"
+          - "REQ-PAGE_ARCHIVE_STORAGE"
+      - risk: "Storage rejection is shown as a false missing archive"
+        mitigation: "Catch lookup rejection and preserve StorageFailed through RENDER_READER_ERROR."
+        severity: "medium"
+        tied_token_references:
+          - "ARCH-OFFLINE_READER_MODE"
+          - "IMPL-OFFLINE_READER_MODE"
+      - risk: "New block names drift from the domain vocabulary"
+        mitigation: "Record backend-scoped archive identity, Reader error state, ARCHIVE_ENTRY_KEY, and RENDER_READER_ERROR in page-archives.md and routing.md."
+        severity: "low"
+        tied_token_references:
+          - "PROC-IMPL_PSEUDOCODE_TOKENS"
+          - "PROC-VOCABULARY_INDEX"
+  tdd_sequence:
+    phases:
+      - "Extension Playwright validation using playwright.extension.config.js"
+      - "IMPL sidecar refinement and token-comment review"
+      - "Production/dist synchronization via build:only"
+      - "Unit and composition validation for backend identity and Reader error outcomes"
+    summary: "Reconcile existing IMPL-first changes, align full-block comments in tests and source, run unit/composition tests, build dist, then run extension E2E."
+  test_strategy:
+    matrix_notes: "Unit: archive-content-search, bookmarks-table-archive-search, page-archive-store, message-handler-archive, reader. Composition: popup-archive-status-composition. E2E: extension-archive-features. Same-URL Local/File collision is covered below E2E because it is deterministic module and binding behavior."
+    summary: "Full Jest: 1,598 passed, 1 skipped across 158 suites. Targeted archive unit/composition: 51 passed. Extension archive E2E: 8 passed."

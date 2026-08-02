@@ -9,13 +9,16 @@ IMPL-ARCHIVED_CONTENT_SEARCH:
         description: "Archive content search control"
     functions:
       - name: "queryArchivedContent"
-        description: "Return bounded archive search results"
+        description: "Return bounded backend-scoped archive search results"
         file: "src/features/archive/archive-content-search.js"
       - name: "replaceArchivedContent"
-        description: "Replace one URL index entry"
+        description: "Replace one backend plus normalized URL search entry"
         file: "src/features/archive/archive-content-search.js"
       - name: "removeArchivedContent"
-        description: "Remove one URL index entry"
+        description: "Remove one selected-backend or legacy URL search entry"
+        file: "src/features/archive/archive-content-search.js"
+      - name: "archiveEntryKey"
+        description: "Build a stable backend-scoped archive search key"
         file: "src/features/archive/archive-content-search.js"
   cross_references:
     - "ARCH-ARCHIVED_CONTENT_SEARCH"
@@ -31,11 +34,14 @@ IMPL-ARCHIVED_CONTENT_SEARCH:
   implementation_approach:
     details:
       - "Archive browse/search scope rebuilds from persisted archives and maps results to extension-resolvable Reader targets before table rendering."
+      - "Archive lifecycle synchronization removes only the selected backend entry when backend is supplied and removes all URL entries only for legacy backend-omitted cleanup."
       - "Capture/recapture calls replace; deletion calls remove; missing archives do not appear as successful content matches."
-      - "Index entries are keyed by normalized URL and contain extracted text plus archive metadata, not sanitized HTML."
+      - "Derived archive search entries are keyed by backend plus normalized URL so Local and File records sharing a URL remain distinct."
+      - "Index entries are keyed by backend plus normalized URL and contain extracted text plus archive metadata, not sanitized HTML."
       - "Local Query API aggregate snapshots remain metadata-only in this phase."
       - "Metadata search remains the default and existing matchSearch behavior is unchanged."
-      - "Query normalization is case-insensitive substring matching with bounded context snippets; result ordering is deterministic by match position then capture time."
+      - "Query normalization is case-insensitive substring matching with bounded context snippets; result ordering is deterministic by match position, capture time, storage, then URL."
+      - "Search and browse results include storage and archiveId and construct Reader targets with the selected archive identity."
     summary: "Add an archive text index/query module and compose it with the Local Bookmarks Index through an explicit content scope."
   metadata:
     created:
@@ -44,7 +50,7 @@ IMPL-ARCHIVED_CONTENT_SEARCH:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Define empty-query browse and Reader target handoff"
+      reason: "Clarify backend-scoped search function contracts"
   name: "Archived Content Search Implementation"
   rationale:
     benefits:

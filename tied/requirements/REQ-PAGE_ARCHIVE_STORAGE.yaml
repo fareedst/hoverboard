@@ -9,7 +9,7 @@ REQ-PAGE_ARCHIVE_STORAGE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Add bounded source presentation profile storage contract"
+      reason: "Record backend-scoped archive identity"
   name: "Page Archive Storage"
   priority: "P1"
   rationale:
@@ -31,6 +31,7 @@ REQ-PAGE_ARCHIVE_STORAGE:
   satisfaction_criteria:
     - criterion: "A screenshot is a separate artifact linked to the bookmark archive and follows the same Local/File lifecycle."
     - criterion: "An archive stores capture metadata, content hash/version, sanitized readable HTML, extracted text, and an optional bounded source presentation profile outside the bookmark metadata map."
+    - criterion: "Archive identity and lifecycle are scoped by the selected backend plus normalized URL/archiveId so Local and File archives sharing a URL remain distinct."
     - criterion: "Bookmark-association failure returns bookmarkCreated false with explicit archive-retention and cleanup diagnostics and compensates the archive mutation when possible."
     - criterion: "Capture is explicit and supports only HTTP(S) pages mapped to Local or File bookmark storage."
     - criterion: "Capture validates an explicit preferredBackend of local or file, checks existence only in that selected backend, preserves an existing bookmark, and creates one minimal bookmark after a successful archive capture when none exists."

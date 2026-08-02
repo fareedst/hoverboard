@@ -34,6 +34,8 @@
 | **Reader theme fallback** | default colors | Hoverboard-owned Reader colors used when source presentation is absent, unsafe, transparent, or below WCAG AA contrast |
 | **selected-backend lookup** | aggregate URL lookup | Bookmark existence query constrained to `preferredBackend`; it does not use aggregate 2C semantics |
 | **status context key** | cached status identity | URL/backend pair used to discard stale cross-tab or cross-backend status responses |
+| **backend-scoped archive identity** | archive identity | Selected backend plus normalized URL and optional `archiveId`; keeps same-URL Local and File artifacts distinct |
+| **Reader error state** | Reader failure screen | Accessible state preserving stable missing, unsupported-backend, storage-failure, or invalid-archive codes |
 
 ---
 
@@ -50,6 +52,8 @@
 | Archived-content scope | Archived content | `SEARCH_ARCHIVED_CONTENT` | `APPLY_ARCHIVE_CONTENT_SCOPE` / `QUERY_ARCHIVED_CONTENT` | [IMPL-ARCHIVED_CONTENT_SEARCH] |
 | Archive snippet | — | result `snippet` | `snippetAround` | [IMPL-ARCHIVED_CONTENT_SEARCH] |
 | Offline Reader | Open offline Reader | `reader.html?url=…` or `archiveId` | `OPEN_OFFLINE_READER` / `LOAD_READER_ARCHIVE` | [IMPL-OFFLINE_READER_MODE] |
+| Backend-scoped archive identity | — | `backend` + normalized URL + `archiveId` | `archiveEntryKey` / `LOAD_READER_ARCHIVE` | [IMPL-ARCHIVED_CONTENT_SEARCH] [IMPL-OFFLINE_READER_MODE] |
+| Reader error state | Archive unavailable / backend unavailable | response `code` | `RENDER_READER_ERROR` / `renderReaderError` | [IMPL-OFFLINE_READER_MODE] |
 | Source presentation profile | — | `sourcePresentationProfile` | `EXTRACT_SOURCE_PRESENTATION` / `NORMALIZE_SOURCE_PRESENTATION` / `VALIDATE_SOURCE_PRESENTATION` / `APPLY_SOURCE_PRESENTATION` | [IMPL-PAGE_ARCHIVE_STORAGE] [IMPL-OFFLINE_READER_MODE] |
 | Reader target | Open stored archive | Reader extension URL | `readerTarget` | [REQ-ARCHIVED_CONTENT_SEARCH] |
 | Stale archive status | Archive status warning | `status: 'stale'` | `renderReaderArchive` | [IMPL-OFFLINE_READER_MODE] |
@@ -87,6 +91,8 @@
 - **Reader theme fallback** — Extension-owned presentation used for legacy archives and any profile that fails validation or WCAG AA contrast.
 - **selected-backend lookup** — Lookup through only the provider named by `preferredBackend`; any non-null stub counts as an existing bookmark.
 - **status context key** — Current URL/backend pair used to reject stale asynchronous status results.
+- **backend-scoped archive identity** — The selected backend, normalized archive URL, and optional archive identifier carried together so search, Reader, and cleanup cannot cross-resolve same-URL Local and File artifacts.
+- **Reader error state** — An accessible Reader status that preserves a stable archive failure code and clears content/live navigation instead of treating every failure as a missing archive.
 
 ---
 
@@ -107,10 +113,12 @@
 | Compensate association failure | `COMPENSATE_ARCHIVE_ASSOCIATION_FAILURE` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
 | Archive result boundary | `ARCHIVE_ASSOCIATION_RESULT_BOUNDARY` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
 | Replace archive search entry | `REPLACE_ARCHIVED_CONTENT` | [IMPL-ARCHIVED_CONTENT_SEARCH] |
+| Archive entry key | `ARCHIVE_ENTRY_KEY` | [IMPL-ARCHIVED_CONTENT_SEARCH] |
 | Query archive content | `QUERY_ARCHIVED_CONTENT` | [IMPL-ARCHIVED_CONTENT_SEARCH] |
 | Apply archive scope | `APPLY_ARCHIVE_CONTENT_SCOPE` | [IMPL-ARCHIVED_CONTENT_SEARCH] |
 | Parse Reader query | `PARSE_READER_QUERY` | [IMPL-OFFLINE_READER_MODE] |
 | Load Reader archive | `LOAD_READER_ARCHIVE` | [IMPL-OFFLINE_READER_MODE] |
+| Render Reader error | `RENDER_READER_ERROR` | [IMPL-OFFLINE_READER_MODE] |
 | Validate source presentation | `VALIDATE_SOURCE_PRESENTATION` | [IMPL-OFFLINE_READER_MODE] |
 | Apply source presentation | `APPLY_SOURCE_PRESENTATION` | [IMPL-OFFLINE_READER_MODE] |
 | Render Reader state | `RENDER_READER_STATE` | [IMPL-OFFLINE_READER_MODE] |
@@ -130,6 +138,7 @@
 | Term | Section |
 |------|---------|
 | archive artifact | Preferred terms / Named concepts |
+| backend-scoped archive identity | Preferred terms / Naming bridge / Named concepts |
 | archive content | Preferred terms |
 | archive snippet | Preferred terms / Named concepts |
 | archive privacy boundary | Preferred terms / Named concepts |
@@ -149,6 +158,7 @@
 | CREATE_MINIMAL_BOOKMARK_IF_ABSENT | Pseudo-code block names |
 | DELETE_PAGE_ARCHIVE | Pseudo-code block names |
 | EXTRACT_SOURCE_PRESENTATION | Pseudo-code block names |
+| ARCHIVE_ENTRY_KEY | Pseudo-code block names |
 | LOAD_READER_ARCHIVE | Pseudo-code block names |
 | NORMALIZE_SOURCE_PRESENTATION | Pseudo-code block names |
 | Offline Reader | Preferred terms / Named concepts |
@@ -156,6 +166,8 @@
 | QUERY_ARCHIVED_CONTENT | Pseudo-code block names |
 | Reader target | Preferred terms / Naming bridge / Named concepts |
 | REPLACE_ARCHIVED_CONTENT | Pseudo-code block names |
+| Reader error state | Preferred terms / Naming bridge / Named concepts |
+| RENDER_READER_ERROR | Pseudo-code block names |
 | RENDER_READER_STATE | Pseudo-code block names |
 | Reader re-sanitization | Preferred terms / Named concepts |
 | Reader theme fallback | Preferred terms / Named concepts |

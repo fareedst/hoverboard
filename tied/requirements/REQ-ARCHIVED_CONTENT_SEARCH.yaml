@@ -9,7 +9,7 @@ REQ-ARCHIVED_CONTENT_SEARCH:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Close archive scope, Reader navigation, and E2E evidence"
+      reason: "Record backend-scoped search and Reader identity"
   name: "Archived Content Search"
   priority: "P1"
   rationale:
@@ -34,6 +34,7 @@ REQ-ARCHIVED_CONTENT_SEARCH:
     - criterion: "Index updates on capture, recapture, and deletion; missing or stale archives are represented consistently."
     - criterion: "Queries search extracted text from Local and File archives and return bookmark identity, snippet, capture status, and Reader target."
     - criterion: "Search behavior defines case normalization, substring matching, result ordering, and bounded snippets."
+    - criterion: "Search results preserve selected backend and archiveId so same-URL Local and File archives resolve to distinct Reader targets."
   status: "Implemented"
   summary: "Search extracted text in Local and File page archives with snippets and Reader links."
   traceability:

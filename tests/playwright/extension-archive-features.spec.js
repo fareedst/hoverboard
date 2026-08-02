@@ -21,6 +21,7 @@ const archive = {
   textContent: 'Offline article Durable archive content.',
   contentHash: 'archive-content-hash',
   version: 1,
+  storage: 'local',
   sourcePresentationProfile: {
     background: '#ffffff',
     text: '#202124',
@@ -123,7 +124,7 @@ test.describe('[REQ-OFFLINE_READER_MODE] archive feature extension pages', () =>
     const reader = await context.newPage()
     reader.on('console', message => console.log(`[E2E reader console] ${message.type()}: ${message.text()}`))
     reader.on('pageerror', error => console.log(`[E2E reader error] ${error.message}`))
-    await reader.goto(`chrome-extension://${extensionId}/src/ui/reader/reader.html?url=${encodeURIComponent(archiveUrl)}`)
+    await reader.goto(`chrome-extension://${extensionId}/src/ui/reader/reader.html?url=${encodeURIComponent(archiveUrl)}&backend=local&archiveId=${archive.archiveId}`)
     await reader.waitForTimeout(250)
     await expect(reader.locator('#reader-title')).toHaveText('Archived feature article')
     await expect(reader.locator('#reader-content')).toContainText('Offline article')
@@ -285,6 +286,8 @@ test.describe('[REQ-ARCHIVED_CONTENT_SEARCH] Local Bookmarks Index archive scope
     await expect(readerLink).toBeVisible()
     const readerTarget = await readerLink.getAttribute('href')
     expect(readerTarget).toContain(`chrome-extension://${extensionId}/src/ui/reader/reader.html`)
+    expect(readerTarget).toContain('backend=local')
+    expect(readerTarget).toContain(`archiveId=${archive.archiveId}`)
     await readerLink.click()
     await expect(page).toHaveURL(/src\/ui\/reader\/reader\.html\?url=/)
     await expect(page.locator('#reader-title')).toHaveText('Archived feature article')

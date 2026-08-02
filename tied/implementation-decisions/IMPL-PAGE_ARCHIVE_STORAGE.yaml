@@ -31,10 +31,13 @@ IMPL-PAGE_ARCHIVE_STORAGE:
   implementation_approach:
     details:
       - "All adapter writes are atomic from the caller perspective and return explicit success/error outcomes."
+      - "Archive lookup accepts backend and archiveId together; omitted backend retains legacy local-then-file fallback only for unambiguous callers."
       - "Archive record contains url, archiveId, version, capturedAt, sourceTitle, contentHash, sanitizedHtml, textContent, status, artifact references, and optional sourcePresentationProfile."
+      - "Archive search synchronization receives backend identity so derived entries do not collapse Local and File records sharing a URL."
       - "Association failure restores the prior archive or removes the new archive version and returns cleanup diagnostics."
       - "Capture uses Readability extraction plus sanitized HTML; AI tagging retains its 16000-character payload cap as a separate option."
       - "CAPTURE_PAGE_ARCHIVE passes an explicit preferredBackend to the selected-backend association orchestrator; archive persistence precedes missing-bookmark creation and preserves existing bookmark metadata."
+      - "Delete and compensation cleanup pass the selected backend to remove only the intended derived search entry."
       - "Local persistence uses a quota-appropriate archive adapter separate from hoverboard_local_bookmarks; File persistence uses a versioned archive file/directory separate from hoverboard-bookmarks.json."
       - "normalizeSourcePresentationProfile allowlists canonical opaque colors and light/dark intent, caps serialized profile size, and omits invalid values."
       - "Only Local and File backend values resolve to archive adapters; an unconfigured File archive adapter returns UnsupportedBackend instead of silently using memory."
@@ -49,7 +52,7 @@ IMPL-PAGE_ARCHIVE_STORAGE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Add bounded source presentation extraction, normalization, and hash exclusion"
+      reason: "Record backend-scoped archive lookup and search lifecycle"
   name: "Page Archive Storage Implementation"
   rationale:
     benefits:

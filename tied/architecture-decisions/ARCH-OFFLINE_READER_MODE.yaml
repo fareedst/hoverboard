@@ -1,5 +1,5 @@
 ARCH-OFFLINE_READER_MODE:
-  decision: "Reader is a standalone extension tool page addressed by archive identifier or normalized URL. It loads stored archive data through the archive message boundary, injects only sanitized HTML into a constrained container, and applies a validated bounded source presentation profile to the Reader shell and content through extension-owned CSS variables. Invalid, transparent, missing, or WCAG-AA-failing profiles clear the variables and use the Hoverboard Reader theme fallback."
+  decision: "Reader is a standalone extension tool page addressed by selected backend plus archive identifier or normalized URL; URL-only legacy targets are accepted only when unambiguous. It loads stored archive data through the archive message boundary, injects only sanitized HTML into a constrained container, and applies a validated bounded source presentation profile to the Reader shell and content through extension-owned CSS variables. Invalid, transparent, missing, or WCAG-AA-failing profiles clear the variables and use the Hoverboard Reader theme fallback. Stable missing, unsupported-backend, storage-failure, and invalid-archive outcomes render as accessible Reader error states, while stale content remains readable."
   detail_file: "architecture-decisions/ARCH-OFFLINE_READER_MODE.yaml"
   metadata:
     created:
@@ -8,7 +8,7 @@ ARCH-OFFLINE_READER_MODE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Define isolated source presentation profile application and fallback"
+      reason: "Define Reader archive identity and failure states"
   name: "Offline Reader Mode Architecture"
   rationale:
     alternatives_considered:

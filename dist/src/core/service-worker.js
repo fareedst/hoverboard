@@ -25337,7 +25337,7 @@ var PageArchiveStore = class {
       };
       data.archives[key] = normalized;
       await adapter.writeArchiveFile(data);
-      await this.archiveSearch?.replaceArchivedContent(key, normalized);
+      await this.archiveSearch?.replaceArchivedContent(key, backend, { ...normalized, storage: backend });
       console.log("[IMPL-PAGE_ARCHIVE_STORAGE] Archive saved:", key, backend);
       return { success: true, archive: clone2({ ...normalized, storage: backend }) };
     } catch (error48) {
@@ -25370,7 +25370,7 @@ var PageArchiveStore = class {
       const data = await readArchiveMap(adapter);
       delete data.archives[key];
       await adapter.writeArchiveFile(data);
-      await this.archiveSearch?.removeArchivedContent(key);
+      await this.archiveSearch?.removeArchivedContent(key, backend);
       console.log("[IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] Current archive removed:", key, backend);
       return { success: true };
     } catch (error48) {
@@ -25405,7 +25405,7 @@ var PageArchiveStore = class {
         }
         await adapter.writeArchiveFile(data);
       }
-      await this.archiveSearch?.removeArchivedContent(key);
+      await this.archiveSearch?.removeArchivedContent(key, backend);
       console.log("[IMPL-PAGE_ARCHIVE_STORAGE] Archive deleted:", key);
       return { success: true };
     } catch (error48) {
@@ -25575,6 +25575,19 @@ var DEFAULT_SNIPPET_LENGTH = 180;
 function normalizeQuery(query) {
   return String(query || "").trim().toLowerCase();
 }
+function normalizeStorage(storage) {
+  return String(storage || "local").toLowerCase() === "file" ? "file" : "local";
+}
+function archiveEntryKey(url2, storage) {
+  return `${normalizeStorage(storage)}:${normalizeArchiveUrl(url2)}`;
+}
+function buildReaderTarget({ url: url2, storage, archiveId } = {}) {
+  const params = new URLSearchParams();
+  params.set("url", String(url2 || ""));
+  params.set("backend", normalizeStorage(storage));
+  if (archiveId) params.set("archiveId", String(archiveId));
+  return `src/ui/reader/reader.html?${params.toString()}`;
+}
 function snippetAround(text, position, length) {
   const source = String(text || "");
   const start = Math.max(0, position - Math.floor(length / 3));
@@ -25590,30 +25603,40 @@ var ArchiveContentSearch = class {
   }
   /**
    * [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH]
-   * Replace one search entry after successful archive capture or remove it when text is empty.
+   * Replace one backend-scoped search entry after successful archive capture or remove it when text is empty.
    */
-  async replaceArchivedContent(url2, archive) {
+  async replaceArchivedContent(url2, backendOrArchive, maybeArchive) {
+    const archive = typeof backendOrArchive === "string" ? maybeArchive : backendOrArchive;
+    const storage = normalizeStorage(typeof backendOrArchive === "string" ? backendOrArchive : archive?.storage);
     const key = normalizeArchiveUrl(url2);
     if (!key || !archive?.textContent) {
-      await this.removeArchivedContent(key);
+      await this.removeArchivedContent(key, storage);
       return;
     }
-    this.entries.set(key, {
+    this.entries.set(archiveEntryKey(key, storage), {
       url: key,
       title: archive.sourceTitle || archive.title || key,
       textContent: String(archive.textContent),
       capturedAt: archive.capturedAt || "",
       status: archive.status || "available",
       archiveId: archive.archiveId || "",
-      storage: archive.storage || ""
+      storage
     });
   }
   /**
    * [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH]
    * Remove derived search state when archive content is deleted.
    */
-  async removeArchivedContent(url2) {
-    this.entries.delete(normalizeArchiveUrl(url2));
+  async removeArchivedContent(url2, backend = null) {
+    const key = normalizeArchiveUrl(url2);
+    if (!key) return;
+    if (backend) {
+      this.entries.delete(archiveEntryKey(key, backend));
+      return;
+    }
+    for (const [entryKey, entry] of this.entries.entries()) {
+      if (entry.url === key) this.entries.delete(entryKey);
+    }
   }
   /**
    * [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH]
@@ -25632,12 +25655,13 @@ var ArchiveContentSearch = class {
         snippet: snippetAround(entry.textContent, position, this.snippetLength),
         archiveStatus: entry.status,
         storage: entry.storage,
-        readerTarget: `src/ui/reader/reader.html?url=${encodeURIComponent(entry.url)}`,
+        archiveId: entry.archiveId,
+        readerTarget: buildReaderTarget(entry),
         capturedAt: entry.capturedAt,
         position
       });
     }
-    return results.sort((a, b) => a.position - b.position || String(b.capturedAt).localeCompare(String(a.capturedAt)) || a.url.localeCompare(b.url));
+    return results.sort((a, b) => a.position - b.position || String(b.capturedAt).localeCompare(String(a.capturedAt)) || a.storage.localeCompare(b.storage) || a.url.localeCompare(b.url));
   }
   /**
    * [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH]
@@ -25652,8 +25676,13 @@ var ArchiveContentSearch = class {
         title: archive.sourceTitle || archive.title || url2,
         snippet: text ? snippetAround(text, 0, this.snippetLength) : "(archived page)",
         archiveStatus: archive.status || "available",
-        storage: archive.storage || "",
-        readerTarget: `src/ui/reader/reader.html?url=${encodeURIComponent(url2)}`,
+        storage: normalizeStorage(archive.storage),
+        archiveId: archive.archiveId || "",
+        readerTarget: buildReaderTarget({
+          url: url2,
+          storage: archive.storage,
+          archiveId: archive.archiveId
+        }),
         capturedAt: archive.capturedAt || "",
         position: 0
       };
@@ -25662,7 +25691,9 @@ var ArchiveContentSearch = class {
   seed(archives = []) {
     this.entries.clear();
     for (const archive of archives) {
-      if (archive?.url) this.replaceArchivedContent(archive.url, archive);
+      if (!archive?.url) continue;
+      if (archive.storage) this.replaceArchivedContent(archive.url, archive.storage, archive);
+      else this.replaceArchivedContent(archive.url, archive);
     }
   }
 };

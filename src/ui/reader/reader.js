@@ -3,30 +3,52 @@
  * Render persisted sanitized archive content in a dedicated Offline Reader without fetching the live page.
  *
  * ## LOAD_READER_ARCHIVE
- * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: parse URL/archiveId query, request only persisted archive state, and use an explicit freshness handoff.
+ * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: parse URL/archiveId/backend identity, request only the selected persisted archive state, and use an explicit freshness handoff.
  * - Contract:
  *   - INPUT: location { search }, sendMessage, elements, staleAfterMs option
  *   - PRE: Reader is an extension page; sendMessage reads persisted state only
  *   - OUTPUT: rendered Reader state
  *   - POST:
- *     - URL/archiveId query => one GET_PAGE_ARCHIVE request includes `staleAfterMs`
+ *     - URL/archiveId query => one GET_PAGE_ARCHIVE request includes `backend`, `archiveId`, and `staleAfterMs`
  *     - no query => no storage request and missing state is rendered
- *     - archive success => screenshot lookup uses the persisted archive URL
- *   - FAILURE_MODES: MissingArchive, StorageFailed, InvalidArchive
- *   - DATA: URLSearchParams, PageArchiveStore response, PageScreenshotStore response
+ *     - archive success => screenshot lookup uses the persisted archive URL, backend, and archive identity
+ *   - FAILURE_MODES: MissingArchive, UnsupportedBackend, StorageFailed, InvalidArchive
+ *   - DATA: URLSearchParams, backend, archiveId, PageArchiveStore response, PageScreenshotStore response
  *   - DATA_TRANSITION: storage response becomes DOM state; no live page data enters Reader
  *   - EFFECTS: DOM, Async, IO
  *   - TERMINATION: total
  * - PROCEDURE: LOAD_READER_ARCHIVE
  *   - query = PARSE_QUERY(location)
- *   - IF query.url and query.archiveId are absent: RENDER_READER_ARCHIVE(null); RETURN MissingArchive
+ *   - IF query.url and query.archiveId are absent: RENDER_READER_ERROR(MissingArchive); RETURN MissingArchive
  *   - staleAfterMs = options.staleAfterMs OR DEFAULT_READER_STALE_AFTER_MS (default 0, meaning no age-based override)
- *   - archiveResponse = AWAIT sendMessage(GET_PAGE_ARCHIVE, { url: query.url, archiveId: query.archiveId, staleAfterMs })
- *   - IF archiveResponse is missing or failed: RENDER_READER_ARCHIVE(null); RETURN MissingArchive
+ *   - archiveResponse = AWAIT sendMessage(GET_PAGE_ARCHIVE, { url: query.url, archiveId: query.archiveId, backend: query.backend, staleAfterMs })
+ *   - IF archiveResponse is missing: RENDER_READER_ERROR(MissingArchive); RETURN MissingArchive
+ *   - IF archiveResponse is failed: RENDER_READER_ERROR(archiveResponse.code OR StorageFailed); RETURN archiveResponse.code OR StorageFailed
+ *   - IF archive lookup throws: RENDER_READER_ERROR(StorageFailed); RETURN { success: false, code: StorageFailed, error }
  *   - RENDER_READER_ARCHIVE(archiveResponse.archive)
- *   - screenshotResponse = AWAIT sendMessage(GET_PAGE_SCREENSHOTS, { url: archiveResponse.archive.url })
- *   - RENDER_READER_SCREENSHOTS(screenshotResponse.screenshots)
+ *   - screenshotResponse = AWAIT sendMessage(GET_PAGE_SCREENSHOTS, { url: archiveResponse.archive.url, archiveId: archiveResponse.archive.archiveId, backend: archiveResponse.archive.storage OR query.backend })
+ *   - IF screenshotResponse is successful: RENDER_READER_SCREENSHOTS(screenshotResponse.screenshots)
  *   - RETURN success
+ *
+ * ## RENDER_READER_ERROR
+ * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: preserve stable missing, unsupported, storage, and malformed archive failure codes in an accessible Reader error state instead of collapsing them into missing content.
+ * - Contract:
+ *   - INPUT: failure code, Reader DOM elements
+ *   - PRE: code is a stable archive lookup failure or defaults to StorageFailed
+ *   - OUTPUT: { success: false, code }
+ *   - POST:
+ *     - content is empty and live link is hidden
+ *     - status state is error with code-specific guidance
+ *     - failure code remains available to callers
+ *   - FAILURE_MODES: MissingArchive, UnsupportedBackend, StorageFailed, InvalidArchive
+ *   - EFFECTS: DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: RENDER_READER_ERROR
+ *   - normalizedCode = code OR StorageFailed
+ *   - clear content and live link
+ *   - set title and status text from normalizedCode
+ *   - set status state to error
+ *   - RETURN { success: false, code: normalizedCode }
  *
  * ## VALIDATE_SOURCE_PRESENTATION
  * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: validate persisted source presentation metadata before it can influence the extension-owned Reader shell.
@@ -82,10 +104,7 @@
  *   - TERMINATION: total
  * - PROCEDURE: RENDER_READER_ARCHIVE
  *   - IF archive is absent:
- *     - clear content
- *     - show Archive unavailable
- *     - hide live link
- *     - RETURN MissingArchive
+ *     - RETURN RENDER_READER_ERROR(MissingArchive)
  *   - title = archive.sourceTitle OR archive.title OR archive.url
  *   - profile = VALIDATE_SOURCE_PRESENTATION(archive.sourcePresentationProfile)
  *   - APPLY_SOURCE_PRESENTATION(reader shell, profile)
@@ -262,6 +281,50 @@ function actualResponse (response) {
     : response
 }
 
+const READER_ERROR_MESSAGES = Object.freeze({
+  MissingArchive: {
+    title: 'Archive unavailable',
+    status: 'This bookmark has no stored archive.'
+  },
+  UnsupportedBackend: {
+    title: 'Archive backend unavailable',
+    status: 'This archive backend is unavailable.'
+  },
+  StorageFailed: {
+    title: 'Archive could not be loaded',
+    status: 'The stored archive could not be loaded from local storage.'
+  },
+  InvalidArchive: {
+    title: 'Archive is invalid',
+    status: 'The stored archive is invalid.'
+  }
+})
+
+/**
+ * [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: preserve stable missing, unsupported, storage, and malformed archive failure codes in an accessible Reader error state instead of collapsing them into missing content.
+ */
+export function renderReaderError (code = 'StorageFailed', elements = {}) {
+  const normalizedCode = READER_ERROR_MESSAGES[code] ? code : 'StorageFailed'
+  const message = READER_ERROR_MESSAGES[normalizedCode]
+  const titleEl = elements.titleEl || document.getElementById('reader-title')
+  const statusEl = elements.statusEl || document.getElementById('reader-status')
+  const contentEl = elements.contentEl || document.getElementById('reader-content')
+  const liveLink = elements.liveLink || document.getElementById('reader-live-link')
+  const shellEl = elements.shellEl || contentEl?.closest('.reader-shell') || document.querySelector('.reader-shell')
+  if (titleEl) titleEl.textContent = message.title
+  if (statusEl) {
+    statusEl.textContent = message.status
+    statusEl.dataset.state = 'error'
+  }
+  if (contentEl) contentEl.replaceChildren()
+  if (liveLink) {
+    liveLink.removeAttribute('href')
+    liveLink.hidden = true
+  }
+  applySourcePresentation(shellEl, undefined)
+  return { success: false, code: normalizedCode }
+}
+
 /**
  * [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: validate persisted source presentation metadata before it can influence the extension-owned Reader shell.
  */
@@ -310,15 +373,7 @@ export function renderReaderArchive (archive, elements = {}) {
   const liveLink = elements.liveLink || document.getElementById('reader-live-link')
   const shellEl = elements.shellEl || contentEl?.closest('.reader-shell') || document.querySelector('.reader-shell')
   if (!archive) {
-    if (titleEl) titleEl.textContent = 'Archive unavailable'
-    if (statusEl) {
-      statusEl.textContent = 'This bookmark has no stored archive.'
-      statusEl.dataset.state = 'error'
-    }
-    if (contentEl) contentEl.replaceChildren()
-    if (liveLink) liveLink.hidden = true
-    applySourcePresentation(shellEl, undefined)
-    return { success: false, code: 'MissingArchive' }
+    return renderReaderError('MissingArchive', elements)
   }
   if (titleEl) titleEl.textContent = archive.sourceTitle || archive.title || archive.url || 'Archived page'
   if (metaEl) {
@@ -346,8 +401,7 @@ export function renderReaderArchive (archive, elements = {}) {
 }
 
 /**
- * [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE]
- * Load an archive by URL query and classify missing/stale/storage errors for the UI.
+ * [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: parse URL/archiveId/backend identity, request only the selected persisted archive state, and use an explicit freshness handoff.
  */
 export async function loadReaderArchive (locationLike = window.location, options = {}) {
   const sendMessage = options.sendMessage || defaultSendMessage
@@ -355,31 +409,35 @@ export async function loadReaderArchive (locationLike = window.location, options
   const query = new URLSearchParams(locationLike.search || '')
   const url = query.get('url')
   const archiveId = query.get('archiveId')
-  if (!url && !archiveId) return renderReaderArchive(null, elements)
+  const backend = query.get('backend') || null
+  if (!url && !archiveId) return renderReaderError('MissingArchive', elements)
   try {
     const staleAfterMs = Number(options.staleAfterMs ?? DEFAULT_READER_STALE_AFTER_MS)
     const response = actualResponse(await sendMessage({
       type: GET_PAGE_ARCHIVE,
-      data: { url, archiveId, staleAfterMs }
+      data: { url, archiveId, backend, staleAfterMs }
     }))
-    if (!response?.success || !response.archive) return renderReaderArchive(null, elements)
+    if (!response?.success) return renderReaderError(response?.code || 'StorageFailed', elements)
+    if (!response.archive) return renderReaderError('InvalidArchive', elements)
     const result = renderReaderArchive(response.archive, elements)
     try {
       const screenshotResponse = actualResponse(await sendMessage({
         type: GET_PAGE_SCREENSHOTS,
-        data: { url: response.archive.url }
+        data: {
+          url: response.archive.url,
+          archiveId: response.archive.archiveId || response.archive.id || archiveId,
+          backend: response.archive.storage || backend
+        }
       }))
-      renderReaderScreenshots(screenshotResponse?.screenshots || [], elements)
+      if (screenshotResponse?.success !== false) {
+        renderReaderScreenshots(screenshotResponse?.screenshots || [], elements)
+      }
     } catch (error) {
       console.warn('[IMPL-PAGE_SCREENSHOT_ARCHIVE] Reader screenshot lookup failed:', error)
     }
     return result
   } catch (error) {
-    const statusEl = elements.statusEl || document.getElementById('reader-status')
-    if (statusEl) {
-      statusEl.textContent = 'The archive could not be loaded from local storage.'
-      statusEl.dataset.state = 'error'
-    }
+    renderReaderError('StorageFailed', elements)
     return { success: false, code: 'StorageFailed', error: error.message }
   }
 }

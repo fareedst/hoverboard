@@ -357,4 +357,31 @@ describe('[REQ-PAGE_ARCHIVE_STATUS_UI] selected-backend status composition', () 
     expect(uiManager.showError).toHaveBeenCalledWith(expect.stringContaining('unavailable'))
     expect(chrome.tabs.create).not.toHaveBeenCalled()
   })
+
+  test('opens Offline Reader with selected backend and archive identity', async () => {
+    const uiManager = makeUiManager()
+    const controller = new PopupController({
+      uiManager,
+      stateManager: { setState: jest.fn(), getState: jest.fn(() => ({})) },
+      errorHandler: { handleError: jest.fn() }
+    })
+    controller.currentPin = { url: 'https://example.com/shared' }
+    controller._resolvedStorageBackend = 'file'
+    controller.getSelectedStorageBackend = jest.fn(() => 'file')
+    controller._archiveArtifactStatus = {
+      backend: 'file',
+      archiveSaved: true,
+      screenshotSaved: false,
+      readerAvailable: true,
+      archiveArtifactId: 'archive-file-shared',
+      screenshotArtifactId: null
+    }
+
+    await controller.handleOpenOfflineReader()
+
+    expect(chrome.tabs.create).toHaveBeenCalledWith({
+      url: expect.stringContaining('backend=file')
+    })
+    expect(chrome.tabs.create.mock.calls.at(-1)[0].url).toContain('archiveId=archive-file-shared')
+  })
 })

@@ -112,11 +112,11 @@
   - PRE: capture is explicit; bookmark.url is HTTP(S); archiveSearch may be absent
   - OUTPUT: { success: true, archive } | { success: false, code, previous? }
   - POST:
-    - success => one current archive version and matching derived text entry exist
+    - success => one current backend-scoped archive version and matching derived text entry exist
     - StorageFailed => prior archive remains available when the adapter supports atomic failure
   - FAILURE_MODES: InvalidRequest, UnsupportedBackend, StorageUnavailable, RestrictedUrl, InhibitedUrl, CaptureFailed, TooLarge, StorageFailed
   - DATA: archive collections and derived ArchiveTextIndex
-  - DATA_TRANSITION: successful write replaces one URL version; failure does not claim a new archive
+  - DATA_TRANSITION: successful write replaces one backend-scoped URL version; failure does not claim a new archive
   - EFFECTS: Async, IO, State
   - TERMINATION: total
 - PROCEDURE: SAVE_PAGE_ARCHIVE
@@ -127,7 +127,7 @@
   - previous = AWAIT adapter.readArchiveFile(bookmark.url)
   - result = AWAIT adapter.writeArchiveFile(bookmark.url, archive)
   - IF result fails: RETURN { success: false, code: StorageFailed, previous }
-  - IF archiveSearch exists: AWAIT archiveSearch.replaceArchivedContent(bookmark.url, archive)
+  - IF archiveSearch exists: AWAIT archiveSearch.replaceArchivedContent(bookmark.url, bookmark.storage, archive)
   - RETURN { success: true, archive }
 
 ## DELETE_PAGE_ARCHIVE
@@ -148,7 +148,7 @@
   - adapter = RESOLVE_ARCHIVE_ADAPTER(bookmark.storage, adapters)
   - IF adapter is error: RETURN { success: false, code: adapter.error }
   - REMOVE readable archive and matching screenshot records for bookmark.url
-  - IF archiveSearch exists: AWAIT archiveSearch.removeArchivedContent(bookmark.url)
+  - IF archiveSearch exists: AWAIT archiveSearch.removeArchivedContent(bookmark.url, bookmark.storage)
   - RETURN { success: true }
 
 ## LOOKUP_PAGE_ARCHIVE
@@ -158,7 +158,7 @@
   - PRE: identifier is present; backend is local or file when supplied
   - OUTPUT: archive | { error: MissingArchive | UnsupportedBackend | StorageUnavailable | StorageFailed }
   - POST:
-    - success => returned archive is persisted sanitized data; no network request occurs
+    - success => returned archive is persisted sanitized data with selected backend identity; no network request occurs
     - error => no network request occurs
   - FAILURE_MODES: MissingArchive, UnsupportedBackend, StorageUnavailable, StorageFailed
   - EFFECTS: Async, IO
@@ -192,4 +192,4 @@
     - IF adapter is error and backend is supplied: RETURN { error: adapter.error }
     - IF adapter is error: CONTINUE
     - archives = archives CONCAT AWAIT adapter.listArchives()
-  - RETURN SORT archives BY capturedAt DESCENDING, url ASCENDING
+  - RETURN SORT archives BY capturedAt DESCENDING, storage ASCENDING, url ASCENDING

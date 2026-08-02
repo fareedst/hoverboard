@@ -3,42 +3,58 @@
  * Search extracted text from Local/File archives without changing metadata search.
  *
  * ## REPLACE_ARCHIVED_CONTENT
- * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: synchronize one extracted-text entry with successful archive capture and remove it when text is empty.
+ * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: synchronize one backend-scoped extracted-text entry with successful archive capture and remove it when text is empty.
  * - Contract:
- *   - INPUT: url, archive entry
+ *   - INPUT: url, backend, archive entry
  *   - PRE: url is normalizable; entry may be absent or have empty text
  *   - OUTPUT: none
  *   - POST:
- *     - non-empty entry => normalized URL maps to one normalized search entry
- *     - missing/empty entry => normalized URL is absent from the index
- *   - DATA: ArchiveTextIndex
- *   - DATA_TRANSITION: replace updates one URL; empty input removes one URL
+ *     - non-empty entry => backend plus normalized URL maps to one normalized search entry
+ *     - missing/empty entry => the selected backend plus normalized URL is absent from the index
+ *   - DATA: ArchiveTextIndex keyed by backend plus normalized URL
+ *   - DATA_TRANSITION: replace updates one backend-scoped entry; empty input removes one backend-scoped entry
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: REPLACE_ARCHIVED_CONTENT
- *   - IF entry is missing or text is empty: REMOVE_ARCHIVED_CONTENT(url); RETURN
- *   - index[normalize(url)] = normalizeEntry(entry)
+ *   - storage = normalizeStorage(backend OR entry.storage OR local)
+ *   - key = ARCHIVE_ENTRY_KEY(normalize(url), storage)
+ *   - IF entry is missing or text is empty: REMOVE_ARCHIVED_CONTENT(url, storage); RETURN
+ *   - index[key] = normalizeEntry(entry with storage and archiveId)
+ *
+ * ## ARCHIVE_ENTRY_KEY
+ * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: keep Local and File archive records distinct when they share a normalized URL.
+ * - Contract:
+ *   - INPUT: normalized URL, backend
+ *   - PRE: URL is normalized; backend is local or file or defaults to local for legacy entries
+ *   - OUTPUT: stable search key
+ *   - POST: distinct backend/URL pairs produce distinct keys
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: ARCHIVE_ENTRY_KEY
+ *   - storage = normalizeStorage(backend)
+ *   - RETURN `${storage}:${normalized URL}`
  *
  * ## REMOVE_ARCHIVED_CONTENT
- * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: remove derived search state when an archive is deleted or compensation removes the current archive.
+ * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: remove selected-backend derived search state when an archive is deleted or compensation removes the current archive.
  * - Contract:
- *   - INPUT: url
+ *   - INPUT: url, optional backend
  *   - PRE: url is normalizable
  *   - OUTPUT: none
- *   - POST: normalized URL is absent from ArchiveTextIndex
- *   - DATA: ArchiveTextIndex
- *   - DATA_TRANSITION: one normalized URL is deleted
+ *   - POST: selected backend entry is absent, or all backend entries for the URL are absent when backend is omitted
+ *   - DATA: ArchiveTextIndex keyed by backend plus normalized URL
+ *   - DATA_TRANSITION: one or more backend-scoped entries are deleted
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: REMOVE_ARCHIVED_CONTENT
- *   - DELETE index[normalize(url)]
+ *   - IF backend is supplied: DELETE index[ARCHIVE_ENTRY_KEY(normalize(url), backend)]
+ *   - ELSE: DELETE every index entry whose URL is normalize(url)
  *
  * ## QUERY_ARCHIVED_CONTENT
  * - [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH] How: return bounded deterministic snippets for explicit non-empty archive-content queries without mutating metadata or the index.
  * - Contract:
  *   - INPUT: query (string), ArchiveTextIndex
  *   - PRE: index entries came from successful archive captures
- *   - OUTPUT: list of { url, title, snippet, archiveStatus, readerTarget }
+ *   - OUTPUT: list of { url, title, snippet, archiveStatus, storage, archiveId, readerTarget }
  *   - POST:
  *     - success => each result has a bounded snippet and deterministic order
  *     - empty query => empty list; index remains unchanged
@@ -53,7 +69,7 @@
  *   - FOR each entry IN index:
  *     - position = findCaseInsensitive(entry.text, needle)
  *     - IF position >= 0: append result with bounded snippet and Reader target
- *   - SORT results BY position ASCENDING, capturedAt DESCENDING, url ASCENDING
+ *   - SORT results BY position ASCENDING, capturedAt DESCENDING, storage ASCENDING, url ASCENDING
  *   - RETURN results
  *
  * ## APPLY_ARCHIVE_CONTENT_SCOPE
@@ -83,14 +99,14 @@
  * - Contract:
  *   - INPUT: persisted archive list, archiveSearch
  *   - PRE: archiveSearch is available; each archive has a URL or is discarded
- *   - OUTPUT: deterministic rows with title, snippet, status, storage, capturedAt, readerTarget
- *   - POST: each readerTarget resolves to the extension Reader page
+ *   - OUTPUT: deterministic rows with title, snippet, status, storage, archiveId, capturedAt, readerTarget
+ *   - POST: each readerTarget resolves to the selected backend archive in the extension Reader page
  *   - EFFECTS: pure
  *   - TERMINATION: total
  * - PROCEDURE: BROWSE_ARCHIVED_CONTENT
  *   - rows = archiveSearch.browseArchivedContent(archives)
  *   - FOR each row IN rows:
- *     - row.readerTarget = extensionRuntimeUrl('src/ui/reader/reader.html', { url: row.url })
+ *     - row.readerTarget = extensionRuntimeUrl('src/ui/reader/reader.html', { url: row.url, backend: row.storage, archiveId: row.archiveId })
  *   - RETURN rows
  *
  * ## OPEN_READER_FROM_ARCHIVE_RESULT
@@ -115,6 +131,22 @@ function normalizeQuery (query) {
   return String(query || '').trim().toLowerCase()
 }
 
+function normalizeStorage (storage) {
+  return String(storage || 'local').toLowerCase() === 'file' ? 'file' : 'local'
+}
+
+function archiveEntryKey (url, storage) {
+  return `${normalizeStorage(storage)}:${normalizeArchiveUrl(url)}`
+}
+
+function buildReaderTarget ({ url, storage, archiveId } = {}) {
+  const params = new URLSearchParams()
+  params.set('url', String(url || ''))
+  params.set('backend', normalizeStorage(storage))
+  if (archiveId) params.set('archiveId', String(archiveId))
+  return `src/ui/reader/reader.html?${params.toString()}`
+}
+
 function snippetAround (text, position, length) {
   const source = String(text || '')
   const start = Math.max(0, position - Math.floor(length / 3))
@@ -132,22 +164,24 @@ export class ArchiveContentSearch {
 
   /**
    * [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH]
-   * Replace one search entry after successful archive capture or remove it when text is empty.
+   * Replace one backend-scoped search entry after successful archive capture or remove it when text is empty.
    */
-  async replaceArchivedContent (url, archive) {
+  async replaceArchivedContent (url, backendOrArchive, maybeArchive) {
+    const archive = typeof backendOrArchive === 'string' ? maybeArchive : backendOrArchive
+    const storage = normalizeStorage(typeof backendOrArchive === 'string' ? backendOrArchive : archive?.storage)
     const key = normalizeArchiveUrl(url)
     if (!key || !archive?.textContent) {
-      await this.removeArchivedContent(key)
+      await this.removeArchivedContent(key, storage)
       return
     }
-    this.entries.set(key, {
+    this.entries.set(archiveEntryKey(key, storage), {
       url: key,
       title: archive.sourceTitle || archive.title || key,
       textContent: String(archive.textContent),
       capturedAt: archive.capturedAt || '',
       status: archive.status || 'available',
       archiveId: archive.archiveId || '',
-      storage: archive.storage || ''
+      storage
     })
   }
 
@@ -155,8 +189,16 @@ export class ArchiveContentSearch {
    * [IMPL-ARCHIVED_CONTENT_SEARCH] [ARCH-ARCHIVED_CONTENT_SEARCH] [REQ-ARCHIVED_CONTENT_SEARCH]
    * Remove derived search state when archive content is deleted.
    */
-  async removeArchivedContent (url) {
-    this.entries.delete(normalizeArchiveUrl(url))
+  async removeArchivedContent (url, backend = null) {
+    const key = normalizeArchiveUrl(url)
+    if (!key) return
+    if (backend) {
+      this.entries.delete(archiveEntryKey(key, backend))
+      return
+    }
+    for (const [entryKey, entry] of this.entries.entries()) {
+      if (entry.url === key) this.entries.delete(entryKey)
+    }
   }
 
   /**
@@ -176,7 +218,8 @@ export class ArchiveContentSearch {
         snippet: snippetAround(entry.textContent, position, this.snippetLength),
         archiveStatus: entry.status,
         storage: entry.storage,
-        readerTarget: `src/ui/reader/reader.html?url=${encodeURIComponent(entry.url)}`,
+        archiveId: entry.archiveId,
+        readerTarget: buildReaderTarget(entry),
         capturedAt: entry.capturedAt,
         position
       })
@@ -184,6 +227,7 @@ export class ArchiveContentSearch {
     return results.sort((a, b) => (
       a.position - b.position ||
       String(b.capturedAt).localeCompare(String(a.capturedAt)) ||
+      a.storage.localeCompare(b.storage) ||
       a.url.localeCompare(b.url)
     ))
   }
@@ -203,8 +247,13 @@ export class ArchiveContentSearch {
           title: archive.sourceTitle || archive.title || url,
           snippet: text ? snippetAround(text, 0, this.snippetLength) : '(archived page)',
           archiveStatus: archive.status || 'available',
-          storage: archive.storage || '',
-          readerTarget: `src/ui/reader/reader.html?url=${encodeURIComponent(url)}`,
+          storage: normalizeStorage(archive.storage),
+          archiveId: archive.archiveId || '',
+          readerTarget: buildReaderTarget({
+            url,
+            storage: archive.storage,
+            archiveId: archive.archiveId
+          }),
           capturedAt: archive.capturedAt || '',
           position: 0
         }
@@ -218,9 +267,11 @@ export class ArchiveContentSearch {
   seed (archives = []) {
     this.entries.clear()
     for (const archive of archives) {
-      if (archive?.url) this.replaceArchivedContent(archive.url, archive)
+      if (!archive?.url) continue
+      if (archive.storage) this.replaceArchivedContent(archive.url, archive.storage, archive)
+      else this.replaceArchivedContent(archive.url, archive)
     }
   }
 }
 
-export { DEFAULT_SNIPPET_LENGTH, normalizeQuery, snippetAround }
+export { DEFAULT_SNIPPET_LENGTH, archiveEntryKey, normalizeQuery, normalizeStorage, snippetAround }

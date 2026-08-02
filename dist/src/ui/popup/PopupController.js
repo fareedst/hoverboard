@@ -4073,7 +4073,15 @@ export class PopupController {
       this.uiManager?.showError?.('Offline Reader is unavailable until a readable page archive is saved.')
       return
     }
-    const readerUrl = `${chrome.runtime.getURL('src/ui/reader/reader.html')}?url=${encodeURIComponent(url)}`
+    const backend = this._resolvedStorageBackend || this.getSelectedStorageBackend()
+    const params = new URLSearchParams({
+      url,
+      backend: backend || ''
+    })
+    if (this._archiveArtifactStatus.archiveArtifactId) {
+      params.set('archiveId', this._archiveArtifactStatus.archiveArtifactId)
+    }
+    const readerUrl = `${chrome.runtime.getURL('src/ui/reader/reader.html')}?${params.toString()}`
     await chrome.tabs.create({ url: readerUrl })
   }
 

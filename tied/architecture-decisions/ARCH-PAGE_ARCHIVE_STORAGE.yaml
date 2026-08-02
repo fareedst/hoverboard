@@ -1,5 +1,5 @@
 ARCH-PAGE_ARCHIVE_STORAGE:
-  decision: "Page archives are separate artifacts keyed by normalized bookmark URL and archive version. Local uses a quota-appropriate browser archive store; File uses a versioned archive directory and adapter alongside the existing bookmark JSON. Pinboard, Sync, and Browser storage remain metadata-only until separately designed. The capture boundary associates a saved archive with a bookmark in the explicitly selected Local or File backend, preserving existing bookmark metadata and compensating a failed bookmark creation. An archive may include an optional sourcePresentationProfile containing only bounded computed colors and color-scheme intent; profile metadata is excluded from content identity hashes and never contains source CSS."
+  decision: "Page archives are separate artifacts keyed by selected backend plus normalized bookmark URL and archive version/archiveId. Local uses a quota-appropriate browser archive store; File uses a versioned archive directory and adapter alongside the existing bookmark JSON. Pinboard, Sync, and Browser storage remain metadata-only until separately designed. The capture boundary associates a saved archive with a bookmark in the explicitly selected Local or File backend, preserving existing bookmark metadata and compensating a failed bookmark creation. An archive may include an optional sourcePresentationProfile containing only bounded computed colors and color-scheme intent; profile metadata is excluded from content identity hashes and never contains source CSS."
   detail_file: "architecture-decisions/ARCH-PAGE_ARCHIVE_STORAGE.yaml"
   metadata:
     created:
@@ -8,7 +8,7 @@ ARCH-PAGE_ARCHIVE_STORAGE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Define bounded source presentation profile artifact metadata"
+      reason: "Define backend-scoped archive identity"
   name: "Page Archive Storage Architecture"
   rationale:
     alternatives_considered:

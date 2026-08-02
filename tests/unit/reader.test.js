@@ -3,30 +3,52 @@
  * Render persisted sanitized archive content in a dedicated Offline Reader without fetching the live page.
  *
  * ## LOAD_READER_ARCHIVE
- * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: parse URL/archiveId query, request only persisted archive state, and use an explicit freshness handoff.
+ * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: parse URL/archiveId/backend identity, request only the selected persisted archive state, and use an explicit freshness handoff.
  * - Contract:
  *   - INPUT: location { search }, sendMessage, elements, staleAfterMs option
  *   - PRE: Reader is an extension page; sendMessage reads persisted state only
  *   - OUTPUT: rendered Reader state
  *   - POST:
- *     - URL/archiveId query => one GET_PAGE_ARCHIVE request includes `staleAfterMs`
+ *     - URL/archiveId query => one GET_PAGE_ARCHIVE request includes `backend`, `archiveId`, and `staleAfterMs`
  *     - no query => no storage request and missing state is rendered
- *     - archive success => screenshot lookup uses the persisted archive URL
- *   - FAILURE_MODES: MissingArchive, StorageFailed, InvalidArchive
- *   - DATA: URLSearchParams, PageArchiveStore response, PageScreenshotStore response
+ *     - archive success => screenshot lookup uses the persisted archive URL, backend, and archive identity
+ *   - FAILURE_MODES: MissingArchive, UnsupportedBackend, StorageFailed, InvalidArchive
+ *   - DATA: URLSearchParams, backend, archiveId, PageArchiveStore response, PageScreenshotStore response
  *   - DATA_TRANSITION: storage response becomes DOM state; no live page data enters Reader
  *   - EFFECTS: DOM, Async, IO
  *   - TERMINATION: total
  * - PROCEDURE: LOAD_READER_ARCHIVE
  *   - query = PARSE_QUERY(location)
- *   - IF query.url and query.archiveId are absent: RENDER_READER_ARCHIVE(null); RETURN MissingArchive
+ *   - IF query.url and query.archiveId are absent: RENDER_READER_ERROR(MissingArchive); RETURN MissingArchive
  *   - staleAfterMs = options.staleAfterMs OR DEFAULT_READER_STALE_AFTER_MS (default 0, meaning no age-based override)
- *   - archiveResponse = AWAIT sendMessage(GET_PAGE_ARCHIVE, { url: query.url, archiveId: query.archiveId, staleAfterMs })
- *   - IF archiveResponse is missing or failed: RENDER_READER_ARCHIVE(null); RETURN MissingArchive
+ *   - archiveResponse = AWAIT sendMessage(GET_PAGE_ARCHIVE, { url: query.url, archiveId: query.archiveId, backend: query.backend, staleAfterMs })
+ *   - IF archiveResponse is missing: RENDER_READER_ERROR(MissingArchive); RETURN MissingArchive
+ *   - IF archiveResponse is failed: RENDER_READER_ERROR(archiveResponse.code OR StorageFailed); RETURN archiveResponse.code OR StorageFailed
+ *   - IF archive lookup throws: RENDER_READER_ERROR(StorageFailed); RETURN { success: false, code: StorageFailed, error }
  *   - RENDER_READER_ARCHIVE(archiveResponse.archive)
- *   - screenshotResponse = AWAIT sendMessage(GET_PAGE_SCREENSHOTS, { url: archiveResponse.archive.url })
- *   - RENDER_READER_SCREENSHOTS(screenshotResponse.screenshots)
+ *   - screenshotResponse = AWAIT sendMessage(GET_PAGE_SCREENSHOTS, { url: archiveResponse.archive.url, archiveId: archiveResponse.archive.archiveId, backend: archiveResponse.archive.storage OR query.backend })
+ *   - IF screenshotResponse is successful: RENDER_READER_SCREENSHOTS(screenshotResponse.screenshots)
  *   - RETURN success
+ *
+ * ## RENDER_READER_ERROR
+ * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: preserve stable missing, unsupported, storage, and malformed archive failure codes in an accessible Reader error state instead of collapsing them into missing content.
+ * - Contract:
+ *   - INPUT: failure code, Reader DOM elements
+ *   - PRE: code is a stable archive lookup failure or defaults to StorageFailed
+ *   - OUTPUT: { success: false, code }
+ *   - POST:
+ *     - content is empty and live link is hidden
+ *     - status state is error with code-specific guidance
+ *     - failure code remains available to callers
+ *   - FAILURE_MODES: MissingArchive, UnsupportedBackend, StorageFailed, InvalidArchive
+ *   - EFFECTS: DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: RENDER_READER_ERROR
+ *   - normalizedCode = code OR StorageFailed
+ *   - clear content and live link
+ *   - set title and status text from normalizedCode
+ *   - set status state to error
+ *   - RETURN { success: false, code: normalizedCode }
  *
  * ## VALIDATE_SOURCE_PRESENTATION
  * - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: validate persisted source presentation metadata before it can influence the extension-owned Reader shell.
@@ -82,10 +104,7 @@
  *   - TERMINATION: total
  * - PROCEDURE: RENDER_READER_ARCHIVE
  *   - IF archive is absent:
- *     - clear content
- *     - show Archive unavailable
- *     - hide live link
- *     - RETURN MissingArchive
+ *     - RETURN RENDER_READER_ERROR(MissingArchive)
  *   - title = archive.sourceTitle OR archive.title OR archive.url
  *   - profile = VALIDATE_SOURCE_PRESENTATION(archive.sourcePresentationProfile)
  *   - APPLY_SOURCE_PRESENTATION(reader shell, profile)
@@ -246,6 +265,7 @@ import {
   applySourcePresentation,
   loadReaderArchive,
   renderReaderArchive,
+  renderReaderError,
   renderReaderScreenshots,
   validateSourcePresentation
 } from '../../src/ui/reader/reader.js'
@@ -302,6 +322,19 @@ describe('offline Reader [REQ-OFFLINE_READER_MODE]', () => {
     expect(elements.statusEl.dataset.state).toBe('error')
     expect(elements.liveLink.hidden).toBe(true)
     expect(elements.shellEl.dataset.sourcePresentation).toBeUndefined()
+  })
+
+  test.each([
+    ['MissingArchive', 'no stored archive'],
+    ['UnsupportedBackend', 'backend is unavailable'],
+    ['StorageFailed', 'could not be loaded from local storage'],
+    ['InvalidArchive', 'archive is invalid']
+  ])('preserves structured Reader failure %s [REQ-OFFLINE_READER_MODE]', (code, message) => {
+    expect(renderReaderError(code, elements)).toEqual({ success: false, code })
+    expect(elements.statusEl.dataset.state).toBe('error')
+    expect(elements.statusEl.textContent).toContain(message)
+    expect(elements.contentEl.textContent).toBe('')
+    expect(elements.liveLink.hidden).toBe(true)
   })
 
   // - [IMPL-OFFLINE_READER_MODE] [ARCH-OFFLINE_READER_MODE] [REQ-OFFLINE_READER_MODE] How: validate persisted source presentation metadata before it can influence the extension-owned Reader shell.
@@ -407,23 +440,30 @@ describe('offline Reader [REQ-OFFLINE_READER_MODE]', () => {
     expect(elements.contentEl.querySelector('a')).not.toBeNull()
   })
 
-  test('looks up archive through message boundary using query URL', async () => {
+  test('looks up archive through the selected backend and archive identity', async () => {
     const sendMessage = jest.fn().mockResolvedValue({
       success: true,
       archive: {
         url: 'https://example.com/page',
+        archiveId: 'archive-file-page',
+        storage: 'file',
         sourceTitle: 'Page',
         capturedAt: '2026-07-31T12:00:00.000Z',
         sanitizedHtml: '<p>Read me</p>'
       }
     })
     const result = await loadReaderArchive(
-      { search: '?url=https%3A%2F%2Fexample.com%2Fpage' },
+      { search: '?url=https%3A%2F%2Fexample.com%2Fpage&backend=file&archiveId=archive-file-page' },
       { sendMessage, elements }
     )
     expect(sendMessage).toHaveBeenCalledWith({
       type: 'GET_PAGE_ARCHIVE',
-      data: { url: 'https://example.com/page', archiveId: null, staleAfterMs: 0 }
+      data: {
+        url: 'https://example.com/page',
+        archiveId: 'archive-file-page',
+        backend: 'file',
+        staleAfterMs: 0
+      }
     })
     expect(result.success).toBe(true)
     expect(elements.contentEl.textContent).toBe('Read me')
@@ -447,6 +487,8 @@ describe('offline Reader [REQ-OFFLINE_READER_MODE]', () => {
           success: true,
           archive: {
             url: 'https://example.com/with-shot',
+            archiveId: 'archive-file-shot',
+            storage: 'file',
             sourceTitle: 'With screenshot',
             sanitizedHtml: '<p>Stored</p>'
           }
@@ -465,9 +507,49 @@ describe('offline Reader [REQ-OFFLINE_READER_MODE]', () => {
 
     expect(sendMessage).toHaveBeenCalledWith({
       type: 'GET_PAGE_SCREENSHOTS',
-      data: { url: 'https://example.com/with-shot' }
+      data: {
+        url: 'https://example.com/with-shot',
+        archiveId: 'archive-file-shot',
+        backend: 'file'
+      }
     })
     expect(elements.screenshotList.querySelectorAll('img')).toHaveLength(1)
+  })
+
+  test('renders the response error code instead of treating storage failure as missing', async () => {
+    const sendMessage = jest.fn().mockResolvedValue({
+      success: false,
+      code: 'StorageFailed',
+      error: 'File archive unavailable'
+    })
+
+    const result = await loadReaderArchive(
+      { search: '?url=https%3A%2F%2Fexample.com%2Ffailed&backend=file' },
+      { sendMessage, elements }
+    )
+
+    expect(result).toEqual({ success: false, code: 'StorageFailed' })
+    expect(elements.statusEl.textContent).toContain('could not be loaded from local storage')
+    expect(elements.statusEl.textContent).not.toContain('no stored archive')
+  })
+
+  test('renders structured storage failure when archive lookup rejects [REQ-OFFLINE_READER_MODE]', async () => {
+    const sendMessage = jest.fn().mockRejectedValue(new Error('storage disconnected'))
+
+    const result = await loadReaderArchive(
+      { search: '?url=https%3A%2F%2Fexample.com%2Frejected&backend=file' },
+      { sendMessage, elements }
+    )
+
+    expect(result).toEqual({
+      success: false,
+      code: 'StorageFailed',
+      error: 'storage disconnected'
+    })
+    expect(elements.titleEl.textContent).toBe('Archive could not be loaded')
+    expect(elements.statusEl.dataset.state).toBe('error')
+    expect(elements.contentEl.textContent).toBe('')
+    expect(elements.liveLink.hidden).toBe(true)
   })
 
   test('passes an explicit Reader freshness threshold to archive lookup [REQ-OFFLINE_READER_MODE]', async () => {
@@ -486,7 +568,12 @@ describe('offline Reader [REQ-OFFLINE_READER_MODE]', () => {
 
     expect(sendMessage).toHaveBeenCalledWith(expect.objectContaining({
       type: 'GET_PAGE_ARCHIVE',
-      data: { url: 'https://example.com/freshness', archiveId: null, staleAfterMs: 86_400_000 }
+      data: {
+        url: 'https://example.com/freshness',
+        archiveId: null,
+        backend: null,
+        staleAfterMs: 86_400_000
+      }
     }))
   })
 })

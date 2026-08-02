@@ -9,7 +9,7 @@ REQ-OFFLINE_READER_MODE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-01"
-      reason: "Add bounded source presentation profile and WCAG-AA Reader fallback contract"
+      reason: "Record backend identity and structured Reader failures"
   name: "Offline Reader Mode"
   priority: "P1"
   rationale:
@@ -30,7 +30,8 @@ REQ-OFFLINE_READER_MODE:
     - criterion: "Existing archives without a source presentation profile remain readable through the Hoverboard Reader theme fallback without migration or recapture."
     - criterion: "Only sanitized stored HTML is rendered; archived scripts and unsafe navigation are not executable."
     - criterion: "Reader displays capture time, archive status, and clear missing/stale/error states."
-    - criterion: "Reader opens a stored archive by bookmark URL or archive identifier without fetching the live URL."
+    - criterion: "Reader opens a stored archive by selected backend plus bookmark URL or archive identifier without fetching the live URL; URL-only legacy targets are accepted only when unambiguous."
+    - criterion: "Reader preserves stable missing, unsupported-backend, storage-failure, and invalid-archive outcomes in accessible error states while stale content remains readable."
     - criterion: "Reader works for Local and File archives and preserves the bookmark/live URL as an explicit optional action."
     - criterion: "When a valid source presentation profile exists, Reader applies its bounded background, text, link, and color-scheme values to the Reader shell and content; missing, invalid, transparent, or WCAG-AA-failing profiles use the Hoverboard Reader theme fallback."
   status: "Implemented"
