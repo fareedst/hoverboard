@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * [IMPL-COMPOSITION_TEST_PATTERNS] [ARCH-COMPOSITION_TEST_PATTERNS] [REQ-COMPOSITION_TEST_RECOGNITION]
+ * [IMPL-COMPOSITION_TEST_PATTERNS] [ARCH-COMPOSITION_TEST_PATTERNS] [REQ-COMPOSITION_TEST_RECOGNITION] [REQ-MODULE_VALIDATION]
  * [PROC-TEST_STRATEGY] Composition test-plan report: discover Active IMPL composition edges,
  * match pattern IDs, classify edge status, emit reviewable plan for generated tests.
  *

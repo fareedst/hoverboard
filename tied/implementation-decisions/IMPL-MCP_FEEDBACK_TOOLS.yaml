@@ -20,6 +20,7 @@ IMPL-MCP_FEEDBACK_TOOLS:
       - name: "exportJson"
         description: "Export entries as JSON string"
         file: "mcp-server/src/feedback.ts"
+  coverage_scope: "canonical_source_anchor"
   cross_references:
     - "ARCH-FEEDBACK_STORAGE"
     - "REQ-FEEDBACK_TO_TIED"
@@ -33,14 +34,15 @@ IMPL-MCP_FEEDBACK_TOOLS:
       - "tied_feedback_add: parse args, call appendEntry, return ok/id/created_at and optional report_snippet (markdown)"
       - "tied_feedback_export: load entries, call exportMarkdown or exportJson, return string"
     summary: "Feedback module (load/append/export) under mcp-server/src/feedback.ts; two tool handlers in tools/index.ts"
+  local_project_coverage: "none"
   metadata:
     created:
       author: "AI Agent"
       date: "2026-03-03"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-03"
-      reason: "Initial creation"
+      date: "2026-08-02"
+      reason: "Align canonical-source coverage classification and add sidecar anchor"
     last_validated:
       date: "2026-03-03"
       result: "pass"
@@ -60,6 +62,8 @@ IMPL-MCP_FEEDBACK_TOOLS:
       - "REQ-FEEDBACK_TO_TIED"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Deferred local Hoverboard coverage: code_locations and feedback.test.ts refer to the canonical TIED source repository, not this client. Preserve this project-owned feedback traceability record for upstream reporting, but do not claim local implementation or test coverage until the client explicitly adopts the feedback tools."
+  testability: "canonical_source_anchor"
   traceability:
     architecture:
       - "ARCH-FEEDBACK_STORAGE"

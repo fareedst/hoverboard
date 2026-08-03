@@ -243,18 +243,18 @@ ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
   status: "Active"
   type: "ARCH"
 ARCH-FEEDBACK_STORAGE:
-  cross_references:
+  "cross_references":
     - "IMPL-MCP_FEEDBACK_TOOLS"
     - "REQ-FEEDBACK_TO_TIED"
-  description: "Feedback stored in single file tied/feedback.yaml; MCP tools read/write via base path resolution"
-  detail_file: "architecture-decisions/ARCH-FEEDBACK_STORAGE.yaml"
-  metadata:
-    last_updated: "2026-03-03T00:00:00.000Z"
-    registered: "2026-03-03T00:00:00.000Z"
-  name: "Feedback Storage for TIED Reporting"
-  source_index: "architecture-decisions.yaml"
-  status: "Active"
-  type: "ARCH"
+  "description": "Feedback stored in single file tied/feedback.yaml; MCP tools read/write via base path resolution"
+  "detail_file": "architecture-decisions/ARCH-FEEDBACK_STORAGE.yaml"
+  "metadata":
+    "last_updated": "2026-03-03T00:00:00.000Z"
+    "registered": "2026-03-03T00:00:00.000Z"
+  "name": "Feedback Storage for TIED Reporting"
+  "source_index": "architecture-decisions.yaml"
+  "status": "Active"
+  "type": "ARCH"
 ARCH-FILE_BOOKMARK_PROVIDER:
   cross_references:
     - "ARCH-LOCAL_STORAGE_PROVIDER"
@@ -414,19 +414,6 @@ ARCH-MESSAGE_HANDLING:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Message Handling Architecture"
-  source_index: "architecture-decisions.yaml"
-  status: "Active"
-  type: "ARCH"
-ARCH-MODULE_VALIDATION:
-  cross_references:
-    - "IMPL-MODULE_VALIDATION"
-    - "REQ-MODULE_VALIDATION"
-  description: "Module validation strategy decision"
-  detail_file: "architecture-decisions/ARCH-MODULE_VALIDATION.yaml"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-12-18T00:00:00.000Z"
-  name: "Module Validation Strategy"
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
@@ -906,19 +893,6 @@ ARCH-THEME:
   type: "ARCH"
 ARCH-THIS_PAGE_TAG_SORT:
   description: "This Page tag sort: pure module tag-chip-sort.js; frequency from hoverboard_tag_frequency; MAIN-world relevance tiers + two-step inject; UIManager gated on tagSortToggle. REQ-THIS_PAGE_TAG_SORT, REQ-SUGGESTED_TAGS_FROM_CONTENT; IMPL-THIS_PAGE_TAG_SORT."
-  type: "ARCH"
-ARCH-TIED_STRUCTURE:
-  cross_references:
-    - "IMPL-TIED_FILES"
-    - "REQ-TIED_SETUP"
-  description: "TIED project structure decision"
-  detail_file: "architecture-decisions/ARCH-TIED_STRUCTURE.yaml"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-12-18T00:00:00.000Z"
-  name: "TIED Project Structure"
-  source_index: "architecture-decisions.yaml"
-  status: "Active"
   type: "ARCH"
 ARCH-UI_TESTABILITY:
   cross_references:
@@ -1627,18 +1601,18 @@ IMPL-LOGGER_LEGACY:
   status: "Active"
   type: "IMPL"
 IMPL-MCP_FEEDBACK_TOOLS:
-  cross_references:
+  "cross_references":
     - "ARCH-FEEDBACK_STORAGE"
     - "REQ-FEEDBACK_TO_TIED"
-  description: "Two MCP tools (tied_feedback_add, tied_feedback_export) and feedback module for load/append/export"
-  detail_file: "implementation-decisions/IMPL-MCP_FEEDBACK_TOOLS.yaml"
-  metadata:
-    last_updated: "2026-03-03T00:00:00.000Z"
-    registered: "2026-03-03T00:00:00.000Z"
-  name: "MCP Feedback Tools"
-  source_index: "implementation-decisions.yaml"
-  status: "Active"
-  type: "IMPL"
+  "description": "Two MCP tools (tied_feedback_add, tied_feedback_export) and feedback module for load/append/export"
+  "detail_file": "implementation-decisions/IMPL-MCP_FEEDBACK_TOOLS.yaml"
+  "metadata":
+    "last_updated": "2026-03-03T00:00:00.000Z"
+    "registered": "2026-03-03T00:00:00.000Z"
+  "name": "MCP Feedback Tools"
+  "source_index": "implementation-decisions.yaml"
+  "status": "Active"
+  "type": "IMPL"
 IMPL-MESSAGE_HANDLING:
   cross_references:
     - "ARCH-MESSAGE_HANDLING"
@@ -1655,19 +1629,6 @@ IMPL-MESSAGE_HANDLING:
     last_updated: "2026-03-28T00:00:00.000Z"
     registered: "2026-03-28T00:00:00.000Z"
   name: "Message Handling System Implementation"
-  source_index: "implementation-decisions.yaml"
-  status: "Active"
-  type: "IMPL"
-IMPL-MODULE_VALIDATION:
-  cross_references:
-    - "ARCH-MODULE_VALIDATION"
-    - "REQ-MODULE_VALIDATION"
-  description: "Module validation implementation"
-  detail_file: "implementation-decisions/IMPL-MODULE_VALIDATION.yaml"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-12-18T00:00:00.000Z"
-  name: "Module Validation Implementation"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -2336,19 +2297,6 @@ IMPL-THIS_PAGE_TAG_SORT:
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
-IMPL-TIED_FILES:
-  cross_references:
-    - "ARCH-TIED_STRUCTURE"
-    - "REQ-TIED_SETUP"
-  description: "TIED file creation implementation"
-  detail_file: "implementation-decisions/IMPL-TIED_FILES.yaml"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-12-18T00:00:00.000Z"
-  name: "TIED File Creation"
-  source_index: "implementation-decisions.yaml"
-  status: "Active"
-  type: "IMPL"
 IMPL-TIME_ASYNC_UTILITIES:
   cross_references:
     - "ARCH-SHARED_UTILITIES"
@@ -2501,30 +2449,6 @@ PROC-AGENT_REQ_CHECKLIST:
   source_index: "processes.md"
   status: "Active"
   type: "PROC"
-PROC-BUILD_PIPELINE_VALIDATION:
-  cross_references:
-    - "REQ-MODULE_VALIDATION"
-  description: "Build/deploy validation tied to REQ-MODULE_VALIDATION"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-11-08T00:00:00.000Z"
-  name: "Build Pipeline Validation Process"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
-PROC-COMMIT_MESSAGES:
-  cross_references:
-    - "PROC-TIED_DEV_CYCLE"
-  description: "Consistent commit message format (type/scope/subject, body, footer); optional TIED token references for traceability"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-03-03T00:00:00.000Z"
-    registered: "2026-03-03T00:00:00.000Z"
-  name: "Commit message format and guidelines"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
 PROC-IMPL_CODE_TEST_SYNC:
   cross_references:
     - "PROC-AGENT_REQ_CHECKLIST"
@@ -2545,18 +2469,6 @@ PROC-IMPL_CODE_TEST_SYNC:
   source_index: "processes.md"
   status: "Active"
   type: "PROC"
-PROC-IMPL_PSEUDOCODE_TOKENS:
-  cross_references:
-    - "PROC-TIED_DEV_CYCLE"
-  description: "Every block in IMPL essence_pseudocode must have a comment naming REQ/ARCH/IMPL and how the block implements them; primary mechanism for implementation traceability"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-03-05T00:00:00.000Z"
-    registered: "2026-03-05T00:00:00.000Z"
-  name: "IMPL pseudo-code semantic token comments (most critical)"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
 PROC-LEAP:
   cross_references:
     - "PROC-IMPL_PSEUDOCODE_TOKENS"
@@ -2569,19 +2481,6 @@ PROC-LEAP:
     last_updated: "2026-03-27T00:00:00.000Z"
     registered: "2026-03-27T00:00:00.000Z"
   name: "Logic Elevation And Propagation (LEAP)"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
-PROC-PROJECT_SURVEY_AND_SETUP:
-  cross_references:
-    - "ARCH-TIED_STRUCTURE"
-    - "REQ-TIED_SETUP"
-  description: "Survey and readiness process supporting REQ-TIED_SETUP and ARCH-TIED_STRUCTURE"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-11-08T00:00:00.000Z"
-  name: "Project Survey and Setup Process"
   source_index: "processes.md"
   status: "Active"
   type: "PROC"
@@ -2599,63 +2498,6 @@ PROC-PSEUDOCODE_VALIDATION:
   source_index: "processes.md"
   status: "Active"
   type: "PROC"
-PROC-RELEASE:
-  cross_references:
-    - "PROC-COMMIT_MESSAGES"
-  description: "Version numbering (major/minor/patch/build) for releases"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-03-03T00:00:00.000Z"
-    registered: "2026-03-03T00:00:00.000Z"
-  name: "Release and version numbering"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
-PROC-TEST_STRATEGY:
-  cross_references:
-    - "IMPL-MODULE_VALIDATION"
-    - "REQ-MODULE_VALIDATION"
-  description: "Minimize code not covered by tests; unit/integration cover IMPL/ARCH/REQ logic; E2E reserved for critical journeys"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-03-01T00:00:00.000Z"
-    registered: "2026-03-01T00:00:00.000Z"
-  name: "Test Strategy and Coverage (minimize untested code)"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
-PROC-TIED_DEV_CYCLE:
-  cross_references:
-    - "PROC-AGENT_REQ_CHECKLIST"
-    - "PROC-COMMIT_MESSAGES"
-    - "PROC-IMPL_PSEUDOCODE_TOKENS"
-    - "PROC-TOKEN_AUDIT"
-    - "PROC-TOKEN_VALIDATION"
-    - "REQ-MODULE_VALIDATION"
-    - "REQ-TIED_SETUP"
-  description: "Session workflow: plan from TIED, author pseudo-code and tokens, add/align tests, implement (TDD), minimal glue, validate, sync TIED to code"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-03-27T00:00:00.000Z"
-    registered: "2026-03-01T00:00:00.000Z"
-  name: "TIED Development Cycle (session workflow)"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
-PROC-TIED_METHODOLOGY_READONLY:
-  cross_references:
-    - "ARCH-TIED_STRUCTURE"
-    - "PROC-YAML_DB_OPERATIONS"
-    - "REQ-TIED_SETUP"
-  description: "Methodology YAML (tied/methodology/) is read-only in client; project YAML (tied/ root) holds client data only; refresh methodology via copy_files.sh"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-03-16T00:00:00.000Z"
-    registered: "2026-03-16T00:00:00.000Z"
-  name: "TIED-sourced YAML read-only in client"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
 PROC-TIED_VERIFICATION_GATED:
   cross_references:
     - "PROC-TIED_DEV_CYCLE"
@@ -2667,55 +2509,6 @@ PROC-TIED_VERIFICATION_GATED:
     last_updated: "2026-03-27T00:00:00.000Z"
     registered: "2026-03-27T00:00:00.000Z"
   name: "Verification-gated status (closed-loop)"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
-PROC-TOKEN_AUDIT:
-  cross_references: []
-  description: "Mandatory checklist ensuring every requirement → architecture → implementation → code/test path is annotated and documented"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-11-08T00:00:00.000Z"
-  name: "Token Audit Process"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
-PROC-TOKEN_VALIDATION:
-  cross_references: []
-  description: "Automated validation workflow that proves all referenced tokens exist in the registry"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-11-08T00:00:00.000Z"
-  name: "Token Validation Process"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
-PROC-VOCABULARY_INDEX:
-  cross_references:
-    - "PROC-AGENT_REQ_CHECKLIST"
-    - "PROC-IMPL_PSEUDOCODE_TOKENS"
-    - "PROC-TOKEN_AUDIT"
-  description: "Consult and maintain domain vocabulary index files at tied/vocab/*.md whenever a concept is named or expressed; distinct from IMPL pseudo-code grammar vocabulary"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-05-29"
-    registered: "2026-05-29"
-  name: "Domain vocabulary index discipline"
-  source_index: "processes.md"
-  status: "Active"
-  type: "PROC"
-PROC-YAML_DB_OPERATIONS:
-  cross_references:
-    - "ARCH-TIED_STRUCTURE"
-    - "REQ-TIED_SETUP"
-  description: "YAML database operations for reading, writing, querying, and validating YAML index files"
-  detail_file: "null"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-11-08T00:00:00.000Z"
-  name: "YAML Database Operations Process"
   source_index: "processes.md"
   status: "Active"
   type: "PROC"
@@ -3030,19 +2823,19 @@ REQ-EXTENSION_IDENTITY:
   status: "Active"
   type: "REQ"
 REQ-FEEDBACK_TO_TIED:
-  category: "Functional"
-  cross_references:
+  "category": "Functional"
+  "cross_references":
     - "ARCH-FEEDBACK_STORAGE"
     - "IMPL-MCP_FEEDBACK_TOOLS"
-  description: "Projects and users can submit feature requests, bug reports, and methodology improvement suggestions; store under TIED tree and export for reporting to TIED project"
-  detail_file: "requirements/REQ-FEEDBACK_TO_TIED.yaml"
-  metadata:
-    last_updated: "2026-03-03T00:00:00.000Z"
-    registered: "2026-03-03T00:00:00.000Z"
-  name: "Feedback to TIED (Feature Requests, Bug Reports, Methodology)"
-  source_index: "requirements.yaml"
-  status: "Active"
-  type: "REQ"
+  "description": "Projects and users can submit feature requests, bug reports, and methodology improvement suggestions; store under TIED tree and export for reporting to TIED project"
+  "detail_file": "requirements/REQ-FEEDBACK_TO_TIED.yaml"
+  "metadata":
+    "last_updated": "2026-03-03T00:00:00.000Z"
+    "registered": "2026-03-03T00:00:00.000Z"
+  "name": "Feedback to TIED (Feature Requests, Bug Reports, Methodology)"
+  "source_index": "requirements.yaml"
+  "status": "Active"
+  "type": "REQ"
 REQ-FILE_BOOKMARK_STORAGE:
   cross_references:
     - "ARCH-FILE_BOOKMARK_PROVIDER"
@@ -3193,20 +2986,6 @@ REQ-MANIFEST_V3_MIGRATION:
   name: "Manifest V3 Migration"
   source_index: "requirements.yaml"
   status: "Planned"
-  type: "REQ"
-REQ-MODULE_VALIDATION:
-  category: "Core Functional"
-  cross_references:
-    - "ARCH-MODULE_VALIDATION"
-    - "IMPL-MODULE_VALIDATION"
-  description: "Independent module validation before integration requirement"
-  detail_file: "requirements/REQ-MODULE_VALIDATION.yaml"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-01-27T00:00:00.000Z"
-  name: "Independent Module Validation Before Integration"
-  source_index: "requirements.yaml"
-  status: "Active"
   type: "REQ"
 REQ-MOVE_BOOKMARK_STORAGE_UI:
   cross_references:
@@ -3756,20 +3535,6 @@ REQ-TAG_MANAGEMENT:
   type: "REQ"
 REQ-THIS_PAGE_TAG_SORT:
   description: "This Page three-way tag chip sort (alphabetical, bookmark frequency, DOM relevance); side panel toggle; default A–Z; no persistence; popup order unchanged when no toggle. Trace: ARCH/IMPL-THIS_PAGE_TAG_SORT; unit + composition tests; Playwright extension-this-page-tag-sort.spec.js for chrome-extension:// side panel surface (Phase H). [REQ-SIDE_PANEL_POPUP_EQUIVALENT]"
-  type: "REQ"
-REQ-TIED_SETUP:
-  category: "Core Functional"
-  cross_references:
-    - "ARCH-TIED_STRUCTURE"
-    - "IMPL-TIED_FILES"
-  description: "TIED methodology setup requirement"
-  detail_file: "requirements/REQ-TIED_SETUP.yaml"
-  metadata:
-    last_updated: "2026-02-08T00:00:00.000Z"
-    registered: "2025-11-08T00:00:00.000Z"
-  name: "TIED Methodology Setup"
-  source_index: "requirements.yaml"
-  status: "Active"
   type: "REQ"
 REQ-UI_INSPECTION:
   cross_references:

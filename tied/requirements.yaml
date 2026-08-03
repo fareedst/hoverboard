@@ -839,55 +839,21 @@ REQ-FEEDBACK_TO_TIED:
   category: "Functional"
   detail_file: "requirements/REQ-FEEDBACK_TO_TIED.yaml"
   metadata:
-    created:
-      author: "AI Agent"
-      date: "2026-03-03T00:00:00.000Z"
     last_updated:
-      author: "AI Agent"
-      date: "2026-03-03T00:00:00.000Z"
-      reason: "Initial creation"
-    last_validated:
-      date: "2026-03-03T00:00:00.000Z"
-      result: "pass"
-      validator: "AI Agent"
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
   name: "Feedback to TIED (Feature Requests, Bug Reports, Methodology)"
   priority: "P1"
-  rationale:
-    benefits:
-      - "Export format suitable for reporting to the TIED project (e.g. GitHub issues)"
-      - "Structured feedback stored under the project TIED tree"
-      - "Traceability of feedback types (feature_request, bug_report, methodology_improvement)"
-    problems_solved:
-      - "Methodology improvements from the field are not easily reported upstream"
-      - "No structured way to collect feedback from TIED adopters"
-    why: "Projects and users need a standard way to submit feature requests, bug reports, and methodology improvement suggestions and to report them to the TIED project"
   related_requirements:
     depends_on: []
     related_to:
       - "REQ-TIED_SETUP"
     supersedes: []
-  satisfaction_criteria:
-    - criterion: "Feedback can be exported for reporting to TIED"
-      metric: "tied_feedback_export returns markdown or JSON of all entries"
-    - criterion: "MCP tools allow adding feedback entries (type, title, description, optional context)"
-      metric: "tied_feedback_add creates/updates tied/feedback.yaml"
-  status: "Implemented"
+  status: "Planned"
   traceability:
     architecture:
       - "ARCH-FEEDBACK_STORAGE"
-    code_annotations:
-      - "ARCH-FEEDBACK_STORAGE"
-      - "IMPL-MCP_FEEDBACK_TOOLS"
-      - "REQ-FEEDBACK_TO_TIED"
     implementation:
       - "IMPL-MCP_FEEDBACK_TOOLS"
-    tests:
-      - "feedback.test.ts"
-  validation_criteria:
-    - method: "Unit tests"
-      coverage: "Feedback module load/append/export and tool handlers"
-    - method: "Manual or E2E"
-      coverage: "MCP client can call tools and get valid output"
 REQ-FILE_BOOKMARK_STORAGE:
   category: "Functional"
   detail_file: "requirements/REQ-FILE_BOOKMARK_STORAGE.yaml"
@@ -1363,74 +1329,23 @@ REQ-MANIFEST_V3_MIGRATION:
       coverage: "Service worker performance"
 REQ-MODULE_VALIDATION:
   category: "Functional"
-  detail_file: "requirements/REQ-MODULE_VALIDATION.yaml"
+  detail_file: "null"
   metadata:
-    created:
-      author: "AI Agent"
-      date: "2025-01-27T00:00:00.000Z"
     last_updated:
-      author: "AI Agent"
-      date: "2026-02-06T00:00:00.000Z"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
-    last_validated:
-      date: "2026-02-06T00:00:00.000Z"
-      result: "pass"
-      validator: "AI Agent"
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
   name: "Independent Module Validation Before Integration"
   priority: "P0"
-  rationale:
-    benefits:
-      - "Bugs caught early before integration"
-      - "Clear module boundaries and contracts"
-      - "Easier debugging by isolating issues to specific modules"
-      - "Reduced integration complexity"
-    problems_solved:
-      - "Bugs discovered too late in the development cycle"
-      - "Integration complexity causing difficult-to-debug issues"
-      - "Module contracts not properly validated before integration"
-    why: "To eliminate bugs related to code complexity by ensuring each module works correctly in isolation before combining with other modules"
   related_requirements:
     depends_on:
       - "REQ-TIED_SETUP"
     related_to: []
     supersedes: []
-  satisfaction_criteria:
-    - criterion: "All logical modules identified and documented with clear boundaries before development"
-    - criterion: "Module interfaces and contracts defined and documented"
-    - criterion: "Module validation criteria specified for each module"
-      metric: "What 'validated' means is explicitly defined"
-    - criterion: "Each module developed independently"
-    - criterion: "Each module passes independent validation before integration"
-      metric: "Unit tests with mocks, integration tests with test doubles, contract validation, edge case testing, error handling validation all passing"
-    - criterion: "Integration only occurs after module validation passes"
-    - criterion: "Integration tasks separate from module development tasks"
-    - criterion: "Minimize code measurable only from outside testing (E2E/manual); every IMPL has test strategy (unit/integration or E2E/glue-only with documented reason)"
-    - criterion: "Module validation results documented"
-    - criterion: "No non-trivial logic in entry points unless documented as glue with reason"
   status: "Implemented"
   traceability:
     architecture:
       - "ARCH-MODULE_VALIDATION"
-    code_annotations:
-      - "IMPL-MODULE_VALIDATION"
-      - "REQ-MODULE_VALIDATION"
     implementation:
       - "IMPL-MODULE_VALIDATION"
-    tests:
-      - "testModuleName_IndependentValidation_REQ_MODULE_VALIDATION"
-  validation_criteria:
-    - method: "Manual verification"
-      coverage: "Modules identified and documented before development starts"
-    - method: "Automated testing"
-      coverage: "Module validation tests exist and pass before integration"
-    - method: "Code review"
-      coverage: "Integration code references validated modules"
-    - method: "Documentation review"
-      coverage: "Module validation results are documented"
-    - method: "Integration testing"
-      coverage: "Integration tests validate combined behavior of validated modules"
-    - method: "Coverage gates and gap report"
-      coverage: "IMPL traceability.tests or test_coverage_note (E2E-only with reason) for every Active IMPL"
 REQ-MOVE_BOOKMARK_STORAGE_UI:
   category: "Functional"
   detail_file: "requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml"
@@ -1995,6 +1910,27 @@ REQ-PRIVACY_CONTROLS:
       coverage: "Private and to-read states"
     - method: "State persistence tests"
       coverage: "Storage and retrieval"
+REQ-QUALITY_ASSURANCE_EVIDENCE:
+  category: "Non-Functional"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+  description: "Every behavior-changing change selects applicable quality attributes from a bounded risk profile and records reproducible evidence, limitations, and accepted residual risk without imposing irrelevant checks."
+  detail_file: "requirements/REQ-QUALITY_ASSURANCE_EVIDENCE.yaml"
+  name: "Risk-triggered quality assurance evidence"
+  priority: "P0"
+  related_requirements:
+    depends_on:
+      - "REQ-MODULE_VALIDATION"
+      - "REQ-TIED_SETUP"
+    related_to: []
+    supersedes: []
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    implementation:
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
 REQ-QUICK_ACCESS_ENTRY:
   category: "Functional"
   detail_file: "requirements/REQ-QUICK_ACCESS_ENTRY.yaml"
@@ -3171,62 +3107,22 @@ REQ-THIS_PAGE_TAG_SORT:
   status: "Implemented"
 REQ-TIED_SETUP:
   category: "Functional"
-  detail_file: "requirements/REQ-TIED_SETUP.yaml"
+  detail_file: "null"
   metadata:
-    created:
-      author: "AI Agent"
-      date: "2025-11-08T00:00:00.000Z"
     last_updated:
-      author: "AI Agent"
-      date: "2026-02-06T00:00:00.000Z"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
-    last_validated:
-      date: "2026-02-06T00:00:00.000Z"
-      result: "pass"
-      validator: "AI Agent"
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
   name: "TIED Methodology Setup"
   priority: "P0"
-  rationale:
-    benefits:
-      - "AI-friendly documentation structure"
-      - "Complete traceability from requirements to code"
-      - "Consistent development methodology"
-    problems_solved:
-      - "Difficulty tracking requirements through architecture to implementation"
-      - "Inconsistent documentation practices across projects"
-      - "Loss of intent during development lifecycle"
-    why: "To ensure traceability of intent from requirements to code and to maintain a consistent development process"
   related_requirements:
     depends_on: []
     related_to: []
     supersedes: []
-  satisfaction_criteria:
-    - criterion: "All required documentation files exist and are populated from templates"
-      metric: "requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml, semantic-tokens.md, processes.md all present"
-    - criterion: "Base files properly configured"
-      metric: ".cursorrules contains TIED rules, AGENTS.md contains canonical AI agent instructions"
-    - criterion: "Detail directories exist"
-      metric: "requirements/, architecture-decisions/, implementation-decisions/ directories present"
-    - criterion: "tied/ directory exists with proper structure"
   status: "Implemented"
   traceability:
     architecture:
       - "ARCH-TIED_STRUCTURE"
-    code_annotations:
-      - "ARCH-TIED_STRUCTURE"
-      - "IMPL-TIED_FILES"
-      - "REQ-TIED_SETUP"
     implementation:
       - "IMPL-TIED_FILES"
-    tests:
-      - "Manual verification checklists"
-  validation_criteria:
-    - method: "AI agent acknowledgment"
-      coverage: "Agent responds with 'Observing AI principles!' confirming rules are loaded"
-    - method: "Manual verification"
-      coverage: "File existence checks for all required files and directories"
-    - method: "Structure validation"
-      coverage: "All index files have corresponding detail directories with proper naming"
 REQ-UI_INSPECTION:
   category: "Non-Functional"
   detail_file: "requirements/REQ-UI_INSPECTION.yaml"

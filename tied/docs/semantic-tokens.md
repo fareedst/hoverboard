@@ -1,6 +1,6 @@
 # Semantic Tokens Directory
 
-**TIED Methodology Version**: 1.6.0
+**TIED Methodology Version**: 2.2.0
 
 ## Overview
 This document serves as the **central directory/registry** for all semantic tokens used in the project. Semantic tokens (`[REQ-*]`, `[ARCH-*]`, `[IMPL-*]`) provide a consistent vocabulary and traceability mechanism that ties together all documentation, code, and tests.
@@ -44,7 +44,7 @@ When implementing features:
 2. **ALWAYS** create `[ARCH-*]` token in `architecture-decisions.md` for design decisions
 3. **ALWAYS** add `[IMPL-*]` tokens to code comments
 4. **ALWAYS** reference `[REQ-*]` tokens in test names/comments
-5. **ALWAYS** update `semantic-tokens.yaml` registry when creating new tokens
+5. **ALWAYS** update the project `tied/semantic-tokens.yaml` registry when creating new client tokens
 6. **ALWAYS** document any `[PROC-*]` process tokens in `processes.md` when defining operational workflows
 
 ### Token Audit Workflow `[PROC-TOKEN_AUDIT]`
@@ -76,14 +76,14 @@ Before marking features complete:
 
 ## Inherited tokens (TIED/LEAP methodology)
 
-All TIED projects **inherit** a core set of REQ/ARCH/IMPL and PROC tokens via `copy_files.sh` (from `templates/`). These tokens are **mandatory for TIED success** and enforce the methodology; they must not be removed from the client's `tied/`. The inherited set includes:
+All TIED projects **inherit** a core set of REQ/ARCH/IMPL and PROC tokens via `copy_files.sh` (from `templates/`). These tokens are **mandatory for TIED success** and enforce the methodology. They live in the read-only merged methodology snapshot under `tied/methodology/`; the project registry at `tied/semantic-tokens.yaml` contains only client-owned additions and explicit project overrides. The inherited set includes:
 
 - **REQ**: REQ-TIED_SETUP, REQ-MODULE_VALIDATION; optionally REQ-FEEDBACK_TO_TIED
 - **ARCH**: ARCH-TIED_STRUCTURE, ARCH-MODULE_VALIDATION; optionally ARCH-FEEDBACK_STORAGE
 - **IMPL**: IMPL-TIED_FILES, IMPL-MODULE_VALIDATION; optionally IMPL-MCP_FEEDBACK_TOOLS
 - **PROC**: e.g. PROC-LEAP, PROC-TOKEN_AUDIT, PROC-TOKEN_VALIDATION, PROC-TIED_DEV_CYCLE, PROC-IMPL_PSEUDOCODE_TOKENS (see `processes.md` and `semantic-tokens.yaml`)
 
-For structure and sample records, agents refer to **`templates/`** in the TIED repository (see AGENTS.md § Client inheritance of LEAP R+A+I).
+For structure and sample records, agents refer to **`templates/`** in the TIED repository (see AGENTS.md § Client inheritance of LEAP R+A+I). When a canonical snapshot registers a token without a detail file, retain the client-owned record in project YAML until the source defect is resolved.
 
 ## Token Types
 

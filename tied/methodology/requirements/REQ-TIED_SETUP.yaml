@@ -40,13 +40,13 @@ REQ-TIED_SETUP:
     - criterion: "Detail directories exist"
       metric: "requirements/, architecture-decisions/, implementation-decisions/ directories present"
     - criterion: "Domain vocabulary for TIED layout (project YAML, semantic token, TIED base path) is defined in tied/vocab/tied-methodology.md; naming uses sub-vocabulary-sync RESOLVE/RECORD per [PROC-VOCABULARY_INDEX]"
-    - criterion: "YAML validation uses scripts/yaml_tool.sh or lint_yaml wrapper per [PROC-YAML_EDIT_LOOP] with default double-quoted scalar lint (yq sort_keys(.. style=\"double\")); terms documented in tied/vocab/tied-methodology.md"
     - criterion: "Existing clients can follow tied/docs/methodology-migration.md when adopting a newer methodology snapshot"
       metric: "Migration guide is installed when missing and preserves client-owned project YAML and customized documentation"
     - criterion: "copy_files.sh --merge-vocab adds absent glossary basenames without overwriting existing client vocabulary"
       metric: "Existing client glossary contents remain unchanged while missing canonical glossaries are added"
     - criterion: "Refreshing inherited methodology preserves project YAML and installs promoted quality detail files and pseudo-code sidecars"
       metric: "tied/methodology/ matches the current template snapshot and stale inherited files are pruned"
+    - criterion: "YAML validation uses scripts/yaml_tool.sh or lint_yaml wrapper per [PROC-YAML_EDIT_LOOP] with default double-quoted scalar lint (yq sort_keys(.. style=\"double\")); terms documented in tied/vocab/tied-methodology.md"
   status: "Implemented"
   traceability:
     architecture:

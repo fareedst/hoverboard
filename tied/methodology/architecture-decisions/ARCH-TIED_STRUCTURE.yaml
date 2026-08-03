@@ -24,11 +24,11 @@ ARCH-TIED_STRUCTURE:
       - "Create detail subdirectories: requirements/, architecture-decisions/, implementation-decisions/"
       - "Create tied/ directory at project root"
       - "Create tied/vocab/ for project-scoped domain vocabulary (plain Markdown *.md; writable; seeded by copy_files.sh when absent; not under tied/methodology/)"
+      - "Install promoted quality REQ/ARCH/IMPL detail files and pseudo-code sidecars into the inherited methodology snapshot"
+      - "Never overwrite project YAML indexes or detail directories under the tied/ root during bootstrap"
       - "Populate with YAML index files: requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml"
       - "Refresh tied/methodology/ as an inherited read-only snapshot with exact template parity and stale-file pruning"
-      - "Never overwrite project YAML indexes or detail directories under the tied/ root during bootstrap"
       - "Use copy_files.sh --merge-vocab to add absent glossary basenames without replacing existing client vocabulary"
-      - "Install promoted quality REQ/ARCH/IMPL detail files and pseudo-code sidecars into the inherited methodology snapshot"
     summary: "Create dedicated tied/ directory with YAML indexes and detail subdirectories"
   metadata:
     created:

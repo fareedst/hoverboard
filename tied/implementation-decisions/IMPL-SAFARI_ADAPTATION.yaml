@@ -35,6 +35,8 @@ IMPL-SAFARI_ADAPTATION:
       - "IMPL-CROSS_BROWSER"
     supersedes: []
   status: "Deferred"
+  test_coverage_note: "Deferred and excluded from Chrome/MV3 unit, composition, and E2E coverage. The named platform constraint is the separate Safari App Extension host; Safari-specific validation is required if this scope is reactivated."
+  testability: "deferred"
   traceability:
     architecture:
       - "ARCH-SAFARI_ADAPTATION"

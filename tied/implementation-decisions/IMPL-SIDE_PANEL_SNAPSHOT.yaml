@@ -54,7 +54,8 @@ IMPL-SIDE_PANEL_SNAPSHOT:
       - "IMPL-SIDE_PANEL_TAGS_TREE"
     supersedes: []
   status: "Active"
-  test_coverage_note: "Unit: JSDOM snapshot PROCEDURE; E2E shape contract in popup-snapshot.e2e.test.js"
+  test_coverage_note: "The snapshot helper is intentionally test-owned: tests/unit/side-panel-snapshot.test.js validates the DOM contract and E2E suites validate the extension surface. No production src locus is expected; Browser Bookmarks is explicitly an absence check on side-panel.html."
+  testability: "unit_and_e2e"
   traceability:
     architecture:
       - "ARCH-UI_TESTABILITY"

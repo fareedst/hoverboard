@@ -1,6 +1,6 @@
 /**
  * GENERATED COMPOSITION TEST TEMPLATE
- * [IMPL-COMPOSITION_TEST_PATTERNS] [ARCH-COMPOSITION_TEST_PATTERNS] [REQ-COMPOSITION_TEST_RECOGNITION]
+ * [IMPL-COMPOSITION_TEST_PATTERNS] [ARCH-COMPOSITION_TEST_PATTERNS] [REQ-COMPOSITION_TEST_RECOGNITION] [REQ-MODULE_VALIDATION]
  *
  * Copy this file to tests/integration/<edge>-composition.integration.test.js
  * Fill placeholders from the IMPL block lead (or full block) and composition:plan row.

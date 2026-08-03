@@ -1,6 +1,8 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_SNAPSHOT ===
- * Unit-testable DOM snapshot PROCEDURE (JSDOM); E2E uses same shape against live panel.
+ * [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] — Unit-testable DOM snapshot of This Page / By Tag / Tabs. Browser Bookmarks is an absence check when the standalone page is not part of side-panel.html ([IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]).
+ * - [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] How: Apply the same panel-presence and control-shape checks in JSDOM that the E2E helper applies against the live side panel.
+ * - Contract: INPUT document; OUTPUT bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab; EFFECTS none; TERMINATION total.
  * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_SNAPSHOT ===
  */
 

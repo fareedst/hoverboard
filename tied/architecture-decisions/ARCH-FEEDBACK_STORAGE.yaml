@@ -50,13 +50,11 @@ ARCH-FEEDBACK_STORAGE:
       - "IMPL-MCP_FEEDBACK_TOOLS"
     see_also: []
   status: "Active"
+  test_coverage_note: "Canonical-source anchor only: feedback implementation and tests live in the upstream TIED methodology repository; this client has no local project coverage."
   traceability:
-    code_annotations:
-      - "ARCH-FEEDBACK_STORAGE"
-      - "IMPL-MCP_FEEDBACK_TOOLS"
+    code_annotations: []
     implementation:
       - "IMPL-MCP_FEEDBACK_TOOLS"
     requirements:
       - "REQ-FEEDBACK_TO_TIED"
-    tests:
-      - "feedback.test.ts"
+    tests: []

@@ -20,7 +20,8 @@
 
 - Template IMPLs: `IMPL-CONFIG_STRUCT`, `IMPL-ERROR_HANDLING`, `IMPL-EXAMPLE_IMPLEMENTATION`, `IMPL-TESTING`
 - Deferred: `IMPL-SAFARI_ADAPTATION`
-- Methodology YAML-only (no product sidecar): `IMPL-MCP_FEEDBACK_TOOLS`, `IMPL-MODULE_VALIDATION`, `IMPL-TIED_FILES`
+- Canonical-source anchor (no local product coverage): `IMPL-MCP_FEEDBACK_TOOLS`
+- Methodology YAML-only (no product sidecar): `IMPL-MODULE_VALIDATION`, `IMPL-TIED_FILES`
 - Generated / vendored / build output (`dist/`, `node_modules/`, bundled popup chunks unless they are the authored source)
 - Pure fixture/data files with no behavior
 

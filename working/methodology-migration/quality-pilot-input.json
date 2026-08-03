@@ -1,0 +1,241 @@
+{
+  "run_id": "hoverboard-tied-migration-20260802",
+  "commit": "working-tree-after-phase-4",
+  "environment": {
+    "os": "darwin 25.5.0",
+    "node": "20+",
+    "project": "hoverboard",
+    "mode": "report-only"
+  },
+  "commands": [
+    {
+      "id": "lint",
+      "argv": ["npm", "run", "lint"],
+      "cwd": "/Users/fareed/Documents/dev/browser/hoverboard",
+      "artifact_dir": "/Users/fareed/Documents/dev/browser/hoverboard/working/methodology-migration/evidence/lint",
+      "tool_version_argv": ["node", "--version"],
+      "tool_version_name": "node"
+    },
+    {
+      "id": "typecheck",
+      "argv": ["npm", "run", "typecheck"],
+      "cwd": "/Users/fareed/Documents/dev/browser/hoverboard",
+      "artifact_dir": "/Users/fareed/Documents/dev/browser/hoverboard/working/methodology-migration/evidence/typecheck",
+      "tool_version_argv": ["node", "--version"],
+      "tool_version_name": "node"
+    },
+    {
+      "id": "unit",
+      "argv": ["npm", "run", "test:unit", "--", "--runInBand"],
+      "cwd": "/Users/fareed/Documents/dev/browser/hoverboard",
+      "timeout_ms": 180000,
+      "artifact_dir": "/Users/fareed/Documents/dev/browser/hoverboard/working/methodology-migration/evidence/unit",
+      "threshold": "exit code 0",
+      "tool_version_argv": ["node", "--version"],
+      "tool_version_name": "node"
+    },
+    {
+      "id": "integration",
+      "argv": ["npm", "run", "test:integration", "--", "--runInBand"],
+      "cwd": "/Users/fareed/Documents/dev/browser/hoverboard",
+      "timeout_ms": 180000,
+      "artifact_dir": "/Users/fareed/Documents/dev/browser/hoverboard/working/methodology-migration/evidence/integration",
+      "threshold": "exit code 0",
+      "tool_version_argv": ["node", "--version"],
+      "tool_version_name": "node"
+    },
+    {
+      "id": "e2e-extension",
+      "argv": ["npm", "run", "test:e2e:extension"],
+      "cwd": "/Users/fareed/Documents/dev/browser/hoverboard",
+      "timeout_ms": 240000,
+      "artifact_dir": "/Users/fareed/Documents/dev/browser/hoverboard/working/methodology-migration/evidence/e2e-extension",
+      "threshold": "exit code 0; skipped tests recorded",
+      "tool_version_argv": ["node", "--version"],
+      "tool_version_name": "node"
+    },
+    {
+      "id": "manifest",
+      "argv": ["npm", "run", "validate:manifest"],
+      "cwd": "/Users/fareed/Documents/dev/browser/hoverboard",
+      "artifact_dir": "/Users/fareed/Documents/dev/browser/hoverboard/working/methodology-migration/evidence/manifest",
+      "threshold": "exit code 0",
+      "tool_version_argv": ["node", "--version"],
+      "tool_version_name": "node"
+    },
+    {
+      "id": "tokens",
+      "argv": ["npm", "run", "validate:tokens"],
+      "cwd": "/Users/fareed/Documents/dev/browser/hoverboard",
+      "artifact_dir": "/Users/fareed/Documents/dev/browser/hoverboard/working/methodology-migration/evidence/tokens",
+      "threshold": "exit code 0",
+      "tool_version_argv": ["node", "--version"],
+      "tool_version_name": "node"
+    },
+    {
+      "id": "yaml-lint",
+      "argv": [
+        "/Users/fareed/Documents/dev/chatgpt/stdd/scripts/lint_yaml.sh",
+        "tied/requirements.yaml",
+        "tied/architecture-decisions.yaml",
+        "tied/implementation-decisions.yaml",
+        "tied/semantic-tokens.yaml",
+        "docs/agent-preload-contract-hoverboard-js.yaml",
+        "working/methodology-migration/REQ-TIED_SETUP_METHODOLOGY_MIGRATION_20260802.yaml"
+      ],
+      "cwd": "/Users/fareed/Documents/dev/browser/hoverboard",
+      "artifact_dir": "/Users/fareed/Documents/dev/browser/hoverboard/working/methodology-migration/evidence/yaml-lint",
+      "threshold": "exit code 0",
+      "tool_version_argv": ["node", "--version"],
+      "tool_version_name": "node"
+    },
+    {
+      "id": "tied-consistency",
+      "argv": [
+        ".cursor/skills/tied-yaml/scripts/tied-cli.sh",
+        "tied_validate_consistency",
+        "{\"include_detail_files\":true,\"include_pseudocode\":true}"
+      ],
+      "cwd": "/Users/fareed/Documents/dev/browser/hoverboard",
+      "timeout_ms": 180000,
+      "environment": {
+        "TIED_BASE_PATH": "/Users/fareed/Documents/dev/browser/hoverboard/tied"
+      },
+      "artifact_dir": "/Users/fareed/Documents/dev/browser/hoverboard/working/methodology-migration/evidence/tied-consistency",
+      "threshold": "ok true",
+      "tool_version_argv": ["node", "--version"],
+      "tool_version_name": "node"
+    },
+    {
+      "id": "whitespace",
+      "argv": ["git", "diff", "--check"],
+      "cwd": "/Users/fareed/Documents/dev/browser/hoverboard",
+      "artifact_dir": "/Users/fareed/Documents/dev/browser/hoverboard/working/methodology-migration/evidence/whitespace",
+      "threshold": "exit code 0",
+      "tool_version_argv": ["node", "--version"],
+      "tool_version_name": "node"
+    }
+  ],
+  "quality_rows": [
+    {
+      "id": "baseline-functional",
+      "attribute": "baseline-functional",
+      "applicability": "applicable",
+      "rationale": "The migration changes governed documentation, TIED data layout, pseudo-code classifications, and tooling configuration.",
+      "risk": "Traceability or project behavior could regress during refresh.",
+      "evidence_method": "unit, composition/integration, extension E2E, lint, typecheck, manifest, token, YAML, consistency checks",
+      "command_or_test": "unit; integration; e2e-extension; lint; typecheck; manifest; tokens; yaml-lint; tied-consistency",
+      "threshold": "Each command exit code 0; E2E skips recorded",
+      "result": "passed",
+      "owner": "migration maintainers",
+      "limitation": "Evidence is from this environment and does not prove universal runtime correctness.",
+      "waiver": {"required": false}
+    },
+    {
+      "id": "data-integrity-migration",
+      "attribute": "data-integrity-migration",
+      "applicability": "applicable",
+      "rationale": "The migration separates inherited methodology records from client-owned project YAML and changes preload/document paths.",
+      "risk": "Project records or traceability could be lost or structurally invalid.",
+      "evidence_method": "per-file YAML lint plus TIED consistency with details and pseudo-code",
+      "command_or_test": "yaml-lint; tied-consistency",
+      "threshold": "All changed YAML valid; consistency ok true",
+      "result": "passed",
+      "owner": "migration maintainers",
+      "limitation": "Validator proves repository structure and traceability, not arbitrary external backups.",
+      "waiver": {"required": false}
+    },
+    {
+      "id": "external-input-security",
+      "attribute": "external-input-security",
+      "applicability": "not_applicable",
+      "rationale": "No runtime authorization, parser, message schema, or untrusted-input behavior was changed; MCP validators were exercised only as repository tooling.",
+      "evidence_method": "bounded N/A rationale",
+      "command_or_test": "N/A",
+      "threshold": "N/A",
+      "result": "not_applicable",
+      "owner": "migration maintainers",
+      "limitation": "A future MCP handler or runtime input change must select this profile.",
+      "waiver": {"required": false}
+    },
+    {
+      "id": "stateful-reliability",
+      "attribute": "stateful-reliability",
+      "applicability": "not_applicable",
+      "rationale": "No retry, recovery, concurrency, or runtime state-machine behavior was changed.",
+      "evidence_method": "bounded N/A rationale",
+      "command_or_test": "N/A",
+      "threshold": "N/A",
+      "result": "not_applicable",
+      "owner": "migration maintainers",
+      "limitation": "Runtime state changes require a new risk selection.",
+      "waiver": {"required": false}
+    },
+    {
+      "id": "performance-scale-cost",
+      "attribute": "performance-scale-cost",
+      "applicability": "not_applicable",
+      "rationale": "No workload, latency, throughput, resource, external-call, or model/tool cost behavior was changed.",
+      "evidence_method": "bounded N/A rationale",
+      "command_or_test": "N/A",
+      "threshold": "N/A",
+      "result": "not_applicable",
+      "owner": "migration maintainers",
+      "limitation": "No performance claim is made by this pilot.",
+      "waiver": {"required": false}
+    },
+    {
+      "id": "user-facing-accessibility",
+      "attribute": "user-facing-accessibility",
+      "applicability": "not_applicable",
+      "rationale": "No user-facing interaction or accessibility contract was changed.",
+      "evidence_method": "bounded N/A rationale",
+      "command_or_test": "N/A",
+      "threshold": "N/A",
+      "result": "not_applicable",
+      "owner": "migration maintainers",
+      "limitation": "UI changes require accessibility profile selection.",
+      "waiver": {"required": false}
+    },
+    {
+      "id": "regulated-privacy",
+      "attribute": "regulated-privacy",
+      "applicability": "not_applicable",
+      "rationale": "No sensitive data, retention, consent, or regulatory behavior was changed.",
+      "evidence_method": "bounded N/A rationale",
+      "command_or_test": "N/A",
+      "threshold": "N/A",
+      "result": "not_applicable",
+      "owner": "migration maintainers",
+      "limitation": "No compliance or privacy certification is inferred.",
+      "waiver": {"required": false}
+    },
+    {
+      "id": "ai-enabled",
+      "attribute": "ai-enabled",
+      "applicability": "not_applicable",
+      "rationale": "No model, prompt, tool, agent, or generated-content product boundary was changed.",
+      "evidence_method": "bounded N/A rationale",
+      "command_or_test": "N/A",
+      "threshold": "N/A",
+      "result": "not_applicable",
+      "owner": "migration maintainers",
+      "limitation": "AI-enabled changes require a dedicated profile.",
+      "waiver": {"required": false}
+    }
+  ],
+  "covered_tokens": [
+    "REQ-TIED_SETUP",
+    "IMPL-TIED_FILES",
+    "IMPL-QUALITY_EVIDENCE_MANIFEST",
+    "PROC-QUALITY_ASSURANCE",
+    "PROC-QUALITY_EVIDENCE_PROVENANCE",
+    "PROC-TEST_ADEQUACY"
+  ],
+  "proof_boundaries": [
+    "TIED consistency proves index/detail/token/pseudo-code integrity and traceability only.",
+    "Application unit and integration tests prove only the executed scenarios.",
+    "Extension E2E evidence is Chromium/MV3 environment evidence with two recorded skips.",
+    "Report-only pilot does not enable strict quality blockers or claim universal correctness."
+  ]
+}

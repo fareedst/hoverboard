@@ -53,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **TIED methodology refresh** ([REQ-TIED_SETUP], [REQ-QUALITY_ASSURANCE_EVIDENCE], [IMPL-TIED_FILES]) – Added quality-assurance, pseudo-code validation, composition coverage, migration, and evidence-provenance guidance. No extension runtime behavior changed.
+- **TIED migration audit corrections** ([PROC-IMPL_PSEUDOCODE_TOKENS], [PROC-LEAP], [IMPL-MCP_FEEDBACK_TOOLS], [IMPL-SIDE_PANEL_SNAPSHOT]) – Added the canonical-source feedback sidecar, synchronized side-panel absence-check comments/tests, and recorded vocabulary and CITDP follow-up. No extension runtime behavior changed.
 - **R1c comparison closeout** ([REQ-LOCAL_BOOKMARKS_INDEX], [REQ-BROWSER_BOOKMARK_STORAGE]) – Documented collections-as-tags evidence and accepted 2B Local Query API limitations; no UX or runtime behavior change. CITDP: `tied/citdp/CITDP-REQ-BOOKMARK_MANAGER_COMPLETENESS-r1c-collections-na.yaml`.
 
 - **IMPL full-block comment re-sync + PROCEDURE audit** ([PROC-IMPL_PSEUDOCODE_TOKENS], [PROC-IMPL_CODE_TEST_SYNC]) – Re-injected Active sidecar H2 bodies into `src/`/`tests/` (fixed `sync_impl_full_blocks.py` `re.sub` backslash escape); PROCEDURE thoroughness audit across storage/ui/util; filled `traceability.tests` for empty Active IMPLs (gap report now Deferred Safari only). Working: `tied/working/IMPL_THREE_WAY_AUDIT_20260730113900.yaml`.

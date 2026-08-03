@@ -4,7 +4,7 @@
 
 ## MATCH_COMPOSITION_PATTERN
 
-- [IMPL-COMPOSITION_TEST_PATTERNS] [ARCH-COMPOSITION_TEST_PATTERNS] [REQ-COMPOSITION_TEST_RECOGNITION] How: Map binding signals and known suite families to a stable pattern ID from tied/vocab/test-composition.md.
+- [IMPL-COMPOSITION_TEST_PATTERNS] [ARCH-COMPOSITION_TEST_PATTERNS] [REQ-COMPOSITION_TEST_RECOGNITION] [REQ-MODULE_VALIDATION] How: Map binding signals between independently validated units and known suite families to a stable pattern ID from tied/vocab/test-composition.md.
 - Contract:
   - INPUT: edge (source_impl, target_impl?), sidecar_text?, suite_paths[]
   - PRE: pattern catalog loaded (MESSAGE_DISPATCH … SCOPED_DOM_BINDING)
@@ -48,7 +48,7 @@
 
 ## EMIT_COMPOSITION_TEST_PLAN
 
-- [IMPL-COMPOSITION_TEST_PATTERNS] [ARCH-COMPOSITION_TEST_PATTERNS] [REQ-COMPOSITION_TEST_RECOGNITION] How: Scan Active IMPLs, classify edges, print reviewable plan for agents generating tests; enforce unit-first then composition RED ordering in guidance.
+- [IMPL-COMPOSITION_TEST_PATTERNS] [ARCH-COMPOSITION_TEST_PATTERNS] [REQ-COMPOSITION_TEST_RECOGNITION] [REQ-MODULE_VALIDATION] How: Scan Active IMPLs, classify edges between independently validated units, print a reviewable plan for agents generating tests, and enforce unit-first then composition RED ordering in guidance.
 - Contract:
   - INPUT: tied/implementation-decisions/*.yaml (+ sidecars), tests/integration/**/*.integration.test.js
   - PRE: catalog and status vocabulary available

@@ -1,6 +1,6 @@
 # TIED Processes
 
-**TIED Methodology Version**: 1.4.0
+**TIED Methodology Version**: 2.2.0
 
 Process documentation is the missing link that keeps tooling, rituals, and expectations traceable back to requirements. This guide defines how to record repeatable processes with semantic tokens so that every operational step you take is measurable, auditable, and associated with the intent that drove it.
 
@@ -58,7 +58,7 @@ Use the structure below for every process you document. Each entry should be kep
 
 #### Core Activities
 1. **Survey**
-   - Read `TIED.md`, `semantic-tokens.yaml`, `semantic-tokens.md`, and recent requirements to understand intent.
+   - Read `tied/docs/LEAP.md`, `semantic-tokens.yaml`, `semantic-tokens.md`, and recent requirements to understand intent.
    - Tag findings with `[PROC-PROJECT_SURVEY_AND_SETUP]` and record them in the project knowledge base.
 2. **Build**
    - Confirm required toolchains (language runtime, TIED tooling) are installed and share the list on the onboarding checklist.
@@ -122,7 +122,7 @@ Active. Mandatory on every change to the TIED db or its outputs.
 Minimize the amount of code not covered by tests so that IMPL/ARCH/REQ logic is validated by unit and integration tests; E2E remains expensive and is reserved for critical user journeys.
 
 ### Scope
-Chrome extension `src/` only (Safari-only code excluded). Applies to unit tests (`tests/unit/**/*.test.js`), integration tests (`**/*.integration.test.js`), and Playwright E2E (`tests/playwright/`).
+Applies to managed source and tests in the active project. Hoverboard's declared suites are JavaScript unit/integration tests under `tests/` and Playwright extension E2E; Safari-only code remains excluded unless explicitly selected by a future change.
 
 ### Token references
 - `[IMPL-TESTING]` — testing implementation decisions
@@ -138,19 +138,84 @@ Active
 2. **Unit + integration tests cover logic** — Unit and integration tests should cover IMPL/ARCH/REQ logic so that untested pathways are found and fixed before or alongside E2E.
 3. **Composition tests cover bindings** — Every binding between tested units (event listeners, IPC, entry-point delegation, wiring) must have a composition test (component, integration, or contract) that verifies the connection works without invoking the UI. If a binding exists and no composition test covers it, there is a gap.
 4. **IMPL–test alignment** — Every Active IMPL should have at least one test reference in `traceability.tests`, or be explicitly documented as "tested only via E2E" / "no unit tests" with a reason.
-5. **Coverage gates** — Jest `coverageThreshold` and the coverage gap report (`scripts/coverage-gap-report.js`) help prevent regressions and surface files/IMPLs with no tests.
+5. **Coverage and evidence gates** — Use configured coverage, traceability, and quality-evidence checks when the project provides them. Do not treat percentage coverage or marker presence as proof of correctness; every Active IMPL must still have a testability classification and explicit evidence boundary.
 6. **E2E-only requires justification** — `e2e_only` classification in an IMPL requires justification that no mock, stub, or programmatic trigger can exercise the boundary below E2E. The justification must name the specific platform constraint (e.g. "native OS menu click cannot be simulated in JSDOM or Playwright"). Bindings between units that communicate via events, messages, or function calls are not E2E-only — they are composition-testable.
 7. **Minimize E2E-only code** — Treat E2E and manual verification as the exception. Every IMPL should have unit or integration tests for its logic, or an explicit E2E-only reason in the IMPL detail.
 
 ### Activities
-- Run `npm run test:coverage` before merging; fix or document any new code that lowers coverage below threshold.
-- Run `node scripts/coverage-gap-report.js [threshold]` to list src files below threshold and IMPLs with empty `traceability.tests`; use the report in MRs or docs.
+- Run Hoverboard's declared unit, composition/integration, E2E, and quality-evidence commands before merging; record commands, versions, thresholds, and results in the verification evidence manifest when that artifact is enabled.
+- If a project has no configured coverage or gap command, record that limitation and rely on the applicable test matrix, binding inventory, token audit, and explicit risk rationale rather than inventing a command.
 - For IMPLs that are intentionally not unit-tested (e.g. platform-specific glue or debug tooling), record in the IMPL detail that coverage is via E2E or manual testing so the "no tests" is explicit and reviewable.
-- When adding or changing IMPLs, classify code as unit-testable, integration-testable, or E2E-only. If E2E-only, set `traceability.tests` to [] and document in the IMPL (e.g. `test_coverage_note` or `e2e_only_reason`) why unit/integration are not used; the justification must name the specific platform constraint. Bindings (event listeners, IPC, wiring) are composition-testable, not E2E-only. Use the coverage gap report to catch IMPLs with empty tests and no justification.
+- When adding or changing IMPLs, classify code as unit-testable, integration-testable, or E2E-only. If E2E-only, set `traceability.tests` to [] and document in the IMPL (e.g. `test_coverage_note` or `e2e_only_reason`) why unit/integration are not used; the justification must name the specific platform constraint. Bindings (event listeners, IPC, wiring) are composition-testable, not E2E-only. Use the project's configured traceability or evidence validator, when present, to catch IMPLs with empty tests and no justification.
 
 ### Artifacts & Metrics
-- **Artifacts** — Coverage report (`coverage/`), coverage gap report output, TIED `traceability.tests` in IMPL detail files.
-- **Success Metrics** — Coverage at or above threshold; IMPL traceability.tests populated or explicitly documented; E2E used for critical flows only.
+- **Artifacts** — Project-declared test output, quality evidence matrix, verification evidence manifest, and TIED `traceability.tests` in IMPL detail files.
+- **Success Metrics** — Applicable evidence is reproducible or explicitly accepted with owner/expiry; IMPL testability is classified; E2E is used only for justified platform boundaries.
+
+---
+
+## `[PROC-QUALITY_ASSURANCE]` Risk-triggered quality assurance
+
+### Purpose
+Select only the quality attributes justified by change risk, then define evidence and ownership before implementation. This preserves the mandatory TDD, module-validation, composition, LEAP, and TIED-consistency spine without universal ceremony.
+
+### Scope
+Every behavior-changing requirement or change that reaches CITDP. The baseline-functional profile is always considered; specialized profiles are selected only when their triggers are present.
+
+### Token references
+- `[REQ-QUALITY_ASSURANCE_EVIDENCE]`
+- `[ARCH-QUALITY_ASSURANCE_PROFILES]`
+- `[IMPL-QUALITY_EVIDENCE_MANIFEST]`
+- `[PROC-QUALITY_EVIDENCE_PROVENANCE]`
+- `[PROC-TEST_ADEQUACY]`
+
+### Profile selectors
+1. **baseline-functional** — all behavior changes; unit TDD, applicable composition evidence, and traceability boundaries.
+2. **external-input-security** — untrusted input, authorization, API, CLI, message, file, or content boundaries.
+3. **data-integrity-migration** — persistence, schema, migration, import/export, replay, or idempotency changes.
+4. **stateful-reliability** — retries, recovery, restart, concurrency, or state-machine behavior.
+5. **performance-scale-cost** — workload, latency, throughput, resource, external-call, or model/tool cost risk.
+6. **user-facing-accessibility** — user-visible interaction or accessibility contracts.
+7. **regulated-privacy** — sensitive data, retention, consent, or named regulatory obligations.
+8. **ai-enabled** — model, prompt, tool, agent, or generated-content boundaries.
+
+Profiles are applicability selectors, not a requirement to execute every profile. An inapplicable row records a reason; an accepted residual risk records an owner and expiry.
+
+### Required evidence row
+For each quality attribute, record `applicability`, `rationale`, `risk`, `evidence_method`, `command_or_test`, `threshold`, `result`, `owner`, `limitation`, and `waiver/expiry` when applicable. Select risk before REQ/ARCH/IMPL design and freeze implementation until pseudo-code validation and TIED persistence pass.
+
+### Proof boundaries
+`tied_validate_consistency` proves TIED index/detail/token/pseudo-code integrity and traceability. It does not prove runtime security, performance, usability, compliance, resilience, privacy, or product correctness. Those claims require profile-specific executable or qualified human evidence.
+
+### Artifacts & Metrics
+- **Artifacts** — CITDP risk/profile matrix, bounded scenario and abuse-case rows, evidence manifest reference, waiver/residual-risk decisions.
+- **Success Metrics** — Applicable quality rows have reproducible evidence or owned expiring acceptance; specialized checks remain scoped to selected profiles.
+
+---
+
+## `[PROC-QUALITY_EVIDENCE_PROVENANCE]` Evidence provenance
+
+### Purpose
+Make machine-derived verification evidence reproducible and distinguish it from human rationale, waivers, and residual-risk decisions.
+
+### Required provenance
+Record commit identity, environment and tool versions, exact commands, exit codes, test/lint/build results, covered REQ/IMPL tokens, quality-matrix outcomes, validator diagnostics, and TIED consistency results. Store human decisions separately.
+
+### Proof boundary
+An evidence manifest reports what commands observed in one environment and does not claim universal correctness, regulatory certification, or complete product quality.
+
+---
+
+## `[PROC-TEST_ADEQUACY]` Risk-triggered test adequacy
+
+### Purpose
+Apply advanced testing and maintainability controls only when selected by the assurance profile and changed-module risk.
+
+### Conditional checks
+Mutation, property/metamorphic testing, fuzzing, deterministic replay, flaky-test detection, harness self-tests, complexity/dead-code review, dependency/license/vulnerability review, maintainability/coupling thresholds, and external-call cost controls are conditional. Record repeat count, seed, retry classification, quarantine owner/expiry, expected call volume, timeout, retry budget, caching/batching choice, and resource-exhaustion behavior when relevant.
+
+### Non-goal
+Ordinary low-risk internal or documentation changes use a bounded N/A rationale instead of irrelevant load, accessibility, compliance, or pilot ceremony.
 
 ---
 
@@ -180,6 +245,42 @@ Active
 - **Success Metrics** — Methodology can be refreshed without losing project data; agents and MCP write only to project YAML.
 
 **Migration**: Existing clients with mixed content in a single `tied/*.yaml` should follow the one-time procedure in `tied/docs/migration-methodology-project-yaml.md` (or `docs/migration-methodology-project-yaml.md` in the TIED repo).
+
+---
+
+## `[PROC-VOCABULARY_INDEX]` Domain vocabulary index discipline
+
+### Purpose
+Keep one controlled set of preferred terms so that requirements, architecture, IMPL pseudo-code, tests, code, and user-facing docs all name the same concept the same way. The domain vocabulary index files at `tied/vocab/*.md` are an active traceability artifact; this is distinct from the IMPL grammar vocabulary in `implementation-decisions.md`.
+
+### Scope
+Every point in `[PROC-AGENT_REQ_CHECKLIST]` where a concept is named: sponsor wording, TIED resources, storage items, logical units, tests, code, design, and UI documents.
+
+### Token references
+- `[PROC-AGENT_REQ_CHECKLIST]`
+- `[PROC-IMPL_PSEUDOCODE_TOKENS]`
+- `[PROC-TOKEN_AUDIT]`
+
+### File location and editing
+- Domain vocabulary index files live at `tied/vocab/*.md`; filenames do not carry a `-vocabulary` suffix.
+- They are plain Markdown, not TIED index/detail YAML, and are edited directly; do not route them through `tied-cli.sh` or `lint_yaml`.
+
+### Core activities
+1. **RESOLVE** before naming: choose the preferred term from the matched glossary and flag absent concepts.
+2. **PRELOAD** before reading TIED indexes, detail files, source, or tests: read `routing.md`, match task keywords, and open only matched glossaries; use `domain-references.md` on demand for cross-topic notes.
+3. **RECORD** as concepts and artifacts change: update preferred-term, naming-bridge, and UPPER_SNAKE block-name rows.
+4. **VALIDATE** before commit: audit TIED names, semantic tokens, pseudo-code blocks, tests, code, and user-facing docs for synonym drift or missing bridges.
+
+### Touchpoint mapping
+| Touchpoint | Mode | Checklist steps |
+|---|---|---|
+| Prompt intake | RESOLVE (+ RECORD for new concepts) | `translate-sponsor-intent`, `change-definition` |
+| Pre-read | PRELOAD | `session-bootstrap`, `impact-discovery` |
+| Pre-commit | VALIDATE | `traceable-commit` |
+
+### Artifacts & Metrics
+- **Artifacts** — `tied/vocab/*.md` preferred-term tables, naming bridges, UPPER_SNAKE block names, and alphabetical indexes.
+- **Success Metrics** — each named concept resolves to exactly one preferred term; new concepts are recorded after artifacts change; validation passes before commit.
 
 ---
 
@@ -360,8 +461,12 @@ with open('tied/requirements.yaml', 'w') as f:
 
 This is the **controlling loop** for creating or editing any TIED YAML (index or detail). No TIED record is considered valid for use until it has passed this loop.
 
-1. **Edit** — Create or modify the YAML file (index or detail) under `tied/` or other TIED-related paths (e.g. `docs/citdp/*.yaml` as defined by the project).
-2. **Validate and pretty-print** — Run `yq -i -P <file>` (or project-equivalent). This validates syntax and canonicalizes formatting in place. On failure, the file is invalid; fix and repeat from step 1.
+**`scripts/yaml_tool.sh`** — Primary project utility for YAML validation and list normalization. Default operation canonicalizes each path in place with double-quoted scalar lint (`yq -i 'sort_keys(.. style="double")'`, one file per invocation). `--sort-lists` delegates qualifying list groups to `yaml_list_sorter.rb`; `--sort-keys` is optional on that path. Block-scalar bodies remain opaque.
+
+**`lint_yaml`** / **`scripts/lint_yaml.sh`** — Backward-compatible alias that delegates to `yaml_tool.sh`. It must process each path independently; do not pass multiple paths to one raw `yq -i` command.
+
+1. **Edit** — Create or modify the YAML file (index or detail) under `tied/` or other TIED-related paths (e.g. `tied/citdp/*.yaml` as defined by the project).
+2. **Validate and pretty-print** — Run `scripts/yaml_tool.sh <file>` or `lint_yaml <file>` (or multiple paths through the wrapper). This validates syntax and canonicalizes formatting in place. On failure, the file is invalid; fix and repeat from step 1.
 3. **Use** — Only after step 2 succeeds is the file considered **valid for use** under TIED (MCP, `tied_validate_consistency`, and other tooling may rely on it). YAML that does not validate is **invalid** and **must not be used** until fixed.
 4. **Optional** — For TIED index and detail files, run **tied_validate_consistency** (and any index/detail checks) as a further gate.
 
@@ -372,6 +477,8 @@ This is the **controlling loop** for creating or editing any TIED YAML (index or
 `lint_yaml` validates **YAML syntax** and canonicalizes formatting. It does **not** enforce TIED **schema** or **field shapes** (e.g. index-only fields, list vs scalar, top-level token key in detail files). Those issues often surface only when running **`tied_validate_consistency`** or other index/detail merge tooling.
 
 **Authoritative reference:** `detail-files-schema.md` — especially § **Structural rules and common errors (agents)** (index-only fields, top-level key, field shapes, quoting).
+
+**MCP partial updates:** `yaml_detail_update` and `yaml_index_update` payloads that include only part of `metadata` or `traceability` can drop sibling fields. Read, merge locally, write, re-read, and restore any vanished audit fields before treating an update as complete.
 
 **Pre-write checklist for any REQ/ARCH/IMPL detail YAML** (verify before saving or before approving a patch):
 
@@ -385,14 +492,11 @@ This is the **controlling loop** for creating or editing any TIED YAML (index or
 
 #### 4. Validating YAML Syntax (mandatory before use)
 
-**All** changes to TIED YAML must be validated before the file is considered valid for use. Validate (and canonicalize) with `yq -i -P <file>`. If validation fails, the YAML is **invalid** and **must not be used** until fixed.
+**All** changes to TIED YAML must be validated before the file is considered valid for use. Validate (and canonicalize) with `lint_yaml` per `[PROC-YAML_EDIT_LOOP]`. If validation fails, the YAML is **invalid** and **must not be used** until fixed.
 
-**Validate and pretty-print with yq (recommended):**
+**Validate and pretty-print with `yaml_tool.sh` or `lint_yaml` (recommended):**
 ```bash
-yq -i -P tied/requirements.yaml && echo "✅ Valid YAML" || echo "❌ Invalid YAML"
-yq -i -P tied/architecture-decisions.yaml && echo "✅ Valid YAML" || echo "❌ Invalid YAML"
-yq -i -P tied/implementation-decisions.yaml && echo "✅ Valid YAML" || echo "❌ Invalid YAML"
-yq -i -P tied/semantic-tokens.yaml && echo "✅ Valid YAML" || echo "❌ Invalid YAML"
+lint_yaml tied/requirements.yaml tied/architecture-decisions.yaml tied/implementation-decisions.yaml tied/semantic-tokens.yaml
 # Repeat for any changed detail files under tied/requirements/, tied/architecture-decisions/, tied/implementation-decisions/
 ```
 
@@ -509,7 +613,7 @@ yq '.REQ-TIED_SETUP.metadata.last_validated.result' tied/requirements.yaml
 
 ### Artifacts & Metrics
 - **Artifacts**: YAML index files (requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml); all created or updated per [PROC-YAML_EDIT_LOOP] so they are valid for use.
-- **Success Metrics**: YAML files are valid (validated with `yq -i -P` or equivalent), all records have required fields, cross-references are consistent; invalid YAML is not used until fixed.
+- **Success Metrics**: YAML files are valid (validated with `lint_yaml`), all records have required fields, cross-references are consistent; invalid YAML is not used until fixed.
 
 ---
 
@@ -551,7 +655,7 @@ Active
 **Code-generation inner loop (per TDD iteration)** — Steps 3–7 are governed by a single inner loop. Every iteration must complete RED → GREEN → (optional REFACTOR) before the iteration is considered done. Code that does not pass lint is incomplete and must not proceed.
 
 - **RED (mandatory entry)** — Write or update a **test** that fails for the behavior being implemented. Run the test suite; confirm the new test fails for the expected reason. No production code is written in this step.
-- **GREEN** — Write the **minimum production code** to make the failing test pass. Run tests and **language-specific lint** for each language in scope: **Rust** → `bun run lint:rust` [PROC-RUST_LINT]; **TypeScript** → `bunx tsc -b` or `bun run lint:ts` [PROC-TS_CHECK]; **Swift** → `swift build && swift test` [PROC-SWIFT_BUILD]; **YAML** → `yq -i -P <changed files>` [PROC-YAML_EDIT_LOOP] (when TIED YAML is created or updated). If tests still fail, iterate on production code only (do not add new tests in GREEN). If lint fails, fix before proceeding.
+- **GREEN** — Write the **minimum production code** to make the failing test pass. Run tests and **language-specific lint** for each language in scope: **Rust** → `bun run lint:rust` [PROC-RUST_LINT]; **TypeScript** → `bunx tsc -b` or `bun run lint:ts` [PROC-TS_CHECK]; **Swift** → `swift build && swift test` [PROC-SWIFT_BUILD]; **YAML** → `lint_yaml` on changed files [PROC-YAML_EDIT_LOOP] (when TIED YAML is created or updated). If tests still fail, iterate on production code only (do not add new tests in GREEN). If lint fails, fix before proceeding.
 - **REFACTOR** (optional) — Clean up test or production code; re-run tests and lint to confirm no regressions.
 - **NEXT** — Proceed to the next iteration (new failing test) or next step.
 
@@ -785,7 +889,7 @@ Active
 5. **Test determination** — Per [PROC-TEST_STRATEGY]; test matrix with impl_block_reference and tied_token_comments; testability_classification.
 6. **TDD sequence** — Per [PROC-TIED_DEV_CYCLE]: pseudo-code first, then failing unit tests, then unit code via TDD, then failing composition tests (component/integration/contract) for every binding, then composition code via TDD, then E2E for UI-only behavior, then validate and sync TIED stack per [PROC-LEAP] if divergences.
 7. **Completion** — Before returning work to the caller, run applicable **language and data checks**: [PROC-RUST_LINT] for Rust, [PROC-TS_CHECK] for TypeScript, [PROC-SWIFT_BUILD] for Swift, [PROC-YAML_EDIT_LOOP] for YAML (and any other gates defined in `processes.md`). All mandated checks must pass before the implementation is considered complete. Then: [PROC-TOKEN_VALIDATION] / `tied_validate_consistency`; module validation per [REQ-MODULE_VALIDATION]; LEAP feedback (divergences_from_analysis, tied_stack_updates_required, record_status) when applicable.
-8. **Persistence** — Record stored as YAML per [PROC-YAML_DB_OPERATIONS]. Validate and pretty-print per [PROC-YAML_EDIT_LOOP] (e.g. `yq -i -P <file>`); the record is not valid for use until validation passes. JSON export optional.
+8. **Persistence** — Record stored as YAML per [PROC-YAML_DB_OPERATIONS]. Validate and pretty-print per [PROC-YAML_EDIT_LOOP] (e.g. `lint_yaml <file>`); the record is not valid for use until validation passes. JSON export optional.
 
 ### Artifacts & Metrics
 - **Artifacts**: Change-analysis YAML record (record identity, change definition, impact analysis, risk analysis, acceptance criteria, test strategy with test matrix, TDD sequence, implementation guidance, completion criteria, LEAP feedback).
@@ -867,27 +971,33 @@ This checklist is organized into nine phases (A–I). Phases A–C are analytica
 
 4. **B1. Read and catalog contracts.** Read each IMPL's `essence_pseudocode` sequentially. For each, note:
    - INPUT/OUTPUT/DATA declarations (and CONTROL when present)
+   - Precision contract fields: PRE, POST, EFFECTS; FAILURE_MODES when errors are possible; DATA_TRANSITION when DATA is mutated or EFFECTS includes State; TERMINATION when recursion / WHILE / open-ended wait (prefer `total` otherwise)
    - Procedure names (UPPER_SNAKE or camelCase)
-   - Key branches (IF/ELSE), loops (FOR ... IN), error paths (ON error, RETURN error)
-   - Async boundaries (AWAIT, Promise)
+   - Key branches (IF/ELSE), loops (FOR ... IN), error paths (ON error, RETURN error) and whether error names appear in FAILURE_MODES
+   - Async boundaries (AWAIT, Promise) and whether EFFECTS includes `Async`
 
 5. **B2. Identify insufficient specifications.** Flag any of these as incomplete and requiring resolution before tests or code:
    - Missing INPUT or OUTPUT declarations
+   - Missing PRE, POST, or EFFECTS on a new or changed Active procedure block (Template stubs exempt; untouched legacy Active blocks may defer with documented N/A `pre-contract-grammar` until next edit)
+   - Missing FAILURE_MODES when OUTPUT includes error, or steps use ON error / fallible returns
+   - Missing DATA_TRANSITION when DATA is mutated or EFFECTS includes State
+   - Missing TERMINATION when recursion / WHILE / open-ended wait is present
    - Procedures referenced but not defined (called by name but body absent)
    - Branches without error handling (no ON error, no RETURN error on a fallible path)
    - Stub or template pseudo-code (`Template: placeholder for ...`) on an IMPL with `status: Active`
    - Blocks with no token comment (violates [PROC-IMPL_PSEUDOCODE_TOKENS])
 
 6. **B3. Identify contradictory specifications.** Compare across IMPLs in the set:
-   - **Shared DATA conflict** — two IMPLs read/write the same DATA key or structure with different assumptions (e.g., one assumes sync storage, another assumes async).
+   - **Shared DATA conflict** — two IMPLs read/write the same DATA key or structure with different assumptions (e.g., one assumes sync storage, another assumes async), or incompatible DATA_TRANSITION / PRE/POST on shared DATA.
+   - **EFFECTS conflict** — composed IMPLs claim incompatible effects on the same path (e.g., both mutate the same State without ordering).
    - **Ordering conflict** — IMPL-A expects to run before IMPL-B (e.g., index must be loaded before lookup), but IMPL-B has no such ordering constraint or assumes the reverse.
-   - **Incompatible OUTPUT types** — IMPL-A produces `{ result }` but IMPL-B expects `{ result, metadata }` from the same procedure.
+   - **Incompatible OUTPUT types** — IMPL-A produces `{ result }` but IMPL-B expects `{ result, metadata }` from the same procedure; or FAILURE_MODES sets disagree for the same error surface.
    - **Duplicate logic** — the same step appears in two IMPLs with different parameters or behavior; one must defer to the other or a shared procedure must be extracted.
 
 7. **B4. Resolve and update.** For each issue found in B2–B3:
    - Update the affected IMPL's `essence_pseudocode` so contracts are compatible, ordering is explicit, and every block is complete.
    - When resolution changes the scope of an ARCH or REQ, propagate per [PROC-LEAP] (IMPL → ARCH → REQ).
-   - Run `yq -i -P` on every changed detail file per [PROC-YAML_EDIT_LOOP].
+   - Run `lint_yaml` on every changed detail file per [PROC-YAML_EDIT_LOOP].
 
 #### Phase C — Document pseudo-code (block token comments)
 
@@ -927,7 +1037,7 @@ This checklist is organized into nine phases (A–I). Phases A–C are analytica
 
 13. **D3. RED — write failing tests before production code.** Per [PROC-TIED_DEV_CYCLE] inner loop: write the test, run the suite, confirm the test fails for the expected reason. No production code in this step.
 
-14. **D4. Verify assertion matches pseudo-code OUTPUT.** For each test, check that the assertion corresponds to the OUTPUT or effect described in the pseudo-code block. If no programmatic assertion can be written for a block (e.g., platform-only behavior), mark it as `testability: e2e_only` in the IMPL detail and document the `e2e_only_reason` naming the platform constraint. Do not leave blocks silently untested.
+14. **D4. Verify assertion matches pseudo-code OUTPUT, POST, and FAILURE_MODES.** For each test, check that the assertion corresponds to the OUTPUT, POST predicates, and named FAILURE_MODES described in the pseudo-code block. Test setup must satisfy PRE. If no programmatic assertion can be written for a block (e.g., platform-only behavior), mark it as `testability: e2e_only` in the IMPL detail and document the `e2e_only_reason` naming the platform constraint. Do not leave blocks silently untested.
 
 #### Phase E — Derive code from pseudo-code (TDD, unit layer)
 
@@ -945,7 +1055,7 @@ This checklist is organized into nine phases (A–I). Phases A–C are analytica
     1. Update IMPL `essence_pseudocode` first (add the missing block, fix the contract, add the new dependency comment).
     2. Update or add the test to match the corrected pseudo-code.
     3. Update the production code to pass the corrected test.
-    4. Run `yq -i -P` on the changed IMPL detail file.
+    4. Run `lint_yaml` on the changed IMPL detail file.
 
     This keeps pseudo-code authoritative at every point during TDD, not just at the end.
 
@@ -971,7 +1081,7 @@ This checklist is organized into nine phases (A–I). Phases A–C are analytica
 
 #### Phase G — Expand to composition testing
 
-21. **G1. Identify bindings.** After all unit tests pass, identify the bindings between validated modules: event listeners, IPC channels, entry-point delegation, function wiring, platform hooks. Each binding connects two or more units that were validated independently in Phases D–F.
+21. **G1. Identify bindings.** After all unit tests pass, identify the bindings between validated modules: event listeners, IPC channels, entry-point delegation, function wiring, platform hooks. Each binding connects two or more units that were validated independently in Phases D–F. Maintain a binding inventory with trigger, callee, arguments, effect, ordering, failure behavior, composition test locus, and E2E flag; use `tied/docs/composition-coverage.md`.
 
 22. **G2. Find or create IMPL coverage for each binding.** For each binding, locate the IMPL(s) whose `essence_pseudocode` describes the composition (often in ON/WHEN event handlers or wiring procedures). If no IMPL covers the binding:
     - Extend an existing IMPL's pseudo-code to add a composition block describing the binding, **or**
@@ -1011,7 +1121,7 @@ This checklist is organized into nine phases (A–I). Phases A–C are analytica
     - Update `traceability.tests` to list all tests that validate this IMPL.
     - Update `code_locations` (files and functions) to reflect the current code.
     - Update `metadata.last_updated` with date, author, and reason.
-    - Run `yq -i -P` on the detail file per [PROC-YAML_EDIT_LOOP].
+   - Run `lint_yaml` on the detail file per [PROC-YAML_EDIT_LOOP].
 
 ### Process Diagram
 
@@ -1076,7 +1186,7 @@ All IMPL `essence_pseudocode` blocks in the project. Applied when pseudo-code is
 ### Token references
 - [PROC-IMPL_PSEUDOCODE_TOKENS] — block-level token comment rules for pseudo-code
 - [PROC-IMPL_CODE_TEST_SYNC] — phases B–C invoke validation before tests/code
-- [PROC-AGENT_REQ_CHECKLIST] — S06.5a invokes SUB-PSEUDOCODE-VALIDATE before S06.6
+- [PROC-AGENT_REQ_CHECKLIST] — gate-pseudocode-validation invokes sub-pseudocode-validation-pass before persist-implementation-records
 
 ### Status
 Active
@@ -1085,12 +1195,13 @@ Active
 1. Load the application pseudo-code validation checklist from `tied/docs/pseudocode-validation-checklist.yaml` (or `docs/pseudocode-validation-checklist.yaml` at repo root).
 2. Run each validation category in the **recommended_validation_order** (parsing → schema → symbol_resolution → contract_validation → dependency_graph → behavioral_coverage → traceability → linting → semantic_simulation → generation_readiness → reporting).
 3. Record findings with **severity** (error, warning, info) and **source location** (block identifier, line/column when available).
-4. Treat **required** checks as **gating**: do not proceed to writing tests or code until minimum gating rules are satisfied or explicitly waived and documented.
-5. If no parser or tool exists, perform a manual pass over the checklist categories and document results.
+4. Apply caller context: `gate-pseudocode-validation` runs Layer A plus structural Layer B and records test-dependent rows as N/A with rationale before executable tests exist; `verification-gate` runs full Layer B including minimum gating rules after tests.
+5. Treat **required** checks as gating for the active context; document N/A rows with rationale rather than ad-hoc waivers.
+6. If no parser or tool exists, perform a manual pass over the checklist categories and document results.
 
 ### Artifacts & Metrics
-- **Artifacts**: Validation report (findings by category, severity, location); optional waiver log for any required check that is waived.
-- **Success Metrics**: All required checks pass (or are waived with justification); minimum gating rules satisfied; diagnostics include source locations where available.
+- **Artifacts**: Validation report (findings by category, severity, location); N/A log for pre-RED test-dependent rows; optional waiver log only when policy allows explicit waiver.
+- **Success Metrics**: Pre-RED structural gate satisfied before persistence; full minimum gating rules satisfied at verification-gate; diagnostics include source locations where available.
 
 ### Procedure and checklist documents
 - `tied/docs/pseudocode-writing-and-validation.md` — how to write and validate; when to run; minimum gating rules.
@@ -1188,10 +1299,7 @@ The app opens with no documents. Use **File > Open...** (Cmd+O) to select text f
 
 **YAML syntax validation** (per `[PROC-YAML_EDIT_LOOP]`):
 ```bash
-yq -i -P tied/semantic-tokens.yaml
-yq -i -P tied/requirements.yaml
-yq -i -P tied/architecture-decisions.yaml
-yq -i -P tied/implementation-decisions.yaml
+lint_yaml tied/semantic-tokens.yaml tied/requirements.yaml tied/architecture-decisions.yaml tied/implementation-decisions.yaml
 # Repeat for any changed detail files under tied/*/
 ```
 
@@ -1214,10 +1322,7 @@ swift build
 swift test
 
 # 3. YAML validation (for any changed TIED files)
-yq -i -P tied/semantic-tokens.yaml
-yq -i -P tied/requirements.yaml
-yq -i -P tied/architecture-decisions.yaml
-yq -i -P tied/implementation-decisions.yaml
+lint_yaml tied/semantic-tokens.yaml tied/requirements.yaml tied/architecture-decisions.yaml tied/implementation-decisions.yaml
 
 # 4. TIED consistency (via MCP — must report "ok": true)
 # tied_validate_consistency
@@ -1233,7 +1338,7 @@ In the TDD inner loop (steps 3-7 of `[PROC-TIED_DEV_CYCLE]`):
 
 ### Artifacts & Metrics
 - **Artifacts**: Build output (`.build/debug/TextViewerApp`), test results (99 tests), TIED validation report.
-- **Success Metrics**: `swift build` exits 0; `swift test` reports 0 failures; `yq -i -P` exits 0 for all changed YAML; `tied_validate_consistency` reports `"ok": true`.
+- **Success Metrics**: `swift build` exits 0; `swift test` reports 0 failures; `lint_yaml` succeeds for all changed YAML; `tied_validate_consistency` reports `"ok": true`.
 
 ---
 
@@ -1257,7 +1362,7 @@ Active (optional per project).
 1. **Policy**: Do not edit `status` in `requirements.yaml` (or implementation index) by hand when verification-gated mode is on. Status reflects test outcomes only.
 2. **Verify step**: After running the test suite, run the project's verify step (e.g. MCP tool `tied_verify` with `--update`, or a script that parses test results and passes covered tokens to the tool). The verify step updates REQ/IMPL status from the set of tokens that have passing tests (e.g. from test names/comments or requirement markers).
 3. **CI**: In CI, run: test suite → verify (update status) → `tied_validate_consistency`. Optionally run a "health" check with defined exit codes (0 = ok, 1 = warnings, 2 = fail).
-4. **Pre-commit**: Optionally run `tied_validate_consistency` (and `yq -i -P` on staged TIED YAML) in a pre-commit hook to catch invalid or inconsistent TIED data.
+4. **Pre-commit**: Optionally run `tied_validate_consistency` (and `lint_yaml` on staged TIED YAML) in a pre-commit hook to catch invalid or inconsistent TIED data.
 
 ### Artifacts & Metrics
 - **Artifacts**: Updated requirement/implementation index status; verify run report.

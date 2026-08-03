@@ -59,7 +59,8 @@ IMPL-COMPOSITION_TEST_PATTERNS:
       - "IMPL-TESTING"
     supersedes: []
   status: "Active"
-  test_coverage_note: "No Playwright E2E for pattern recognition: classifier unit-tested; representative edges covered by composition suites. Platform-only edges require explicit e2e_only_reason."
+  test_coverage_note: "Unit classifier coverage is in tests/unit/composition-test-plan.test.js; representative binding edges are exercised by composition suites. Report-only composition audit found no candidate or partial edges; no runtime source locus is expected for this report tool."
+  testability: "unit_and_composition"
   traceability:
     architecture:
       - "ARCH-COMPOSITION_TEST_PATTERNS"

@@ -12,84 +12,82 @@
 agent_preload:
   workspace:
     cwd: ""
-    project_summary: 'Hoverboard is a Chrome Manifest V3 extension for local-first bookmark management, optional Pinboard.in integration, overlays, popup, and side panel. Production code is JavaScript (ES modules) under src/; build uses scripts/build.js, esbuild, and npm scripts in package.json. This repo is a TIED client: methodology under tied/methodology/ is read-only; project REQ/ARCH/IMPL YAML lives under tied/ at the paths in session_bootstrap_docs. Canonical AI agent operating rules are in AGENTS.md at the repository root (in addition to this contract).'
+    project_summary: "Hoverboard is a Chrome Manifest V3 extension for local-first bookmark management, optional Pinboard.in integration, overlays, popup, and side panel. Production code is JavaScript (ES modules) under src/; build uses scripts/build.js, esbuild, and npm scripts in package.json. This repo is a TIED client: methodology under tied/methodology/ is read-only; project REQ/ARCH/IMPL YAML lives under tied/ at the paths in session_bootstrap_docs. Canonical AI agent operating rules are in AGENTS.md at the repository root (in addition to this contract)."
     top_level_entries:
-      - src
-      - tests
-      - tied
-      - scripts
-      - docs
-      - specs
-      - manifest.json
-      - package.json
-      - jest.config.js
-      - playwright.extension.config.js
-    vcs_present: true
+      - "src"
+      - "tests"
+      - "tied"
+      - "scripts"
+      - "docs"
+      - "specs"
+      - "manifest.json"
+      - "package.json"
+      - "jest.config.js"
+      - "playwright.extension.config.js"
+    vcs_present: "true"
   session_bootstrap_docs:
-    ai_principles_path: ./ai-principles.md
-    semantic_tokens_index: ./tied/semantic-tokens.yaml
-    semantic_tokens_guide: ./tied/semantic-tokens.md
-    architecture_decisions_index: ./tied/architecture-decisions.yaml
-    implementation_decisions_index: ./tied/implementation-decisions.yaml
-    implementation_decisions_guide: ./tied/implementation-decisions.md
-    processes_path: ./tied/processes.md
-    agent_req_checklist_path: ./tied/docs/agent-req-implementation-checklist.md
-    detail_files_schema: ./tied/detail-files-schema.md
-    requirements_index: ./tied/requirements.yaml
+    ai_principles_path: "./tied/docs/ai-principles.md"
+    semantic_tokens_index: "./tied/semantic-tokens.yaml"
+    semantic_tokens_guide: "./tied/semantic-tokens.md"
+    architecture_decisions_index: "./tied/architecture-decisions.yaml"
+    implementation_decisions_index: "./tied/implementation-decisions.yaml"
+    implementation_decisions_guide: "./tied/implementation-decisions.md"
+    processes_path: "./tied/docs/processes.md"
+    agent_req_checklist_path: "./tied/docs/agent-req-implementation-checklist.md"
+    detail_files_schema: "./tied/docs/detail-files-schema.md"
+    requirements_index: "./tied/requirements.yaml"
+    client_development_index: "./tied/docs/client-development-index.md"
+    tied_yaml_agent_index: "./tied/docs/tied-yaml-agent-index.md"
+    methodology_migration: "./tied/docs/methodology-migration.md"
+    vocabulary_routing: "./tied/vocab/routing.md"
+    vocabulary_standards: "./tied/docs/vocabulary-index-analysis-and-standards.md"
+    pseudocode_validation_checklist: "./tied/docs/pseudocode-validation-checklist.yaml"
   methodology_vs_project:
-    methodology_readonly: true
-    project_tokens_only_writable: true
+    methodology_readonly: "true"
+    project_tokens_only_writable: "true"
   implementation_contract:
-    language: javascript
-    language_version: Node >=20.19.0 (engines); TypeScript tsc --noEmit for JS checking (ES2022)
-    test_framework: jest (unit/integration under tests/); Playwright for extension E2E (npm run test:e2e:extension)
-    test_cohabit_code: false
-    invalid_input: Varies by module; Zod is used on some paths. Extension messaging contracts are documented under docs/architecture/.
+    language: "javascript"
+    language_version: "Node >=20.19.0 (engines); TypeScript tsc --noEmit for JS checking (ES2022)"
+    test_framework: "jest (unit/integration under tests/); Playwright for extension E2E (npm run test:e2e:extension)"
+    test_cohabit_code: "false"
+    invalid_input: "Varies by module; Zod is used on some paths. Extension messaging contracts are documented under docs/architecture/."
     target_source_paths:
-      - src/
-      - manifest.json
-      - scripts/
+      - "src/"
+      - "manifest.json"
+      - "scripts/"
     citdp_artifact_paths:
-      - tied/requirements.yaml
-      - tied/requirements/
-      - tied/architecture-decisions.yaml
-      - tied/architecture-decisions/
-      - tied/implementation-decisions.yaml
-      - tied/implementation-decisions/
-      - specs/
+      - "tied/citdp/"
+      - "tied/requirements.yaml"
+      - "tied/requirements/"
+      - "tied/architecture-decisions.yaml"
+      - "tied/architecture-decisions/"
+      - "tied/implementation-decisions.yaml"
+      - "tied/implementation-decisions/"
+      - "specs/"
   tied_mcp:
-    base_path_resolved: false
-    yaml_detail_batch_done: false
+    base_path_resolved: "true"
+    tied_cli_stdio_ok_without_cursor_mcp: "true"
+    yaml_detail_batch_done: "true"
   tied_paths:
-    TIED_BASE_PATH: tied
+    TIED_BASE_PATH: "/Users/fareed/Documents/dev/browser/hoverboard/tied"
     project_yaml_writable_globs:
-      - '*.yaml'
-      - requirements/*.yaml
-      - architecture-decisions/*.yaml
-      - implementation-decisions/*.yaml
-    methodology_readonly_glob: methodology/**
-    mcp_tied_yaml_verified_this_session: false
+      - "*.yaml"
+      - "requirements/*.yaml"
+      - "architecture-decisions/*.yaml"
+      - "implementation-decisions/*.yaml"
+    methodology_readonly_glob: "methodology/**"
+    mcp_tied_yaml_verified_this_session: "true"
   discovery_already_done:
-    ruby_files_present: false
-    ruby_test_files_present: false
-    gemfile_present: false
-    semantic_tokens_present: true
+    ruby_files_present: "false"
+    ruby_test_files_present: "false"
+    gemfile_present: "false"
+    semantic_tokens_present: "true"
     grep_patterns_satisfied:
-      token_scan_in_sources: false
-      repo_layout_scan: false
+      token_scan_in_sources: "false"
+      repo_layout_scan: "false"
   active_user_intent:
     primary_query_summary: ""
     checklist_token: ""
     checklist_step_id: ""
 # Instruction block for prompts (optional; paste near agent_preload in user rules)
-preload_instructions: |
-  Treat agent_preload as authoritative context. If a value is present, do not spend
-  tool calls rediscovering it unless a later tool result or user message contradicts it.
-  Prefer preload facts over filesystem discovery. Do not search for MCP schema, server
-  metadata, project layout, or target file existence unless needed to resolve a
-  contradiction. When tied_paths.TIED_BASE_PATH and project_yaml_writable_globs are set,
-  align MCP TIED_BASE_PATH with them; never treat methodology_readonly_glob paths as
-  writable. Keep preload narrow and accurate; wrong preload costs more than one
-  discovery call.
-  Also honor repository root AGENTS.md alongside this contract for TIED obligations,
-  session bootstrap, and process checklists.
+preload_instructions: "Treat agent_preload as authoritative context. If a value is present, do not spend\ntool calls rediscovering it unless a later tool result or user message contradicts it.\nPrefer preload facts over filesystem discovery. Do not search for MCP schema, server\nmetadata, project layout, or target file existence unless needed to resolve a\ncontradiction. When tied_paths.TIED_BASE_PATH and project_yaml_writable_globs are set,\nalign MCP TIED_BASE_PATH with them; never treat methodology_readonly_glob paths as\nwritable. Keep preload narrow and accurate; wrong preload costs more than one\ndiscovery call.\nAlso honor repository root AGENTS.md alongside this contract for TIED obligations,\nsession bootstrap, and process checklists.\n"

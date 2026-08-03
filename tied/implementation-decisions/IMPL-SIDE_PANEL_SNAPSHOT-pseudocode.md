@@ -1,12 +1,12 @@
-# [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] — Side panel snapshot helper for This Page / By Tag / Tabs. browserBookmarksTab is an absence check: Browser Bookmarks is a standalone page ([IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]), so on side-panel.html panelPresent is false.
+# [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] — Side panel snapshot helper for This Page / By Tag / Tabs. Browser Bookmarks is an absence check because it is a standalone page ([IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]).
 
 ## MAIN
 
-- [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] How: Bookmark tab snapshot: root #bookmarkPanel; query by data-popup-ref for loadingState, errorState, mainInterface; derive visibility and screen. Tags tree tab: #tagsTreePanel key elements. browserTabsTab: #browserTabsPanel. browserBookmarksTab: query #browserBookmarksPanel; on side-panel.html expect panelPresent false (standalone Browser Bookmarks page, not a side-panel surface).
+- [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] How: Collect the Bookmark, By Tag, and Tabs panel shapes; represent Browser Bookmarks as an explicit absence check on side-panel.html because its UI is standalone.
 - Contract:
   - INPUT: page (Playwright/Puppeteer page navigated to side-panel.html)
   - PRE: caller supplies valid inputs for this block; dependencies wired
-  - OUTPUT: { bookmarkTab: {...}, tagsTreeTab: {...}, browserTabsTab: {...}, browserBookmarksTab: { panelPresent: false } on side-panel.html } | { error: OperationFailed }
+  - OUTPUT: { bookmarkTab: {...}, tagsTreeTab: {...}, browserTabsTab: {...}, browserBookmarksTab: { panelPresent: false } } on side-panel.html | { error: OperationFailed }
   - POST:
     - success => block outputs match OUTPUT success shape
     - error OperationFailed => no silent partial commit beyond documented best-effort
@@ -15,62 +15,10 @@
   - EFFECTS: IO
   - TERMINATION: total
 - PROCEDURE: MAIN
-  - 1. bookmarkTab = (function () {
-  - 2.   const root = document.getElementById('bookmarkPanel')
-  - 3.   if (!root) return { panelPresent: false }
-  - 4.   const loading = root.querySelector('[data-popup-ref="loadingState"]')
-  - 5.   const error = root.querySelector('[data-popup-ref="errorState"]')
-  - 6.   const main = root.querySelector('[data-popup-ref="mainInterface"]')
-  - 7.   const loadingVisible = loading && !loading.classList.contains('hidden')
-  - 8.   const errorVisible = error && !error.classList.contains('hidden')
-  - 9.   const mainVisible = main && !main.classList.contains('hidden')
-  - 10.   let screen = 'unknown'
-  - 11.   if (loadingVisible) screen = 'loading'
-  - 12.   else if (errorVisible) screen = 'error'
-  - 13.   else if (mainVisible) screen = 'mainInterface'
-  - 14.   const errorMsg = root.querySelector('[data-popup-ref="errorMessage"]')
-  - 15.   return { panelPresent: true, screen, loadingVisible, errorVisible, mainVisible, errorMessage: errorMsg ? errorMsg.textContent : undefined }
-  - 16. })()
-  - 17. tagsTreeTab = (function () {
-  - 18.   const root = document.getElementById('tagsTreePanel')
-  - 19.   if (!root) return { panelPresent: false }
-  - 20.   return {
-  - 21.     panelPresent: true,
-  - 22.     hasTagSelector: !!root.querySelector('#tagSelector') || !!document.getElementById('tagSelector'),
-  - 23.     hasTreeContainer: !!root.querySelector('#treeContainer') || !!document.getElementById('treeContainer'),
-  - 24.     hasSearchInput: !!root.querySelector('#searchInput') || !!document.getElementById('searchInput'),
-  - 25.     hasConfigToggle: !!root.querySelector('#configToggle') || !!document.getElementById('configToggle'),
-  - 26.     hasSearchCount: !!root.querySelector('#searchCount') || !!document.getElementById('searchCount'),
-  - 27.     hasEmptyState: !!root.querySelector('#emptyState') || !!document.getElementById('emptyState'),
-  - 28.     hasLoadError: !!root.querySelector('#loadError') || !!document.getElementById('loadError')
-  - 29.   }
-  - 30. })()
-  - 31. browserTabsTab = (function () {
-  - 32.   const root = document.getElementById('browserTabsPanel')
-  - 33.   if (!root) return { panelPresent: false }
-  - 34.   return {
-  - 35.     panelPresent: true,
-  - 36.     hasFilterInput: !!root.querySelector('#browserTabsFilterInput') || !!document.getElementById('browserTabsFilterInput'),
-  - 37.     hasCopyButton: !!root.querySelector('[data-action="copyUrls"]') || !!root.querySelector('#browserTabsCopyBtn'),
-  - 38.     hasCloseButton: !!root.querySelector('[data-action="closeTabs"]') || !!root.querySelector('#browserTabsCloseBtn'),
-  - 39.     hasListContainer: !!root.querySelector('#browserTabsList') || !!root.querySelector('.browser-tabs-list')
-  - 40.   }
-  - 41. })()
-  - 42. browserBookmarksTab = (function () {
-  - 43.   const root = document.getElementById('browserBookmarksPanel')
-  - 44.   if (!root) return { panelPresent: false }
-  - 45.   const byId = (id) => document.getElementById(id)
-  - 46.   return {
-  - 47.     panelPresent: true,
-  - 48.     hasSearchInput: !!byId('browserBookmarksSearchInput'),
-  - 49.     hasFolderSelect: !!byId('browserBookmarksFolderSelect'),
-  - 50.     hasSortSelect: !!byId('browserBookmarksSortSelect'),
-  - 51.     hasListContainer: !!byId('browserBookmarksList'),
-  - 52.     hasSelectAllBtn: !!byId('browserBookmarksSelectAllBtn'),
-  - 53.     hasUndoBar: !!byId('browserBookmarksUndoBar'),
-  - 54.     hasImportFolderSelect: !!byId('browserBookmarksImportFolderSelect'),
-  - 55.     hasExportHtmlBtn: !!byId('browserBookmarksExportHtmlBtn'),
-  - 56.     hasExportCsvBtn: !!byId('browserBookmarksExportCsvBtn')
-  - 57.   }
-  - 58. })()
-  - 59. RETURN { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }
+  - Locate #bookmarkPanel and return panelPresent, screen, visibility flags, and error text.
+  - Locate #tagsTreePanel and return presence of tag selector, tree, search, config, count, empty, and error elements.
+  - Locate #browserTabsPanel and return presence of scope, layout, filter, action, list, and section elements.
+  - Locate #browserBookmarksPanel.
+  - IF #browserBookmarksPanel is absent: return browserBookmarksTab.panelPresent = false.
+  - IF #browserBookmarksPanel is present: return its standalone-page controls without treating it as a side-panel tab.
+  - RETURN { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }.

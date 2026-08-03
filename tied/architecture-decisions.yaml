@@ -873,50 +873,13 @@ ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
     requirements:
       - "REQ-EXTENSION_BUNDLED_ENTRY_POINTS"
 ARCH-FEEDBACK_STORAGE:
-  alternatives_considered:
-    - name: "New YAML index (e.g. feedback.yaml as index)"
-      cons:
-        - "Feedback is not a traceability index; different schema (entries array)"
-      pros:
-        - "Consistent with requirements.yaml pattern"
-      rejected_reason: "Keep feedback as a separate artifact; schema is list of entries, not token-keyed records"
-    - name: "Store in requirements or implementation index"
-      cons:
-        - "Pollutes REQ/IMPL with non-traceability data"
-      pros:
-        - "No new file"
-      rejected_reason: "Feedback is not a requirement or implementation decision"
   cross_references:
     - "REQ-FEEDBACK_TO_TIED"
   detail_file: "architecture-decisions/ARCH-FEEDBACK_STORAGE.yaml"
-  implementation_approach:
-    details:
-      - "Each entry: id, type (feature_request | bug_report | methodology_improvement), title, description, context (optional), created_at (ISO 8601)"
-      - "MCP tools: tied_feedback_add (append), tied_feedback_export (markdown or JSON)"
-      - "Use getBasePath() from yaml-loader for path resolution"
-    summary: "One file {TIED_BASE_PATH}/feedback.yaml with top-level key 'entries' (array of objects)"
   metadata:
-    created:
-      author: "AI Agent"
-      date: "2026-03-03T00:00:00.000Z"
     last_updated:
-      author: "AI Agent"
-      date: "2026-03-03T00:00:00.000Z"
-      reason: "Initial creation"
-    last_validated:
-      date: "2026-03-03T00:00:00.000Z"
-      result: "pass"
-      validator: "AI Agent"
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
   name: "Feedback Storage for TIED Reporting"
-  rationale:
-    benefits:
-      - "Entries have id, type, title, description, optional context, created_at"
-      - "Same base path resolution as existing MCP tools (getBasePath())"
-      - "Single file tied/feedback.yaml; no new index type in REQ/ARCH/IMPL sense"
-    problems_solved:
-      - "Feedback not tied to project context (TIED base path)"
-      - "No standard location for feedback entries"
-    why: "Store user and project feedback in a single file under the TIED tree so it is versioned with the project and exportable for reporting to the TIED project"
   related_decisions:
     depends_on:
       - "REQ-FEEDBACK_TO_TIED"
@@ -925,15 +888,10 @@ ARCH-FEEDBACK_STORAGE:
     see_also: []
   status: "Active"
   traceability:
-    code_annotations:
-      - "ARCH-FEEDBACK_STORAGE"
-      - "IMPL-MCP_FEEDBACK_TOOLS"
     implementation:
       - "IMPL-MCP_FEEDBACK_TOOLS"
     requirements:
       - "REQ-FEEDBACK_TO_TIED"
-    tests:
-      - "feedback.test.ts"
 ARCH-FILE_BOOKMARK_PROVIDER:
   alternatives_considered:
     - name: "Multiple files per bookmark"
@@ -1521,69 +1479,13 @@ ARCH-MESSAGE_HANDLING:
       - "tests/unit/service-worker-messaging-routing.test.js"
       - "tests/unit/tag-recent-behavior.test.js"
 ARCH-MODULE_VALIDATION:
-  alternatives_considered:
-    - name: "Big Bang Integration"
-      cons:
-        - "Bugs compound during integration"
-        - "Difficult to isolate issues"
-        - "Too complex to debug"
-      pros:
-        - "Faster initial integration"
-      rejected_reason: "Makes debugging too difficult and bugs compound"
-    - name: "Minimal Validation"
-      cons:
-        - "Doesn't validate contracts properly"
-        - "Insufficient to catch complexity bugs"
-      pros:
-        - "Faster development cycle"
-      rejected_reason: "Insufficient validation leads to integration issues"
-    - name: "Post-Integration Validation Only"
-      cons:
-        - "Doesn't catch module-level bugs early"
-        - "Increases debugging complexity"
-      pros:
-        - "All validation done at once"
-      rejected_reason: "Bugs discovered too late, making fixes expensive"
   cross_references:
     - "REQ-MODULE_VALIDATION"
   detail_file: "architecture-decisions/ARCH-MODULE_VALIDATION.yaml"
-  implementation_approach:
-    details:
-      - "Define module interfaces and contracts explicitly"
-      - "Document validation results before integration"
-      - "Identify modules and document boundaries before development"
-      - "Integration test with test doubles (mocks, stubs, fakes)"
-      - "Only integrate after validation passes"
-      - "Specify validation criteria for each module"
-      - "Test edge cases and error handling"
-      - "Unit test modules with mocked dependencies"
-      - "Validate contracts (input/output validation)"
-    summary: "Independent module validation before integration with comprehensive testing strategy"
   metadata:
-    created:
-      author: "AI Agent"
-      date: "2025-12-18T00:00:00.000Z"
     last_updated:
-      author: "AI Agent"
-      date: "2026-02-06T00:00:00.000Z"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
-    last_validated:
-      date: "2026-02-06T00:00:00.000Z"
-      result: "pass"
-      validator: "AI Agent"
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
   name: "Module Validation Strategy"
-  rationale:
-    benefits:
-      - "Bugs caught early before integration"
-      - "Clear module boundaries and contracts"
-      - "Easier debugging by isolating issues"
-      - "Enables parallel module development"
-      - "Reduced integration complexity"
-    problems_solved:
-      - "Bugs discovered too late in development cycle"
-      - "Integration complexity causing difficult-to-debug issues"
-      - "Module contracts not properly validated"
-    why: "To eliminate bugs related to code complexity by ensuring each module works correctly in isolation"
   related_decisions:
     depends_on:
       - "REQ-MODULE_VALIDATION"
@@ -1592,15 +1494,10 @@ ARCH-MODULE_VALIDATION:
     see_also: []
   status: "Active"
   traceability:
-    code_annotations:
-      - "IMPL-MODULE_VALIDATION"
-      - "REQ-MODULE_VALIDATION"
     implementation:
       - "IMPL-MODULE_VALIDATION"
     requirements:
       - "REQ-MODULE_VALIDATION"
-    tests:
-      - "testModuleName_IndependentValidation_REQ_MODULE_VALIDATION"
 ARCH-MOVE_BOOKMARK_UI:
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
@@ -2160,6 +2057,51 @@ ARCH-PROJECT_STRUCTURE:
     implementation: []
     requirements:
       - "REQ-MAINTAINABILITY"
+ARCH-QUALITY_ASSURANCE_PROFILES:
+  cross_references:
+    - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+  detail_file: "architecture-decisions/ARCH-QUALITY_ASSURANCE_PROFILES.yaml"
+  name: "Risk-triggered quality assurance profiles and evidence boundary"
+  related_decisions:
+    depends_on:
+      - "ARCH-MODULE_VALIDATION"
+      - "ARCH-TIED_STRUCTURE"
+    informs:
+      - "IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK"
+      - "IMPL-QUALITY_BINDING_INVENTORY"
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+      - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+      - "IMPL-QUALITY_PSEUDOCODE_VALIDATOR"
+      - "IMPL-QUALITY_SECURITY_PROFILE_VALIDATION"
+      - "IMPL-QUALITY_TEST_ADEQUACY"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    implementation:
+      - "IMPL-QUALITY_ASSURANCE_PILOT_WEBHOOK"
+      - "IMPL-QUALITY_BINDING_INVENTORY"
+      - "IMPL-QUALITY_EVIDENCE_COLLECTION"
+      - "IMPL-QUALITY_EVIDENCE_COMMAND_RUNNER"
+      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+      - "IMPL-QUALITY_PSEUDOCODE_VALIDATOR"
+      - "IMPL-QUALITY_SECURITY_PROFILE_VALIDATION"
+      - "IMPL-QUALITY_TEST_ADEQUACY"
+    requirements:
+      - "REQ-QUALITY_ASSURANCE_EVIDENCE"
+    tests:
+      - "mcp-server/src/analysis/binding-inventory.test.ts"
+      - "mcp-server/src/analysis/pseudocode-validator.test.ts"
+      - "mcp-server/src/analysis/traceability-gap.test.ts"
+      - "mcp-server/src/quality-adequacy.test.ts"
+      - "mcp-server/src/quality-command-runner.test.ts"
+      - "mcp-server/src/quality-evidence-collection.test.ts"
+      - "mcp-server/src/quality-evidence.test.ts"
+      - "mcp-server/src/quality-security.test.ts"
+      - "mcp-server/src/tools/quality-validation-mcp.test.ts"
+      - "pilot/webhook-inbox/test/webhook-inbox.test.mjs"
 ARCH-QUICK_ACCESS_ENTRY:
   cross_references:
     - "REQ-QUICK_ACCESS_ENTRY"
@@ -3221,55 +3163,13 @@ ARCH-THIS_PAGE_TAG_SORT:
   name: "This Page tag sort architecture"
   status: "Active"
 ARCH-TIED_STRUCTURE:
-  alternatives_considered:
-    - name: "Root-level files"
-      cons:
-        - "Clutters the root directory"
-        - "No clear organization"
-      pros:
-        - "Immediately visible in repository root"
-      rejected_reason: "Creates too much clutter at project root"
-    - name: ".github or .docs folder"
-      cons:
-        - ".github is typically for GitHub workflows"
-        - "Too generic for methodology-specific files"
-      pros:
-        - "Common convention for documentation"
-      rejected_reason: "tied/ is more specific to the methodology"
   cross_references:
     - "REQ-TIED_SETUP"
   detail_file: "architecture-decisions/ARCH-TIED_STRUCTURE.yaml"
-  implementation_approach:
-    details:
-      - "Add guide files: semantic-tokens.md, processes.md"
-      - "Create detail subdirectories: requirements/, architecture-decisions/, implementation-decisions/"
-      - "Create tied/ directory at project root"
-      - "Populate with YAML index files: requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml"
-    summary: "Create dedicated tied/ directory with YAML indexes and detail subdirectories"
   metadata:
-    created:
-      author: "AI Agent"
-      date: "2025-12-18T00:00:00.000Z"
     last_updated:
-      author: "AI Agent"
-      date: "2026-02-06T00:00:00.000Z"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
-    last_validated:
-      date: "2026-02-06T00:00:00.000Z"
-      result: "pass"
-      validator: "AI Agent"
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
   name: "TIED Project Structure"
-  rationale:
-    benefits:
-      - "Clear separation of concerns"
-      - "Easy discovery of all TIED documentation"
-      - "Standard project layout for AI agents"
-      - "Testable and maintainable structure"
-    problems_solved:
-      - "Difficulty finding all context in one place"
-      - "Documentation scattered across project"
-      - "Meta-documentation mixed with source code"
-    why: "Keeps documentation close to code but organized in a dedicated namespace"
   related_decisions:
     depends_on:
       - "REQ-TIED_SETUP"
@@ -3278,16 +3178,10 @@ ARCH-TIED_STRUCTURE:
     see_also: []
   status: "Active"
   traceability:
-    code_annotations:
-      - "ARCH-TIED_STRUCTURE"
-      - "IMPL-TIED_FILES"
-      - "REQ-TIED_SETUP"
     implementation:
       - "IMPL-TIED_FILES"
     requirements:
       - "REQ-TIED_SETUP"
-    tests:
-      - "TestTIEDSetup_REQ_TIED_SETUP"
 ARCH-UI_TESTABILITY:
   cross_references:
     - "IMPL-PLAYWRIGHT_E2E_EXTENSION"

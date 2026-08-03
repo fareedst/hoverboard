@@ -2,7 +2,7 @@
 
 **Scope:** Core TIED layout, semantic tokens, module validation, bootstrap (`copy_files.sh`), methodology vs project YAML, agent operating guides, and `[PROC-*]` process token names used across this repository. **Vocabulary only** — file-copy mechanics and validation algorithms live in IMPL pseudo-code and [`../docs/processes.md`](../docs/processes.md).
 
-**Traceability:** [REQ-TIED_SETUP](../requirements/REQ-TIED_SETUP.yaml) · [REQ-MODULE_VALIDATION](../requirements/REQ-MODULE_VALIDATION.yaml) · [ARCH-TIED_STRUCTURE](../architecture-decisions/ARCH-TIED_STRUCTURE.yaml) · [ARCH-MODULE_VALIDATION](../architecture-decisions/ARCH-MODULE_VALIDATION.yaml) · [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) · [IMPL-MODULE_VALIDATION](../implementation-decisions/IMPL-MODULE_VALIDATION.yaml)
+**Traceability:** [REQ-TIED_SETUP](../methodology/requirements/REQ-TIED_SETUP.yaml) · [REQ-MODULE_VALIDATION](../methodology/requirements/REQ-MODULE_VALIDATION.yaml) · [ARCH-TIED_STRUCTURE](../methodology/architecture-decisions/ARCH-TIED_STRUCTURE.yaml) · [ARCH-MODULE_VALIDATION](../methodology/architecture-decisions/ARCH-MODULE_VALIDATION.yaml) · [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) · [IMPL-MODULE_VALIDATION](../methodology/implementation-decisions/IMPL-MODULE_VALIDATION.yaml)
 
 **See also:** [`routing.md`](routing.md) (primary entry / PRELOAD) · [`domain-references.md`](domain-references.md) (full catalog, on-demand) · [`tied-yaml-mcp.md`](tied-yaml-mcp.md) · [`pseudocode-and-citdp.md`](pseudocode-and-citdp.md) · [`../docs/vocabulary-index-analysis-and-standards.md`](../docs/vocabulary-index-analysis-and-standards.md)
 
@@ -17,11 +17,11 @@
 | **methodology YAML** | template yaml, inherited yaml | Read-only under `tied/methodology/`; refreshed by `copy_files.sh` |
 | **detail file** | sidecar yaml (for REQ/ARCH/IMPL index rows) | YAML under `tied/requirements/`, `tied/architecture-decisions/`, `tied/implementation-decisions/` |
 | **pseudo-code sidecar** | essence in index body | Plain Markdown `IMPL-*-pseudocode.md`; not YAML |
-| **module validation** | unit testing (alone) | Independent validation before integration per [REQ-MODULE_VALIDATION](../requirements/REQ-MODULE_VALIDATION.yaml) |
+| **module validation** | unit testing (alone) | Independent validation before integration per [REQ-MODULE_VALIDATION](../methodology/requirements/REQ-MODULE_VALIDATION.yaml) |
 | **binding inventory** | glue list, wiring notes (alone) | Table of trigger→callee→arguments→effect seams; see [`../docs/composition-coverage.md`](../docs/composition-coverage.md) |
 | **composition evidence** | E2E covers wiring | UI-free composition/integration/contract test proving a binding before integration |
 | **contract precision** | INPUT/OUTPUT only (for new Active blocks) | PRE/POST/EFFECTS required on new/changed Active procedure blocks; FAILURE_MODES/DATA_TRANSITION/TERMINATION when applicable |
-| **Observing AI principles!** | (omit) | Mandatory session acknowledgment per [REQ-TIED_SETUP](../requirements/REQ-TIED_SETUP.yaml) |
+| **Observing AI principles!** | (omit) | Mandatory session acknowledgment per [REQ-TIED_SETUP](../methodology/requirements/REQ-TIED_SETUP.yaml) |
 | **yaml_tool** | yaml lint script, yq wrapper (alone) | Primary YAML utility: `scripts/yaml_tool.sh`; default lint = **double-quoted scalar lint** per [PROC-YAML_EDIT_LOOP](../docs/processes.md) |
 | **lint_yaml** | lint yaml (generic) | Backward-compatible wrapper; delegates to **yaml_tool** |
 | **double-quoted scalar lint** | `yq -i -P` (as default lint), pretty-print-only lint | Default `yaml_tool` / `lint_yaml`: `yq -i 'sort_keys(.. style="double")'` one file per invocation. On-disk **bool/int become string scalars** (e.g. `e2e_only: "false"`); coerce after load when typed values are required |
@@ -43,22 +43,22 @@
 
 | Canonical concept | Doc label | Storage path | CLI/env | TIED token |
 |-------------------|-----------|--------------|---------|------------|
-| TIED project root | TIED base | `tied/` | `TIED_BASE_PATH` (absolute) | [REQ-TIED_SETUP](../requirements/REQ-TIED_SETUP.yaml) |
-| Requirements index | requirements index | `tied/requirements.yaml` | `yaml_index_*` index=`requirements` | [REQ-TIED_SETUP](../requirements/REQ-TIED_SETUP.yaml) |
-| Architecture index | architecture index | `tied/architecture-decisions.yaml` | index=`architecture` | [ARCH-TIED_STRUCTURE](../architecture-decisions/ARCH-TIED_STRUCTURE.yaml) |
-| Implementation index | implementation index | `tied/implementation-decisions.yaml` | index=`implementation` | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
-| Token registry | semantic tokens | `tied/semantic-tokens.yaml` | index=`semantic-tokens` | [REQ-TIED_SETUP](../requirements/REQ-TIED_SETUP.yaml) |
+| TIED project root | TIED base | `tied/` | `TIED_BASE_PATH` (absolute) | [REQ-TIED_SETUP](../methodology/requirements/REQ-TIED_SETUP.yaml) |
+| Requirements index | requirements index | `tied/requirements.yaml` | `yaml_index_*` index=`requirements` | [REQ-TIED_SETUP](../methodology/requirements/REQ-TIED_SETUP.yaml) |
+| Architecture index | architecture index | `tied/architecture-decisions.yaml` | index=`architecture` | [ARCH-TIED_STRUCTURE](../methodology/architecture-decisions/ARCH-TIED_STRUCTURE.yaml) |
+| Implementation index | implementation index | `tied/implementation-decisions.yaml` | index=`implementation` | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
+| Token registry | semantic tokens | `tied/semantic-tokens.yaml` | index=`semantic-tokens` | [REQ-TIED_SETUP](../methodology/requirements/REQ-TIED_SETUP.yaml) |
 | Methodology merge view | merged TIED view | read via MCP resources | `tied://requirements` etc. | [PROC-TIED_METHODOLOGY_READONLY](../docs/processes.md) |
-| Agent operating guide | AGENTS | `AGENTS.md` | — | [REQ-TIED_SETUP](../requirements/REQ-TIED_SETUP.yaml) |
+| Agent operating guide | AGENTS | `AGENTS.md` | — | [REQ-TIED_SETUP](../methodology/requirements/REQ-TIED_SETUP.yaml) |
 | Client development index | core six | `tied/docs/client-development-index.md` | minimal CITDP+LEAP+TIED doc set | [PROC-AGENT_REQ_CHECKLIST](../docs/processes.md) |
-| Bootstrap script | copy_files | `copy_files.sh` | `./copy_files.sh /path/to/client` | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
-| Methodology migration guide | migration guide | `tied/docs/methodology-migration.md` | Existing-client upgrade procedure | [REQ-TIED_SETUP](../requirements/REQ-TIED_SETUP.yaml) |
-| Vocabulary merge mode | copy-missing-vocab | `copy_files.sh --merge-vocab` | Additive vocabulary installation | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
+| Bootstrap script | copy_files | `copy_files.sh` | `./copy_files.sh /path/to/client` | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
+| Methodology migration guide | migration guide | `tied/docs/methodology-migration.md` | Existing-client upgrade procedure | [REQ-TIED_SETUP](../methodology/requirements/REQ-TIED_SETUP.yaml) |
+| Vocabulary merge mode | copy-missing-vocab | `copy_files.sh --merge-vocab` | Additive vocabulary installation | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
 | Domain vocabulary index | vocab index | `tied/vocab/*.md` | checklist `VOCAB_INDEX` | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
 | Vocab directory routing index | routing index | `tied/vocab/routing.md` | PRELOAD primary entry | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
 | Domain vocabulary full catalog | full catalog | `tied/vocab/domain-references.md` | on-demand cross-topic / Priority table | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
 | Per-request checklist copy | working folder checklist | `<working_folder>/REQ-*_<timestamp>.yaml` | — | [PROC-AGENT_REQ_CHECKLIST](../docs/processes.md) |
-| Composition coverage guide | binding inventory / E2E exclusion | `tied/docs/composition-coverage.md` | checklist `composition-integration` | [REQ-MODULE_VALIDATION](../requirements/REQ-MODULE_VALIDATION.yaml) |
+| Composition coverage guide | binding inventory / E2E exclusion | `tied/docs/composition-coverage.md` | checklist `composition-integration` | [REQ-MODULE_VALIDATION](../methodology/requirements/REQ-MODULE_VALIDATION.yaml) |
 | YAML validate/sort | yaml_tool | `scripts/yaml_tool.sh` | default: `sort_keys(.. style="double")`; `--sort-lists` → Ruby sorter; optional `--sort-keys` | [PROC-YAML_EDIT_LOOP](../docs/processes.md) |
 | Double-quoted scalar lint | canonical lint | via **yaml_tool** / **lint_yaml** | `yq -i 'sort_keys(.. style="double")'` | [PROC-YAML_EDIT_LOOP](../docs/processes.md) |
 | YAML lint wrapper | lint_yaml | `scripts/lint_yaml.sh` | delegates to yaml_tool | [PROC-YAML_EDIT_LOOP](../docs/processes.md) |
@@ -110,16 +110,16 @@ Exact spellings for checklist and docs cross-reference:
 
 | Preferred term | UPPER_SNAKE block | Owning IMPL |
 |----------------|-------------------|-------------|
-| module validation lifecycle | `MODULE_VALIDATION_LIFECYCLE` | [IMPL-MODULE_VALIDATION](../implementation-decisions/IMPL-MODULE_VALIDATION.yaml) |
-| composition binding validation | `COMPOSITION_BINDING_VALIDATION` | [IMPL-MODULE_VALIDATION](../implementation-decisions/IMPL-MODULE_VALIDATION.yaml) |
-| TIED bootstrap | `BOOTSTRAP_TIED` | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
-| TIED YAML skill installation | `INSTALL_TIED_YAML_SKILL` | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
-| TIED CLI repository-root patch | `PATCH_TIED_CLI_REPO_ROOT` | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
-| domain vocabulary seed | `SEED_DOMAIN_VOCAB` | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
-| domain vocabulary merge | `MERGE_DOMAIN_VOCAB` | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
-| implementation pseudo-code sidecar copy | `COPY_IMPLEMENTATION_PSEUDOCODE_SIDECARS` | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
-| YAML canonicalization | `CANONICALIZE_YAML_FILE` | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
-| YAML path lint | `LINT_YAML_PATHS` | [IMPL-TIED_FILES](../implementation-decisions/IMPL-TIED_FILES.yaml) |
+| module validation lifecycle | `MODULE_VALIDATION_LIFECYCLE` | [IMPL-MODULE_VALIDATION](../methodology/implementation-decisions/IMPL-MODULE_VALIDATION.yaml) |
+| composition binding validation | `COMPOSITION_BINDING_VALIDATION` | [IMPL-MODULE_VALIDATION](../methodology/implementation-decisions/IMPL-MODULE_VALIDATION.yaml) |
+| TIED bootstrap | `BOOTSTRAP_TIED` | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
+| TIED YAML skill installation | `INSTALL_TIED_YAML_SKILL` | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
+| TIED CLI repository-root patch | `PATCH_TIED_CLI_REPO_ROOT` | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
+| domain vocabulary seed | `SEED_DOMAIN_VOCAB` | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
+| domain vocabulary merge | `MERGE_DOMAIN_VOCAB` | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
+| implementation pseudo-code sidecar copy | `COPY_IMPLEMENTATION_PSEUDOCODE_SIDECARS` | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
+| YAML canonicalization | `CANONICALIZE_YAML_FILE` | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
+| YAML path lint | `LINT_YAML_PATHS` | [IMPL-TIED_FILES](../methodology/implementation-decisions/IMPL-TIED_FILES.yaml) |
 
 ---
 

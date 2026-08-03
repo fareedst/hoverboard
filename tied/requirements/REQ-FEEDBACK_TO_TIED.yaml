@@ -34,7 +34,8 @@ REQ-FEEDBACK_TO_TIED:
       metric: "tied_feedback_add creates/updates tied/feedback.yaml"
     - criterion: "Feedback can be exported for reporting to TIED"
       metric: "tied_feedback_export returns markdown or JSON of all entries"
-  status: "Implemented"
+  status: "Planned"
+  test_coverage_note: "Canonical-source anchor only: feedback implementation and tests live in the upstream TIED methodology repository; this client has no local project coverage."
   traceability:
     architecture:
       - "ARCH-FEEDBACK_STORAGE"
@@ -44,10 +45,5 @@ REQ-FEEDBACK_TO_TIED:
       - "REQ-FEEDBACK_TO_TIED"
     implementation:
       - "IMPL-MCP_FEEDBACK_TOOLS"
-    tests:
-      - "feedback.test.ts"
-  validation_criteria:
-    - method: "Unit tests"
-      coverage: "Feedback module load/append/export and tool handlers"
-    - method: "Manual or E2E"
-      coverage: "MCP client can call tools and get valid output"
+    tests: []
+  validation_criteria: []

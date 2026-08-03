@@ -62,6 +62,8 @@ IMPL-NON_WEB_TOOLS_TOOLBAR:
       - "IMPL-EXTENSION_COMMANDS"
       - "IMPL-SIDE_PANEL_TABS"
   status: "Active"
+  test_coverage_note: "Unit protocol and toolbar tests plus non-web-tools composition suites cover the five launcher bindings and routing. Full-block audit reports source annotations; any remaining missing-locus result is a tooling classification limitation, not an untested runtime path."
+  testability: "unit_and_composition"
   traceability:
     architecture:
       - "ARCH-NON_WEB_TOOLS_TOOLBAR"

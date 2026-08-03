@@ -19,6 +19,8 @@
 | **methodology_improvement** | process fix | Exact enum value |
 | **tied_feedback_add** | feedback add | MCP tool name |
 | **tied_feedback_export** | feedback dump | MCP tool name |
+| **canonical-source anchor** | local feedback implementation | Upstream feedback implementation retained as authoritative without local client coverage |
+| **local project coverage** | canonical coverage | Client-owned implementation and tests; upstream `code_locations` do not establish local coverage |
 
 ---
 
@@ -76,11 +78,13 @@ entries:
 |------|---------|
 | appendEntry | Pseudo-code blocks |
 | bug_report | Preferred terms |
+| canonical-source anchor | Preferred terms |
 | entries | Schema catalog |
 | feature_request | Preferred terms |
 | feedback entry | Preferred terms |
 | feedback.yaml | Preferred terms |
 | loadFeedback | Pseudo-code blocks |
+| local project coverage | Preferred terms |
 | methodology_improvement | Preferred terms |
 | tied_feedback_add | MCP tools |
 | tied_feedback_export | MCP tools |

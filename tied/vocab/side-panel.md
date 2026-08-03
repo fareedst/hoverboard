@@ -21,6 +21,7 @@
 | **By Tag** | tags tree (UI) | Hierarchical bookmarks-by-tag; `data-tab="tagsTree"` |
 | **Tabs** (panel) | browser tabs panel | Open/closed tab manager; `data-tab="browserTabs"` |
 | **Browser Bookmarks** (page) | Bookmarks (panel), browser bookmarks panel | Standalone full-page Chrome `bookmarks.getTree` UI (`browser-bookmarks.html`) — **not** a **side panel** tab; **not** Local Bookmarks Index; **not** **Browser storage (backend)** / Store B ([REQ-SIDE_PANEL_BROWSER_BOOKMARKS](../requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml)) |
+| **absence check** | missing panel | Explicitly verify that a standalone page surface, such as `#browserBookmarksPanel`, is absent from `side-panel.html` |
 | **Visit History** (page) | Usage (panel), analytics tab | Standalone full-page Most Visited / Recently Visited / Navigation Graph (`visit-history.html`) — **not** a **side panel** tab; opened from **tools toolbar** ([REQ-BOOKMARK_USAGE_TRACKING](../requirements/REQ-BOOKMARK_USAGE_TRACKING.yaml)) |
 | **web protocol** | http(s) page | Active tab URL is `http:` or `https:` ([REQ-NON_WEB_TOOLS_TOOLBAR](../requirements/REQ-NON_WEB_TOOLS_TOOLBAR.yaml)) |
 | **tools toolbar** | non-web tools popup | Badge popup on non-**web protocol** tabs with launchers for full-page tools ([REQ-NON_WEB_TOOLS_TOOLBAR](../requirements/REQ-NON_WEB_TOOLS_TOOLBAR.yaml)) |
@@ -88,6 +89,7 @@
 - **By Tag / tags tree** — Hierarchical tag navigation; “Show all tags” vs checked-only.
 - **Tabs panel** — Manage open and recently closed browser tabs (`chrome.sessions` for closed).
 - **Bookmarks panel** — Legacy name for Browser Bookmarks when it was a side-panel tab; now **Browser Bookmarks (page)**.
+- **absence check** — Snapshot assertion that a standalone surface is not present in the side-panel document; it is not evidence that the standalone page itself is missing.
 - **Visit History (page)** — Standalone page: **Most Visited**, **Recently Visited**, **Navigation Graph** (former Usage tab).
 - **bookmark search (Next/Previous)** — Search within side-panel bookmark lists.
 - **data-popup-ref** — Attribute bridging shared This Page / popup controls.
@@ -147,6 +149,7 @@
 
 | Term | Section |
 |------|---------|
+| absence check | Preferred terms / Named concepts |
 | ANALYZE_SIDE_PANEL_BUNDLE | Pseudo-code block names |
 | BIND_STORAGE_TAB_CHANGE | Pseudo-code block names |
 | BOOT_SIDE_PANEL | Pseudo-code block names |

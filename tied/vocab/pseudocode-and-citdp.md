@@ -2,7 +2,7 @@
 
 **Scope:** Distinction between **domain vocabulary** (`tied/vocab/`) and **IMPL grammar vocabulary** (INPUT/OUTPUT/DATA/CONTROL, PRE/POST/EFFECTS/FAILURE_MODES/DATA_TRANSITION/TERMINATION); three-way alignment; pseudo-code validation; CITDP record naming; checklist per-request copy conventions. **Vocabulary only** — validation algorithms in [`../docs/pseudocode-writing-and-validation.md`](../docs/pseudocode-writing-and-validation.md) and [`../docs/processes.md`](../docs/processes.md).
 
-**Traceability:** [PROC-PSEUDOCODE_VALIDATION](../docs/processes.md) · [PROC-CITDP](../docs/processes.md) · [PROC-IMPL_PSEUDOCODE_TOKENS](../docs/processes.md) · [PROC-IMPL_CODE_TEST_SYNC](../docs/processes.md) · [PROC-VOCABULARY_INDEX](../docs/processes.md) · [REQ-TIED_SETUP](../requirements/REQ-TIED_SETUP.yaml)
+**Traceability:** [PROC-PSEUDOCODE_VALIDATION](../docs/processes.md) · [PROC-CITDP](../docs/processes.md) · [PROC-IMPL_PSEUDOCODE_TOKENS](../docs/processes.md) · [PROC-IMPL_CODE_TEST_SYNC](../docs/processes.md) · [PROC-VOCABULARY_INDEX](../docs/processes.md) · [REQ-TIED_SETUP](../methodology/requirements/REQ-TIED_SETUP.yaml)
 
 **See also:** [`routing.md`](routing.md) (PRELOAD primary entry) · [`domain-references.md`](domain-references.md) (full catalog, on-demand) · [`tied-methodology.md`](tied-methodology.md) · [`../docs/citdp-policy.md`](../docs/citdp-policy.md) · [`../docs/pseudocode-format-and-practices.md`](../docs/pseudocode-format-and-practices.md)
 
@@ -31,6 +31,9 @@ Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with 
 | **PROCEDURE thoroughness audit** | H2 depth audit, marker_only scan | Check that suites exercise PROCEDURE / H2 blocks (not only that a token marker exists); severity labels such as `marker_only` / `no_suite` / `weak_h2` live in working gap dumps |
 | **full-block duplication** | full block paste, comment dump | Hoverboard policy: copy lead + Contract + PROCEDURE into `src/` and primary unit-test loci (vs default block-lead-only); see writing guide § Full block duplication and [`../docs/source-file-impl-traceability.md`](../docs/source-file-impl-traceability.md) |
 | **source-file IMPL traceability** | in-file IMPL copy policy | Repo policy for which files carry full-block comments, placement, and drift direction IMPL → comment → code |
+| **canonical-source anchor** | local implementation | Traceability record for an upstream TIED implementation that is authoritative but intentionally has no local project coverage |
+| **local project coverage** | canonical coverage | Tests and implementation owned by the current client repository; do not infer it from upstream `code_locations` |
+| **absence check** | missing feature | Explicitly verifies that a surface is not present in a host document, such as Browser Bookmarks absent from `side-panel.html` |
 | **sync_impl_full_blocks** | full-block sync script | [`scripts/sync_impl_full_blocks.py`](../../scripts/sync_impl_full_blocks.py) — inject or `--check` Active H2 presence in mapped loci |
 | **IMPL-FULL-BLOCK marker** | FULL-BLOCK wrapper | Comment delimiters `=== IMPL-FULL-BLOCK: IMPL-* ===` / `=== END IMPL-FULL-BLOCK: … ===` around injected bodies |
 | **UPPER_SNAKE block name** | procedure name (ambiguous) | Preferred **domain** term becomes block identifier |
@@ -60,9 +63,10 @@ Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with 
 | Per-request checklist | `<working_folder>/REQ-{TOKEN}_{timestamp}.yaml` | same |
 | IMPL sidecar | `tied/implementation-decisions/IMPL-{TOKEN}-pseudocode.md` | [PROC-IMPL_PSEUDOCODE_TOKENS](../docs/processes.md) |
 | Pseudo-code template | `templates/impl-essence-pseudocode-template.md` | [PROC-PSEUDOCODE_VALIDATION](../docs/processes.md) |
+| Canonical-source anchor | `essence_pseudocode` sidecar plus IMPL coverage fields | [IMPL-MCP_FEEDBACK_TOOLS](../implementation-decisions/IMPL-MCP_FEEDBACK_TOOLS.yaml) |
 | CITDP record | `tied/citdp/CITDP-REQ-{TOKEN}.yaml` (pattern) | [PROC-CITDP](../docs/processes.md) |
 | Validation checklist | `tied/docs/pseudocode-validation-checklist.yaml` | [PROC-PSEUDOCODE_VALIDATION](../docs/processes.md) |
-| Composition coverage guide | `tied/docs/composition-coverage.md` | [REQ-MODULE_VALIDATION](../requirements/REQ-MODULE_VALIDATION.yaml) / [PROC-TEST_STRATEGY](../docs/processes.md) |
+| Composition coverage guide | `tied/docs/composition-coverage.md` | [REQ-MODULE_VALIDATION](../methodology/requirements/REQ-MODULE_VALIDATION.yaml) / [PROC-TEST_STRATEGY](../docs/processes.md) |
 | Domain vocab index | `tied/vocab/*.md` | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
 | Vocab routing index (PRELOAD) | `tied/vocab/routing.md` | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
 
@@ -117,10 +121,12 @@ Prefer in `essence_pseudocode` (not domain terms):
 
 | Term | Section |
 |------|---------|
+| absence check | Preferred terms |
 | binding inventory | Preferred terms |
 | block lead comment | Preferred terms |
 | block-lead bracket format | Preferred terms |
 | CITDP record | Preferred terms |
+| canonical-source anchor | Preferred terms / Naming bridge |
 | composition evidence | Preferred terms |
 | composition-coverage.md | Naming bridge |
 | contract precision | Preferred terms |
@@ -136,6 +142,7 @@ Prefer in `essence_pseudocode` (not domain terms):
 | IMPL grammar vocabulary | Domain vs grammar |
 | IMPL-FULL-BLOCK marker | Preferred terms |
 | LEAP | Preferred terms |
+| local project coverage | Preferred terms |
 | per-request checklist copy | Preferred terms |
 | POST | IMPL grammar keywords |
 | PRE | IMPL grammar keywords |

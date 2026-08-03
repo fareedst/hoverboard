@@ -38,19 +38,19 @@ IMPL-TIED_FILES:
   detail_file: "implementation-decisions/IMPL-TIED_FILES.yaml"
   implementation_approach:
     details:
+      - "Additive vocabulary merge mode: copy_files.sh --merge-vocab copies only absent TIED_SOURCE/tied/vocab/*.md filenames and reports added versus preserved files; existing client vocabulary remains authoritative."
       - "Copy base files to project root when missing (.cursorrules, AGENTS.md). In a TIED source repository, live guide content is under tied/docs/; agents and preload use client ./tied/docs/ paths and ./tied/agent-preload-contract.yaml."
       - "Copy guide .md files, detail-files-schema.md, preload contract templates, and reference docs from TIED source tied/docs/ into client tied/docs/ when missing (per DOCS_TO_COPY in copy_files.sh)"
       - "Copy YAML index files from templates (requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml)"
       - "Create detail subdirectories (requirements/, architecture-decisions/, implementation-decisions/)"
       - "Create tied/ directory at project root"
+      - "DOCS_TO_COPY now installs methodology-migration.md, composition-coverage.md, and the quality-assurance command, pilot, and evidence-manifest guides when missing."
       - "Install the tied-yaml Cursor skill to .cursor/skills/tied-yaml/ (from tools/bundled-tied-yaml-skill/ in the TIED source repo; .cursor/skills/tied-yaml only if the bundle is missing; overwritten each run). The canonical stdio client on the client is .cursor/skills/tied-yaml/scripts/tied-cli.sh only; copy_files.sh does not create a project-root scripts/tied-cli.sh entry."
       - "Patch installed tied-cli.sh to bake TIED_REPO_ROOT (absolute TIED source path) so TIED_MCP_BIN resolves on client projects (_patch_tied_cli_repo_root in copy_files.sh)"
       - "Seed tied/vocab/*.md from TIED source when client tied/vocab/ is missing or empty (never overwrite existing client vocab files)"
+      - "Template promotion supplies quality REQ/ARCH/IMPL detail YAML and IMPL-*-pseudocode.md sidecars; copy_files.sh refreshes inherited implementation pseudo-code sidecars into tied/methodology/implementation-decisions/ without touching project YAML."
       - "tied_token_rename supports extra_globs/extra_extensions anchored at client project root for substitution outside default TIED rename scope; pretty-prints modified YAML with the same yq expression as yaml_tool default lint"
       - "YAML edit-loop tooling: yaml_tool.sh default lint uses yq sort_keys(.. style=\"double\") (recursive key sort + double-quoted scalars; bool/int become string scalars); --sort-lists/--sort-keys via yaml_list_sorter.rb; post-sort semantic validation via yaml_semantic_compare.rb; directory compare via compare_yaml_dirs.rb [PROC-YAML_EDIT_LOOP]"
-      - "Additive vocabulary merge mode: copy_files.sh --merge-vocab copies only absent TIED_SOURCE/tied/vocab/*.md filenames and reports added versus preserved files; existing client vocabulary remains authoritative."
-      - "DOCS_TO_COPY now installs methodology-migration.md, composition-coverage.md, and the quality-assurance command, pilot, and evidence-manifest guides when missing."
-      - "Template promotion supplies quality REQ/ARCH/IMPL detail YAML and IMPL-*-pseudocode.md sidecars; copy_files.sh refreshes inherited implementation pseudo-code sidecars into tied/methodology/implementation-decisions/ without touching project YAML."
     summary: "Bootstrap script that creates tied/ directory, copies template files, sets up base files, and installs the tied-yaml CLI skill under .cursor/skills/tied-yaml/; ships YAML sort/compare and token-rename tooling"
   metadata:
     created:
