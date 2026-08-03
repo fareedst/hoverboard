@@ -101,15 +101,6 @@
         </div>
       </section>
       <section class="tag-management">
-        <!-- [REQ-SIDE_PANEL_POPUP_EQUIVALENT] This Page only: session tag label casing (Original / lower / UPPER) -->
-        <div class="tag-case-folding" data-popup-ref="tagCaseFoldingToggle" role="toolbar" aria-label="Tag label casing">
-          <span class="tag-case-folding-label" id="tag-case-folding-label">Tag labels</span>
-          <div class="tag-case-folding-buttons">
-            <button type="button" class="button tag-case-mode-btn" data-case-mode="original" aria-pressed="true" aria-labelledby="tag-case-folding-label" title="Show tags as stored">Original</button>
-            <button type="button" class="button tag-case-mode-btn" data-case-mode="lower" aria-pressed="false" aria-labelledby="tag-case-folding-label" title="Lowercase labels">lower</button>
-            <button type="button" class="button tag-case-mode-btn" data-case-mode="upper" aria-pressed="false" aria-labelledby="tag-case-folding-label" title="Uppercase labels">UPPER</button>
-          </div>
-        </div>
         <!-- [REQ-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT] This Page only: sort Current / Recent / Suggested chip lists -->
         <div class="tag-sort-toggle" data-popup-ref="tagSortToggle" role="toolbar" aria-label="Tag list sort">
           <span class="tag-sort-toggle-label" id="tag-sort-toggle-label">Sort tags</span>
@@ -135,6 +126,15 @@
         <div class="recent-tags">
           <h4 class="tags-subtitle">Recent Tags</h4>
           <div class="tags-container" data-popup-ref="recentTagsContainer"></div>
+        </div>
+        <!-- [REQ-SIDE_PANEL_POPUP_EQUIVALENT] This Page only: Suggested Tags session label casing (Original / lower / UPPER). Current/Recent Tags retain source casing. -->
+        <div class="tag-case-folding" data-popup-ref="tagCaseFoldingToggle" role="toolbar" aria-label="Suggested Tag label casing">
+          <span class="tag-case-folding-label" id="tag-case-folding-label">Suggested Tag labels</span>
+          <div class="tag-case-folding-buttons">
+            <button type="button" class="button tag-case-mode-btn" data-case-mode="original" aria-pressed="true" aria-labelledby="tag-case-folding-label" title="Show Suggested Tags as stored">Original</button>
+            <button type="button" class="button tag-case-mode-btn" data-case-mode="lower" aria-pressed="false" aria-labelledby="tag-case-folding-label" title="Lowercase Suggested Tags labels">lower</button>
+            <button type="button" class="button tag-case-mode-btn" data-case-mode="upper" aria-pressed="false" aria-labelledby="tag-case-folding-label" title="Uppercase Suggested Tags labels">UPPER</button>
+          </div>
         </div>
         <div class="suggested-tags" data-popup-ref="suggestedTags">
           <h4 class="tags-subtitle">Suggested Tags</h4>

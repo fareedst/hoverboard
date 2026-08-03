@@ -1,5 +1,5 @@
 /**
- * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Tag label case folding for This Page tag chips (original | lower | upper).
+ * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Suggested Tags label case folding for This Page chips (original | lower | upper).
  * Unicode case mapping via String.prototype.toLowerCase / toUpperCase (product default).
  */
 
@@ -27,7 +27,7 @@ export function isEmptyOrWhitespaceOnlyTag (source) {
 }
 
 /**
- * Display label and value used when adding a tag from a chip (same string in all modes per spec).
+ * Display label and value used when adding a Suggested Tag from a chip.
  * @param {string} source - Non-empty trimmed or raw from caller; caller should skip empties
  * @param {TagCaseFoldingMode} mode
  * @returns {{ display: string, addValue: string }}
@@ -40,12 +40,10 @@ export function tagChipDisplayAndAddValue (source, mode) {
 }
 
 /**
- * Label shown for a tag already on the bookmark; identity for remove remains `stored`.
+ * Label shown for a tag already on the bookmark; Current/Recent Tags retain source casing.
  * @param {string} stored
- * @param {TagCaseFoldingMode} mode
  * @returns {string}
  */
-export function currentTagDisplayLabel (stored, mode) {
-  const { display } = tagChipDisplayAndAddValue(stored, mode)
-  return display
+export function currentTagDisplayLabel (stored) {
+  return typeof stored === 'string' ? stored.trim() : ''
 }

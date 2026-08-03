@@ -9,14 +9,15 @@ ARCH-SIDE_PANEL_TABS:
       - "Bookmark panel markup: same structure as popup main (loading, error, main with quick actions, storage, tag management, search) with data-popup-ref on each element"
       - "Layout: Page and tab content use full viewport height and panel width. Override popup-derived body constraints (max-height, width) when in side panel. Tab content area is a flex column so children can distribute space. Tags tree tab: #tagsTreePanel is the scroll container so the above-list div (.tags-tree-above-list) can scroll off the page; the tree list section (.tree-section) uses min-height: 100% so it consumes the full visible height and scrolls its own list."
       - "Modular runtime: side-panel.js facade composes side-panel-controller.js (state/init), side-panel-shell.js (visibility/tab bar), side-panel-event-bindings.js (browser/storage listeners), and side-panel-bookmark-tab.js (scoped Bookmark init); compatibility test hooks remain on the facade."
+      - "Scoped This Page loading transitions preserve the bookmark panel container scrollTop after mainInterface visibility, input focus, and content redraw changes; standalone popup loading remains unchanged."
       - "Tab bar: two buttons or links; click switches visible panel and persists choice"
       - "Tags tree panel: current tags-tree sections (config, search, tag selector, tree); IDs remain unique in document"
       - "UIManager must support optional container; when set, cacheElements uses container.querySelector('[data-popup-ref=\"id\"]') instead of document.getElementById"
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-08-01"
-      reason: "LEAP: document modular side-panel runtime split under existing tab architecture"
+      date: "2026-08-03"
+      reason: "Define scoped This Page scroll preservation across loading transitions"
   name: "Side Panel Tabs Architecture"
   rationale:
     benefits:
@@ -56,9 +57,11 @@ ARCH-SIDE_PANEL_TABS:
       - "tests/integration/browser-tabs-tab-composition.integration.test.js"
       - "tests/integration/side-panel-create-popup-scoped-composition.integration.test.js"
       - "tests/integration/side-panel-tab-change-injection.integration.test.js"
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
       - "tests/integration/window-focus-recent-tags-composition.integration.test.js"
       - "tests/playwright/extension-messaging.spec.js"
       - "tests/playwright/extension-side-panel-recent-tags-e2e.spec.js"
+      - "tests/playwright/extension-this-page-tag-sort.spec.js"
       - "tests/unit/side-panel-bookmark-tab.test.js"
       - "tests/unit/side-panel-controller.test.js"
       - "tests/unit/side-panel-event-bindings.test.js"

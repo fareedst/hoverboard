@@ -839,11 +839,11 @@
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-SUGGESTED_TAGS ===
- * [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] — Summary: Suggested tags from page — overlay TagService.extractSuggestedTagsFromContent; Chromium popup via MAIN-world snippet global and IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags (inject, normalize, filter, UIManager handoff).
+ * [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] — Summary: Suggested tags from page — canonical source extraction, case-insensitive Current Tags conflict handling, and Suggested Tags-only case-converted render/action values.
  *
  * ## EXTRACT_SUGGESTED_TAGS
  *
- * - [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] [REQ-THIS_PAGE_TAG_SORT] How: How — cross-IMPL: Popup path depends on IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags; ordering invariant — executeScript file (snippet) then func (global extractor); shared data — raw array from page world; post — NORMALIZE_SUGGESTED_ROWS then filters then updateSuggestedTags(rows); on error or non-scriptable URL (IMPL-POPUP_SESSION CLASSIFY_SCRIPT_INJECTION_URL: restricted_scheme / extensions_gallery / missing_url) — updateSuggestedTags([]) + injectionOutcome; no debugError for expected skips. How — composed_with IMPL-SELECTION_TO_TAG_INPUT: pre — suggested chips rendered in UIManager; post — selection/tag-input add flows attach to chip DOM per IMPL-SELECTION_TO_TAG_INPUT (shared surface only; no ordering constraint on extraction).
+ * - [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] [REQ-THIS_PAGE_TAG_SORT] How: How — cross-IMPL: Popup path depends on IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags; ordering invariant — executeScript file (snippet) then func (global extractor); shared data — raw canonical source-cased array from page world; post — NORMALIZE_SUGGESTED_ROWS then filters then Suggested Tags-only display/action conversion in UIManager; on error or non-scriptable URL (IMPL-POPUP_SESSION CLASSIFY_SCRIPT_INJECTION_URL: restricted_scheme / extensions_gallery / missing_url) — updateSuggestedTags([]) + injectionOutcome; no debugError for expected skips. How — composed_with IMPL-SELECTION_TO_TAG_INPUT: pre — Suggested Tags rendered in UIManager; post — selection/tag-input add flows attach to chip DOM per IMPL-SELECTION_TO_TAG_INPUT (shared surface only; no ordering constraint on extraction).
  * - Contract:
  *   - INPUT: active page document (implicit)
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
@@ -872,6 +872,111 @@
  *   - RETURN []
  *   - How (sub-block): How — Cross-path note (S06.3): overlay sanitizeTag vs snippet inline sanitizer may differ on edge characters; tokenizer must remain identical. See ARCH-SUGGESTED_TAGS.
  *   - How (sub-block): How — Popup inject eligibility is CLASSIFY_SCRIPT_INJECTION_URL in IMPL-POPUP_SESSION (shared module); this EXTRACT block covers page-world extraction only.
+ *
+ * ## CLASSIFY_SIDE_PANEL_SUGGESTED_TAG_STATE
+ *
+ * - [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] [REQ-THIS_PAGE_TAG_SORT] How: Sanitize the raw page suggestion, apply the active Suggested Tags label conversion, and classify the adjusted value against authoritative Current Tags for the side-panel This Page surface while leaving popup and overlay filtering behavior unchanged.
+ * - Contract:
+ *   - INPUT: suggestedTag string; comparisonTag string adjusted by Tag labels mode; currentTags array or tag string
+ *   - PRE: suggestedTag is page-derived input; comparisonTag is the active display/action value; currentTags may contain source-cased persisted tags
+ *   - OUTPUT: null for invalid input, otherwise `{ state: "absent" | "case-match" | "case-mismatch", suggestedTag: string, matchedTag: string | null }`; comparisonTag is an input-only adjusted value
+ *   - POST: exact case matches between comparisonTag and Current Tags are classified as case-match; case-insensitive matches with different casing as case-mismatch; no case-insensitive match as absent
+ *   - FAILURE_MODES: invalid or unsafe suggested tag
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: CLASSIFY_SIDE_PANEL_SUGGESTED_TAG_STATE
+ *   - sanitizedSource = SANITIZE_SUGGESTED_TAG(suggestedTag); IF sanitizedSource is null THEN RETURN null
+ *   - sanitizedComparison = SANITIZE_SUGGESTED_TAG(comparisonTag); IF sanitizedComparison is null THEN RETURN null
+ *   - current = NORMALIZE_CURRENT_TAGS(currentTags) without changing persisted source casing
+ *   - IF current contains sanitizedComparison with exact case THEN RETURN state case-match, suggestedTag sanitizedSource, matchedTag exact match
+ *   - IF current contains a tag whose lower-case value equals sanitizedComparison lower-case value THEN RETURN state case-mismatch, suggestedTag sanitizedSource, matchedTag first case-insensitive match
+ *   - RETURN state absent, suggestedTag sanitizedSource, matchedTag null
+ *
+ * ## REPLACE_SUGGESTED_TAG_IN_PLACE
+ *
+ * - [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-TAG_SYSTEM] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] How: Atomically replace the matched persisted tag with the clicked case-converted Suggested Tag value at the first matching position, remove duplicate case variants of that tag, and preserve every unrelated tag and its order.
+ * - Contract:
+ *   - INPUT: currentTags array; matchedTag string; replacementTag string
+ *   - PRE: currentTags is the authoritative snapshot used for the save; replacementTag is page-derived and must pass suggested-tag sanitization
+ *   - OUTPUT: `{ ok: boolean, tags: array, replacedTag?: string, reason?: string }`
+ *   - POST: success changes only the matching case-insensitive tag group and preserves its first position; failure returns a copy with no mutation
+ *   - FAILURE_MODES: invalid replacement, invalid tag collection, or no matching tag
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: REPLACE_SUGGESTED_TAG_IN_PLACE
+ *   - original = shallow copy currentTags when currentTags is an array; otherwise RETURN `{ ok: false, tags: [], reason: invalid_tags }`
+ *   - replacement = SANITIZE_SUGGESTED_TAG(replacementTag); IF replacement is null THEN RETURN `{ ok: false, tags: original, reason: invalid_replacement }`
+ *   - matchKey = lower-case sanitized matchedTag; IF matchKey is empty THEN RETURN `{ ok: false, tags: original, reason: invalid_match }`
+ *   - matchingIndexes = indexes of string tags whose trimmed lower-case value equals matchKey
+ *   - IF matchingIndexes is empty THEN RETURN `{ ok: false, tags: original, reason: match_not_found }`
+ *   - firstIndex = first matchingIndexes value
+ *   - output = replace tag at firstIndex with replacement and omit all later matching indexes
+ *   - RETURN `{ ok: true, tags: output, replacedTag: original[firstIndex] }`
+ *
+ * ## LOAD_SIDE_PANEL_SUGGESTED_TAGS
+ *
+ * - [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [IMPL-UIManager_SCOPED_ROOT] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] [REQ-THIS_PAGE_TAG_SORT] How: Add three-state metadata only for the scoped side-panel UI; preserve canonical source data for identity, apply the active case conversion before conflict classification, apply each state’s background, border, and visible text styling consistently in normal/hover/focus states, and preserve existing popup and overlay filtering/add flow.
+ * - Contract:
+ *   - INPUT: normalized suggested rows; current bookmark tags; UI surface; active Tag labels mode
+ *   - PRE: rows have source-cased tag values; side-panel scope is observable from UIManager container; adjusted display/action values are derived from the active mode
+ *   - OUTPUT: side-panel rows with absent, case-match, or case-mismatch state metadata; popup/overlay rows retain their existing shape and filtering
+ *   - POST: side-panel absent rows route to add, exact matches route to remove, and mismatches route to replace; the clicked case-converted Suggested Tag value is the add/replace payload while the exact stored match remains the remove identity
+ *   - FAILURE_MODES: script extraction failure, unavailable page, invalid row
+ *   - EFFECTS: Async, IO, State, DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: LOAD_SIDE_PANEL_SUGGESTED_TAGS
+ *   - rows = NORMALIZE_SUGGESTED_ROWS(raw)
+ *   - IF surface is side-panel THEN
+ *     - adjusted = tagChipDisplayAndAddValue(row.tag, tagCaseFoldingMode).addValue
+ *     - classified = MAP rows through CLASSIFY_SIDE_PANEL_SUGGESTED_TAG_STATE(row.tag, currentTags, adjusted)
+ *     - DROP null classifications only
+ *     - RETURN rows enriched with state and matchedTag
+ *   - ELSE
+ *     - FILTER rows using existing case-insensitive popup/overlay exclusion
+ *     - RETURN rows unchanged
+ *
+ * ## PERSIST_SIDE_PANEL_SUGGESTED_TAG_ACTION
+ *
+ * - [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-TAG_SYSTEM] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] How: Route absent suggestions through the existing add action, exact adjusted-value matches through the existing stored-value removal action, and adjusted-value case-mismatch suggestions through one full-bookmark save using the clicked case-converted Suggested Tag value and REPLACE_SUGGESTED_TAG_IN_PLACE; update UI state only after persistence succeeds.
+ * - Contract:
+ *   - INPUT: action state; clicked case-converted Suggested Tag value; optional matchedTag; authoritative current bookmark
+ *   - PRE: action originated from a rendered side-panel chip; save backend is available
+ *   - OUTPUT: one persisted bookmark update and refreshed This Page state
+ *   - POST: clicked case-converted Suggested Tag value is persisted; unrelated tags and order are preserved; failed save leaves local bookmark/UI state unchanged
+ *   - FAILURE_MODES: invalid action, stale match, save rejection
+ *   - EFFECTS: Async, IO, State, DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: PERSIST_SIDE_PANEL_SUGGESTED_TAG_ACTION
+ *   - IF state absent THEN DISPATCH existing add-tag flow with clicked case-converted Suggested Tag value; RETURN
+ *   - IF state case-match THEN DISPATCH existing remove-tag flow with matchedTag; RETURN
+ *   - IF state case-mismatch THEN
+ *     - snapshot = READ authoritative current bookmark
+ *     - replacement = REPLACE_SUGGESTED_TAG_IN_PLACE(snapshot.tags, matchedTag, clicked case-converted Suggested Tag value)
+ *     - IF replacement.ok is false THEN REFRESH suggestions without saving; RETURN
+ *     - AWAIT one full-bookmark save with replacement.tags
+ *     - IF save fails THEN preserve snapshot/UI state and report failure
+ *     - ELSE APPLY replacement.tags locally and REFRESH current/recent/suggested chips
+ *
+ * ## PRESERVE_SIDE_PANEL_SCROLL_DURING_SUGGESTED_TAG_ACTION
+ *
+ * - [IMPL-SUGGESTED_TAGS] [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] How: Preserve the scoped This Page container scroll position across Suggested Tag loading, focus, persistence, and chip-redraw effects while leaving standalone popup behavior unchanged.
+ * - Contract:
+ *   - INPUT: isLoading boolean; optional scoped UIManager container
+ *   - PRE: UIManager has applied its element cache; a scoped container, when present, is the This Page bookmark panel scroll container
+ *   - OUTPUT: loading visibility and controls updated; scoped container scrollTop restored after a completed loading transition
+ *   - POST: when a scoped container exists, the scrollTop captured before the outermost loading transition equals the scrollTop after loading ends, subject to the browser's current scroll range; when no container exists, popup behavior is unchanged
+ *   - FAILURE_MODES: missing container, repeated loading transition, or unavailable scrollTop
+ *   - DATA: savedScopedScrollTop (number or undefined); loadingTransitionActive (boolean)
+ *   - DATA_TRANSITION: capture savedScopedScrollTop only when entering loading; do not overwrite it on repeated loading calls; clear it after restoring on exit
+ *   - EFFECTS: DOM, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SET_LOADING_WITH_SCOPED_SCROLL_RESTORE
+ *   - IF isLoading AND NOT loadingTransitionActive AND container exists THEN save container.scrollTop
+ *   - APPLY loading-state visibility and interactive-control disabled state
+ *   - IF NOT isLoading AND loadingTransitionActive THEN
+ *     - SHOW mainInterface
+ *     - IF savedScopedScrollTop is a number THEN SET container.scrollTop = savedScopedScrollTop
+ *     - CLEAR savedScopedScrollTop and loadingTransitionActive
  *
  * === END IMPL-FULL-BLOCK: IMPL-SUGGESTED_TAGS ===
  */
@@ -999,10 +1104,33 @@
  *   - debugError; updateSuggestedTags([])
  *   - How (sub-block): How — setTagFrequencyMapForSort: merge into tagFrequencyMap; caller redraws.
  *   - How (sub-block): How — getEffectiveTagSortMode: IF no tagSortToggle element THEN RETURN null; ELSE RETURN mode from segment state.
- *   - How (sub-block): How — updateCurrentTags / updateRecentTags / _paintSuggestedTags: IF getEffectiveTagSortMode() null THEN paint source order; ELSE build rows with displayKey=tagChipDisplayAndAddValue, bookmarkFreq, suggested relevance; sortTagChipRows(mode); paint.
+ *   - How (sub-block): How — updateCurrentTags / updateRecentTags / _paintSuggestedTags: IF getEffectiveTagSortMode() null THEN paint source order; ELSE build Current/Recent rows with source-cased displayKey and Suggested rows with case-converted displayKey=tagChipDisplayAndAddValue; sortTagChipRows(mode); paint.
  *   - How (sub-block): How — Comparators (tag-chip-sort): alphabetical by displayKey localeCompare lower tie stableIndex; frequency by bookmarkFreq desc; relevance by relevance desc then bookmarkFreq then inPageFrequency.
  *   - How (sub-block): How — loadInitialData: AWAIT refreshTagFrequencyMapForSort before first updateCurrentTags; AWAIT loadRecentTags before AWAIT loadSuggestedTags (PopupController orchestration binding).
  *   - How (sub-block): How — setupEventListeners: click [data-sort-mode] under tagSortToggle -> setTagSortMode if isTagChipSortMode.
+ *
+ * ## SIDE_PANEL_SUGGESTED_TAG_CHIP_ACTIONS
+ *
+ * - [IMPL-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [IMPL-UIManager_SCOPED_ROOT] [ARCH-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] How: Apply the active Tag labels conversion before comparing each scoped Suggested Tag with Current Tags; render absent, adjusted-value case-match, and adjusted-value case-mismatch suggestions as explicit accessible chips with distinct state styling and emit add/remove/replace actions without changing popup chip behavior.
+ * - Contract:
+ *   - INPUT: side-panel suggested rows `{ tag, state, matchedTag }`; active Tag labels mode
+ *   - PRE: adjusted comparisonTag is derived from `tag` and the active mode; row state is absent, case-match, or case-mismatch; matchedTag is present for Current Tag states
+ *   - OUTPUT: accessible chip with state metadata, distinct state styling, and the correct converted or stored action payload
+ *   - POST: absent emits addSuggestedTag; case-match emits removeTag with matchedTag; case-mismatch emits replaceSuggestedTag; state meaning is available through color and non-color cues
+ *   - FAILURE_MODES: malformed row or missing scoped container
+ *   - EFFECTS: DOM, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SIDE_PANEL_SUGGESTED_TAG_CHIP_ACTIONS
+ *   - FOR each row:
+ *     - adjusted = tagChipDisplayAndAddValue(row.tag, activeTagLabelsMode).addValue
+ *     - state = CLASSIFY_SIDE_PANEL_SUGGESTED_TAG_STATE(row.tag, currentTags, adjusted)
+ *     - IF state absent THEN render “Add” state label and emit addSuggestedTag({ tag: row.tag, state: absent })
+ *     - IF state case-match THEN render “Remove” state label and emit removeTag(matchedTag)
+ *     - IF state case-mismatch THEN render “Replace” state label and emit replaceSuggestedTag({ tag: row.tag, state: case-mismatch, matchedTag: row.matchedTag })
+ *     - APPLY state-specific background and border styling while retaining an accessible text label
+ *   - preserve row.tag canonical source casing for identity; use adjusted for classification, display, and add/replace payloads; use matchedTag for exact stored-value removal
+ *   - WHEN active Tag labels mode changes THEN reclassify cached Suggested Tags against cached Current Tags before redraw
+ *   - IF keyboard Enter or Space THEN emit the same action as click
  *
  * ## SIDE_PANEL_TAG_SORT_TOOLBAR_E2E
  *
@@ -1436,7 +1564,6 @@
  * === END IMPL-FULL-BLOCK: IMPL-PAGE_ARCHIVE_STATUS_UI ===
  */
 import {
-  currentTagDisplayLabel,
   isEmptyOrWhitespaceOnlyTag,
   isTagCaseFoldingMode,
   tagChipDisplayAndAddValue
@@ -1446,6 +1573,10 @@ import {
   lookupBookmarkFrequency,
   sortTagChipRows
 } from '../../shared/tag-chip-sort.js'
+import {
+  classifySuggestedTagState,
+  SUGGESTED_TAG_STATES
+} from '../../shared/suggested-tag-state.js'
 import { syncBookmarkNotesFields as syncBookmarkNotesFieldsHelper } from '../../shared/bookmark-notes-ui.js'
 import { applyLinkHealthHint } from '../../shared/link-health.js'
 
@@ -1468,10 +1599,14 @@ export class UIManager {
     this.tagFrequencyMap = {}
     /** @type {boolean} */
     this._tagSortUiEnabled = false
+    /** @type {boolean} */
+    this._loadingTransitionActive = false
+    /** @type {number|undefined} */
+    this._savedScopedScrollTop = undefined
     /** @type {ReturnType<typeof setTimeout> | null} */
     this._actionFeedbackTimer = null
-    /** @type {{ current: string[], recent: string[], suggested: Array<{ tag: string, relevance: number, inPageFrequency: number }> }} */
-    this._tagChipSourceCache = { current: [], recent: [], suggested: [] }
+    /** @type {{ current: string[], currentLoaded: boolean, recent: string[], suggested: Array<{ tag: string, relevance: number, inPageFrequency: number }> }} */
+    this._tagChipSourceCache = { current: [], currentLoaded: false, recent: [], suggested: [] }
 
     // Cache DOM elements
     this.elements = {}
@@ -1831,7 +1966,7 @@ export class UIManager {
   }
 
   /**
-   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Session-only tag label casing for This Page tag chips.
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Session-only Suggested Tags label casing for This Page chips.
    * @returns {import('../../shared/tag-case-folding.js').TagCaseFoldingMode}
    */
   getTagCaseFoldingMode () {
@@ -1839,7 +1974,7 @@ export class UIManager {
   }
 
   /**
-   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Set casing mode and redraw cached tag chips (no refetch).
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Set Suggested Tags casing mode and redraw cached chips (no refetch).
    * @param {string} mode
    */
   setTagCaseFoldingMode (mode) {
@@ -1863,7 +1998,7 @@ export class UIManager {
   }
 
   /**
-   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Re-render Current / Recent / Suggested chips from last update* payload (mode change).
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Re-render Current / Recent / Suggested chips from last update payload (mode changes only Suggested Tags).
    * [REQ-THIS_PAGE_TAG_SORT] Suggested list re-painted from normalized cache (objects with relevance).
    */
   redrawTagChipsFromCache () {
@@ -1939,7 +2074,16 @@ export class UIManager {
         } else if (typeof item.frequency === 'number' && !Number.isNaN(item.frequency)) {
           inPageFrequency = item.frequency
         }
-        out.push({ tag: t, relevance, inPageFrequency })
+        const normalized = { tag: t, relevance, inPageFrequency }
+        if (
+          item.state === SUGGESTED_TAG_STATES.ABSENT ||
+          item.state === SUGGESTED_TAG_STATES.CASE_MATCH ||
+          item.state === SUGGESTED_TAG_STATES.CASE_MISMATCH
+        ) {
+          normalized.state = item.state
+          normalized.matchedTag = typeof item.matchedTag === 'string' ? item.matchedTag : null
+        }
+        out.push(normalized)
       }
     }
     return out
@@ -1988,6 +2132,15 @@ export class UIManager {
    * Set loading state
    */
   setLoading (isLoading) {
+    // [IMPL-SUGGESTED_TAGS] [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] How: Preserve the scoped This Page container scroll position across Suggested Tag loading, focus, persistence, and chip-redraw effects while leaving standalone popup behavior unchanged.
+    if (isLoading && !this._loadingTransitionActive && this.container) {
+      const scrollTop = this.container.scrollTop
+      this._savedScopedScrollTop = typeof scrollTop === 'number' && Number.isFinite(scrollTop)
+        ? scrollTop
+        : undefined
+      this._loadingTransitionActive = true
+    }
+
     if (this.elements.loadingState) {
       this.elements.loadingState.classList.toggle('hidden', !isLoading)
     }
@@ -2020,6 +2173,14 @@ export class UIManager {
         }
       }
     })
+
+    if (!isLoading && this._loadingTransitionActive) {
+      if (this.container && typeof this._savedScopedScrollTop === 'number') {
+        this.container.scrollTop = this._savedScopedScrollTop
+      }
+      this._savedScopedScrollTop = undefined
+      this._loadingTransitionActive = false
+    }
   }
 
   /**
@@ -2231,7 +2392,7 @@ export class UIManager {
 
   /**
    * Update current tags display
-   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Label casing from tagCaseFoldingMode; remove uses stored string.
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Current Tags retain source casing; remove uses stored string.
    * [REQ-THIS_PAGE_TAG_SORT] When side-panel sort toggle present, order by selected mode within Current Tags only.
    */
   updateCurrentTags (tags) {
@@ -2243,6 +2404,7 @@ export class UIManager {
     // Create tag elements
     const tagsArray = Array.isArray(tags) ? tags : tags.split(' ').filter(tag => tag.length > 0)
     this._tagChipSourceCache.current = [...tagsArray]
+    this._tagChipSourceCache.currentLoaded = true
 
     const visible = tagsArray.filter(tag => !isEmptyOrWhitespaceOnlyTag(tag))
 
@@ -2258,7 +2420,7 @@ export class UIManager {
     if (mode) {
       const rows = visible.map((tag, stableIndex) => ({
         canonical: String(tag),
-        displayKey: tagChipDisplayAndAddValue(String(tag), this.tagCaseFoldingMode).display,
+        displayKey: String(tag).trim(),
         stableIndex,
         bookmarkFreq: lookupBookmarkFrequency(this.tagFrequencyMap, tag),
         relevance: 0,
@@ -2305,7 +2467,7 @@ export class UIManager {
     if (mode) {
       const rows = visible.map((tag, stableIndex) => ({
         canonical: String(tag),
-        displayKey: tagChipDisplayAndAddValue(String(tag), this.tagCaseFoldingMode).display,
+        displayKey: String(tag).trim(),
         stableIndex,
         bookmarkFreq: lookupBookmarkFrequency(this.tagFrequencyMap, tag),
         relevance: 0,
@@ -2327,7 +2489,7 @@ export class UIManager {
    * @returns {HTMLElement} Tag element
    */
   createRecentTagElement (tag) {
-    const { display, addValue } = tagChipDisplayAndAddValue(tag, this.tagCaseFoldingMode)
+    const { display, addValue } = tagChipDisplayAndAddValue(tag, 'original')
     const tagElement = document.createElement('div')
     tagElement.className = 'tag recent clickable'
     tagElement.innerHTML = `
@@ -2335,9 +2497,86 @@ export class UIManager {
     `
 
     // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Add click handler to add this tag to current site only
-    // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Persisted string matches displayed casing mode
+    // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Recent Tags retain source casing; mode is Suggested Tags-only
     tagElement.addEventListener('click', () => {
       this.emit('addTag', addValue)
+    })
+
+    return tagElement
+  }
+
+  /**
+   * [IMPL-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS]
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Render Suggested Tags
+   * with the active converted display/action value; conflict identity remains source-cased.
+   */
+  createSuggestedTagElement (item) {
+    const hasState = item && typeof item === 'object' && (
+      item.state === SUGGESTED_TAG_STATES.ABSENT ||
+      item.state === SUGGESTED_TAG_STATES.CASE_MATCH ||
+      item.state === SUGGESTED_TAG_STATES.CASE_MISMATCH
+    )
+    const state = hasState ? item.state : null
+    const sourceTag = typeof item === 'string' ? item : item?.tag
+    const { display, addValue } = tagChipDisplayAndAddValue(sourceTag, this.tagCaseFoldingMode)
+    if (!hasState) {
+      const tagElement = document.createElement('div')
+      tagElement.className = 'tag recent clickable'
+      tagElement.innerHTML = `
+        <span class="tag-text">${this.escapeHtml(display)}</span>
+      `
+      tagElement.addEventListener('click', () => {
+        this.emit('addTag', addValue)
+      })
+      return tagElement
+    }
+    const stateLabel = state === SUGGESTED_TAG_STATES.CASE_MATCH
+      ? 'Remove'
+      : state === SUGGESTED_TAG_STATES.CASE_MISMATCH ? 'Replace' : 'Add'
+    const actionLabel = state === SUGGESTED_TAG_STATES.CASE_MATCH
+      ? `Remove current tag ${item.matchedTag}`
+      : state === SUGGESTED_TAG_STATES.CASE_MISMATCH
+        ? `Replace current tag ${item.matchedTag} with suggested tag ${display}`
+        : `Add suggested tag ${display}`
+    const tagElement = document.createElement('div')
+    tagElement.className = `tag recent clickable suggested-tag-state-${state}`
+    tagElement.dataset.suggestedTagState = state
+    tagElement.dataset.suggestedTagValue = state === SUGGESTED_TAG_STATES.CASE_MATCH
+      ? item.matchedTag
+      : addValue
+    if (typeof item.matchedTag === 'string') {
+      tagElement.dataset.matchedTag = item.matchedTag
+    }
+    tagElement.setAttribute('role', 'button')
+    tagElement.setAttribute('tabindex', '0')
+    tagElement.setAttribute('aria-label', actionLabel)
+    tagElement.innerHTML = `
+      <span class="tag-state-label sr-only">${stateLabel}</span>
+      <span class="tag-text">${this.escapeHtml(display)}</span>
+    `
+
+    const emitSuggestedAction = () => {
+      if (state === SUGGESTED_TAG_STATES.CASE_MATCH) {
+        this.emit('removeTag', item.matchedTag)
+      } else if (state === SUGGESTED_TAG_STATES.CASE_MISMATCH) {
+        this.emit('replaceSuggestedTag', {
+          tag: addValue,
+          state,
+          matchedTag: item.matchedTag
+        })
+      } else {
+        this.emit('addSuggestedTag', {
+          tag: addValue,
+          state: SUGGESTED_TAG_STATES.ABSENT
+        })
+      }
+    }
+    tagElement.addEventListener('click', emitSuggestedAction)
+    tagElement.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        emitSuggestedAction()
+      }
     })
 
     return tagElement
@@ -2356,6 +2595,30 @@ export class UIManager {
   }
 
   /**
+   * [IMPL-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]
+   * Reclassify side-panel suggestions against the active converted value before painting.
+   * @param {{ tag: string, relevance: number, inPageFrequency: number, state?: string, matchedTag?: string|null }} item
+   * @returns {typeof item}
+   */
+  _getRenderedSuggestedTagItem (item) {
+    if (!this.container || !item || typeof item.tag !== 'string') return item
+
+    const hasState = item.state === SUGGESTED_TAG_STATES.ABSENT ||
+      item.state === SUGGESTED_TAG_STATES.CASE_MATCH ||
+      item.state === SUGGESTED_TAG_STATES.CASE_MISMATCH
+    if (!hasState) return item
+
+    const { current: currentTags, currentLoaded } = this._tagChipSourceCache
+    if (!currentLoaded) return item
+
+    const adjustedTag = tagChipDisplayAndAddValue(item.tag, this.tagCaseFoldingMode).addValue
+    const state = classifySuggestedTagState(item.tag, currentTags, adjustedTag)
+    return state
+      ? { ...item, state: state.state, matchedTag: state.matchedTag }
+      : item
+  }
+
+  /**
    * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] Paint suggested chips from normalized cache (sort when toggle present).
    */
   _paintSuggestedTags () {
@@ -2367,7 +2630,9 @@ export class UIManager {
     const suggestedTagsSection = this.container ? this.container.querySelector('[data-popup-ref="suggestedTags"]') : document.getElementById('suggestedTags')
 
     const source = this._tagChipSourceCache.suggested
-    const visible = source.filter(s => !isEmptyOrWhitespaceOnlyTag(s.tag))
+    const visible = source
+      .filter(s => !isEmptyOrWhitespaceOnlyTag(s.tag))
+      .map(item => this._getRenderedSuggestedTagItem(item))
 
     if (visible.length === 0) {
       if (suggestedTagsSection) {
@@ -2397,17 +2662,17 @@ export class UIManager {
     }
 
     ordered.forEach((item) => {
-      const tagElement = this.createRecentTagElement(item.tag)
+      const tagElement = this.createSuggestedTagElement(item)
       this.elements.suggestedTagsContainer.appendChild(tagElement)
     })
   }
 
   /**
    * Create a tag element
-   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Display label follows tagCaseFoldingMode; removeTag uses stored `tag`.
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Current Tags retain stored/source casing; removeTag uses stored `tag`.
    */
   createTagElement (tag) {
-    const label = currentTagDisplayLabel(String(tag), this.tagCaseFoldingMode)
+    const label = String(tag).trim()
     const tagElement = document.createElement('div')
     tagElement.className = 'tag'
     tagElement.innerHTML = `

@@ -20,6 +20,25 @@
 #   source_index: Path to the YAML index that holds the full record (e.g., requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, processes.md)
 #   detail_file: Path to the detailed .yaml, or null when no detail file (methodology seed)
 #   metadata: Structured metadata with registered and last_updated dates
+#
+# ---
+# Template Record - Copy this block to create new tokens
+# ---
+#
+# TOKEN-IDENTIFIER:
+#   type: REQ | ARCH | IMPL | TEST | PROC
+#   name: Token Name
+#   category: Optional category (e.g., Core Functional, Non-Functional for REQ)
+#   status: Active | Deprecated | Template | Planned
+#   description: "One-line description of what this token represents"
+#   cross_references:
+#     - RELATED-TOKEN-1
+#     - RELATED-TOKEN-2
+#   source_index: requirements.yaml | architecture-decisions.yaml | implementation-decisions.yaml | processes.md
+#   detail_file: path/to/detail/file.yaml | null
+#   metadata:
+#     registered: YYYY-MM-DD
+#     last_updated: YYYY-MM-DD
 ARCH-FEEDBACK_STORAGE:
   cross_references:
     - "IMPL-MCP_FEEDBACK_TOOLS"
@@ -396,25 +415,6 @@ PROC-VOCABULARY_INDEX:
   detail_file: "null"
   metadata:
     last_updated: "2026-05-29"
-# ---
-# Template Record - Copy this block to create new tokens
-# ---
-#
-# TOKEN-IDENTIFIER:
-#   type: REQ | ARCH | IMPL | TEST | PROC
-#   name: Token Name
-#   category: Optional category (e.g., Core Functional, Non-Functional for REQ)
-#   status: Active | Deprecated | Template | Planned
-#   description: "One-line description of what this token represents"
-#   cross_references:
-#     - RELATED-TOKEN-1
-#     - RELATED-TOKEN-2
-#   source_index: requirements.yaml | architecture-decisions.yaml | implementation-decisions.yaml | processes.md
-#   detail_file: path/to/detail/file.yaml | null
-#   metadata:
-#     registered: YYYY-MM-DD
-#     last_updated: YYYY-MM-DD
-
     registered: "2026-05-29"
   name: "Domain vocabulary index discipline"
   source_index: "processes.md"

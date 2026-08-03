@@ -23,59 +23,7 @@
 #   detail_file: Path to the detailed .yaml in requirements/ or null for methodology index-only rows; procedure: tied/docs/agent-req-implementation-checklist.yaml
 #   metadata: Optional metadata
 # Methodology seed: token identity and traceability only; do not expand rationale here (use the checklist and project detail files when needed).
-REQ-FEEDBACK_TO_TIED:
-  category: "Functional"
-  detail_file: "null"
-  metadata:
-    last_updated:
-      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
-  name: "Feedback to TIED (Feature Requests, Bug Reports, Methodology)"
-  priority: "P1"
-  related_requirements:
-    depends_on: []
-    related_to:
-      - "REQ-TIED_SETUP"
-    supersedes: []
-  status: "Planned"
-  traceability:
-    architecture:
-      - "ARCH-FEEDBACK_STORAGE"
-    implementation:
-      - "IMPL-MCP_FEEDBACK_TOOLS"
-REQ-MODULE_VALIDATION:
-  category: "Functional"
-  detail_file: "null"
-  metadata:
-    last_updated:
-      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
-  name: "Independent Module Validation Before Integration"
-  priority: "P0"
-  related_requirements:
-    depends_on:
-      - "REQ-TIED_SETUP"
-    related_to: []
-    supersedes: []
-  status: "Implemented"
-  traceability:
-    architecture:
-      - "ARCH-MODULE_VALIDATION"
-    implementation:
-      - "IMPL-MODULE_VALIDATION"
-REQ-QUALITY_ASSURANCE_EVIDENCE:
-  category: "Non-Functional"
-  cross_references:
-    - "ARCH-QUALITY_ASSURANCE_PROFILES"
-    - "IMPL-QUALITY_EVIDENCE_MANIFEST"
-  description: "Every behavior-changing change selects applicable quality attributes from a bounded risk profile and records reproducible evidence, limitations, and accepted residual risk without imposing irrelevant checks."
-  detail_file: "requirements/REQ-QUALITY_ASSURANCE_EVIDENCE.yaml"
-  name: "Risk-triggered quality assurance evidence"
-  priority: "P0"
-  related_requirements:
-    depends_on:
-      - "REQ-MODULE_VALIDATION"
-      - "REQ-TIED_SETUP"
-    related_to: []
-    supersedes: []
+#
 # ---
 # Template Record - Copy this block to create new requirements
 # ---
@@ -130,13 +78,59 @@ REQ-QUALITY_ASSURANCE_EVIDENCE:
 #       date: YYYY-MM-DD
 #       validator: "agent/contributor"
 #       result: "pass"
-
+REQ-FEEDBACK_TO_TIED:
+  category: "Functional"
+  detail_file: "null"
+  metadata:
+    last_updated:
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
+  name: "Feedback to TIED (Feature Requests, Bug Reports, Methodology)"
+  priority: "P1"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-TIED_SETUP"
+    supersedes: []
+  status: "Planned"
+  traceability:
+    architecture:
+      - "ARCH-FEEDBACK_STORAGE"
+    implementation:
+      - "IMPL-MCP_FEEDBACK_TOOLS"
+REQ-MODULE_VALIDATION:
+  category: "Functional"
+  detail_file: "null"
+  metadata:
+    last_updated:
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
+  name: "Independent Module Validation Before Integration"
+  priority: "P0"
+  related_requirements:
+    depends_on:
+      - "REQ-TIED_SETUP"
+    related_to: []
+    supersedes: []
   status: "Implemented"
   traceability:
     architecture:
-      - "ARCH-QUALITY_ASSURANCE_PROFILES"
+      - "ARCH-MODULE_VALIDATION"
     implementation:
-      - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+      - "IMPL-MODULE_VALIDATION"
+REQ-QUALITY_ASSURANCE_EVIDENCE:
+  category: "Non-Functional"
+  cross_references:
+    - "ARCH-QUALITY_ASSURANCE_PROFILES"
+    - "IMPL-QUALITY_EVIDENCE_MANIFEST"
+  description: "Every behavior-changing change selects applicable quality attributes from a bounded risk profile and records reproducible evidence, limitations, and accepted residual risk without imposing irrelevant checks."
+  detail_file: "requirements/REQ-QUALITY_ASSURANCE_EVIDENCE.yaml"
+  name: "Risk-triggered quality assurance evidence"
+  priority: "P0"
+  related_requirements:
+    depends_on:
+      - "REQ-MODULE_VALIDATION"
+      - "REQ-TIED_SETUP"
+    related_to: []
+    supersedes: []
 REQ-TIED_SETUP:
   category: "Functional"
   detail_file: "null"

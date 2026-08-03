@@ -22,7 +22,7 @@ ARCH-SUGGESTED_TAGS:
     - "Overlay/TagService: `sanitizeTag()` (comprehensive XSS prevention)"
     - "Popup inlined: `replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 50)` (simple character filter)"
   data_flow_diagram: "```\nPage Content (DOM + URL)\n         ↓\n    [Extraction]\n    ├─ Title\n    ├─ URL segments\n    ├─ Headings (h1/h2/h3)\n    ├─ Nav links (20)\n    ├─ Breadcrumbs\n    ├─ Images alt (5)\n    └─ Main links (10)\n         ↓\n    [Tokenization]\n    Split on whitespace/punctuation\n         ↓\n    [Filtering]\n    ├─ Remove noise words\n    ├─ Remove short words (<2)\n    ├─ Remove pure numbers\n    └─ Filter URL segments\n         ↓\n    [Frequency Counting]\n    Count occurrences (case-insensitive)\n         ↓\n    [Case Preservation]\n    ├─ Count by lowercase key\n    ├─ Canonical spelling (mixed > ALLCAPS > lower)\n    └─ Remove exact duplicates\n         ↓\n    [Sorting]\n    Sort by frequency ↓, then alphabetically ↑\n         ↓\n    [Sanitization]\n    Remove special chars, limit length\n         ↓\n    [Deduplication vs Current Tags]\n    Exclude suggestions in current tags (case-insensitive)\n         ↓\n    [Display]\n    ├─ Overlay: show 5 tags, click → saveTag + refresh\n    └─ Popup: show all tags, click → add tag\n```\n\n---"
-  decision: "Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, meta tags, headings, semantic emphasis elements, structured content, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, choosing one canonical spelling per lowercase key (no extra lowercase-only suggestion), and deduplicating against current tags. The popup/side-panel path must only run script injection on injectable URLs: http(s) AND not a non-scriptable URL (restricted schemes or Chrome Web Store / extensions gallery hosts per classifyScriptInjectionUrl). On non-scriptable URLs it skips injection, calls updateSuggestedTags([]), records injectionOutcome, and returns — avoiding Chrome permission and \"extensions gallery cannot be scripted\" errors."
+  decision: "Use multi-source extraction with case-preserving canonical suggestions and case-insensitive Current Tags conflict handling. In the side-panel This Page surface, classify every normalized suggestion as absent, case-match, or case-mismatch; render all three with explicit accessible state cues; route add, exact stored-value removal, or atomic replacement respectively. The Tag labels mode applies only to Suggested Tags, and popup/overlay filtering/add behavior remains unchanged."
   depends_on: "None"
   detail_file: "architecture-decisions/ARCH-SUGGESTED_TAGS.yaml"
   extract_→_filter_→_rank_→_deduplicate_→_display: "1. **Extract text** from multiple page sources (title, URL segments, meta tags, headings, emphasis elements, definition terms, table headers, nav, breadcrumbs, images, links)\n2. **Tokenize and filter** (remove noise words, short words, pure numbers)\n3. **Rank by frequency** (count occurrences, sort descending)\n4. **Preserve case** (one canonical spelling per word; chip case toggle for lower/UPPER display)\n5. **Sanitize** (remove special characters, limit length)\n6. **Deduplicate** (exclude tags already in current bookmark, case-insensitive)\n7. **Display** (show suggestions in UI, allow click-to-add)"
@@ -30,7 +30,9 @@ ARCH-SUGGESTED_TAGS:
   hybrid: "Extract core logic to shared module imported by both paths"
   implementation_approach:
     details:
-      - "**Restricted-URL skip (popup/side panel)**: Before chrome.scripting.executeScript, classifyScriptInjectionUrl (src/shared/script-injection-eligibility.js) must return injectable. Skip when reason is missing_url, restricted_scheme, or extensions_gallery (Chrome Web Store hosts and chrome:// / chrome-extension:// / edge:// / about: / etc.). Then updateSuggestedTags([]), recordAction injectionOutcome, debugLog (not debugError). Prevents gallery and host-permission errors when the active tab is non-scriptable during side-panel tab-change refresh."
+      - "Atomic correction uses the authoritative bookmark snapshot, the clicked case-converted Suggested Tag value, and preserves unrelated tag order while collapsing duplicate case variants."
+      - "Restricted-URL and popup/side-panel extraction behavior remains unchanged; expected skips clear suggestions without debugError."
+      - "Side-panel state is surface-specific: absent suggestions add, exact matches remove the exact stored Current Tag, and case mismatches offer a converted Suggested Tag correction without changing popup/overlay filtering behavior."
     key_components: "#### 1. Extraction Sources (in order)\n\n| Source | Selector/Method | Limit | Priority |\n|--------|----------------|-------|----------|\n| Document title | `document.title` | Full text | High |\n| URL path segments | `URL.pathname.split('/')` | All segments (filtered) | High |\n| Meta keywords | `meta[name=\"keywords\"]` | Full content | High |\n| Meta description | `meta[name=\"description\"]` | Full content | High |\n| H1/H2/H3 headings | `querySelectorAll('h1, h2, h3')` | All headings | High |\n| Emphasis elements | `main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code` (+ article, [role=\"main\"], .main, .content) | First 30 elements | Medium-High |\n| Definition terms | `main dl dt` (+ article, [role=\"main\"], .main, .content) | First 20 terms | Medium |\n| Table headers/captions | `main th, main caption` (+ article, [role=\"main\"], .main, .content) | First 20 headers | Medium |\n| Navigation links | `nav a`, `header nav a`, `[role=\"navigation\"] a` | First 20 links | Medium |\n| Breadcrumbs | `[aria-label*=\"breadcrumb\"]`, `.breadcrumb`, etc. | All breadcrumb links | Medium |\n| Main images | `main img`, `article img`, etc. | First 5 images (alt text) | Low |\n| Main links | `main a`, `article a`, etc. | First 10 links | Low |"
     summary: "Implement intelligent tag suggestions from multi-source page content with frequency ranking and case preservation. Popup/side-panel inject path uses classifyScriptInjectionUrl (restricted_scheme / extensions_gallery / missing_url / ok); expected skips clear suggestions and record injectionOutcome without debugError. Distinct from user inhibit URLs."
   issue: "Inconsistent sanitization may produce different suggestions from same page content."
@@ -43,8 +45,12 @@ ARCH-SUGGESTED_TAGS:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-07-30"
-      reason: "Architecture summary: gallery-host classifier (not http(s)-only)"
+      date: "2026-08-03"
+      reason: "Define three-state side-panel Suggested Tags actions"
+    last_validated:
+      date: "2026-08-03"
+      result: "pass"
+      validator: "focused/full Jest, lint, typecheck, token validation, and tied_validate_consistency"
   method: "`extractSuggestedTagsFromContent(document, url, limit)`"
   modifiable: "Unify sanitization; inline full `sanitizeTag` logic in popup script; or document and accept the difference."
   name: "Suggested Tags from Page Content Architecture"
@@ -57,7 +63,7 @@ ARCH-SUGGESTED_TAGS:
   rationale:
     benefits: []
     problems_solved: []
-    why: "Intelligent tag suggestions speed up bookmarking workflow by providing context-aware tag candidates without requiring manual typing. Multi-source extraction ensures comprehensive coverage of page semantics; frequency sorting prioritizes common/important terms; case preservation picks one canonical spelling per word from the page (mixed case preferred over ALL CAPS over all-lowercase) without a duplicate all-lowercase chip; users choose lower/UPPER display via the tag case toggle."
+    why: "Users need context-aware Suggested Tags while retaining explicit control over their displayed and persisted casing. Case-insensitive Current Tags conflict handling prevents duplicate identity, and atomic replacement preserves bookmark order."
   related_decisions:
     depends_on: []
     informs:
@@ -75,20 +81,21 @@ ARCH-SUGGESTED_TAGS:
       - "src/features/content/overlay-manager.js"
       - "src/features/tagging/suggested-tags-main-world-snippet.js"
       - "src/features/tagging/tag-service.js"
-      - "src/shared/suggested-tag-original-case.js"
+      - "src/shared/suggested-tag-state.js"
       - "src/ui/popup/PopupController.js"
       - "src/ui/popup/UIManager.js"
+      - "src/ui/side-panel/side-panel.css"
+      - "src/ui/side-panel/side-panel.html"
     tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
-      - "tests/unit/suggested-tag-original-case.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
   traceability:
     code_annotations:
       - "ARCH-SUGGESTED_TAGS"
-      - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
-      - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
-      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     implementation:
-      - "IMPL-POPUP_SESSION"
       - "IMPL-SUGGESTED_TAGS"
       - "IMPL-THIS_PAGE_TAG_SORT"
     requirements:
@@ -96,11 +103,11 @@ ARCH-SUGGESTED_TAGS:
       - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     tests:
-      - "tests/integration/side-panel-tab-change-injection.integration.test.js"
-      - "tests/unit/popup-injection-outcome.test.js"
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
-      - "tests/unit/script-injection-eligibility.test.js"
-      - "tests/unit/suggested-tag-original-case.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
   url_path_segments: "Exclude `www`, `com`, `org`, `net`, `html`, `htm`, `php`, `asp`, `aspx`, `index`, `home`, `page`; exclude pure numeric segments; exclude segments shorter than 2 characters."
   user-configurable: "Allow users to add custom noise words"
   user_choice_in_capitalization: "Tag case toggle (original / lower / UPPER) applies to suggested chips; extractors emit one canonical spelling per word."

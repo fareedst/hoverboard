@@ -19365,10 +19365,6 @@ function tagChipDisplayAndAddValue(source, mode) {
   if (mode === "upper") return { display: t.toUpperCase(), addValue: t.toUpperCase() };
   return { display: t, addValue: t };
 }
-function currentTagDisplayLabel(stored, mode) {
-  const { display } = tagChipDisplayAndAddValue(stored, mode);
-  return display;
-}
 
 // src/shared/tag-chip-sort.js
 var TAG_CHIP_SORT_MODES = (
@@ -19432,6 +19428,118 @@ function sortTagChipRows(rows, mode) {
     return a.stableIndex - b.stableIndex;
   });
   return copy;
+}
+
+// src/shared/suggested-tag-state.js
+var SUGGESTED_TAG_STATES = Object.freeze({
+  ABSENT: "absent",
+  CASE_MATCH: "case-match",
+  CASE_MISMATCH: "case-mismatch"
+});
+var MAX_TAG_LENGTH = 50;
+var INVALID_TAG_CHARACTERS = /[<>]/;
+var SAFE_TAG_CHARACTERS = /^[\w\s.#+-]+$/;
+function sanitizeSuggestedTag(value) {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const tag = value.trim();
+  if (tag.length === 0 || tag.length > MAX_TAG_LENGTH || INVALID_TAG_CHARACTERS.test(tag) || !SAFE_TAG_CHARACTERS.test(tag)) {
+    return null;
+  }
+  return tag;
+}
+function normalizeCurrentTags(currentTags) {
+  if (typeof currentTags === "string") {
+    return currentTags.split(" ").filter((tag) => tag.trim());
+  }
+  return Array.isArray(currentTags) ? currentTags.filter((tag) => typeof tag === "string" && tag.trim()) : [];
+}
+function classifySuggestedTagState(suggestedTag, currentTags, comparisonTag = suggestedTag) {
+  const sanitizedSource = sanitizeSuggestedTag(suggestedTag);
+  const sanitizedComparison = sanitizeSuggestedTag(comparisonTag);
+  if (sanitizedSource === null || sanitizedComparison === null) {
+    return null;
+  }
+  const normalizedCurrentTags = normalizeCurrentTags(currentTags);
+  const exactMatch = normalizedCurrentTags.find((tag) => tag === sanitizedComparison);
+  if (exactMatch) {
+    return {
+      state: SUGGESTED_TAG_STATES.CASE_MATCH,
+      suggestedTag: sanitizedSource,
+      matchedTag: exactMatch
+    };
+  }
+  const comparisonKey = sanitizedComparison.toLowerCase();
+  const caseInsensitiveMatch = normalizedCurrentTags.find(
+    (tag) => tag.toLowerCase() === comparisonKey
+  );
+  if (caseInsensitiveMatch) {
+    return {
+      state: SUGGESTED_TAG_STATES.CASE_MISMATCH,
+      suggestedTag: sanitizedSource,
+      matchedTag: caseInsensitiveMatch
+    };
+  }
+  return {
+    state: SUGGESTED_TAG_STATES.ABSENT,
+    suggestedTag: sanitizedSource,
+    matchedTag: null
+  };
+}
+function replaceTagInPlace(currentTags, matchedTag, replacementTag) {
+  if (!Array.isArray(currentTags)) {
+    return {
+      ok: false,
+      tags: [],
+      reason: "invalid_tags"
+    };
+  }
+  const original = currentTags.slice();
+  const replacement = sanitizeSuggestedTag(replacementTag);
+  if (replacement === null) {
+    return {
+      ok: false,
+      tags: original,
+      reason: "invalid_replacement"
+    };
+  }
+  if (typeof matchedTag !== "string" || matchedTag.trim().length === 0) {
+    return {
+      ok: false,
+      tags: original,
+      reason: "invalid_match"
+    };
+  }
+  const matchKey = matchedTag.trim().toLowerCase();
+  const matchingIndexes = original.reduce((indexes, tag, index) => {
+    if (typeof tag === "string" && tag.trim().toLowerCase() === matchKey) {
+      indexes.push(index);
+    }
+    return indexes;
+  }, []);
+  if (matchingIndexes.length === 0) {
+    return {
+      ok: false,
+      tags: original,
+      reason: "match_not_found"
+    };
+  }
+  const firstIndex = matchingIndexes[0];
+  const matchingIndexSet = new Set(matchingIndexes);
+  const tags = original.reduce((result, tag, index) => {
+    if (!matchingIndexSet.has(index)) {
+      result.push(tag);
+    } else if (index === firstIndex) {
+      result.push(replacement);
+    }
+    return result;
+  }, []);
+  return {
+    ok: true,
+    tags,
+    replacedTag: original[firstIndex]
+  };
 }
 
 // src/shared/bookmark-notes-ui.js
@@ -19532,8 +19640,10 @@ var UIManager = class {
     this.tagSortMode = "alphabetical";
     this.tagFrequencyMap = {};
     this._tagSortUiEnabled = false;
+    this._loadingTransitionActive = false;
+    this._savedScopedScrollTop = void 0;
     this._actionFeedbackTimer = null;
-    this._tagChipSourceCache = { current: [], recent: [], suggested: [] };
+    this._tagChipSourceCache = { current: [], currentLoaded: false, recent: [], suggested: [] };
     this.elements = {};
     this.cacheElements();
     this.applyConfiguration();
@@ -19817,14 +19927,14 @@ var UIManager = class {
     }
   }
   /**
-   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Session-only tag label casing for This Page tag chips.
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Session-only Suggested Tags label casing for This Page chips.
    * @returns {import('../../shared/tag-case-folding.js').TagCaseFoldingMode}
    */
   getTagCaseFoldingMode() {
     return this.tagCaseFoldingMode;
   }
   /**
-   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Set casing mode and redraw cached tag chips (no refetch).
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Set Suggested Tags casing mode and redraw cached chips (no refetch).
    * @param {string} mode
    */
   setTagCaseFoldingMode(mode) {
@@ -19846,7 +19956,7 @@ var UIManager = class {
     });
   }
   /**
-   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Re-render Current / Recent / Suggested chips from last update* payload (mode change).
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Re-render Current / Recent / Suggested chips from last update payload (mode changes only Suggested Tags).
    * [REQ-THIS_PAGE_TAG_SORT] Suggested list re-painted from normalized cache (objects with relevance).
    */
   redrawTagChipsFromCache() {
@@ -19916,7 +20026,12 @@ var UIManager = class {
         } else if (typeof item.frequency === "number" && !Number.isNaN(item.frequency)) {
           inPageFrequency = item.frequency;
         }
-        out.push({ tag: t, relevance, inPageFrequency });
+        const normalized = { tag: t, relevance, inPageFrequency };
+        if (item.state === SUGGESTED_TAG_STATES.ABSENT || item.state === SUGGESTED_TAG_STATES.CASE_MATCH || item.state === SUGGESTED_TAG_STATES.CASE_MISMATCH) {
+          normalized.state = item.state;
+          normalized.matchedTag = typeof item.matchedTag === "string" ? item.matchedTag : null;
+        }
+        out.push(normalized);
       }
     }
     return out;
@@ -19961,6 +20076,11 @@ var UIManager = class {
    * Set loading state
    */
   setLoading(isLoading) {
+    if (isLoading && !this._loadingTransitionActive && this.container) {
+      const scrollTop = this.container.scrollTop;
+      this._savedScopedScrollTop = typeof scrollTop === "number" && Number.isFinite(scrollTop) ? scrollTop : void 0;
+      this._loadingTransitionActive = true;
+    }
     if (this.elements.loadingState) {
       this.elements.loadingState.classList.toggle("hidden", !isLoading);
     }
@@ -19989,6 +20109,13 @@ var UIManager = class {
         }
       }
     });
+    if (!isLoading && this._loadingTransitionActive) {
+      if (this.container && typeof this._savedScopedScrollTop === "number") {
+        this.container.scrollTop = this._savedScopedScrollTop;
+      }
+      this._savedScopedScrollTop = void 0;
+      this._loadingTransitionActive = false;
+    }
   }
   /**
    * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
@@ -20175,7 +20302,7 @@ var UIManager = class {
   }
   /**
    * Update current tags display
-   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Label casing from tagCaseFoldingMode; remove uses stored string.
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Current Tags retain source casing; remove uses stored string.
    * [REQ-THIS_PAGE_TAG_SORT] When side-panel sort toggle present, order by selected mode within Current Tags only.
    */
   updateCurrentTags(tags) {
@@ -20183,6 +20310,7 @@ var UIManager = class {
     this.elements.currentTagsContainer.innerHTML = "";
     const tagsArray = Array.isArray(tags) ? tags : tags.split(" ").filter((tag) => tag.length > 0);
     this._tagChipSourceCache.current = [...tagsArray];
+    this._tagChipSourceCache.currentLoaded = true;
     const visible = tagsArray.filter((tag) => !isEmptyOrWhitespaceOnlyTag(tag));
     if (visible.length === 0) {
       this.elements.currentTagsContainer.innerHTML = '<div class="no-tags">No tags</div>';
@@ -20193,7 +20321,7 @@ var UIManager = class {
     if (mode) {
       const rows = visible.map((tag, stableIndex) => ({
         canonical: String(tag),
-        displayKey: tagChipDisplayAndAddValue(String(tag), this.tagCaseFoldingMode).display,
+        displayKey: String(tag).trim(),
         stableIndex,
         bookmarkFreq: lookupBookmarkFrequency(this.tagFrequencyMap, tag),
         relevance: 0,
@@ -20231,7 +20359,7 @@ var UIManager = class {
     if (mode) {
       const rows = visible.map((tag, stableIndex) => ({
         canonical: String(tag),
-        displayKey: tagChipDisplayAndAddValue(String(tag), this.tagCaseFoldingMode).display,
+        displayKey: String(tag).trim(),
         stableIndex,
         bookmarkFreq: lookupBookmarkFrequency(this.tagFrequencyMap, tag),
         relevance: 0,
@@ -20250,7 +20378,7 @@ var UIManager = class {
    * @returns {HTMLElement} Tag element
    */
   createRecentTagElement(tag) {
-    const { display, addValue } = tagChipDisplayAndAddValue(tag, this.tagCaseFoldingMode);
+    const { display, addValue } = tagChipDisplayAndAddValue(tag, "original");
     const tagElement = document.createElement("div");
     tagElement.className = "tag recent clickable";
     tagElement.innerHTML = `
@@ -20258,6 +20386,68 @@ var UIManager = class {
     `;
     tagElement.addEventListener("click", () => {
       this.emit("addTag", addValue);
+    });
+    return tagElement;
+  }
+  /**
+   * [IMPL-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS]
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Render Suggested Tags
+   * with the active converted display/action value; conflict identity remains source-cased.
+   */
+  createSuggestedTagElement(item) {
+    const hasState = item && typeof item === "object" && (item.state === SUGGESTED_TAG_STATES.ABSENT || item.state === SUGGESTED_TAG_STATES.CASE_MATCH || item.state === SUGGESTED_TAG_STATES.CASE_MISMATCH);
+    const state = hasState ? item.state : null;
+    const sourceTag = typeof item === "string" ? item : item?.tag;
+    const { display, addValue } = tagChipDisplayAndAddValue(sourceTag, this.tagCaseFoldingMode);
+    if (!hasState) {
+      const tagElement2 = document.createElement("div");
+      tagElement2.className = "tag recent clickable";
+      tagElement2.innerHTML = `
+        <span class="tag-text">${this.escapeHtml(display)}</span>
+      `;
+      tagElement2.addEventListener("click", () => {
+        this.emit("addTag", addValue);
+      });
+      return tagElement2;
+    }
+    const stateLabel = state === SUGGESTED_TAG_STATES.CASE_MATCH ? "Remove" : state === SUGGESTED_TAG_STATES.CASE_MISMATCH ? "Replace" : "Add";
+    const actionLabel = state === SUGGESTED_TAG_STATES.CASE_MATCH ? `Remove current tag ${item.matchedTag}` : state === SUGGESTED_TAG_STATES.CASE_MISMATCH ? `Replace current tag ${item.matchedTag} with suggested tag ${display}` : `Add suggested tag ${display}`;
+    const tagElement = document.createElement("div");
+    tagElement.className = `tag recent clickable suggested-tag-state-${state}`;
+    tagElement.dataset.suggestedTagState = state;
+    tagElement.dataset.suggestedTagValue = state === SUGGESTED_TAG_STATES.CASE_MATCH ? item.matchedTag : addValue;
+    if (typeof item.matchedTag === "string") {
+      tagElement.dataset.matchedTag = item.matchedTag;
+    }
+    tagElement.setAttribute("role", "button");
+    tagElement.setAttribute("tabindex", "0");
+    tagElement.setAttribute("aria-label", actionLabel);
+    tagElement.innerHTML = `
+      <span class="tag-state-label sr-only">${stateLabel}</span>
+      <span class="tag-text">${this.escapeHtml(display)}</span>
+    `;
+    const emitSuggestedAction = () => {
+      if (state === SUGGESTED_TAG_STATES.CASE_MATCH) {
+        this.emit("removeTag", item.matchedTag);
+      } else if (state === SUGGESTED_TAG_STATES.CASE_MISMATCH) {
+        this.emit("replaceSuggestedTag", {
+          tag: addValue,
+          state,
+          matchedTag: item.matchedTag
+        });
+      } else {
+        this.emit("addSuggestedTag", {
+          tag: addValue,
+          state: SUGGESTED_TAG_STATES.ABSENT
+        });
+      }
+    };
+    tagElement.addEventListener("click", emitSuggestedAction);
+    tagElement.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        emitSuggestedAction();
+      }
     });
     return tagElement;
   }
@@ -20273,6 +20463,22 @@ var UIManager = class {
     this._paintSuggestedTags();
   }
   /**
+   * [IMPL-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]
+   * Reclassify side-panel suggestions against the active converted value before painting.
+   * @param {{ tag: string, relevance: number, inPageFrequency: number, state?: string, matchedTag?: string|null }} item
+   * @returns {typeof item}
+   */
+  _getRenderedSuggestedTagItem(item) {
+    if (!this.container || !item || typeof item.tag !== "string") return item;
+    const hasState = item.state === SUGGESTED_TAG_STATES.ABSENT || item.state === SUGGESTED_TAG_STATES.CASE_MATCH || item.state === SUGGESTED_TAG_STATES.CASE_MISMATCH;
+    if (!hasState) return item;
+    const { current: currentTags, currentLoaded } = this._tagChipSourceCache;
+    if (!currentLoaded) return item;
+    const adjustedTag = tagChipDisplayAndAddValue(item.tag, this.tagCaseFoldingMode).addValue;
+    const state = classifySuggestedTagState(item.tag, currentTags, adjustedTag);
+    return state ? { ...item, state: state.state, matchedTag: state.matchedTag } : item;
+  }
+  /**
    * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] Paint suggested chips from normalized cache (sort when toggle present).
    */
   _paintSuggestedTags() {
@@ -20280,7 +20486,7 @@ var UIManager = class {
     this.elements.suggestedTagsContainer.innerHTML = "";
     const suggestedTagsSection = this.container ? this.container.querySelector('[data-popup-ref="suggestedTags"]') : document.getElementById("suggestedTags");
     const source = this._tagChipSourceCache.suggested;
-    const visible = source.filter((s) => !isEmptyOrWhitespaceOnlyTag(s.tag));
+    const visible = source.filter((s) => !isEmptyOrWhitespaceOnlyTag(s.tag)).map((item) => this._getRenderedSuggestedTagItem(item));
     if (visible.length === 0) {
       if (suggestedTagsSection) {
         suggestedTagsSection.style.display = "none";
@@ -20305,16 +20511,16 @@ var UIManager = class {
       ordered = sortTagChipRows(rows, mode).map((r) => r._itemRef);
     }
     ordered.forEach((item) => {
-      const tagElement = this.createRecentTagElement(item.tag);
+      const tagElement = this.createSuggestedTagElement(item);
       this.elements.suggestedTagsContainer.appendChild(tagElement);
     });
   }
   /**
    * Create a tag element
-   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Display label follows tagCaseFoldingMode; removeTag uses stored `tag`.
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Current Tags retain stored/source casing; removeTag uses stored `tag`.
    */
   createTagElement(tag) {
-    const label = currentTagDisplayLabel(String(tag), this.tagCaseFoldingMode);
+    const label = String(tag).trim();
     const tagElement = document.createElement("div");
     tagElement.className = "tag";
     tagElement.innerHTML = `
@@ -21815,6 +22021,7 @@ var PopupController = class {
     this.handleTogglePrivate = this.handleTogglePrivate.bind(this);
     this.handleReadLater = this.handleReadLater.bind(this);
     this.handleAddTag = this.handleAddTag.bind(this);
+    this.handleReplaceSuggestedTag = this.handleReplaceSuggestedTag.bind(this);
     this.handleRemoveTag = this.handleRemoveTag.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.handleDeletePin = this.handleDeletePin.bind(this);
@@ -21877,6 +22084,8 @@ var PopupController = class {
     this.uiManager.on("togglePrivate", this.handleTogglePrivate);
     this.uiManager.on("readLater", this.handleReadLater);
     this.uiManager.on("addTag", this.handleAddTag);
+    this.uiManager.on("addSuggestedTag", ({ tag } = {}) => this.handleAddTag(tag));
+    this.uiManager.on("replaceSuggestedTag", this.handleReplaceSuggestedTag);
     this.uiManager.on("removeTag", this.handleRemoveTag);
     this.uiManager.on("search", this.handleSearch);
     this.uiManager.on("deletePin", this.handleDeletePin);
@@ -22219,7 +22428,12 @@ var PopupController = class {
           const suggestedList = this._normalizeSuggestedRowsFromMainWorld(raw);
           const currentTags = this.normalizeTags(this.currentPin?.tags || []);
           const currentTagsLower = new Set(currentTags.map((t) => t.toLowerCase()));
-          const filteredSuggestedTags = suggestedList.filter(
+          const filteredSuggestedTags = this.uiManager.container ? suggestedList.map((item) => {
+            const mode = this.uiManager.getTagCaseFoldingMode?.() || "original";
+            const adjustedTag = tagChipDisplayAndAddValue(item.tag, mode).addValue;
+            const state = classifySuggestedTagState(item.tag, currentTags, adjustedTag);
+            return state ? { ...item, state: state.state, matchedTag: state.matchedTag } : null;
+          }).filter((item) => item) : suggestedList.filter(
             (item) => !currentTagsLower.has(item.tag.toLowerCase())
           );
           debugLog("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted suggested tags:", filteredSuggestedTags);
@@ -23330,6 +23544,82 @@ var PopupController = class {
         this.uiManager.updateCurrentTags(currentTagsArray);
       }
       await this.loadRecentTags();
+    } finally {
+      this.setLoading(false);
+    }
+  }
+  /**
+   * [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-TAG_SYSTEM]
+   * [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Persist a
+   * side-panel case-mismatch as one atomic full-bookmark replacement.
+   */
+  async handleReplaceSuggestedTag({ tag, matchedTag } = {}) {
+    recordAction("replaceSuggestedTag", { tag, matchedTag }, "side-panel");
+    if (this._onAction) {
+      this._onAction({
+        actionId: "replaceSuggestedTag",
+        payload: { tag, matchedTag }
+      });
+    }
+    const suggestedTag = sanitizeSuggestedTag(tag);
+    if (!suggestedTag || typeof matchedTag !== "string" || !matchedTag.trim()) {
+      this.uiManager.showError("Invalid suggested tag");
+      return;
+    }
+    const url2 = this.currentTab?.url || this.currentPin?.url;
+    if (!url2) {
+      this.uiManager.showError("No URL to update");
+      return;
+    }
+    const previousPin = this.currentPin;
+    try {
+      this.setLoading(true);
+      const authoritativePin = await this.getBookmarkData(url2);
+      if (!authoritativePin) {
+        throw new Error("No bookmark found");
+      }
+      const currentTags = this.normalizeTags(authoritativePin.tags);
+      const replacement = replaceTagInPlace(currentTags, matchedTag, suggestedTag);
+      if (!replacement.ok) {
+        debugWarn("[IMPL-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_DEDUPLICATION] Suggested tag match was stale; no save performed:", replacement.reason);
+        this.uiManager.showError("Suggested tag is out of date");
+        return;
+      }
+      const pinData = {
+        ...authoritativePin,
+        tags: replacement.tags.join(" "),
+        description: this.getBetterDescription(authoritativePin.description, this.currentTab?.title)
+      };
+      const preferredBackend = this.getSelectedStorageBackend();
+      if (preferredBackend) pinData.preferredBackend = preferredBackend;
+      const response = await this.sendMessage({
+        type: "saveBookmark",
+        data: pinData
+      });
+      if (response?.success === false || response?.error) {
+        throw new Error(response.error || response.message || "Failed to save suggested tag replacement");
+      }
+      this.currentPin = pinData;
+      this.stateManager.setState({ currentPin: this.currentPin });
+      this.uiManager.updateCurrentTags(replacement.tags);
+      this.uiManager.showSuccess("Tag casing updated");
+      await this.loadRecentTags();
+      await this.refreshTagFrequencyMapForSort();
+      this.uiManager.redrawTagChipsFromCache();
+      await this.loadSuggestedTags();
+      try {
+        await this.notifyOverlayOfTagChanges(replacement.tags);
+        await this.sendToTab({
+          type: "BOOKMARK_UPDATED",
+          data: pinData
+        });
+      } catch (notifyError) {
+        debugError("[IMPL-BOOKMARK_STATE_SYNC] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Failed to notify overlay after suggested tag replacement:", notifyError);
+      }
+    } catch (error48) {
+      this.currentPin = previousPin;
+      this.errorHandler.handleError("Failed to replace suggested tag", error48);
+      this.uiManager.showError(error48.message || "Failed to update tag casing");
     } finally {
       this.setLoading(false);
     }

@@ -7,14 +7,14 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
   cross-references: "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT, IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
   cross_references:
     - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
-  decision: "Client-side import on the index page via saveBookmark with preferredBackend Local|File|Sync|Browser. Distinct from ARCH-BROWSER_BOOKMARK_IMPORT (Chrome tree source page), which excludes Browser as Import-to because the source is already chrome.bookmarks. Index Import may target Store B so CSV/JSON can land in the browser backend."
+  decision: "Keep one Import control group in the Local Bookmarks Index with two sources: rich CSV/JSON files and the live chrome.bookmarks tree. File import may target Local|File|Sync|Browser; live Browser source import targets Local|File|Sync only. Live source conflicts are resolved against the selected target backend, never against Browser source rows."
   detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml"
   implementation_approach:
     details:
-      - "Conflict modes Skip/Overwrite/Merge"
-      - "Distinct from Browser Bookmark Import page which excludes Browser as target"
-      - "Import to Local|File|Sync|Browser via preferredBackend"
-    summary: "Import CSV/JSON/Netscape on index page; preferredBackend Local|File|Sync|Browser; reuses saveBookmark."
+      - "Keep Browser excluded only for live Browser-source destinations; retain Browser for file import"
+      - "Reuse saveBookmark for both sources; preserve file record fields and map Browser folder paths to root-stripped tags"
+      - "Use a source selector to switch between file controls and live Browser-tree controls"
+    summary: "Single Index Import group with File and live Browser sources."
   metadata:
     created:
       author: "AI Agent"

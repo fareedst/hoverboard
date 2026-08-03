@@ -1,0 +1,57 @@
+CITDP-REQ-SUGGESTED_TAGS_ADJUSTED_STATE_COMPARISON_20260803:
+  change_definition:
+    current_behavior: "Side-panel Suggested Tag state classification compared Current Tags with the raw source-cased Suggested Tag while display and add/replace payloads used the active Tag labels conversion."
+    desired_behavior: "Apply Original/lower/UPPER conversion first, compare the adjusted Suggested Tag value with Current Tags, and keep the raw source value only as identity metadata. Reclassify cached chips when Tag labels mode changes."
+    non_goals:
+      - "Changing Current Tags or Recent Tags source casing"
+      - "Changing popup or overlay raw Suggested Tag filtering and add behavior"
+      - "Changing the three state color treatment or action semantics"
+    success_criteria:
+      - "Adjusted case-insensitive values with different casing render case-mismatch and replace atomically"
+      - "Adjusted exact values render case-match and remove the exact stored Current Tag"
+      - "Focused and full Jest suites, lint, typecheck, build, token validation, and TIED consistency pass"
+      - "Mode changes redraw chips and recompute state without refetching page suggestions"
+  evidence:
+    commands:
+      - "npm run build:only"
+      - "npm run lint"
+      - "npm run typecheck"
+      - "npm run validate:tokens"
+      - "npm test -- --runInBand tests/unit/suggested-tag-state.test.js tests/unit/uIManager-tag-case-folding.test.js tests/unit/popup-suggested-tags.test.js tests/integration/suggested-tag-chip-composition.integration.test.js"
+      - "npm test -- --runInBand"
+      - "pseudocode_validate token=IMPL-SUGGESTED_TAGS require_contracts=true"
+      - "pseudocode_validate token=IMPL-THIS_PAGE_TAG_SORT require_contracts=true"
+      - "tied_validate_consistency include_detail_files=true include_pseudocode=true"
+      - "yaml_index_validate"
+    result: "All focused tests (39 passed), full Jest (170 suites; 1,681 passed, 1 skipped), lint, typecheck, build, token validation, YAML index validation, pseudo-code validation, and TIED consistency validation passed."
+  impact_analysis:
+    modules_or_boundaries: "Shared Suggested Tag classifier; PopupController initial side-panel classification; UIManager cached-chip redraw and action routing; unit/composition tests; distribution build."
+    tied_tokens_affected:
+      - "ARCH-SUGGESTED_TAGS"
+      - "ARCH-THIS_PAGE_TAG_SORT"
+      - "IMPL-SUGGESTED_TAGS"
+      - "IMPL-THIS_PAGE_TAG_SORT"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+      - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "None; state comparison now uses the active adjusted Suggested Tag value while raw source casing remains identity metadata."
+    record_status: "complete"
+    related_citdp_records:
+      - "CITDP-REQ-SUGGESTED_TAGS_ADJUSTED_STATE_COMPARISON_20260803.yaml"
+      - "CITDP-REQ-SUGGESTED_TAGS_CASE_CONVERSION_20260803.yaml"
+      - "CITDP-REQ-SUGGESTED_TAGS_DEDUPLICATION_20260802.yaml"
+      - "CITDP-REQ-SUGGESTED_TAGS_THREE_STATES_20260803.yaml"
+    stack_updates:
+      - "Linked all four Suggested Tags CITDP records for the LEAP closeout."
+      - "Updated IMPL-SUGGESTED_TAGS and IMPL-THIS_PAGE_TAG_SORT pseudo-code."
+      - "Updated shared classifier, PopupController, UIManager redraw behavior, and tests."
+      - "Updated tag and side-panel vocabulary entries."
+  record_identity:
+    change_request_id: "REQ-SUGGESTED_TAGS_ADJUSTED_STATE_COMPARISON_20260803"
+    recorded_at: "2026-08-03"
+    title: "Compare Suggested Tag states using the active adjusted label value"
+  test_strategy:
+    no_new_e2e_reason: "The changed classification and chip bindings are composition-testable; browser visual contrast remains covered by existing CSS contract tests."
+    summary: "Unit coverage verifies adjusted comparison and source identity; UIManager coverage verifies mode-change reclassification; PopupController and composition coverage verify adjusted exact removal and mismatch replacement."

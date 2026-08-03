@@ -130,6 +130,118 @@
   border-color: var(--accent, #5a9);
 }
 
+/* [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Explicit state
+   styling keeps all three actions distinguishable without relying on color alone. */
+.tag.suggested-tag-state-absent,
+.tag.suggested-tag-state-case-match,
+.tag.suggested-tag-state-case-mismatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tag.suggested-tag-state-absent {
+  background-color: var(--suggested-tag-absent-bg, #f3e5f5);
+  color: var(--suggested-tag-absent-text, #7b1fa2);
+  border-color: var(--suggested-tag-absent-border, #e1bee7);
+  border-style: dashed;
+}
+
+.tag.suggested-tag-state-absent .tag-text,
+.tag.suggested-tag-state-absent .tag-state-label {
+  color: var(--suggested-tag-absent-text, #7b1fa2);
+}
+
+.tag.suggested-tag-state-absent:hover,
+.tag.suggested-tag-state-absent:focus-visible {
+  background-color: var(--suggested-tag-absent-bg, #f3e5f5);
+  color: var(--suggested-tag-absent-text, #7b1fa2);
+  border-color: var(--suggested-tag-absent-border, #e1bee7);
+}
+
+.tag.suggested-tag-state-case-match {
+  background-color: var(--suggested-tag-case-match-bg, #e8f5e9);
+  color: var(--suggested-tag-case-match-text, #1b5e20);
+  border-color: var(--suggested-tag-case-match-border, #a5d6a7);
+  border-style: solid;
+}
+
+.tag.suggested-tag-state-case-match .tag-text,
+.tag.suggested-tag-state-case-match .tag-state-label {
+  color: var(--suggested-tag-case-match-text, #1b5e20);
+}
+
+.tag.suggested-tag-state-case-match:hover,
+.tag.suggested-tag-state-case-match:focus-visible {
+  background-color: var(--suggested-tag-case-match-bg, #e8f5e9);
+  color: var(--suggested-tag-case-match-text, #1b5e20);
+  border-color: var(--suggested-tag-case-match-border, #a5d6a7);
+}
+
+.tag.suggested-tag-state-case-mismatch {
+  background-color: var(--suggested-tag-case-mismatch-bg, #fff3e0);
+  color: var(--suggested-tag-case-mismatch-text, #7a3e00);
+  border-color: var(--suggested-tag-case-mismatch-border, #ffb74d);
+  border-style: double;
+}
+
+.tag.suggested-tag-state-case-mismatch .tag-text,
+.tag.suggested-tag-state-case-mismatch .tag-state-label {
+  color: var(--suggested-tag-case-mismatch-text, #7a3e00);
+}
+
+.tag.suggested-tag-state-case-mismatch:hover,
+.tag.suggested-tag-state-case-mismatch:focus-visible {
+  background-color: var(--suggested-tag-case-mismatch-bg, #fff3e0);
+  color: var(--suggested-tag-case-mismatch-text, #7a3e00);
+  border-color: var(--suggested-tag-case-mismatch-border, #ffb74d);
+}
+
+@media (prefers-color-scheme: dark) {
+  .suggested-tag-state-absent {
+    --suggested-tag-absent-bg: #4a3150;
+    --suggested-tag-absent-text: #f3d7f7;
+    --suggested-tag-absent-border: #b77bc1;
+  }
+
+  .suggested-tag-state-case-match {
+    --suggested-tag-case-match-bg: #1d3d2a;
+    --suggested-tag-case-match-text: #c8e6c9;
+    --suggested-tag-case-match-border: #66bb6a;
+  }
+
+  .suggested-tag-state-case-mismatch {
+    --suggested-tag-case-mismatch-bg: #4a321d;
+    --suggested-tag-case-mismatch-text: #ffe0b2;
+    --suggested-tag-case-mismatch-border: #ffb74d;
+  }
+}
+
+:root.hb-theme-dark .suggested-tag-state-absent {
+  --suggested-tag-absent-bg: #4a3150;
+  --suggested-tag-absent-text: #f3d7f7;
+  --suggested-tag-absent-border: #b77bc1;
+}
+
+:root.hb-theme-dark .suggested-tag-state-case-match {
+  --suggested-tag-case-match-bg: #1d3d2a;
+  --suggested-tag-case-match-text: #c8e6c9;
+  --suggested-tag-case-match-border: #66bb6a;
+}
+
+:root.hb-theme-dark .suggested-tag-state-case-mismatch {
+  --suggested-tag-case-mismatch-bg: #4a321d;
+  --suggested-tag-case-mismatch-text: #ffe0b2;
+  --suggested-tag-case-mismatch-border: #ffb74d;
+}
+
+.tag-state-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
 /* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] Override popup body constraints so panel uses full viewport height and width; max-height none and width 100% implement "tab content fills vertical space". */
 #side-panel-page {
   display: flex;

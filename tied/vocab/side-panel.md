@@ -18,6 +18,9 @@
 | **Brave native sidebar** | Brave side panel (for Brave’s own chrome) | Brave product sidebar (e.g. `Ctrl+B`); distinct from Hoverboard **side panel** |
 | **Brave side-panel window arrange bug** | Hoverboard window snap bug | Browser-owned: with **side panel** or **Brave native sidebar** open, OS maximize/half-screen may overshoot or ignore arrange keys; see [brave-side-panel-window-arrange.md](../../docs/troubleshooting/brave-side-panel-window-arrange.md); upstream [brave-browser#55575](https://github.com/brave/brave-browser/issues/55575). No Hoverboard REQ token. |
 | **This Page** | Bookmark tab (UI) | Popup-equivalent; `data-tab="bookmark"` |
+| **This Page Suggested Tags** | Suggested tags (UI) | Scoped Suggested Tags list with Original/lower/UPPER display/action conversion used for state comparison; absent add, case-match exact remove, and case-mismatch atomic replace actions |
+| **Tag labels mode** | tag casing mode | Session-scoped Original \| lower \| UPPER control above Suggested Tags; conversion applies only to Suggested Tags |
+| **suggested-tag-state-\*** | state color only | CSS hooks for absent, case-match, and case-mismatch chips; each state also exposes text and accessible cues |
 | **By Tag** | tags tree (UI) | Hierarchical bookmarks-by-tag; `data-tab="tagsTree"` |
 | **Tabs** (panel) | browser tabs panel | Open/closed tab manager; `data-tab="browserTabs"` |
 | **Browser Bookmarks** (page) | Bookmarks (panel), browser bookmarks panel | Standalone full-page Chrome `bookmarks.getTree` UI (`browser-bookmarks.html`) — **not** a **side panel** tab; **not** Local Bookmarks Index; **not** **Browser storage (backend)** / Store B ([REQ-SIDE_PANEL_BROWSER_BOOKMARKS](../requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml)) |
@@ -86,6 +89,9 @@
 - **Brave native sidebar** — Brave’s own sidebar chrome (not Hoverboard’s `chrome.sidePanel` document).
 - **Brave side-panel window arrange bug** — When **side panel** or **Brave native sidebar** is open, OS maximize/half-screen may overshoot the display or ignore arrange keystrokes; browser-owned; documented in [brave-side-panel-window-arrange.md](../../docs/troubleshooting/brave-side-panel-window-arrange.md).
 - **This Page** — Same job as popup for the active tab (quick actions, Save to, tags, search); no bottom footer toolbar in the side panel.
+- **This Page Suggested Tags** — Suggested Tags within This Page; Tag labels conversion applies only here and before Current Tags state comparison, absent candidates add the displayed value, exact adjusted matches remove the stored value, and adjusted case-mismatch candidates offer an in-place correction.
+- **Tag labels mode** — Session-scoped Original, lower, or UPPER control positioned above Suggested Tags; it changes Suggested display/action values and state comparison without changing Current or Recent Tags.
+- **suggested-tag-state-\*** — CSS state hooks (`absent`, `case-match`, `case-mismatch`) for Suggested Tag chips; state meaning is also exposed through text and accessible labels.
 - **By Tag / tags tree** — Hierarchical tag navigation; “Show all tags” vs checked-only.
 - **Tabs panel** — Manage open and recently closed browser tabs (`chrome.sessions` for closed).
 - **Bookmarks panel** — Legacy name for Browser Bookmarks when it was a side-panel tab; now **Browser Bookmarks (page)**.
@@ -142,6 +148,7 @@
 | Boot side panel | `BOOT_SIDE_PANEL` | [IMPL-SIDE_PANEL_TABS](../implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) |
 | Init Bookmark tab | `INIT_BOOKMARK_TAB` | [IMPL-SIDE_PANEL_BOOKMARK](../implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml) |
 | Storage tab sync | `BIND_STORAGE_TAB_CHANGE` | [IMPL-SIDE_PANEL_TABS](../implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) |
+| Suggested chip scroll restore | `SET_LOADING_WITH_SCOPED_SCROLL_RESTORE` | [IMPL-SUGGESTED_TAGS](../implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) |
 
 ---
 
@@ -182,6 +189,8 @@
 | side-panel controller | Preferred terms / Named concepts |
 | side-panel event bindings | Preferred terms / Named concepts |
 | side-panel shell | Preferred terms / Named concepts |
+| suggested-tag-state-* | Preferred terms / Named concepts |
+| Tag labels mode | Preferred terms / Named concepts |
 | tab-change This Page refresh | Preferred terms |
 | tabChangeRefresh | Preferred terms |
 | tab source | Preferred terms |

@@ -382,7 +382,7 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
       - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
   status: "Active"
-  summary: "Browser bookmark import: Chrome source → Local|File|Sync; Browser excluded as target."
+  summary: "Local Bookmarks Index owns file and live Browser-tree import. Browser source import targets Local|File|Sync, uses target-specific conflicts, and the legacy standalone URL redirects to Index?source=browser."
   traceability:
     code_annotations:
       - "ARCH-BROWSER_BOOKMARK_IMPORT"
@@ -1284,7 +1284,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
       - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
   status: "Active"
-  summary: "Client-side index import to Local|File|Sync; Browser not an Import-to target."
+  summary: "One Local Bookmarks Index Import group supports rich File CSV/JSON and live Browser-tree sources. File targets include Browser; live Browser source targets Local|File|Sync with target-specific conflicts."
   traceability:
     code_annotations:
       - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
@@ -2561,17 +2561,20 @@ ARCH-SIDE_PANEL_TABS:
   detail_file: "architecture-decisions/ARCH-SIDE_PANEL_TABS.yaml"
   implementation_approach:
     details:
-      - "\"By Tag\" in This Page footer: in panel context, switch to By Tag tab"
-      - "chrome.windows.onFocusChanged + getCurrent: when focused window matches and activeTab is Bookmark, call controller.loadRecentTags()"
-      - "UIManager optional container; cacheElements uses data-popup-ref under container"
-      - Bookmark panel markup: "same structure as popup with data-popup-ref"
-      - Tab bar: "click switches visible panel and persists choice"
+      - "\"By Tag\" in This Page footer: in panel context, switch to By Tag tab instead of sending OPEN_SIDE_PANEL"
+      - "Bookmark panel markup: same structure as popup main (loading, error, main with quick actions, storage, tag management, search) with data-popup-ref on each element"
+      - "Layout: Page and tab content use full viewport height and panel width. Override popup-derived body constraints (max-height, width) when in side panel. Tab content area is a flex column so children can distribute space. Tags tree tab: #tagsTreePanel is the scroll container so the above-list div (.tags-tree-above-list) can scroll off the page; the tree list section (.tree-section) uses min-height: 100% so it consumes the full visible height and scrolls its own list."
+      - "Modular runtime: side-panel.js facade composes side-panel-controller.js (state/init), side-panel-shell.js (visibility/tab bar), side-panel-event-bindings.js (browser/storage listeners), and side-panel-bookmark-tab.js (scoped Bookmark init); compatibility test hooks remain on the facade."
+      - "Scoped This Page loading transitions preserve the bookmark panel container scrollTop after mainInterface visibility, input focus, and content redraw changes; standalone popup loading remains unchanged."
+      - "Tab bar: two buttons or links; click switches visible panel and persists choice"
+      - "Tags tree panel: current tags-tree sections (config, search, tag selector, tree); IDs remain unique in document"
+      - "UIManager must support optional container; when set, cacheElements uses container.querySelector('[data-popup-ref=\"id\"]') instead of document.getElementById"
     summary: "Manifest side_panel.default_path points to one HTML (side-panel.html). Tab bar (This Page | By Tag | …). Bookmark panel uses scoped UIManager/PopupController. When the panel's browser window gains focus and the Bookmark tab is active, refresh Recent Tags (loadRecentTags) so tags added in other windows appear without a tab switch."
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
+      date: "2026-08-03"
+      reason: "Define scoped This Page scroll preservation across loading transitions"
   name: "Side Panel Tabs Architecture"
   rationale:
     benefits:
@@ -2851,19 +2854,22 @@ ARCH-SUGGESTED_TAGS:
     - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
     - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
     - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+  decision: "Classify and render all three side-panel Suggested Tag states with add/exact-remove/atomic-replace actions while preserving popup/overlay filtering and add flows."
   detail_file: "architecture-decisions/ARCH-SUGGESTED_TAGS.yaml"
   implementation_approach:
     details:
-      - "Canonical case: mixed > ALLCAPS > all-lowercase per key; no extra lowercase-only suggestion row (REQ-SUGGESTED_TAGS_CASE_PRESERVATION)"
-      - "Overlay TagService path vs popup injection path share behavioral contract for suggestions"
-      - "Restricted-URL skip for popup scripting.executeScript on non-http(s) tabs"
-      - "Tokenizer sync: popup MAIN snippet and TagService must share delimiter regex (regression if diverged)"
+      - "Atomic replacement uses authoritative snapshot and converted Suggested Tag value."
+      - "Side-panel state is surface-specific and retains exact stored match identity."
     summary: "Extract from title, URL, meta, headings, emphasis, structured content, nav, breadcrumbs, images, links; tokenize with shared delimiter across TagService and MAIN-world snippet; frequency sort; canonical case per lowercase key; sanitize; case-insensitive dedup vs current tags; popup inject only on http(s)."
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27T00:00:00.000Z"
-      reason: "S05 PROC-AGENT_REQ_CHECKLIST: index synced to canonical-case ARCH + tests"
+      date: "2026-08-03"
+      reason: "Define three-state side-panel Suggested Tags actions"
+    last_validated:
+      date: "2026-08-03"
+      result: "pass"
+      validator: "focused/full Jest, lint, typecheck, token validation, and tied_validate_consistency"
   name: "Suggested Tags from Page Content Architecture"
   rationale:
     benefits:
@@ -2874,7 +2880,7 @@ ARCH-SUGGESTED_TAGS:
       - "Manual tag entry"
       - "No context-aware suggestions"
       - "Redundant duplicate case rows"
-    why: "Intelligent tag suggestions speed up bookmarking with context-aware candidates; multi-source extraction and frequency ranking; one canonical spelling per word from the page (REQ-SUGGESTED_TAGS_CASE_PRESERVATION); tag case toggle for lower/UPPER display."
+    why: "Users need context-aware Suggested Tags while retaining explicit control over their displayed and persisted casing. Case-insensitive Current Tags conflict handling prevents duplicate identity, and atomic replacement preserves bookmark order."
   related_decisions:
     depends_on: []
     informs:
@@ -2882,21 +2888,38 @@ ARCH-SUGGESTED_TAGS:
     see_also:
       - "ARCH-TAG_SYSTEM"
   status: "Active"
+  token_coverage:
+    code_files:
+      - "src/features/content/overlay-manager.js"
+      - "src/features/tagging/suggested-tags-main-world-snippet.js"
+      - "src/features/tagging/tag-service.js"
+      - "src/shared/suggested-tag-state.js"
+      - "src/ui/popup/PopupController.js"
+      - "src/ui/popup/UIManager.js"
+      - "src/ui/side-panel/side-panel.css"
+      - "src/ui/side-panel/side-panel.html"
+    tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
   traceability:
     code_annotations:
       - "ARCH-SUGGESTED_TAGS"
-      - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
-      - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
-      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     implementation:
       - "IMPL-SUGGESTED_TAGS"
+      - "IMPL-THIS_PAGE_TAG_SORT"
     requirements:
       - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
       - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
-      - "tests/unit/suggested-tag-original-case.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
 ARCH-SYNC_STORAGE_PROVIDER:
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
@@ -3154,14 +3177,66 @@ ARCH-THIS_PAGE_TAG_SORT:
     - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     - "REQ-THIS_PAGE_TAG_SORT"
+  decision: "Use a shared pure sort module for alphabetical, bookmark-frequency, and DOM-relevance order; UIManager applies it only when the side-panel exposes tagSortToggle. Suggested rows carry explicit absent/case-match/case-mismatch state metadata for accessible Add/Remove/Replace chips, distinct state styling, and converted action values. Current Tags and Recent Tags retain source-cased labels and actions. Popup/controller order and overlay filtering remain unchanged."
   detail_file: "architecture-decisions/ARCH-THIS_PAGE_TAG_SORT.yaml"
+  implementation_approach:
+    details:
+      - "Side-panel tag controls are ordered with the Suggested Tags-only case-folding label immediately before Suggested Tags, and state styling uses explicit labels, data attributes, borders, and distinct backgrounds rather than color alone."
+      - "updateCurrentTags / updateRecentTags / _paintSuggestedTags preserve source-cased Current/Recent labels while Suggested display/action values use the active conversion mode."
+      - "When UIManager is scoped to the side-panel bookmark panel, suggested rows carry all three state values and matchedTag metadata; unscoped popup/overlay rows retain their existing shape and action flow."
+    summary: "Pure comparators in tag-chip-sort.js; PopupController refreshes frequency map and uses two-step MAIN inject for relevance-bearing suggestions; UIManager gates sorting on toggle presence."
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27"
-      reason: "S13: detail traceability + token_coverage synced to IMPL"
+      date: "2026-08-03"
+      reason: "Align sort/UI architecture with rendered three-state chips"
+    last_validated:
+      date: "2026-08-03"
+      result: "pass"
+      validator: "focused/full Jest, lint, typecheck, token validation, and tied_validate_consistency"
   name: "This Page tag sort architecture"
   status: "Active"
+  token_coverage:
+    code_files:
+      - "src/features/tagging/suggested-tags-main-world-snippet.js"
+      - "src/shared/suggested-tag-state.js"
+      - "src/shared/tag-chip-sort.js"
+      - "src/ui/popup/PopupController.js"
+      - "src/ui/popup/UIManager.js"
+      - "src/ui/side-panel/side-panel.css"
+      - "src/ui/side-panel/side-panel.html"
+    tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
+      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
+      - "tests/playwright/extension-this-page-tag-sort.spec.js"
+      - "tests/unit/popup-refresh-tag-frequency-map.test.js"
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/tag-chip-sort.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
+  traceability:
+    code_annotations:
+      - "ARCH-THIS_PAGE_TAG_SORT"
+    implementation:
+      - "IMPL-SUGGESTED_TAGS"
+      - "IMPL-THIS_PAGE_TAG_SORT"
+    requirements:
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+      - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+      - "REQ-THIS_PAGE_TAG_SORT"
+    tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
+      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
+      - "tests/playwright/extension-this-page-tag-sort.spec.js"
+      - "tests/unit/popup-refresh-tag-frequency-map.test.js"
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/tag-chip-sort.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
 ARCH-TIED_STRUCTURE:
   cross_references:
     - "REQ-TIED_SETUP"

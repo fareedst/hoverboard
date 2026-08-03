@@ -1,0 +1,150 @@
+CITDP-REQ-SUGGESTED_TAGS_CASE_CONVERSION_20260803:
+  change_definition:
+    current_behavior: "The side-panel Tag labels mode folded Current Tags, Recent Tags, and Suggested Tags displays; Suggested action payloads could still retain source casing."
+    desired_behavior: "Tag labels conversion applies only to Suggested Tags. Original/lower/UPPER changes Suggested display and click values, while Current Tags and Recent Tags retain source casing and removal identity. Case-insensitive conflict classification and atomic replacement remain unchanged, with converted values persisted."
+    non_goals:
+      - "Adding a new semantic token"
+      - "Changing Current Tags or Recent Tags stored identity and ordering behavior"
+      - "Changing page extraction ranking, canonical source spelling, or sanitization"
+      - "Changing popup and overlay conflict filtering or add behavior"
+    success_criteria:
+      - "Case-mismatch replacement persists the converted value with first-position replacement, duplicate collapse, and unrelated-order preservation"
+      - "Current Tags and Recent Tags remain source-cased in all three modes and their actions retain source values"
+      - "Focused and complete Jest suites, lint, typecheck, token validation, and TIED consistency validation pass"
+      - "Suggested Tags display and add/replace payloads use Original/lower/UPPER conversion"
+    unchanged_behavior: "Popup and overlay retain their existing case-insensitive Suggested Tags suppression/add paths; the side panel renders all three states, including case-match Remove, while Current/Recent source casing, atomic no-mutation failures, and restricted-URL injection skips remain unchanged."
+  completion_criteria:
+    verification_gate_notes: "Complete Jest regression, focused casing/composition suites, source lint, typecheck, manifest validation, token validation, composition plan, TIED index validation, pseudo-code validation, and tied_validate_consistency passed. Manifest retains the pre-existing sessions permission warning. No feature-specific E2E was added because the changed bindings are composition-testable."
+  evidence:
+    commands:
+      - "npm run build:only"
+      - "npm run composition:plan"
+      - "npm run lint -- --no-warn-ignored"
+      - "npm run typecheck"
+      - "npm run validate:manifest"
+      - "npm run validate:tokens"
+      - "npm test -- --runInBand"
+      - "npx jest tests/unit/tag-case-folding.test.js tests/unit/uIManager-tag-case-folding.test.js tests/unit/side-panel-html.test.js tests/integration/suggested-tag-chip-composition.integration.test.js --runInBand"
+      - "tied_validate_consistency include_detail_files=true include_pseudocode=true"
+      - "yaml_index_validate"
+    manifest_reference: "working/suggested-tag-casing/REQ-SUGGESTED_TAGS_CASE_CONVERSION_20260803090300.yaml"
+    proof_boundaries:
+      - "Jest/JSDOM proves display boundaries, action payload conversion, one-save replacement persistence, and failed-save no mutation; it does not prove live backend durability or assistive-technology behavior."
+      - "Manifest validation passed with the existing sessions permission warning."
+      - "TIED validation proves index/detail/pseudo-code traceability and token linkage, not product correctness."
+  impact_analysis:
+    impl_inventory_notes: "Updated IMPL-SUGGESTED_TAGS and IMPL-THIS_PAGE_TAG_SORT pseudo-code, UIManager and shared casing helper contracts, side-panel markup, test coverage, distribution output, and vocabulary descriptions."
+    modules_or_boundaries: "Shared casing helper; UIManager Current/Recent/Suggested chip render and event boundaries; PopupController add/replace binding; pure Suggested Tags classification/replacement; side-panel presentation."
+    tied_tokens_affected:
+      - "ARCH-SUGGESTED_TAGS"
+      - "ARCH-THIS_PAGE_TAG_SORT"
+      - "IMPL-SUGGESTED_TAGS"
+      - "IMPL-THIS_PAGE_TAG_SORT"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+      - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "None; implementation follows the clarified Suggested Tags-only display/action scope and converted persistence contract."
+    record_status: "complete"
+    related_citdp_records:
+      - "CITDP-REQ-SUGGESTED_TAGS_ADJUSTED_STATE_COMPARISON_20260803.yaml"
+      - "CITDP-REQ-SUGGESTED_TAGS_CASE_CONVERSION_20260803.yaml"
+      - "CITDP-REQ-SUGGESTED_TAGS_DEDUPLICATION_20260802.yaml"
+      - "CITDP-REQ-SUGGESTED_TAGS_THREE_STATES_20260803.yaml"
+    tied_stack_updates_required:
+      - "Final evidence and verification gate recorded here."
+      - "REQ/ARCH/IMPL records and sidecars updated through the TIED interface/direct sidecar exception."
+      - "The earlier exact-match suppression wording now applies only to popup/overlay; side-panel case-match chips render Remove, and all four Suggested Tags CITDP records are linked for this LEAP closeout."
+      - "Vocabulary reconciled for converted Suggested Tags action values and source-cased Current/Recent Tags."
+  record_identity:
+    change_request_id: "REQ-SUGGESTED_TAGS_CASE_CONVERSION_20260803"
+    recorded_at: "2026-08-03"
+    title: "Scope Tag labels conversion to Suggested Tags and persist converted actions"
+  risk_analysis:
+    abuse_cases:
+      - "A conversion regression folds Current or Recent source casing"
+      - "A failed save mutates local Current Tags incorrectly"
+      - "A page-derived Suggested Tag contains unsafe characters"
+      - "A stale case-mismatch action overwrites a changed bookmark"
+    quality_evidence_matrix:
+      - attribute: "baseline-functional"
+        applicability: "applicable"
+        command_or_test: "Complete Jest regression and focused casing/composition suites"
+        evidence_method: "Automated unit and integration tests"
+        limitation: "No live backend durability"
+        owner: "Implementation agent"
+        rationale: "Verifies changed UI and persistence boundaries"
+        result: "pass"
+        risk: "Incorrect chip rendering or saved value"
+        threshold: "All suites pass"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+      - attribute: "data-integrity"
+        applicability: "applicable"
+        command_or_test: "suggested-tag-state and suggested-tag-chip-composition tests"
+        evidence_method: "Pure replacement invariants and one-save composition assertions"
+        limitation: "Backend conflict semantics outside JSDOM"
+        owner: "Implementation agent"
+        rationale: "Preserves first position, duplicate collapse, and no mutation on failure"
+        result: "pass"
+        risk: "Tag loss or duplicate identity"
+        threshold: "Converted value saved atomically; unrelated order preserved"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+      - attribute: "user-facing-accessibility"
+        applicability: "applicable"
+        command_or_test: "uIManager-tag-case-folding and side-panel-html tests"
+        evidence_method: "DOM labels, aria-labels, roles, and control scope assertions"
+        limitation: "No assistive technology run"
+        owner: "Implementation agent"
+        rationale: "Suggested Add/Replace actions remain explicit"
+        result: "pass"
+        risk: "Ambiguous Suggested action or mislabeled control"
+        threshold: "Scope and action labels are explicit"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+    quality_profiles:
+      - "baseline-functional"
+      - "data-integrity"
+      - "user-facing-accessibility"
+    residual_risk:
+      expiry: "2026-09-01"
+      owner: "Hoverboard maintainers"
+      summary: "Live backend durability and assistive-technology behavior remain outside deterministic Jest/JSDOM coverage."
+    risks:
+      - severity: "medium"
+        likelihood: "medium"
+        mitigation: "Authoritative reread and pure atomic replacement"
+        quality_attribute: "data-integrity"
+        tied_token_references:
+          - "IMPL-SUGGESTED_TAGS"
+          - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+      - severity: "medium"
+        likelihood: "low"
+        mitigation: "Explicit UIManager surface separation and regression tests"
+        quality_attribute: "baseline-functional"
+        tied_token_references:
+          - "IMPL-THIS_PAGE_TAG_SORT"
+          - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    scenarios:
+      - "Current and Recent labels/actions remain source-cased in all modes"
+      - "Failed or stale replacement leaves local state unchanged"
+      - "Popup and overlay continue suppressing case-insensitive Current Tag matches"
+      - "Side-panel exact adjusted Current Tag matches render Remove and target the exact stored tag"
+      - "Suggested absent click persists lower/upper converted value"
+      - "Suggested mismatch click atomically persists converted value and collapses variants"
+  tdd_sequence:
+    summary: "TIED design and pseudo-code alignment; RED unit and composition assertions; GREEN shared/UI action boundaries; focused regression; full verification and traceability close-out."
+  test_strategy:
+    matrix_notes: "Unit coverage covers helper semantics and Current/Recent/Suggested render boundaries; composition coverage covers converted add and mismatch replacement persistence."
+    summary: "No new E2E was added because this change is programmatically composition-testable; existing browser surface regression remains covered by the complete suite."

@@ -19,15 +19,25 @@
 | **Current Tags** | bookmark tags (UI) | Tags already on this pin |
 | **Recent Tags** | user recent tags | User-driven recent chips from shared/user state — **not** `getRecentBookmarks` |
 | **window-focus Recent Tags refresh** | focus reload recent tags | Side panel This Page reloads Recent Tags on `windows.onFocusChanged` (popup uses `visibilitychange`; see [`side-panel.md`](side-panel.md)) |
-| **Suggested Tags** | content tags, AI chips (alone) | From page content and/or AI; deduped vs current |
+| **Suggested Tags** | content tags, AI chips (alone) | From page content and/or AI; state classification compares the case-adjusted Suggested Tag value against Current Tags |
 | **Session tags** | auto-applied AI tags | Tags applied this session; AI hits that match are auto-applied |
 | **Tag with AI** | AI suggest button | Preferred action label |
 | **sanitizeTag** | normalize tag | Validation/normalization before save |
 | **Sort tags** | chip order | A–Z \| Frequency \| Relevance (side panel This Page) |
 | **Frequency** (sort) | usage sort | Order by `hoverboard_tag_frequency` |
 | **Relevance** (sort) | in-page sort | DOM relevance / in-page frequency tiers |
-| **case preservation** | keep casing | Suggested chips keep original casing |
-| **deduplication** | hide duplicates | Hide suggested already on bookmark |
+| **case preservation** | keep casing | Suggested extraction keeps one canonical source spelling; Tag labels conversion is applied only to Suggested Tags chips |
+| **Tag labels mode** | tag casing mode | Session-scoped Original \| lower \| UPPER control; applies only to Suggested Tags display, classification input, and add/replace values |
+| **adjusted comparison value** | converted comparison | `comparisonTag` / `addValue` from `tagChipDisplayAndAddValue`; compared with Current Tags while raw `tag` remains identity metadata |
+| **reclassify on mode change** | refetch suggestions | Recompute cached Suggested Tag states after Tag labels changes without refetching page content |
+| **addSuggestedTag** | generic add tag | Side-panel absent-state event whose payload uses the displayed case-converted Suggested Tag value |
+| **replaceSuggestedTag** | generic replace tag | Side-panel case-mismatch event whose payload uses the displayed case-converted value and matched Current Tag |
+| **deduplication** | hide duplicates | Classify Suggested Tags against Current Tags without duplicate identity; side-panel This Page renders all three states |
+| **Suggested tag state** | tag status | Side-panel classification of a page suggestion as absent, case-match, or case-mismatch |
+| **absent suggestion** | missing suggestion | No case-insensitive Current Tags match; clicking adds the currently displayed case-converted Suggested Tag value |
+| **case-match suggestion** | duplicate suggestion | Exact-case Current Tag match; rendered as a removal action that targets the exact stored Current Tag |
+| **case-mismatch suggestion** | casing duplicate | Case-insensitive current-tag match with different casing; offers an in-place correction |
+| **atomic tag replacement** | overwrite tag | One full-bookmark save replaces the first matching tag and collapses duplicate variants |
 | **selection → tag input** | selection prefill | Prefill tag box from page selection |
 | **Readability extraction** | main article extract | Readability.js path for AI content |
 | **TagService** | tag manager | Owning service for tag ops |
@@ -58,7 +68,16 @@
 - **Current Tags** — Tags on the active pin.
 - **Recent Tags** — User-driven recent list (shared memory + user state v2).
 - **window-focus Recent Tags refresh** — When This Page is selected, focusing the browser window that hosts the side panel runs the same Recent Tags reload as the popup (`loadRecentTags` / service worker).
-- **Suggested Tags** — Content- and/or AI-derived candidates, case-preserved, deduped against current.
+- **Suggested Tags** — Content- and/or AI-derived candidates, source-cased for identity, converted at the Suggested Tags display/action boundary, and state-classified against Current Tags using that converted value.
+- **Tag labels mode** — Session-scoped Original, lower, or UPPER conversion applied only to Suggested Tags display, state comparison, and add/replace action values.
+- **adjusted comparison value** — The converted Suggested Tag value used for Current Tags comparison; the raw source value remains identity metadata.
+- **reclassify on mode change** — Recompute cached Suggested Tag state and redraw chips when Tag labels changes, without refetching suggestions.
+- **addSuggestedTag / replaceSuggestedTag** — Side-panel chip events for absent and case-mismatch suggestions; both use the displayed case-converted value.
+- **Suggested tag state** — Side-panel This Page state for each candidate: absent, case-match, or case-mismatch.
+- **absent suggestion** — A candidate with no case-insensitive Current Tags match; it uses the existing add flow with the displayed Suggested Tag value.
+- **case-match suggestion** — A candidate exactly equal to a Current Tag; it is rendered in side-panel Suggested Tags with a distinct state cue, and activation removes that exact stored Current Tag.
+- **case-mismatch suggestion** — A candidate matching a Current Tag case-insensitively but with different casing; it renders a correction action that atomically replaces the matched Current Tag with the displayed case-converted Suggested Tag value.
+- **atomic tag replacement** — A single persistence operation that replaces the first matching tag, removes duplicate case variants, and preserves unrelated order.
 - **Session tags** — Tags recorded this extension session; overlap with AI suggestions is auto-applied to the bookmark.
 - **TAG_UPDATED** — Message for tag-change synchronization across surfaces.
 
@@ -80,6 +99,10 @@
 | Recent tags user list | `getUserRecentTags` | [IMPL-TAG_SYSTEM](../implementation-decisions/IMPL-TAG_SYSTEM.yaml) |
 | Normalize selection | `normalizeSelectionForTagInput` | [IMPL-SELECTION_TO_TAG_INPUT](../implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml) |
 | Suggested pipeline | `(proposed) BUILD_SUGGESTED_TAGS` | [IMPL-SUGGESTED_TAGS](../implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) |
+| Suggested tag state classification | `CLASSIFY_SIDE_PANEL_SUGGESTED_TAG_STATE` | [IMPL-SUGGESTED_TAGS](../implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) |
+| Atomic tag replacement | `REPLACE_SUGGESTED_TAG_IN_PLACE` | [IMPL-SUGGESTED_TAGS](../implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) |
+| Suggested display/action conversion | `tagChipDisplayAndAddValue` | [IMPL-THIS_PAGE_TAG_SORT](../implementation-decisions/IMPL-THIS_PAGE_TAG_SORT.yaml) |
+| Side-panel suggestion actions | `SIDE_PANEL_SUGGESTED_TAG_CHIP_ACTIONS` | [IMPL-THIS_PAGE_TAG_SORT](../implementation-decisions/IMPL-THIS_PAGE_TAG_SORT.yaml) |
 | Session record | `recordSessionTags` / `getSessionTags` | [IMPL-SESSION_TAGS](../implementation-decisions/IMPL-SESSION_TAGS.yaml) |
 | AI request | `(proposed) REQUEST_AI_TAGS` | [IMPL-AI_TAGGING_PROVIDER](../implementation-decisions/IMPL-AI_TAGGING_PROVIDER.yaml) |
 | Readability extract | `(proposed) EXTRACT_PAGE_CONTENT_READABILITY` | [IMPL-AI_TAGGING_READABILITY](../implementation-decisions/IMPL-AI_TAGGING_READABILITY.yaml) |
@@ -91,12 +114,15 @@
 | Term | Section |
 |------|---------|
 | AI provider | AI tagging |
+| addSuggestedTag | Named concepts |
+| adjusted comparison value | Preferred terms / Named concepts |
 | case preservation | Preferred terms |
 | Current Tags | Preferred terms |
 | deduplication | Preferred terms |
 | Frequency (sort) | Preferred terms |
 | Recent Tags | Preferred terms |
 | Readability extraction | AI tagging |
+| reclassify on mode change | Named concepts |
 | window-focus Recent Tags refresh | Preferred terms |
 | Relevance (sort) | Preferred terms |
 | sanitizeTag | Pseudo-code block names |
@@ -104,5 +130,7 @@
 | Session tags | Named concepts |
 | Sort tags | Preferred terms |
 | Suggested Tags | Preferred terms |
+| Tag labels mode | Preferred terms / Named concepts |
 | Tag with AI | Preferred terms |
 | TagService | Preferred terms |
+| replaceSuggestedTag | Named concepts |

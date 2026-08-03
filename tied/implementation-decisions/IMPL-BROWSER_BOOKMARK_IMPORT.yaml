@@ -26,11 +26,12 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
   essence_pseudocode_path: "implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT-pseudocode.md"
   implementation_approach:
     details:
-      - "browser-bookmark-import-utils.js: sanitizeTag, folderPathToTags, parseExtraTags, flattenTree"
-      - "Conflict: getAggregatedBookmarksForIndex -> existingByUrl; Skip/Overwrite/Merge"
-      - "Import to Local|File|Sync only; Browser intentionally excluded as target (source is chrome.bookmarks); Index Import may target Store B"
-      - "Tag sanitization: folder path segments and extra tags -> lowercase, non-alphanumeric to underscore, dedupe"
-    summary: "Browser Bookmark Import page: getTree source; Import to Local|File|Sync; Browser excluded as Import-to target."
+      - "Browser source builds folder tags with stripRoots=true, merges extra tags, and preserves earliest dateAdded as time"
+      - "Browser source filters by title, URL, or folder path and by folder path, with select-all and per-record selection"
+      - "Browser source loads chrome.bookmarks.getTree directly in the Index page and collapses duplicate cleaned URLs before rendering"
+      - "Existing Browser rows are excluded from target conflict lookup by filtering aggregate rows to the selected Local|File|Sync backend"
+      - "File CSV/JSON import remains unchanged and may still target Browser"
+    summary: "Integrate live Browser-tree import into Local Bookmarks Index; preserve legacy entry URL as source=browser redirect."
   metadata:
     created:
       author: "AI Agent"
@@ -49,7 +50,7 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
       - "getTree + flattenTree; conflict Skip/Overwrite/Merge; folder+extra tags; Import to Local|File|Sync (Browser excluded); saveBookmark per row"
     problems_solved:
       - "No UI for importing browser bookmarks into Hoverboard-owned backends"
-    why: "Chrome tree is the source; exclude Browser as Import-to to avoid targeting the same native tree as destination."
+    why: "The live browser-tree source is still valuable for selective migration and folder-to-tag conversion, but it belongs beside file import in the storage-aware Index rather than on a duplicate page."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"

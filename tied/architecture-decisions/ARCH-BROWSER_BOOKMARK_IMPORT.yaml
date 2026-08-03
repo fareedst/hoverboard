@@ -7,14 +7,15 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
   cross-references: "REQ-BROWSER_BOOKMARK_IMPORT, IMPL-BROWSER_BOOKMARK_IMPORT"
   cross_references:
     - "REQ-BROWSER_BOOKMARK_IMPORT"
-  decision: "Dedicated page loads chrome.bookmarks.getTree as the import *source*, flattens to a selectable table, and imports into Hoverboard via saveBookmark with Import-to Local|File|Sync. Browser is intentionally excluded as Import-to target because source rows already are Chrome bookmarks; destination is Hoverboard-owned stores (aligned with REQ-BROWSER_BOOKMARK_IMPORT)."
+  decision: "Make the Local Bookmarks Index the single import surface. Its Import control supports both file sources and a live chrome.bookmarks tree source; the live source is flattened, collapsed by cleaned URL, filtered and selected in the Index, then copied through saveBookmark to Local|File|Sync. Conflict detection is scoped to the selected target backend, and Browser is excluded as a destination because it is the source. The former standalone page URL is retained only as a compatibility redirect to the Index with source=browser."
   detail_file: "architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml"
   implementation_approach:
     details:
-      - "Conflict Skip/Overwrite/Merge; folder names as tags option"
-      - "getTree flatten with folder path"
-      - "Import to Local|File|Sync only; Browser not a destination"
-    summary: "Chrome tree source → Import to Local|File|Sync; Browser excluded as destination."
+      - "Add a live Browser source selector and selectable flattened tree list to the Index Import control group"
+      - "Collapse duplicate browser URLs before display/import; preserve earliest date and union root-stripped folder tags"
+      - "Keep Browser excluded as a live Browser-source destination; file import may still target Browser"
+      - "Scope Skip/Overwrite/Merge existing-row lookup to the selected Local|File|Sync target"
+    summary: "Index Import supports File and live Browser sources; the legacy standalone URL redirects to Index?source=browser."
   metadata:
     created:
       author: "AI Agent"

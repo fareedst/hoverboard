@@ -22,20 +22,7 @@
 #   detail_file: Path to the detailed .yaml in implementation-decisions/ or null for methodology index-only; procedure: tied/docs/agent-req-implementation-checklist.yaml
 #   metadata: Optional metadata
 # Methodology seed: token identity and traceability only; expand rationale in project detail files.
-IMPL-MCP_FEEDBACK_TOOLS:
-  cross_references:
-    - "ARCH-FEEDBACK_STORAGE"
-    - "REQ-FEEDBACK_TO_TIED"
-  detail_file: "null"
-  metadata:
-    last_updated:
-      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
-  name: "MCP Feedback Tools (tied_feedback_add, tied_feedback_export)"
-  related_decisions:
-    depends_on: []
-    see_also:
-      - "ARCH-FEEDBACK_STORAGE"
-      - "REQ-FEEDBACK_TO_TIED"
+#
 # ---
 # Template Record - Copy this block to create new implementation decisions
 # ---
@@ -95,6 +82,20 @@ IMPL-MCP_FEEDBACK_TOOLS:
 #       date: YYYY-MM-DD
 #       validator: "agent/contributor"
 #       result: "pass"
+IMPL-MCP_FEEDBACK_TOOLS:
+  cross_references:
+    - "ARCH-FEEDBACK_STORAGE"
+    - "REQ-FEEDBACK_TO_TIED"
+  detail_file: "null"
+  metadata:
+    last_updated:
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
+  name: "MCP Feedback Tools (tied_feedback_add, tied_feedback_export)"
+  related_decisions:
+    depends_on: []
+    see_also:
+      - "ARCH-FEEDBACK_STORAGE"
+      - "REQ-FEEDBACK_TO_TIED"
     supersedes: []
   status: "Active"
   traceability:
@@ -106,7 +107,7 @@ IMPL-MODULE_VALIDATION:
   cross_references:
     - "ARCH-MODULE_VALIDATION"
     - "REQ-MODULE_VALIDATION"
-  detail_file: "implementation-decisions/IMPL-MODULE_VALIDATION.yaml"
+  detail_file: "null"
   metadata:
     last_updated:
       reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
@@ -313,7 +314,7 @@ IMPL-TIED_FILES:
   cross_references:
     - "ARCH-TIED_STRUCTURE"
     - "REQ-TIED_SETUP"
-  detail_file: "implementation-decisions/IMPL-TIED_FILES.yaml"
+  detail_file: "null"
   metadata:
     last_updated:
       reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
@@ -330,5 +331,3 @@ IMPL-TIED_FILES:
       - "ARCH-TIED_STRUCTURE"
     requirements:
       - "REQ-TIED_SETUP"
-    tests:
-      - "mcp-server/src/e2e/bootstrap-and-load.test.ts"

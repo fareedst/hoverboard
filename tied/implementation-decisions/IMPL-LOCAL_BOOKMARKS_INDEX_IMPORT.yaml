@@ -16,10 +16,11 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
   essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT-pseudocode.md"
   implementation_approach:
     details:
-      - "CSV: parseCsv skips header (title,url); parseCsvLine handles quoted fields; rows with empty URL skipped; Shared/Private/toread normalized; Time/Updated mapped to time/updated_at"
-      - "JSON: array or single object; normalizeJsonBookmark returns null for empty url; tags to array; preserves time and updated_at"
-      - "runImport: read file; parseImportFile; if Only new filter; SHOW Importing… (is-pending); for each row saveBookmark({ ...row, preferredBackend }); count imported/skipped/failed; loadBookmarks(); SHOW final counts (is-final)"
-    summary: "Separate Import control group (sibling of Actions for selected): mode radios, Import to, Import button last, #import-result. parseCsv in bookmarks-table-csv.js; only new filters by allBookmarks; per-row saveBookmark with preferredBackend and file times; pending Importing… then final counts."
+      - "Browser source loads and collapses chrome.bookmarks records, filters by title/URL/folder, and selects by cleaned URL"
+      - "Browser source uses Skip/Overwrite/Merge tags, root-stripped folder tags, extra tags, and target-specific existing rows"
+      - "File source keeps Only new/Overwrite and Local|File|Sync|Browser targets"
+      - "Index URL source=browser selects the live Browser source and Import footer; legacy Browser Import launchers use this URL"
+    summary: "Index Import supports File CSV/JSON and a live Browser source with shared saveBookmark orchestration."
   metadata:
     created:
       author: "AI Agent"

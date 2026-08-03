@@ -12,20 +12,23 @@ ARCH-THIS_PAGE_TAG_SORT:
     - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     - "REQ-THIS_PAGE_TAG_SORT"
-  decision: "Use a shared pure sort module for alphabetical, bookmark-frequency, and DOM-relevance order; UIManager applies it only when the side-panel exposes tagSortToggle. Relevance scores and in-page frequencies come from a MAIN-world snippet injected before the extractor function; bookmark counts come from hoverboard_tag_frequency in chrome.storage.local."
+  decision: "Use a shared pure sort module for alphabetical, bookmark-frequency, and DOM-relevance order; UIManager applies it only when the side-panel exposes tagSortToggle. Suggested rows carry explicit absent/case-match/case-mismatch state metadata for accessible Add/Remove/Replace chips, distinct state styling, and converted action values. Current Tags and Recent Tags retain source-cased labels and actions. Popup/controller order and overlay filtering remain unchanged."
   detail_file: "architecture-decisions/ARCH-THIS_PAGE_TAG_SORT.yaml"
   implementation_approach:
     details:
-      - "Bookmark frequency: chrome.storage.local hoverboard_tag_frequency; case-insensitive key lookup"
-      - "executeScript: files inject snippet then func invokes global extractor"
-      - "Pure sort module tag-chip-sort.js: alphabetical | frequency | relevance comparators per REQ"
-      - "Relevance: suggested-tags-main-world-snippet.js assigns integer tier per DOM bucket (headings in main > global headings > nav > breadcrumb > main links > images > meta > title > URL > footer > body fallback); max tier wins per lowercase token"
+      - "Side-panel tag controls are ordered with the Suggested Tags-only case-folding label immediately before Suggested Tags, and state styling uses explicit labels, data attributes, borders, and distinct backgrounds rather than color alone."
+      - "updateCurrentTags / updateRecentTags / _paintSuggestedTags preserve source-cased Current/Recent labels while Suggested display/action values use the active conversion mode."
+      - "When UIManager is scoped to the side-panel bookmark panel, suggested rows carry all three state values and matchedTag metadata; unscoped popup/overlay rows retain their existing shape and action flow."
     summary: "Pure comparators in tag-chip-sort.js; PopupController refreshes frequency map and uses two-step MAIN inject for relevance-bearing suggestions; UIManager gates sorting on toggle presence."
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27"
-      reason: "S13 PROC-AGENT_REQ_CHECKLIST: architecture detail synced to shipped implementation"
+      date: "2026-08-03"
+      reason: "Align sort/UI architecture with rendered three-state chips"
+    last_validated:
+      date: "2026-08-03"
+      result: "pass"
+      validator: "focused/full Jest, lint, typecheck, token validation, and tied_validate_consistency"
   name: "This Page tag sort architecture"
   rationale:
     benefits:
@@ -46,32 +49,42 @@ ARCH-THIS_PAGE_TAG_SORT:
   token_coverage:
     code_files:
       - "src/features/tagging/suggested-tags-main-world-snippet.js"
+      - "src/shared/suggested-tag-state.js"
       - "src/shared/tag-chip-sort.js"
       - "src/ui/popup/PopupController.js"
       - "src/ui/popup/UIManager.js"
       - "src/ui/side-panel/side-panel.css"
       - "src/ui/side-panel/side-panel.html"
     tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
       - "tests/integration/this-page-tag-sort-composition.integration.test.js"
       - "tests/playwright/extension-this-page-tag-sort.spec.js"
       - "tests/unit/popup-refresh-tag-frequency-map.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
       - "tests/unit/tag-chip-sort.test.js"
       - "tests/unit/uIManager-tag-case-folding.test.js"
   traceability:
     code_annotations:
       - "ARCH-THIS_PAGE_TAG_SORT"
     implementation:
+      - "IMPL-SUGGESTED_TAGS"
       - "IMPL-THIS_PAGE_TAG_SORT"
     requirements:
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+      - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
       - "REQ-THIS_PAGE_TAG_SORT"
     tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
       - "tests/integration/this-page-tag-sort-composition.integration.test.js"
       - "tests/playwright/extension-this-page-tag-sort.spec.js"
       - "tests/unit/popup-refresh-tag-frequency-map.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
       - "tests/unit/tag-chip-sort.test.js"
       - "tests/unit/uIManager-tag-case-folding.test.js"
   validation_evidence:

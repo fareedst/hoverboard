@@ -1,0 +1,156 @@
+CITDP-REQ-SUGGESTED_TAGS_THREE_STATES_20260803:
+  change_definition:
+    current_behavior: "This Page classified Suggested Tags but suppressed exact case matches; absent and mismatch chips had add/replace behavior only."
+    desired_behavior: "This Page renders absent, case-match, and case-mismatch Suggested Tag chips. Absent adds the displayed case-converted value, case-match removes the exact stored Current Tag, and case-mismatch atomically replaces the matched Current Tag with the displayed case-converted value. Tag labels remains immediately above Suggested Tags; popup and overlay behavior remains unchanged."
+    non_goals:
+      - "Adding a new semantic token"
+      - "Changing Current Tags or Recent Tags source casing or identity"
+      - "Changing page extraction, ranking, sanitization, popup filtering, or overlay add behavior"
+    success_criteria:
+      - "Absent activation uses the displayed case-converted Suggested Tag value."
+      - "All three states carry state metadata and accessible text/border cues with distinct backgrounds."
+      - "Exact-match activation removes the exact stored Current Tag."
+      - "Mismatch replacement uses authoritative reread, one save, duplicate collapse, and unrelated-order preservation."
+      - "Unit, integration, build, lint, typecheck, manifest, token, composition, and TIED gates pass."
+    unchanged_behavior: "Popup and overlay filtering/add flows, Current/Recent source-cased actions, restricted-URL injection skips, and pure classifier/replacement invariants remain unchanged."
+  completion_criteria:
+    verification_gate_notes: "Full Jest, focused suites, build, lint, typecheck, manifest validation, token validation, composition plan, pseudo-code validation, YAML index validation, and tied_validate_consistency passed. Manifest retains the existing sessions permission warning."
+  evidence:
+    commands:
+      - "npm run build:only"
+      - "npm run composition:plan"
+      - "npm run lint"
+      - "npm run typecheck"
+      - "npm run validate:manifest"
+      - "npm run validate:tokens"
+      - "npm test -- --runInBand"
+      - "npx jest tests/integration --runInBand"
+      - "npx jest tests/unit --runInBand"
+      - "pseudocode_validate IMPL-SUGGESTED_TAGS"
+      - "pseudocode_validate IMPL-THIS_PAGE_TAG_SORT"
+      - "tied_validate_consistency include_detail_files=true include_pseudocode=true"
+      - "yaml_index_validate"
+    manifest_reference: "working/side-panel-tag-states/REQ-SUGGESTED_TAGS_DEDUPLICATION_20260803100800.yaml"
+    proof_boundaries:
+      - "Composition plan reports the changed UI/action path as covered; unrelated pre-existing unit-only edges remain outside this request."
+      - "Jest/JSDOM proves state classification, DOM metadata, accessible labels, keyboard activation, UI event routing, authoritative reread, atomic persistence, stale-match handling, and failed-save no mutation; it does not prove live backend durability or assistive-technology behavior."
+      - "TIED validation proves index/detail/pseudo-code traceability and token linkage, not product correctness."
+    test_results:
+      full_jest: "170 suites passed; 1,681 tests passed; 1 skipped"
+      integration_jest: "30 suites passed; 101 tests passed"
+      unit_jest: "140 suites passed; 1,580 tests passed; 1 skipped"
+  impact_analysis:
+    impl_inventory_notes: "Updated shared state handling, PopupController side-panel classification, UIManager three-state rendering/action routing, side-panel CSS/markup ordering assertions, unit/composition tests, distribution artifacts, TIED records, pseudo-code, and tags/side-panel vocabulary."
+    modules_or_boundaries: "suggested-tag-state.js pure classification/replacement; PopupController surface filtering and persistence; UIManager rendering/accessibility/event emission; side-panel HTML/CSS presentation."
+    tied_tokens_affected:
+      - "ARCH-SUGGESTED_TAGS"
+      - "ARCH-THIS_PAGE_TAG_SORT"
+      - "IMPL-SUGGESTED_TAGS"
+      - "IMPL-THIS_PAGE_TAG_SORT"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+      - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "None; implementation follows the clarified Suggested Tags chip scope and three-state action contract."
+    record_status: "complete"
+    related_citdp_records:
+      - "CITDP-REQ-SUGGESTED_TAGS_ADJUSTED_STATE_COMPARISON_20260803.yaml"
+      - "CITDP-REQ-SUGGESTED_TAGS_CASE_CONVERSION_20260803.yaml"
+      - "CITDP-REQ-SUGGESTED_TAGS_DEDUPLICATION_20260802.yaml"
+      - "CITDP-REQ-SUGGESTED_TAGS_THREE_STATES_20260803.yaml"
+    tied_stack_updates_required:
+      - "Final verification evidence persisted in this record."
+      - "REQ/ARCH/IMPL records and sidecars aligned before production changes."
+      - "This record supersedes the earlier exact-match suppression wording; all four Suggested Tags CITDP records are linked for this LEAP closeout."
+      - "Vocabulary reconciled for case-match removal and case-mismatch replacement."
+  record_identity:
+    change_request_id: "REQ-SUGGESTED_TAGS_THREE_STATES_20260803"
+    recorded_at: "2026-08-03"
+    title: "Render and act on all three side-panel Suggested Tag states"
+  risk_analysis:
+    abuse_cases:
+      - "A case-match chip removes a converted display value instead of the exact stored Current Tag."
+      - "A failed or stale mismatch save mutates local bookmark state."
+      - "A page-derived Suggested Tag contains unsafe characters."
+      - "Popup or overlay filtering changes while side-panel state metadata is introduced."
+    quality_evidence_matrix:
+      - attribute: "baseline-functional"
+        applicability: "applicable"
+        command_or_test: "Full Jest plus focused UI/state/composition suites"
+        evidence_method: "Automated unit and integration tests"
+        limitation: "No live backend durability or assistive technology run"
+        owner: "Implementation agent"
+        rationale: "Verifies all three render states and action routing"
+        result: "pass"
+        risk: "Wrong state label, payload, or surface filtering"
+        threshold: "All suites pass"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+      - attribute: "data-integrity"
+        applicability: "applicable"
+        command_or_test: "suggested-tag-state and suggested-tag-chip-composition tests"
+        evidence_method: "Pure invariant tests and authoritative composition assertions"
+        limitation: "Backend concurrency semantics outside JSDOM"
+        owner: "Implementation agent"
+        rationale: "Proves exact removal identity, one-save replacement, duplicate collapse, stale handling, and no mutation on failure"
+        result: "pass"
+        risk: "Tag loss or duplicate identity"
+        threshold: "Exact removal and atomic replacement assertions pass"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+      - attribute: "user-facing-accessibility"
+        applicability: "applicable"
+        command_or_test: "uIManager-tag-case-folding and side-panel-html tests"
+        evidence_method: "State metadata, roles, aria-labels, visible text cues, keyboard activation, and control-order assertions"
+        limitation: "No assistive technology run or visual contrast audit"
+        owner: "Implementation agent"
+        rationale: "State meaning is available through text/border cues in addition to color"
+        result: "pass"
+        risk: "Ambiguous action or insufficient visual distinction"
+        threshold: "All state labels, metadata, and markup-order assertions pass"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+    quality_profiles:
+      - "baseline-functional"
+      - "data-integrity"
+      - "user-facing-accessibility"
+    residual_risk:
+      expiry: "2026-09-01"
+      owner: "Hoverboard maintainers"
+      summary: "Live backend durability, visual contrast in installed themes, and assistive-technology behavior remain outside deterministic Jest/JSDOM coverage."
+    risks:
+      - severity: "medium"
+        likelihood: "medium"
+        mitigation: "Exact stored matchedTag payload for removal plus authoritative reread and pure atomic replacement for mismatch"
+        quality_attribute: "data-integrity"
+        tied_token_references:
+          - "IMPL-SUGGESTED_TAGS"
+          - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+      - severity: "medium"
+        likelihood: "low"
+        mitigation: "Surface-aware filtering and popup regression tests"
+        quality_attribute: "baseline-functional"
+        tied_token_references:
+          - "IMPL-THIS_PAGE_TAG_SORT"
+          - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    scenarios:
+      - "Absent Suggested Tag chip adds the displayed Original/lower/UPPER value"
+      - "Case-mismatch chip displays Replace and atomically persists the converted value"
+      - "Exact case-match chip displays Remove and removes the exact stored Current Tag"
+      - "Failed or stale replacement leaves local state unchanged"
+      - "Popup and overlay filtering/add behavior remains unchanged"
+  tdd_sequence:
+    summary: "TIED and pseudo-code alignment; RED/GREEN state and action tests; UI/controller implementation; composition persistence tests; full verification and traceability close-out."
+  test_strategy:
+    matrix_notes: "Unit coverage validates pure state and render/action boundaries; composition coverage validates add/remove/replace bindings, authoritative reread, one-save replacement, stale matches, and failed-save no mutation; markup tests validate control order."
+    summary: "No new E2E was added because the changed bindings are composition-testable; installed-theme contrast and assistive-technology behavior remain residual risks."

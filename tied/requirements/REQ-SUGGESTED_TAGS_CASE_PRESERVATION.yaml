@@ -3,14 +3,14 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
   "[impl-suggested_tags]": "pickBetterSuggestedOriginalCase; TagService.extractSuggestedTagsFromContent; suggested-tags-main-world-snippet.js"
   "[req-suggested_tags_deduplication]": "Case-insensitive exclusion of suggestions already on the bookmark unchanged"
   "[req-suggested_tags_from_content]": "Case preservation applied to extracted suggestions"
-  actual: "Implemented; unit tests in tests/unit/suggested-tag-original-case.test.js"
+  actual: "Implemented canonical extraction plus Suggested Tags-only case conversion for display and click payloads. In side-panel This Page, absent and case-mismatch actions persist the converted value, case-match removal uses the exact stored Current Tag, and atomic ordering guarantees remain intact."
   category: "Functional"
   code_annotations: "Case preservation sections marked with `[REQ-SUGGESTED_TAGS_CASE_PRESERVATION]` in comments"
   code_locations: "| Path | Role |\n| src/shared/suggested-tag-original-case.js | Canonical rank helper |\n| src/features/tagging/tag-service.js | Overlay extraction |\n| src/features/tagging/suggested-tags-main-world-snippet.js | Popup MAIN extraction |\n"
   coverage: "Case preservation logic, dual-version generation"
   created: "2025-07-14"
   depends_on: "None"
-  description: "Suggested tags use one canonical spelling per word identity (case-insensitive) derived from page text; users use the tag case toggle for lower/UPPER display—not a second lowercase suggestion row."
+  description: "Suggested Tags use one canonical source spelling per word identity. The Tag labels mode changes only the rendered Suggested Tags label; absent and mismatch clicks store the current case-converted value, while exact case-match clicks remove the exact stored Current Tag. Current Tags and Recent Tags remain source-cased and their actions retain existing identity behavior."
   detail_file: "requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml"
   expected: "\"Suggested tags case preservation tests\" (referenced in requirements.yaml)"
   last_updated: "2026-02-13"
@@ -18,8 +18,12 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 4: clear stale test_scope; keep acyclic related_to"
+      date: "2026-08-03"
+      reason: "Define exact-match removal alongside converted Suggested Tag actions"
+    last_validated:
+      date: "2026-08-03"
+      result: "pass"
+      validator: "focused/full Jest, lint, typecheck, token validation, and tied_validate_consistency"
   modifiable_decisions: "1. **Rank tie**: When two surface forms tie on mixed/ALLCAPS/lower rank, keep the incumbent. 2. **Sanitization**: sanitizeTag runs after canonical pick (REQ-TAG_INPUT_SANITIZATION). 3. **Tokenizer sync**: Popup MAIN snippet and TagService must share delimiter regex (ARCH-SUGGESTED_TAGS / IMPL-SUGGESTED_TAGS)."
   name: "Suggested Tags Case Preservation"
   no_capitalization_choice: "Users had no way to choose between \"JavaScript\" and \"javascript\" if only one was offered."
@@ -42,23 +46,29 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "No separate all-lowercase duplicate suggestion for a word that also appears with uppercase in content (e.g. not both apple and Apple)."
-    - criterion: "One suggested chip per word identity (case-insensitive): canonical spelling prefers mixed case (e.g. Apple) over ALL CAPS over all-lowercase when the page contained those variants."
-    - criterion: "With tag case mode upper, the same canonical value displays as ALL CAPS (e.g. Apple → APPLE) via existing chip folding."
-    - criterion: "Words that appear only in all-lowercase in content still suggest once in that lowercase form."
+    - criterion: "A successful mismatch replacement persists the currently displayed case-converted Suggested Tag value while popup and overlay add flows remain unchanged."
+    - criterion: "Current Tags and Recent Tags remain source-cased and are unaffected by Tag labels."
+    - criterion: "One suggested chip per word identity remains enforced by canonical extraction."
+    - criterion: "Side-panel absent activation persists the displayed case-converted Suggested Tag value."
+    - criterion: "Side-panel exact case-match activation removes the exact stored Current Tag without case conversion."
   status: "Implemented"
   supersedes: ""
-  test_scope: "Unit tests in tests/unit/suggested-tag-original-case.test.js"
+  test_scope: "Unit: classifier/replacement and scoped chip payload casing, state classes/metadata, keyboard actions; integration: converted add/remove/replace routing, one-save mismatch persistence and failure no-mutation behavior; canonical extraction tests retained."
   traceability:
     architecture:
       - "ARCH-SUGGESTED_TAGS"
+      - "ARCH-THIS_PAGE_TAG_SORT"
     code_annotations:
       - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
     implementation:
       - "IMPL-SUGGESTED_TAGS"
+      - "IMPL-THIS_PAGE_TAG_SORT"
     tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
       - "tests/unit/suggested-tag-original-case.test.js"
-  user_choice_in_capitalization: "Tag case folding UI (REQ-SIDE_PANEL_POPUP_EQUIVALENT) applies to suggested chips; extractors emit one canonical string per key."
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
+  user_choice_in_capitalization: "Tag labels applies only to Suggested Tags; extractors emit one canonical source string per key, UI display/action conversion is applied at the Suggested Tags chip boundary, and Current/Recent Tags remain source-cased."
   validation_criteria:
     - method: "Unit tests"
       coverage: "pickBetterSuggestedOriginalCase; TagService.extractSuggestedTagsFromContent; tagChipDisplayAndAddValue upper mode (tests/unit/suggested-tag-original-case.test.js)"

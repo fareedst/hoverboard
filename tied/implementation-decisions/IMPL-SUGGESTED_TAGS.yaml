@@ -6,11 +6,13 @@ IMPL-SUGGESTED_TAGS:
       - path: "src/features/content/overlay-manager.js"
         description: "Suggested section display"
       - path: "src/ui/popup/PopupController.js"
-        description: "loadSuggestedTags with CLASSIFY_SCRIPT_INJECTION_URL precheck"
+        description: "loadSuggestedTags surface-aware classification and mismatch persistence"
+      - path: "src/ui/popup/UIManager.js"
+        description: "updateSuggestedTags and scoped Add/Replace chip rendering"
+      - path: "src/shared/suggested-tag-state.js"
+        description: "Pure suggested-tag state classifier, sanitization, and atomic replacement"
       - path: "src/features/tagging/suggested-tags-main-world-snippet.js"
         description: "MAIN-world relevance tiers and extractor global for popup path"
-      - path: "src/ui/popup/UIManager.js"
-        description: "updateSuggestedTags; optional three-way chip sort when tagSortToggle present"
       - path: "src/shared/script-injection-eligibility.js"
         description: "Shared inject eligibility classifier"
     functions:
@@ -18,27 +20,44 @@ IMPL-SUGGESTED_TAGS:
         description: "Primary extraction for overlay"
         file: "src/features/tagging/tag-service.js"
       - name: "loadSuggestedTags"
-        description: "Popup path inject + normalize + skip non-scriptable"
+        description: "Popup/side-panel inject, normalize, classify, and filter"
         file: "src/ui/popup/PopupController.js"
-      - name: "classifyScriptInjectionUrl"
-        description: "URL inject eligibility"
-        file: "src/shared/script-injection-eligibility.js"
+      - name: "classifySuggestedTagState"
+        description: "Classify absent, case-match, and case-mismatch"
+        file: "src/shared/suggested-tag-state.js"
+      - name: "replaceTagInPlace"
+        description: "Atomic first-position replacement and duplicate variant collapse"
+        file: "src/shared/suggested-tag-state.js"
+      - name: "handleReplaceSuggestedTag"
+        description: "Authoritative reread and one full-bookmark save"
+        file: "src/ui/popup/PopupController.js"
   cross_references:
+    - "ARCH-SIDE_PANEL_TABS"
     - "ARCH-SUGGESTED_TAGS"
+    - "IMPL-UIManager_SCOPED_ROOT"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
     - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
     - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
-  decision: "Overlay path: TagService.extractSuggestedTagsFromContent with multi-source token pipeline, dedupe, and case preservation. Chromium popup path: MAIN-world snippet (suggested-tags-main-world-snippet.js) registers __hoverboardExtractSuggestedTagsWithRelevance; PopupController injects file then func, normalizes to { tag, relevance, inPageFrequency }, filters current bookmark tags; UIManager displays and may reorder chips per IMPL-THIS_PAGE_TAG_SORT."
+  decision: "Overlay and popup extraction continue to emit one canonical source-cased suggestion per word identity. UIManager applies Tag labels conversion only at the Suggested Tags render/action boundary; Current Tags and Recent Tags remain source-cased. Side-panel absent actions add the converted value, exact case-match actions remove the matched stored value, and case-mismatch actions replace atomically with the converted value."
   detail_file: "implementation-decisions/IMPL-SUGGESTED_TAGS.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-SUGGESTED_TAGS-pseudocode.md"
   implementation_approach:
-    details: []
+    details:
+      - "Side-panel mismatch actions persist one full bookmark update only after authoritative re-read and successful replacement; the replacement value is the clicked case-converted Suggested Tag label; popup and overlay filtering/add flows remain unchanged."
+      - "Side-panel This Page classifies normalized suggestions as absent, case-match, or case-mismatch using src/shared/suggested-tag-state.js; exact matches are suppressed while mismatch rows retain canonical source data for classification and expose the converted value only at the chip action boundary."
+      - "The pure replacement helper performs one in-place case-insensitive replacement, removes duplicate variants of the replaced tag, preserves unrelated order, and returns no-mutating failure results for invalid or stale input."
+      - "When UIManager is scoped to #bookmarkPanel, its loading transition captures the container scrollTop before hiding mainInterface and restores the saved value after showing it again. This covers Suggested Tag add, exact-match removal, and case-mismatch replacement, including input-focus and chip-redraw effects, while the standalone popup remains unchanged."
     summary: "Extract from title, URL, meta, headings, emphasis, definitions, tables, nav, breadcrumbs, images, links (per-source limits). Tokenize, filter noise, frequency sort, case preservation, sanitize, deduplicate, apply limit. Overlay: TagService.extractSuggestedTagsFromContent. Popup (Chromium): chrome.scripting.executeScript MAIN files (suggested-tags-main-world-snippet.js) then func calling global extractor; PopupController normalizes to { tag, relevance, inPageFrequency } and filters current bookmark tags before updateSuggestedTags."
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-07-30"
-      reason: "Gallery-host classifier eligibility; injectionOutcome skip path"
+      date: "2026-08-03"
+      reason: "Preserve scoped This Page scroll during Suggested Tag actions"
+    last_validated:
+      date: "2026-08-03"
+      result: "pass"
+      validator: "focused/full Jest, lint, typecheck, token validation, and tied_validate_consistency"
   name: "Suggested Tags Implementation"
   rationale:
     benefits: []
@@ -56,15 +75,18 @@ IMPL-SUGGESTED_TAGS:
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     supersedes: []
   status: "Active"
-  test_coverage_note: "Unit: loadSuggestedTags restricted-URL skip and inject path in popup-suggested-tags.test.js"
+  test_coverage_note: "Unit coverage verifies scoped UIManager loading scroll restoration and three-state rendering; composition coverage retains converted add/remove/replace routing, authoritative reread, atomic persistence, stale matches, and failed-save no mutation; Playwright coverage verifies real This Page Suggested Tag activation preserves #bookmarkPanel scrollTop."
   token_coverage:
     tests:
-      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
-      - "tests/unit/suggested-tag-original-case.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
   traceability:
     architecture:
       - "ARCH-SUGGESTED_TAGS"
+      - "ARCH-TAG_SYSTEM"
     code_annotations:
       - "IMPL-SUGGESTED_TAGS"
     requirements:
@@ -72,8 +94,13 @@ IMPL-SUGGESTED_TAGS:
       - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
+      - "tests/playwright/extension-this-page-tag-sort.spec.js"
       - "tests/unit/popup-suggested-tags.test.js"
-      - "tests/unit/script-injection-eligibility.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/ui-manager-scoped-root.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
   validation_evidence:
     - date: "2026-03-27"
       notes: "S06.6 persist: popup-suggested-tags unit tests + tied_validate_consistency"

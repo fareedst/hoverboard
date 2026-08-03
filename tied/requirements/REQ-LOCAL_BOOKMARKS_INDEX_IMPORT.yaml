@@ -20,10 +20,8 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
   priority: "P1"
   rationale:
     benefits:
-      - "Import to Local | File | Sync | Browser so user chooses target storage; uses existing saveBookmark message (no new backend API)"
-      - "Same file formats as export (CSV with Title, URL, Tags, Time, Storage, Shared, To read, Notes; JSON array of bookmark objects) for round-trip and portability"
-      - Import and overwrite: "full restore or update of records from a file"
-      - Import only new: "merge external data without overwriting existing bookmarks (by URL)"
+      - "Import a selected live Browser bookmark tree into Local | File | Sync without an export-and-reimport step, with folder-to-tag mapping and target-specific conflicts"
+      - "Import to Local | File | Sync | Browser from rich CSV/JSON files, preserving Hoverboard fields"
     problems_solved:
       - "No way to bring in bookmarks from external CSV/JSON files (e.g. from another tool or backup)"
       - "No way to restore or merge previously exported bookmark data into the index"
@@ -35,13 +33,11 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
       - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Import UI is a dedicated control group; Import button is last; #import-result shows pending then final counts."
-    - criterion: "Import uses existing saveBookmark message; no new backend API."
-    - criterion: "On create, imported Time and Updated are retained when present in the file."
-    - criterion: "User can choose to import only new records (skip URLs already in index) or import and overwrite existing records."
-    - criterion: "User can select a file (CSV or JSON in export format) and target storage (Local | File | Sync | Browser)."
+    - "Import source can be File (CSV/JSON) or live Browser bookmarks; the existing file import behavior remains unchanged."
+    - "Live Browser source excludes Browser as a destination while file import retains Local | File | Sync | Browser targets."
+    - "Live Browser source supports title/URL/folder search, folder filtering, selection, Skip/Overwrite/Merge tags, folder tags, extra tags, and imported/skipped/failed results."
   status: "Implemented"
-  summary: "From the Local Bookmarks Index page Import control group, the user can import bookmarks from a CSV or JSON file. Two modes: Import only new (skip URLs already in the index) and Import and overwrite existing. Import to target (Local | File | Sync | Browser). Import button is the final trigger; UI shows pending then imported/skipped/failed counts. New records retain Time and Updated from the file when present. Uses existing saveBookmark message."
+  summary: "The Local Bookmarks Index Import control supports rich CSV/JSON files and a live Browser bookmark source. Live source import targets Local|File|Sync with selective folder/tag migration and target-specific conflict handling; file import retains Browser as a target."
   traceability:
     architecture:
       - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"

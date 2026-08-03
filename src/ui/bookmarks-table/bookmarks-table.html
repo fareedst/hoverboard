@@ -219,12 +219,20 @@
       </div>
     </fieldset>
 
-    <!-- [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import control group: mode, Import to, Import last, result -->
+    <!-- [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import control group: File or live Browser source. -->
     <fieldset id="footer-panel-import" class="actions-below-table actions-group control-panel" data-control-panel="footer" data-control-group="import" role="tabpanel" aria-labelledby="footer-tab-import" hidden>
       <legend id="import-legend" class="group-legend">Import</legend>
-      <div class="import-row">
+      <div class="import-source-row">
+        <label for="import-source">Import source:</label>
+        <select id="import-source" class="filter-select" aria-label="Import source">
+          <option value="file">File (CSV or JSON)</option>
+          <option value="browser">Browser bookmarks (live)</option>
+        </select>
+      </div>
+
+      <div id="file-import-options" class="import-source-options">
         <input type="file" id="import-file" accept=".csv,.json" style="display: none;" aria-label="Choose Hoverboard CSV or JSON file to import (Title, URL, Tags, …)">
-        <fieldset class="import-mode-fieldset" aria-label="Import mode">
+        <fieldset class="import-mode-fieldset" aria-label="File import mode">
           <label class="import-mode-label">
             <input type="radio" name="import-mode" value="only-new" checked>
             <span>Only new</span>
@@ -234,6 +242,69 @@
             <span>Overwrite existing</span>
           </label>
         </fieldset>
+      </div>
+
+      <div id="browser-import-options" class="import-source-options" hidden>
+        <div class="browser-import-filter-row">
+          <label for="browser-import-search">Search:</label>
+          <input type="text" id="browser-import-search" class="filter-input" placeholder="Search title, URL, folder…" autocomplete="off" aria-label="Search live browser bookmarks">
+          <label for="browser-import-folder">Folder:</label>
+          <select id="browser-import-folder" class="filter-select" aria-label="Filter live browser bookmarks by folder">
+            <option value="">All folders</option>
+          </select>
+          <button type="button" id="browser-import-select-all" class="btn btn-secondary btn-sm">Select all visible</button>
+          <button type="button" id="browser-import-clear-selection" class="btn btn-secondary btn-sm">Clear selection</button>
+          <span id="browser-import-count" class="help-text" aria-live="polite">0 bookmarks</span>
+        </div>
+        <div id="browser-import-empty" class="empty-state hidden">
+          <p id="browser-import-empty-message">No browser bookmarks match the current filters.</p>
+        </div>
+        <div id="browser-import-table-wrapper" class="table-wrapper browser-import-table-wrapper hidden">
+          <table class="bookmarks-table browser-import-table" id="browser-import-table">
+            <thead>
+              <tr>
+                <th class="col-select" scope="col">
+                  <label class="select-all-label">
+                    <input type="checkbox" id="browser-import-select-all-checkbox" aria-label="Select all visible browser bookmarks">
+                    <span class="sr-only">Select all</span>
+                  </label>
+                </th>
+                <th scope="col">Title</th>
+                <th scope="col">URL</th>
+                <th scope="col">Folder</th>
+                <th scope="col">Date added</th>
+              </tr>
+            </thead>
+            <tbody id="browser-import-table-body"></tbody>
+          </table>
+        </div>
+        <fieldset class="import-mode-fieldset" aria-label="Browser import conflict mode">
+          <legend class="sr-only">When URL already exists in target</legend>
+          <span class="option-label">When URL already exists in target:</span>
+          <label class="import-mode-label">
+            <input type="radio" name="browser-import-mode" value="skip" checked>
+            <span>Skip</span>
+          </label>
+          <label class="import-mode-label">
+            <input type="radio" name="browser-import-mode" value="overwrite">
+            <span>Overwrite</span>
+          </label>
+          <label class="import-mode-label">
+            <input type="radio" name="browser-import-mode" value="merge">
+            <span>Merge tags</span>
+          </label>
+        </fieldset>
+        <div class="tags-row">
+          <label class="import-mode-label">
+            <input type="checkbox" id="browser-import-use-folder-tags" value="1">
+            <span>Use folder names as tags</span>
+          </label>
+          <label for="browser-import-extra-tags">Add tags (comma-separated):</label>
+          <input type="text" id="browser-import-extra-tags" class="filter-input" placeholder="e.g. imported, browser" autocomplete="off" aria-label="Extra tags for live browser import">
+        </div>
+      </div>
+
+      <div class="import-row">
         <label for="import-target">Import to:</label>
         <select id="import-target" class="filter-select" aria-label="Target storage for imported bookmarks">
           <option value="local">Local</option>
@@ -241,7 +312,7 @@
           <option value="sync">Sync</option>
           <option value="browser">Browser</option>
         </select>
-        <button type="button" id="import-trigger" class="btn btn-secondary btn-sm" title="Import Hoverboard CSV/JSON into Local, File, Sync, or Browser (not Netscape HTML — use side panel Bookmarks for HTML)" aria-label="Import bookmarks from CSV or JSON">Import</button>
+        <button type="button" id="import-trigger" class="btn btn-secondary btn-sm" title="Choose a Hoverboard CSV or JSON file to import" aria-label="Choose file to import">Choose file</button>
         <span id="import-result" class="import-result" aria-live="polite"></span>
       </div>
     </fieldset>

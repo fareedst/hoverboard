@@ -23,7 +23,7 @@ REQ-BROWSER_BOOKMARK_IMPORT:
     problems_solved:
       - "No way to filter/select which browser bookmarks to import or resolve URL conflicts"
       - "No way to import browser bookmarks into Hoverboard"
-    why: "Let users copy bookmarks from the browser's native bookmarking API into Hoverboard storage (Local | File | Sync) with filter, selection, conflict resolution, and tag assignment. Browser is not an Import-to target because the page's source is the Chrome tree itself."
+    why: "Let users copy selected records from the live browser bookmark tree into Hoverboard-owned Local, File, or Sync storage from the Local Bookmarks Index. The Browser storage backend remains the source, not an import target; the former standalone URL is a compatibility entry point to the Index workflow."
   related_requirements:
     depends_on: []
     related_to:
@@ -32,12 +32,13 @@ REQ-BROWSER_BOOKMARK_IMPORT:
       - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Dedicated extension page displays browser bookmarks (flattened from getTree) with Select column, Title, URL, Folder path, Date added; search over title/URL; filter by folder."
-    - criterion: "Documented boundary: Browser Bookmark Import copies FROM the Chrome tree INTO Hoverboard backends; REQ-BROWSER_BOOKMARK_STORAGE is the BookmarkRouter peer backend (Store B), not an import destination on this page."
-    - criterion: "Import uses existing getAggregatedBookmarksForIndex (or getLocalBookmarksForIndex) for conflict set and saveBookmark for each selected item; no new backend message for reading bookmarks (chrome.bookmarks called from page)."
-    - criterion: "User can select bookmarks (checkboxes, select-all), choose conflict mode (Skip / Overwrite / Merge) when URL exists in Hoverboard, optionally use folder names as tags and add extra tags, choose Import to (Local | File | Sync only — Browser excluded as target), and run import; result shows imported, skipped, failed counts."
+    - "Browser-tree import uses target-specific conflict detection against the selected Local, File, or Sync backend; Browser source rows do not conflict with themselves."
+    - "Browser-tree records are collapsed by cleaned URL before import, folder-derived tags strip Chrome root segments, and optional extra tags are sanitized and deduplicated."
+    - "Legacy Browser Bookmark Import entry points open the Local Bookmarks Index with the Browser source selected; no separate import surface is required."
+    - "The Local Bookmarks Index Import control can select the live browser bookmark tree as a source and displays selectable records with title, URL, folder path, and date added; search and folder filtering are available."
+    - "User can select Skip, Overwrite, or Merge tags, choose Local, File, or Sync as the target, import through saveBookmark, and receive imported, skipped, and failed counts."
   status: "Implemented"
-  summary: "A dedicated **Browser Bookmark Import** page loads native bookmarks (chrome.bookmarks.getTree), lets users filter (search, folder), select rows, resolve conflicts (Skip | Overwrite | Merge), assign tags (folder names + extra), and import to Local | File | Sync via saveBookmark; entry from popup and Options. **Import to Browser is intentionally excluded**: the source is already the Chrome bookmark tree; copying into backend `browser` would be circular. Use Local Bookmarks Index Import or Save to / Move when writing into Browser storage (backend). Distinct from REQ-BROWSER_BOOKMARK_STORAGE (peer backend / Store B)."
+  summary: "Live Browser-tree import is integrated into the Local Bookmarks Index. It preserves selective folder/search import, folder-to-tag mapping, extra tags, target-specific Skip/Overwrite/Merge conflict handling, and Local|File|Sync targets; the former standalone URL redirects to the Index."
   traceability:
     architecture:
       - "ARCH-BROWSER_BOOKMARK_IMPORT"

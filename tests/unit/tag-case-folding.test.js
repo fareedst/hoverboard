@@ -44,9 +44,9 @@ describe('[REQ-SIDE_PANEL_POPUP_EQUIVALENT] tag-case-folding', () => {
     expect(r.addValue).toBe('API')
   })
 
-  test('currentTagDisplayLabel matches chip display for stored tag', () => {
+  test('currentTagDisplayLabel preserves stored/source casing for current tags', () => {
     expect(currentTagDisplayLabel('ReadLater', 'original')).toBe('ReadLater')
-    expect(currentTagDisplayLabel('ReadLater', 'lower')).toBe('readlater')
-    expect(currentTagDisplayLabel('ReadLater', 'upper')).toBe('READLATER')
+    expect(currentTagDisplayLabel('ReadLater', 'lower')).toBe('ReadLater')
+    expect(currentTagDisplayLabel('ReadLater', 'upper')).toBe('ReadLater')
   })
 })

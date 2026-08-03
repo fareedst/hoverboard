@@ -22,19 +22,7 @@
 #   detail_file: Path to the detailed .yaml in architecture-decisions/ or null for methodology index-only; procedure: tied/docs/agent-req-implementation-checklist.yaml
 #   metadata: Optional metadata
 # Methodology seed: token identity and traceability only; expand rationale in project detail files.
-ARCH-FEEDBACK_STORAGE:
-  cross_references:
-    - "REQ-FEEDBACK_TO_TIED"
-  detail_file: "null"
-  metadata:
-    last_updated:
-      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
-  related_decisions:
-    depends_on:
-      - "REQ-FEEDBACK_TO_TIED"
-    informs:
-      - "IMPL-MCP_FEEDBACK_TOOLS"
-    see_also: []
+#
 # ---
 # Template Record - Copy this block to create new architecture decisions
 # ---
@@ -97,6 +85,20 @@ ARCH-FEEDBACK_STORAGE:
 #       date: YYYY-MM-DD
 #       validator: "agent/contributor"
 #       result: "pass"
+ARCH-FEEDBACK_STORAGE:
+  cross_references:
+    - "REQ-FEEDBACK_TO_TIED"
+  detail_file: "null"
+  metadata:
+    last_updated:
+      reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
+  name: "Feedback Storage for TIED Reporting"
+  related_decisions:
+    depends_on:
+      - "REQ-FEEDBACK_TO_TIED"
+    informs:
+      - "IMPL-MCP_FEEDBACK_TOOLS"
+    see_also: []
   status: "Active"
   traceability:
     implementation:
@@ -106,7 +108,7 @@ ARCH-FEEDBACK_STORAGE:
 ARCH-MODULE_VALIDATION:
   cross_references:
     - "REQ-MODULE_VALIDATION"
-  detail_file: "architecture-decisions/ARCH-MODULE_VALIDATION.yaml"
+  detail_file: "null"
   metadata:
     last_updated:
       reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"
@@ -171,7 +173,7 @@ ARCH-QUALITY_ASSURANCE_PROFILES:
 ARCH-TIED_STRUCTURE:
   cross_references:
     - "REQ-TIED_SETUP"
-  detail_file: "architecture-decisions/ARCH-TIED_STRUCTURE.yaml"
+  detail_file: "null"
   metadata:
     last_updated:
       reason: "Methodology seed; procedure: tied/docs/agent-req-implementation-checklist.yaml"

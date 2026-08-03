@@ -342,7 +342,7 @@ REQ-BROWSER_BOOKMARK_IMPORT:
       - "Dedicated page; chrome.bookmarks.getTree; filter by folder and search; select; conflict Skip/Overwrite/Merge; tags from folder + extra; import to Local | File | Sync via saveBookmark"
     problems_solved:
       - "No way to import browser bookmarks into Hoverboard"
-    why: "Let users copy bookmarks from the browser's native bookmarking API into Hoverboard storage with filter, selection, conflict resolution, and tag assignment."
+    why: "Let users copy selected records from the live browser bookmark tree into Hoverboard-owned Local, File, or Sync storage from the Local Bookmarks Index."
   related_requirements:
     depends_on: []
     related_to:
@@ -352,6 +352,7 @@ REQ-BROWSER_BOOKMARK_IMPORT:
   satisfaction_criteria:
     - criterion: "Page displays browser bookmarks with search, folder filter, select, conflict mode, tag options, Import to; uses getAggregatedBookmarksForIndex and saveBookmark"
   status: "Implemented"
+  summary: "Live Browser-tree import is integrated into the Local Bookmarks Index. It preserves selective folder/search import, folder-to-tag mapping, extra tags, target-specific Skip/Overwrite/Merge conflict handling, and Local|File|Sync targets; the former standalone URL redirects to the Index."
   traceability:
     architecture:
       - "ARCH-BROWSER_BOOKMARK_IMPORT"
@@ -1203,6 +1204,7 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
     - criterion: "User can choose \"Import only new\" or \"Import and overwrite existing\""
     - criterion: "User can select file (CSV or JSON) and optional target storage"
   status: "Implemented"
+  summary: "The Local Bookmarks Index Import control supports rich CSV/JSON files and a live Browser bookmark source. Live source import targets Local|File|Sync with selective folder/tag migration and target-specific conflict handling; file import retains Browser as a target."
   traceability:
     architecture:
       - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
@@ -2471,13 +2473,18 @@ REQ-SIDE_PANEL_BUNDLE_SIZE:
   priority: "P2"
   status: "Implemented"
 REQ-SIDE_PANEL_POPUP_EQUIVALENT:
+  actual: "This Page keeps Current Tags and Recent Tags in their stored/source casing. Suggested Tags render absent, case-match, and case-mismatch state cues; their controls add, remove the exact stored match, or atomically replace the matched tag using the displayed case-converted value. Activating a Suggested Tag preserves the This Page side-panel scroll position across the loading and redraw cycle. The Tag labels control applies only to Suggested Tags; popup/overlay behavior is unchanged."
   category: "Functional"
   detail_file: "requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml"
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27"
-      reason: "This Page tag label casing toggle; expanded traceability.tests"
+      date: "2026-08-03"
+      reason: "Require This Page Suggested Tag actions to preserve side-panel scroll position"
+    last_validated:
+      date: "2026-08-03"
+      result: "pass"
+      validator: "focused/full Jest, lint, typecheck, token validation, and tied_validate_consistency"
   name: "Side Panel Popup Equivalent with Tabs"
   priority: "P1"
   rationale:
@@ -2495,28 +2502,34 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
       - "REQ-SIDE_PANEL_TAGS_TREE"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "By Tag tab shows the existing tags-and-bookmarks tree (config, search, tag selector, tree)"
-    - criterion: "In This Page tab, \"By Tag\" (or equivalent) switches to the By Tag tab instead of opening the panel again"
-    - criterion: "Last-selected tab is persisted and restored when the panel is reopened"
-    - criterion: "Only one tab content is visible at a time; switching tabs shows the corresponding panel"
-    - criterion: "Side panel has a tab bar with \"This Page\" and \"By Tag\""
-    - criterion: "This Page tab shows functional equivalent of popup UI (quick actions, storage selector, tag management, search tabs, footer actions)"
+    - "Activating any This Page Suggested Tag preserves the prior #bookmarkPanel scrollTop after loading, focus, persistence, and chip redraw complete."
+    - "Current Tags chips always show stored/source casing; remove still targets the stored tag string."
+    - "Popup and overlay Suggested Tags continue their existing filtering and add flow."
+    - "Suggested Tag activation routes absent to add, case-match to exact stored-tag removal, and case-mismatch to atomic replacement."
+    - "Suggested Tags in This Page render all three membership states with accessible text/border cues in addition to distinct backgrounds."
+    - "The Tag labels control remains immediately before the Suggested Tags block and affects only Suggested Tags labels/action values."
   status: "Implemented"
+  test_scope: "Unit: scoped UIManager rendering, state metadata, keyboard activation, loading scroll restoration, and side-panel markup order; integration: add/remove/replace bindings, authoritative reread, persistence and failure behavior; Playwright: real This Page Suggested Tag activation preserves #bookmarkPanel scrollTop; popup regressions retained."
   traceability:
     architecture:
       - "ARCH-SIDE_PANEL_TABS"
+      - "ARCH-SUGGESTED_TAGS"
+      - "ARCH-THIS_PAGE_TAG_SORT"
     code_annotations:
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     implementation:
       - "IMPL-SIDE_PANEL_BOOKMARK"
       - "IMPL-SIDE_PANEL_TABS"
+      - "IMPL-SUGGESTED_TAGS"
+      - "IMPL-THIS_PAGE_TAG_SORT"
       - "IMPL-UIManager_SCOPED_ROOT"
     tests:
-      - "tests/playwright/extension-messaging.spec.js"
-      - "tests/unit/side-panel-initial-tab-init.test.js"
-      - "tests/unit/side-panel-tabs.test.js"
-      - "tests/unit/tag-case-folding.test.js"
-      - "tests/unit/ui-manager-scoped-root.test.js"
+      - "tests/integration/side-panel-tab-change-injection.integration.test.js"
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
+      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
+      - "tests/playwright/extension-this-page-tag-sort.spec.js"
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/side-panel-html.test.js"
       - "tests/unit/uIManager-tag-case-folding.test.js"
   validation_criteria:
     - method: "Manual verification"
@@ -2813,7 +2826,9 @@ REQ-STRUCTURED_LOGGING:
       - "IMPL-LOGGER_CONTEXT_LEVELS"
       - "IMPL-LOGGER_LEGACY"
 REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
+  actual: "Implemented canonical extraction plus Suggested Tags-only case conversion for display and click payloads. In side-panel This Page, absent and case-mismatch actions persist the converted value, case-match removal uses the exact stored Current Tag, and atomic ordering guarantees remain intact."
   category: "Functional"
+  description: "Suggested Tags use one canonical source spelling per word identity. The Tag labels mode changes only the rendered Suggested Tags label; absent and mismatch clicks store the current case-converted value, while exact case-match clicks remove the exact stored Current Tag. Current Tags and Recent Tags remain source-cased and their actions retain existing identity behavior."
   detail_file: "requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml"
   metadata:
     created:
@@ -2821,8 +2836,12 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
       date: "2025-07-14T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27T00:00:00.000Z"
-      reason: "S04 PROC-AGENT_REQ_CHECKLIST: REQ index synced; semantic-tokens registration"
+      date: "2026-08-03"
+      reason: "Define exact-match removal alongside converted Suggested Tag actions"
+    last_validated:
+      date: "2026-08-03"
+      result: "pass"
+      validator: "focused/full Jest, lint, typecheck, token validation, and tied_validate_consistency"
   name: "Suggested Tags Case Preservation"
   priority: "P1"
   rationale:
@@ -2840,25 +2859,35 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "No separate all-lowercase duplicate suggestion when uppercase also appears in content."
-    - criterion: "One suggested chip per word identity (case-insensitive): canonical spelling prefers mixed case (e.g. Apple) over ALL CAPS over all-lowercase when the page contained those variants."
-    - criterion: "Tag case mode upper shows ALL CAPS for the same canonical value (e.g. Apple → APPLE)."
-    - criterion: "Words only ever seen in all-lowercase still appear once as lowercase."
+    - criterion: "A successful mismatch replacement persists the currently displayed case-converted Suggested Tag value while popup and overlay add flows remain unchanged."
+    - criterion: "Current Tags and Recent Tags remain source-cased and are unaffected by Tag labels."
+    - criterion: "One suggested chip per word identity remains enforced by canonical extraction."
+    - criterion: "Side-panel absent activation persists the displayed case-converted Suggested Tag value."
+    - criterion: "Side-panel exact case-match activation removes the exact stored Current Tag without case conversion."
   status: "Implemented"
+  test_scope: "Unit: classifier/replacement and scoped chip payload casing, state classes/metadata, keyboard actions; integration: converted add/remove/replace routing, one-save mismatch persistence and failure no-mutation behavior; canonical extraction tests retained."
   traceability:
     architecture:
       - "ARCH-SUGGESTED_TAGS"
+      - "ARCH-THIS_PAGE_TAG_SORT"
     code_annotations:
       - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
     implementation:
       - "IMPL-SUGGESTED_TAGS"
+      - "IMPL-THIS_PAGE_TAG_SORT"
     tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
       - "tests/unit/suggested-tag-original-case.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
+  user_choice_in_capitalization: "Tag labels applies only to Suggested Tags; extractors emit one canonical source string per key, UI display/action conversion is applied at the Suggested Tags chip boundary, and Current/Recent Tags remain source-cased."
   validation_criteria:
     - method: "Unit tests"
       coverage: "tests/unit/suggested-tag-original-case.test.js"
 REQ-SUGGESTED_TAGS_DEDUPLICATION:
+  actual: "Implemented and covered by popup preservation, three-state side-panel classification/rendering, converted add/remove/replace actions, and atomic composition persistence tests."
   category: "Functional"
+  description: "Suggested Tags are compared with Current Tags case-insensitively. On the side-panel This Page surface, every suggestion is classified as absent, case-match, or case-mismatch: absent suggestions add, exact matches remove their exact stored tag, and mismatches replace the matched tag atomically. Popup and overlay filtering/add behavior remains unchanged."
   detail_file: "requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml"
   metadata:
     created:
@@ -2866,8 +2895,12 @@ REQ-SUGGESTED_TAGS_DEDUPLICATION:
       date: "2025-07-14T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 4: one-way depends; fill tests"
+      date: "2026-08-03"
+      reason: "Render and act on all three side-panel Suggested tag states"
+    last_validated:
+      date: "2026-08-03"
+      result: "pass"
+      validator: "focused/full Jest, lint, typecheck, token validation, and tied_validate_consistency"
   name: "Suggested Tags Deduplication"
   priority: "P1"
   rationale:
@@ -2885,19 +2918,29 @@ REQ-SUGGESTED_TAGS_DEDUPLICATION:
       - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Case-insensitive comparison with current tags"
-    - criterion: "Tags present in current list excluded from suggestions"
-    - criterion: "Works in both popup and overlay"
+    - criterion: "Absent chips add the displayed case-converted Suggested Tag value; mismatch chips replace the matched tag with that value atomically."
+    - criterion: "Case-insensitive comparison identifies absent, exact case-match, and case-mismatch Suggested tag states against Current Tags."
+    - criterion: "Popup and overlay filtering/add behavior remains unchanged."
+    - criterion: "Replacement collapses duplicate case variants and preserves unrelated tag order."
+    - criterion: "Side-panel This Page renders all three states; exact-case chips remove their exact stored Current Tag when activated."
   status: "Implemented"
+  test_scope: "Unit: classifier/replacement, popup filtering preservation, UI state rendering and metadata; composition: side-panel add/remove/replace routing, authoritative reread, one-save replacement, stale-match and failed-save atomicity."
   traceability:
     architecture:
       - "ARCH-SUGGESTED_TAGS"
+      - "ARCH-TAG_SYSTEM"
+      - "ARCH-THIS_PAGE_TAG_SORT"
     code_annotations:
       - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
     implementation:
       - "IMPL-SUGGESTED_TAGS"
+      - "IMPL-THIS_PAGE_TAG_SORT"
     tests:
+      - "tests/integration/suggested-tag-chip-composition.integration.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/suggested-tag-state.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
   validation_criteria:
     - method: "Unit tests"
       coverage: "Case-insensitive filtering logic"
