@@ -1,6 +1,6 @@
 # Demo animated GIF standard
 
-This document summarizes the standard for all side-panel demo animated GIFs (e.g. Bookmarks, Tabs, This Page, By Tag, Usage). The **reference implementation** is `scripts/record-demo-side-panel-bookmarks.js`. When adding or updating any `record-demo-side-panel-*.js` script, follow this standard so GIFs are consistent and loop-friendly.
+This document summarizes the standard for all current demo animated GIFs: side-panel This Page, By Tag, and Tabs plus standalone Browser Bookmarks and Visit History. The **reference implementation** is `scripts/record-demo-side-panel-bookmarks.js`. When adding or updating any `record-demo-side-panel-*.js` script, follow this standard so GIFs are consistent and loop-friendly.
 
 **Authoritative detail:** [IMPL-DEMO_OVERLAY](tied/implementation-decisions/IMPL-DEMO_OVERLAY.yaml) → `demo_gif_standard` in the TIED YAML.
 
@@ -42,10 +42,10 @@ This document summarizes the standard for all side-panel demo animated GIFs (e.g
 
 ## Scripts to align
 
-- `scripts/record-demo-side-panel-bookmarks.js` — **reference** (implements this standard).
+- `scripts/record-demo-side-panel-bookmarks.js` — **reference** for standalone Browser Bookmarks (implements this standard).
 - `scripts/record-demo-side-panel-tabs.js`
 - `scripts/record-demo-side-panel-this-page.js`
 - `scripts/record-demo-side-panel-by-tag.js`
-- `scripts/record-demo-side-panel-usage.js`
+- `scripts/record-demo-side-panel-usage.js` — standalone Visit History.
 
 Update the above scripts to match this standard when touching demo recording or regenerating GIFs.

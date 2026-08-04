@@ -1,40 +1,117 @@
-# [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] — Demo overlay: DOM inject in side-panel page before key-frame groups; position top; larger font; five text classes with colors. Used by record-demo-side-panel-tabs.js, record-demo-side-panel-this-page.js, record-demo-side-panel-by-tag.js.
+# [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-BOOKMARK_USAGE_TRACKING] — Provide shared overlay, highlight, capture-timing, and GIF-building logic for current side-panel and standalone-tool demos.
 
 ## SET_OVERLAY
 
-- [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] How: Implements setOverlay(action, achievement, textClass) behavior for IMPL-DEMO_OVERLAY.
+- [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-BOOKMARK_USAGE_TRACKING] How: Render the current demo step as a colored, top-aligned annotation without changing product state.
 - Contract:
-  - INPUT: context / caller args
-  - PRE: caller supplies valid inputs for this block; dependencies wired
-  - OUTPUT: result
+  - INPUT: browser page; action text; achievement text; text class
+  - PRE: page has a document body; text class is one of `intro`, `navigation`, `state`, `action`, or `result`
+  - OUTPUT: overlay element `#__demo_overlay__` containing the supplied text
   - POST:
-    - success => block outputs match OUTPUT shape
-  - EFFECTS: State
+    - success => overlay exists with the selected class color and `rgba(0,0,0,0.78)` header background
+  - EFFECTS: DOM state
+  - FAILURE_MODES: missing document body; unknown text class falls back to `intro`
+  - DATA_TRANSITION: create or update `#__demo_overlay__`; do not mutate product data
   - TERMINATION: total
 - PROCEDURE: SET_OVERLAY
-  - el = getElementById('__demo_overlay__') or create and append div#__demo_overlay__
-  - base style: position fixed; top 0; left 0; right 0; background rgba(0,0,0,0.72); font-size 18px; font-family system-ui; z-index max; pointer-events none
-  - color = OVERLAY_CLASSES[textClass].color  // intro #e0e0e0, navigation #42a5f5, state #ffa726, action #26c6da, result #66bb6a
-  - el.innerHTML = <strong style="color">action</strong><br><span style="opacity 0.8; color">achievement</span>
-  - 1. removeOverlay(): remove #__demo_overlay__ if present
+  - Select `OVERLAY_CLASSES[textClass]`, or select the `intro` class when the requested class is unknown.
+  - Find `#__demo_overlay__`; create and append a fixed, pointer-transparent element when absent.
+  - Set the top, full-width, 18px system-font layout and `rgba(0,0,0,0.78)` background.
+  - Render escaped-equivalent action and achievement text using the selected color.
 
-## BLOCK_2
+## APPLY_DEMO_HIGHLIGHT
 
-- [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] Bookmark demo element highlight: scope to #bookmarkPanel so only This Page tab content is highlighted. How: Block Start: After panel ready (mainInterface visible), removeOverlay(), wait 1000*RATE ms, snap (frame 0 = useful static image). No overlay before frame 0. Implements demo_gif_standard timing. Block Overlay steps: clearHighlight; setOverlay (header rgba 0.78); highlightElement scoped to #bookmarkPanel; per-step wait*RATE and snap. RATE=1.25; overlay descriptions 30-50% longer. Implements demo_gif_standard overlay and step order above. Block End: After step 11 (Result), clearHighlight(), removeOverlay(), wait 500*RATE, inject full-screen Hoverboard icon centered, snap (frame N-1); GIF end segment 0.5s. Implements demo_gif_standard interstitial. Block GIF build: 3-part concat (nooverlay from frame 0 duration 1s, main from frames 1..N-2 at 1fps, end from frame N-1 duration 0.5s); concat filter + re-encode; no -c copy. Implements demo_gif_standard gif_build. By Tag demo (record-demo-side-panel-by-tag.js): load side panel with ?demo=1 (loadPlaceholderForScreenshot, tagsTreePlaceholderBookmarks); tag toggles update the tree. Element highlight scoped to #tagsTreePanel so only By Tag tab content is highlighted. Block: highlightElement(selector, panelId) with panelId 'browserTabsPanel' or null (document for tab bar). Every step has clearHighlight then highlightElement: 1-3 .side-panel-tabs / .side-panel-tab[data-tab="browserTabs"] (null); 4-12 #browserTabsList, #browserTabsListDisplayTitle, #browserTabsListDisplayBlock, #browserTabsFilterInput, [data-action="removeFromDisplay"], #browserTabsRefreshBtn, #browserTabsCopyRecordsBtn, #browserTabsCopyBtn (browserTabsPanel). Block: Start. Optional: persist hoverboard_sidepanel_active_tab = 'browserTabs' before opening so frame 0 shows Tabs tab. After opening panel: removeOverlay(), wait 1000*RATE ms, snap (frame 0 = useful static image). Then overlay steps from step 1 (frames 1..N-2). Block: setOverlay uses background rgba(0,0,0,0.78). RATE=1.25; overlay descriptions 30-50% longer. Block: Interstitial at end. After step 12: clearHighlight(), removeOverlay(), wait 500*RATE, inject full-screen Hoverboard icon, snap (frame N-1); GIF end segment 0.5s. Block: GIF build 3-part. (1) No-overlay from frame 0, duration 1 s. (2) Main from frames 1..N-2, 1 fps. (3) End from frame N-1, duration 0.5 s. Concat filter + re-encode; no -c copy. Block: Start with Bookmarks tab visible. Persist chrome.storage.local[hoverboard_sidepanel_active_tab] = 'browserBookmarks' in seed step before opening side-panel.html. No overlay for 1 s at start: removeOverlay(), wait 1000*RATE ms, snap (frame 0 = useful static image). Then overlay steps from "Viewing the Bookmarks tab" (frames 1..N-2). Block: Overlay header slightly more opaque. setOverlay uses background rgba(0,0,0,0.78). RATE=1.25; descriptions 30-50% longer. Block: Interstitial logo once, at end. After click URL step, wait 0.5s (rate-adjusted), then inject full-screen overlay with Hoverboard icon centered; snap (frame N-1); GIF end segment 0.5s. Acts as interstitial between replays when GIF loops. Block: GIF build 3-part concat. (1) No-overlay GIF from frame 0, duration 1 s. (2) Main GIF from frames 1..N-2 (image2 -start_number 1, -frames:v totalFrames-2), 1 fps. (3) End GIF from frame N-1, duration 0.5 s. Concat nooverlay + main + end. highlightElement scoped to #browserBookmarksPanel. Block: Start with Usage tab visible. Persist chrome.storage.local[hoverboard_sidepanel_active_tab] = 'usage' in seed step (with usage/edges placeholder data) before opening side-panel.html. No overlay for 1 s at start: removeOverlay(), wait 1000*RATE ms, snap (frame 0 = useful static image). Then overlay steps from "Viewing the Usage tab" (frames 1..N-2). Block: Overlay header rgba(0,0,0,0.78). RATE=1.25; descriptions 30-50% longer. highlightElement/clearHighlight scoped to #usagePanel (panel = getElementById('usagePanel'); el = panel.querySelector(selector)). Block: Step order: (1) Viewing Usage tab (intro), (2) Most Visited section (state), (3) Recently Visited section (state), (4) Refresh button (action), (5) Navigation Graph section (navigation). clearHighlight before each highlight; per-step snap with wait*RATE. Block: Interstitial at end. After last content step: clearHighlight(), removeOverlay(), wait 500*RATE, inject full-screen Hoverboard icon, snap (frame N-1); GIF end segment 0.5s. GIF build 3-part concat (nooverlay 1s, main 1fps, end 0.5s).
+- [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-BOOKMARK_USAGE_TRACKING] How: Apply one visible outline inside the requested product root and remove the previous outline before every capture.
 - Contract:
-  - INPUT: context / caller args
-  - PRE: caller supplies valid inputs for this block; dependencies wired
-  - OUTPUT: result
+  - INPUT: browser page; CSS selector; optional root element id
+  - PRE: selector is valid CSS; root id is null or identifies a loaded element
+  - OUTPUT: selected element has `data-demo-highlight="1"` and the blue outline
   - POST:
-    - success => block outputs match OUTPUT shape
-  - EFFECTS: IO, State
+    - success => at most one element is highlighted; a missing root or selector leaves the page unchanged
+  - EFFECTS: DOM state
+  - FAILURE_MODES: missing root; selector does not match
+  - DATA_TRANSITION: clear prior highlight styles; set outline and box shadow on the selected element
   - TERMINATION: total
-- PROCEDURE: BLOCK_2
-  - 1. highlightElement(selector): panel = getElementById('bookmarkPanel'); el = panel.querySelector(selector); clear any existing data-demo-highlight; set el.outline and el.boxShadow to 3px solid #42a5f5 and glow; set data-demo-highlight=1 on el
-  - 2. clearHighlight(): find element with data-demo-highlight="1"; clear outline and boxShadow; remove data-demo-highlight
-  - 3. highlightElement(selector) for By Tag: panel = getElementById('tagsTreePanel'); el = panel.querySelector(selector); clear existing data-demo-highlight; set el.outline and el.boxShadow (3px solid #42a5f5, glow); set data-demo-highlight=1 on el. clearHighlight() same as Bookmark demo.
-  - How (sub-block): Block Start: Persist chrome.storage.local[hoverboard_sidepanel_active_tab] = 'tagsTree' in seed step (e.g. options.html evaluate); open side-panel.html?demo=1; wait for #tagsTreePanel visible; removeOverlay(); wait 1000*RATE ms; snap (frame 0 = useful static image, By Tag tab visible). Implements demo_gif_standard timing.
-  - How (sub-block): Step order: (1) By Tag loaded (overlay), (2) Filtering by tag — clearHighlight; setOverlay("Filtering by tag", "Only bookmarks that have at least one selected tag are shown in the tree.", state); highlightElement('.tag-selector-section'); snap; select tag(s) if hasTags. (3) Tree updated — clearHighlight; setOverlay("Tree updated", "Bookmarks under selected tags", state); highlightElement('#treeContainer'); snap. (4) Search bookmarks and # matches — clearHighlight; setOverlay("Search bookmarks", ...); highlightElement('#searchInput'); fill('example'); clearHighlight; setOverlay("Match count", ...); highlightElement('#searchCount'); snap. (5) Click URL — clearHighlight; highlightElement('.tree-bookmark-link'); setOverlay("Opening URL", "Opens in new tab", result); click first link; extra beat before end card.
-  - How (sub-block): Block End: After last content step (Click URL): clearHighlight(); removeOverlay(); wait 500*RATE; inject full-screen Hoverboard icon centered (__demo_end_card__); snap (frame N-1); GIF end segment 0.5s. Implements demo_gif_standard interstitial.
-  - How (sub-block): Block GIF build: 3-part concat (nooverlay from frame 0 duration 1s, main from frames 1..N-2 at 1fps, end from frame N-1 duration 0.5s); concat filter + re-encode; no -c copy. Implements demo_gif_standard gif_build.
-  - How (sub-block): Step-to-class mapping (12 steps): 1,2 intro; 3,4 navigation; 5,6,8 state; 7,9,11 action; 10,12 result.
+- PROCEDURE: APPLY_DEMO_HIGHLIGHT
+  - Resolve `root = rootId ? getElementById(rootId) : document`.
+  - Find the first element matching `selector` inside `root`.
+  - Clear `data-demo-highlight`, `outline`, and `boxShadow` from the previous highlighted element.
+  - If the target exists, set `data-demo-highlight="1"`, `outline=3px solid #42a5f5`, and the blue glow.
+
+## CAPTURE_SIDE_PANEL_DEMO
+
+- [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] How: Capture This Page, By Tag, or Tabs at the real side-panel viewport with one unannotated opening frame, annotated steps, and one end-card frame.
+- Contract:
+  - INPUT: extension id; side-panel URL; active-tab storage key/value when needed; panel root id; ordered step actions; frame directory; `RATE=1.25`
+  - PRE: built extension is loaded; panel root becomes visible; each step selector is valid or explicitly optional
+  - OUTPUT: ordered PNG frames with frame 0 unannotated and the final frame showing the Hoverboard end card
+  - POST:
+    - success => every required step has a captured frame and no highlight remains before the end card
+  - EFFECTS: browser navigation, DOM state, filesystem IO, asynchronous waits
+  - FAILURE_MODES: extension id unavailable; panel timeout; optional content absent; screenshot failure
+  - DATA_TRANSITION: persist the requested active side-panel tab before navigation; mutate only demo overlay/highlight/end-card DOM
+  - TERMINATION: total
+- PROCEDURE: CAPTURE_SIDE_PANEL_DEMO
+  - Persist `hoverboard_sidepanel_active_tab` when the selected side-panel surface must be visible in frame 0.
+  - Open the side-panel URL and wait for the selected panel root to be visible.
+  - Remove overlay and highlight; wait `1000*RATE` milliseconds; capture frame 0.
+  - For each ordered step: clear the previous highlight; call `SET_OVERLAY`; call `APPLY_DEMO_HIGHLIGHT` for the step root and selector; perform the described UI action; wait the step duration multiplied by `RATE`; capture one or more frames.
+  - After the final content step: clear highlight and overlay; wait `500*RATE` milliseconds; inject `__demo_end_card__` with the centered Hoverboard icon; capture the final frame.
+
+## CAPTURE_BROWSER_BOOKMARKS_DEMO
+
+- [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] How: Seed a native Chrome bookmark folder, open the standalone Browser Bookmarks page, and highlight only `#browserBookmarksPanel` while presenting search, folder, sort, count, and URL behavior.
+- Contract:
+  - INPUT: extension id; Chromium context with `chrome.bookmarks`; medium-complexity bookmark records; frame directory; `docs/demo-browser-bookmarks.gif` output
+  - PRE: extension is loaded; bookmark permission is available; Browser Bookmarks page is reachable
+  - OUTPUT: Browser Bookmarks PNG frames and `docs/demo-browser-bookmarks.gif`
+  - POST:
+    - success => output frames show the standalone page and the GIF uses the shared three-part timing
+  - EFFECTS: native bookmark state, browser navigation, DOM state, filesystem IO
+  - FAILURE_MODES: bookmark seed failure; page timeout; missing optional row; ffmpeg failure
+  - DATA_TRANSITION: create the demo folder and child bookmarks; mutate only capture annotations after the page loads
+  - TERMINATION: total
+- PROCEDURE: CAPTURE_BROWSER_BOOKMARKS_DEMO
+  - Create one `Hoverboard Demo` folder and 5–10 stable bookmark records under the bookmarks bar.
+  - Navigate to `browser-bookmarks.html`; wait for `#browserBookmarksPanel`.
+  - Capture frame 0 without an overlay, then run the ordered steps for list, search, folder, sort, count, and URL actions using root `browserBookmarksPanel`.
+  - Clear annotations, capture the end card, and pass all frames to `BUILD_DEMO_GIF`.
+
+## CAPTURE_VISIT_HISTORY_DEMO
+
+- [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] How: Seed usage and navigation-edge records, open the standalone Visit History page, and highlight only `#visitHistoryPanel` while presenting its current sections.
+- Contract:
+  - INPUT: extension id; deterministic local usage and navigation-edge records; frame directory; `docs/demo-visit-history.gif` output
+  - PRE: local storage writes are awaited; Visit History page is reachable; usage and edge fixtures contain stable timestamps
+  - OUTPUT: Visit History PNG frames and `docs/demo-visit-history.gif`
+  - POST:
+    - success => frames show Most Visited, Recently Visited, Refresh, and Navigation Graph from the supplied fixtures
+  - EFFECTS: extension storage state, browser navigation, DOM state, filesystem IO
+  - FAILURE_MODES: seed write failure; page timeout; empty section; ffmpeg failure
+  - DATA_TRANSITION: replace only the temporary profile's usage and edge seed; mutate only capture annotations after page load
+  - TERMINATION: total
+- PROCEDURE: CAPTURE_VISIT_HISTORY_DEMO
+  - Write `hoverboard_bookmark_usage` and `hoverboard_bookmark_nav_edges` to temporary local storage and await completion.
+  - Navigate to `visit-history.html`; wait for `#visitHistoryPanel`.
+  - Capture frame 0 without an overlay, then run the ordered steps for the page introduction, Most Visited, Recently Visited, Refresh, and Navigation Graph using root `visitHistoryPanel`.
+  - Clear annotations, capture the end card, and pass all frames to `BUILD_DEMO_GIF`.
+
+## BUILD_DEMO_GIF
+
+- [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-BOOKMARK_USAGE_TRACKING] How: Convert captured frames into a loop-friendly GIF with a useful static first frame, one-second overlay steps, and a half-second end interstitial.
+- Contract:
+  - INPUT: ordered PNG frames; palette path; GIF output path; ffmpeg
+  - PRE: frame 0 and final end-card frame exist; ffmpeg is executable; at least one content frame exists
+  - OUTPUT: GIF containing no-overlay, main, and end segments in order
+  - POST:
+    - success => output is re-encoded with the concat filter and does not use concat demuxer with `-c copy`
+  - EFFECTS: filesystem IO; subprocess execution
+  - FAILURE_MODES: missing frame; palette generation failure; ffmpeg concat failure
+  - DATA_TRANSITION: create intermediate palette and segment GIFs; write the final GIF; preserve source PNGs
+  - TERMINATION: total
+- PROCEDURE: BUILD_DEMO_GIF
+  - Generate one palette from all frames.
+  - Build a no-overlay segment from frame 0 for one second.
+  - Build the main segment from frames 1 through `N-2` at one frame per second.
+  - Build the end segment from frame `N-1` for 0.5 seconds.
+  - Concatenate the available segments with an ffmpeg concat filter and `-c:v gif`; never use concat demuxer `-c copy`.

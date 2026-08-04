@@ -1,379 +1,246 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-SCREENSHOT_MODE ===
- * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] — Placeholder screenshot flow: seed storage, fake tab params, data-screenshot-ready, handleGetCurrentBookmark prefers data.url. Contract: URL params and seed; placeholder UI and script capture.
+ * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] — Generate repeatable README screenshots from seeded extension data across the current side-panel tabs and standalone tools.
  *
- * ## MAIN
+ * ## CAPTURE_README_MEDIA
  *
- * - [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] How: Rich placeholder data: 15+ bookmarks so index and By Tag tree look robust; hero Pinboard entry with 6+ tags and non-empty extended for This Page view. Side panel: open with ?screenshot=1&url=screenshotPopupUrl&title=screenshotPopupTitle so Bookmark tab shows Pinboard bookmark (same doc, PopupController reads window.location.search).
+ * - [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] How: Seed deterministic bookmark, usage, and native Chrome bookmark data, then capture only current product surfaces so README media cannot drift back to the removed popup or legacy side-panel tabs.
  * - Contract:
- *   - INPUT: ?screenshot=1&url=...&title=... (popup/side panel); seed JSON (local bookmarks, storage index, theme); optional --seed=path
- *   - PRE: caller supplies valid inputs for this block; dependencies wired
- *   - OUTPUT: popup/index/side panel rendered with placeholder data; data-screenshot-ready attribute; script can capture screenshot
+ *   - INPUT: optional --seed JSON file; built dist/ extension
+ *   - PRE: dist/manifest.json exists; seed JSON has hoverboard_local_bookmarks when supplied
+ *   - OUTPUT: current side-panel and standalone-tool PNG files under images/
  *   - POST:
- *     - success => block outputs match OUTPUT shape
- *   - DATA: PopupController._screenshotMode; handleGetCurrentBookmark prefers data.url when http(s); placeholderStorageSeed
- *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
- *   - EFFECTS: Async, Http, IO, State
+ *     - success => every expected image exists and represents seeded data
+ *   - FAILURE_MODES: missing_build, missing_seed, capture_timeout
+ *   - EFFECTS: Async, IO, State
  *   - TERMINATION: total
- * - PROCEDURE: MAIN
- *   - 1. localBookmarks: BUILD object keyed by URL; Pinboard entry HAS tags.length >= 6, extended non-empty, toread 'yes'; total entries >= 15; mix of toread yes/no; storageIndex one key per localBookmarks URL, value 'local'
- *   - How (sub-block): Await seed; open popup/index; wait for ready; check store-local for index; capture.
- *   - 2. Script: SEED chrome.storage.local/sync (await set); optional LOAD seed from file; OPEN popup or index; WAIT for [data-screenshot-ready="true"]; CHECK #store-local for index; CAPTURE screenshot
- *   - How (sub-block): Use URL params as fake tab; set data-screenshot-ready in finally.
- *   - 3. Popup load: IF screenshot=1 and url param: USE param as fake tab url/title; SKIP getCurrentTab; IN finally SET data-screenshot-ready on #mainInterface
- *   - How (sub-block): Prefer data.url as targetUrl when http(s) so popup-as-tab gets correct bookmark.
- *   - 4. handleGetCurrentBookmark: IF data.url present and http(s): USE as targetUrl so popup-as-tab gets bookmark for screenshot URL
- *   - 5. Side panel URL: GOTO side-panel.html?screenshot=1&url=encode(screenshotPopupUrl)&title=encode(screenshotPopupTitle); SET viewport width 360 (or 240); WAIT for tab content; CAPTURE screenshot (This Page, then By Tag, Tabs, etc.); output side-panel-bookmark.png, side-panel-tags-tree.png, side-panel-tabs.png
- *   - 6. record-demo-side-panel-this-page: SEED chrome.storage.local with placeholderStorageSeed via options page; GOTO side-panel.html?screenshot=1&url=...&title=...; record frames; assemble GIF
  *
- * ## SCREENSHOT_THEME_CONTRACT
+ * ## BUILD_STABLE_USAGE_FIXTURES
  *
- * - [IMPL-SCREENSHOT_MODE] [IMPL-POPUP_THEME_CSS] [ARCH-THEME] [REQ-DARK_THEME] How: Connects screenshot seed theme selection to the popup stylesheet contract before browser capture.
- * - Contract:
- *   - INPUT: screenshot seed, selected theme, popup stylesheet
- *   - PRE: screenshot seed and popup stylesheet are readable
- *   - OUTPUT: screenshot capture configuration with a supported theme
- *   - POST:
- *     - success => selected/default theme has a matching popup CSS rule
- *   - EFFECTS: pure
- *   - TERMINATION: total
- * - PROCEDURE: SCREENSHOT_THEME_CONTRACT
- *   - Read selected/default theme from screenshot seed
- *   - Read theme selectors from popup stylesheet
- *   - ASSERT selected/default theme is supported
- *
- * === END IMPL-FULL-BLOCK: IMPL-SCREENSHOT_MODE ===
+ * - [IMPL-SCREENSHOT_MODE] [REQ-BOOKMARK_USAGE_TRACKING] How: Add stable usage and navigation-edge fixtures only when the caller did not provide them.
  */
-#!/usr/bin/env node
-/**
- * Generate README/docs screenshots with placeholder bookmark data.
- * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] Requires built extension in dist/. Run: npm run build:dev && node scripts/screenshots-placeholder.js
- * Popup is cropped to #mainInterface only. Pinboard image composites overlay page + cropped popup.
- *
- * Seed from file (optional):
- *   node scripts/screenshots-placeholder.js [--seed=path/to/seed.json]
- *   SCREENSHOT_SEED_FILE=path/to/seed.json node scripts/screenshots-placeholder.js
- * Seed JSON shape: { hoverboard_local_bookmarks: { [url]: bookmark }, hoverboard_storage_index: { [url]: "local" }, hoverboard_theme?: "dark"|"light", hoverboard_settings?: object }
- * See scripts/screenshot-placeholder-data.js for the default seed and bookmark shape.
- */
-
+import os from 'os'
 import path from 'path'
 import fs from 'fs'
-import os from 'os'
 import { fileURLToPath } from 'url'
 import { chromium } from '@playwright/test'
-import sharp from 'sharp'
 import {
   placeholderStorageSeed as defaultLocalSeed,
   placeholderSyncSeed as defaultSyncSeed,
   placeholderSuggestedTags,
   placeholderRecentTags,
+  placeholderSeedTimestamp,
   getPlaceholderUsageSeed,
-  getPlaceholderEdgesSeed,
-  screenshotPopupUrl,
-  screenshotPopupTitle
+  getPlaceholderEdgesSeed
 } from './screenshot-placeholder-data.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.join(__dirname, '..')
 const extPath = path.join(projectRoot, 'dist')
 const imagesDir = path.join(projectRoot, 'images')
+const SIDE_PANEL_VIEWPORT = { width: 360, height: 800 }
+const TOOL_VIEWPORT = { width: 1200, height: 900 }
 
+/**
+ * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] LOAD_SCREENSHOT_SEED
+ * INPUT: optional seed path. OUTPUT: normalized local and sync seed.
+ * PRE: supplied JSON contains hoverboard_local_bookmarks. EFFECTS: filesystem IO.
+ */
 function getSeedFilePath () {
   const env = process.env.SCREENSHOT_SEED_FILE
   if (env) return path.isAbsolute(env) ? env : path.join(projectRoot, env)
-  const arg = process.argv.find(a => a.startsWith('--seed='))
+  const arg = process.argv.find((value) => value.startsWith('--seed='))
   if (arg) return path.isAbsolute(arg.slice(7)) ? arg.slice(7) : path.join(projectRoot, arg.slice(7))
   return null
 }
 
 function loadSeedFromFile (filePath) {
-  const raw = fs.readFileSync(filePath, 'utf8')
-  const data = JSON.parse(raw)
+  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
   if (!data || typeof data.hoverboard_local_bookmarks !== 'object' || Array.isArray(data.hoverboard_local_bookmarks)) {
     throw new Error('Seed file must have hoverboard_local_bookmarks (object keyed by URL)')
   }
-  const hoverboard_storage_index = data.hoverboard_storage_index && typeof data.hoverboard_storage_index === 'object' && !Array.isArray(data.hoverboard_storage_index)
+  const storageIndex = data.hoverboard_storage_index && typeof data.hoverboard_storage_index === 'object' && !Array.isArray(data.hoverboard_storage_index)
     ? data.hoverboard_storage_index
-    : Object.fromEntries(Object.keys(data.hoverboard_local_bookmarks).map(url => [url, 'local']))
-  const placeholderStorageSeed = {
-    hoverboard_local_bookmarks: data.hoverboard_local_bookmarks,
-    hoverboard_storage_index,
-    hoverboard_theme: data.hoverboard_theme || 'dark',
-    hoverboard_demo_suggested_tags: Array.isArray(data.hoverboard_demo_suggested_tags) ? data.hoverboard_demo_suggested_tags : placeholderSuggestedTags,
-    hoverboard_demo_recent_tags: Array.isArray(data.hoverboard_demo_recent_tags) ? data.hoverboard_demo_recent_tags : placeholderRecentTags
+    : Object.fromEntries(Object.keys(data.hoverboard_local_bookmarks).map((url) => [url, 'local']))
+  return {
+    local: {
+      hoverboard_local_bookmarks: data.hoverboard_local_bookmarks,
+      hoverboard_storage_index: storageIndex,
+      hoverboard_theme: data.hoverboard_theme || 'dark',
+      hoverboard_demo_suggested_tags: Array.isArray(data.hoverboard_demo_suggested_tags) ? data.hoverboard_demo_suggested_tags : placeholderSuggestedTags,
+      hoverboard_demo_recent_tags: Array.isArray(data.hoverboard_demo_recent_tags) ? data.hoverboard_demo_recent_tags : placeholderRecentTags,
+      ...(data.hoverboard_bookmark_usage && typeof data.hoverboard_bookmark_usage === 'object' && !Array.isArray(data.hoverboard_bookmark_usage)
+        ? { hoverboard_bookmark_usage: data.hoverboard_bookmark_usage }
+        : {}),
+      ...(data.hoverboard_bookmark_nav_edges && typeof data.hoverboard_bookmark_nav_edges === 'object' && !Array.isArray(data.hoverboard_bookmark_nav_edges)
+        ? { hoverboard_bookmark_nav_edges: data.hoverboard_bookmark_nav_edges }
+        : {})
+    },
+    sync: data.hoverboard_settings != null ? { hoverboard_settings: data.hoverboard_settings } : defaultSyncSeed
   }
-  const placeholderSyncSeed = data.hoverboard_settings != null
-    ? { hoverboard_settings: data.hoverboard_settings }
-    : defaultSyncSeed
-  return { placeholderStorageSeed, placeholderSyncSeed }
 }
 
-const PINBOARD_CONTENT_URL = 'https://pinboard.in/'
-const SCREENSHOT_WAIT_MS = 3000
-const OVERLAY_SELECTOR = '#hoverboard-overlay'
-const POPUP_MAIN_SELECTOR = '#mainInterface'
-const POPUP_READY_ATTR = '[data-screenshot-ready="true"]'
-const OPTIONS_LOAD_SELECTOR = '#auth-token, #storage-mode-pinboard'
-const TABLE_SELECTOR = '.bookmarks-table tbody, .empty-state'
-const STORE_LOCAL_CHECKBOX = '#store-local'
-const POPUP_COMPOSITE_INSET = 24 // px from top-right when compositing popup onto Pinboard image
-const SIDE_PANEL_READY_SELECTOR = '#treeContainer, #emptyState'
-const SIDE_PANEL_BOOKMARK_READY = '#bookmarkPanel [data-popup-ref="mainInterface"], #bookmarkPanel [data-popup-ref="loadingState"]'
-const SIDE_PANEL_TAB_BOOKMARK = '.side-panel-tab[data-tab="bookmark"]'
-const SIDE_PANEL_TAB_TAGS_TREE = '.side-panel-tab[data-tab="tagsTree"]'
-const SIDE_PANEL_TAB_BROWSER_TABS = '.side-panel-tab[data-tab="browserTabs"]'
-const SIDE_PANEL_TAB_BROWSER_BOOKMARKS = '.side-panel-tab[data-tab="browserBookmarks"]'
-const SIDE_PANEL_TAB_USAGE = '.side-panel-tab[data-tab="usage"]'
-const SIDE_PANEL_BROWSER_TABS_READY = '#browserTabsPanel .browser-tabs-header'
-const SIDE_PANEL_BROWSER_BOOKMARKS_READY = '#browserBookmarksPanel #browserBookmarksList, #browserBookmarksPanel #browserBookmarksCount'
-const SIDE_PANEL_USAGE_READY = '#usagePanel #usage-most-visited-heading, #usagePanel [data-usage-refresh]'
-// [IMPL-SCREENSHOT_MODE] Side panel captures at 360px width so README images match real Chrome side panel proportions
-const SIDE_PANEL_VIEWPORT = { width: 360, height: 800 }
-// Viewport for Pinboard overlay page so composite (pinboard + side panel) has predictable dimensions
-const PINBOARD_VIEWPORT = { width: 1024 - SIDE_PANEL_VIEWPORT.width, height: SIDE_PANEL_VIEWPORT.height }
-const PINBOARD_SIDE_PANEL_COMPOSITE_WIDTH = PINBOARD_VIEWPORT.width + SIDE_PANEL_VIEWPORT.width
+async function getExtensionId (context) {
+  const serviceWorker = context.serviceWorkers()[0] || await context.waitForEvent('serviceworker', { timeout: 15000 })
+  return serviceWorker.url().split('/')[2]
+}
 
+/**
+ * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BOOKMARK_USAGE_TRACKING] SEED_EXTENSION_DATA
+ * INPUT: extension context, id, normalized local/sync seed. OUTPUT: completed writes.
+ * PRE: Options page is reachable. EFFECTS: asynchronous extension storage IO.
+ */
+async function seedExtension (context, extensionId, localSeed, syncSeed) {
+  // [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] Await extension storage writes before opening any capture surface.
+  const optionsPage = await context.newPage()
+  await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
+  await optionsPage.evaluate(async ({ local, sync }) => {
+    await chrome.storage.local.set(local)
+    if (sync && chrome.storage.sync) await chrome.storage.sync.set(sync)
+  }, { local: localSeed, sync: syncSeed })
+  await optionsPage.close()
+}
+
+async function seedBrowserBookmarks (context, extensionId) {
+  // [IMPL-SCREENSHOT_MODE] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] Seed a small native bookmark tree for the standalone Browser Bookmarks page.
+  const seedPage = await context.newPage()
+  await seedPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
+  await seedPage.evaluate(async () => {
+    const tree = await chrome.bookmarks.getTree()
+    const bookmarksBar = tree[0]?.children?.find((node) => node.id === '1' || node.title?.includes('Bookmarks Bar'))
+    const folder = await chrome.bookmarks.create({ parentId: bookmarksBar?.id || '1', title: 'Hoverboard README' })
+    const records = [
+      ['MDN Web Docs', 'https://developer.mozilla.org'],
+      ['GitHub', 'https://github.com'],
+      ['Playwright', 'https://playwright.dev'],
+      ['Chrome Extensions', 'https://developer.chrome.com/docs/extensions'],
+      ['Node.js', 'https://nodejs.org'],
+      ['npm', 'https://www.npmjs.com'],
+      ['JavaScript.info', 'https://javascript.info']
+    ]
+    for (const [title, url] of records) await chrome.bookmarks.create({ parentId: folder.id, title, url })
+  })
+  await seedPage.close()
+}
+
+/**
+ * [IMPL-SCREENSHOT_MODE] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BROWSER_TABS] CAPTURE_SIDE_PANEL_SURFACES
+ * INPUT: extension context and id. OUTPUT: current side-panel PNG files. EFFECTS: browser navigation and filesystem IO.
+ */
+async function captureSidePanel (context, extensionId) {
+  // [IMPL-SCREENSHOT_MODE] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Capture exactly This Page, By Tag, and Tabs.
+  const auxOne = await context.newPage()
+  const auxTwo = await context.newPage()
+  await Promise.all([
+    auxOne.goto('https://playwright.dev', { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {}),
+    auxTwo.goto('https://github.com', { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {})
+  ])
+
+  const page = await context.newPage()
+  await page.setViewportSize(SIDE_PANEL_VIEWPORT)
+  const params = `?screenshot=1&url=${encodeURIComponent('https://pinboard.in')}&title=${encodeURIComponent('Pinboard: social bookmarking')}`
+  await page.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html${params}`, { waitUntil: 'domcontentloaded', timeout: 15000 })
+  await page.locator('#bookmarkPanel [data-popup-ref="mainInterface"], #bookmarkPanel [data-popup-ref="loadingState"]').first().waitFor({ state: 'attached', timeout: 10000 })
+  await page.waitForTimeout(800)
+  await page.screenshot({ path: path.join(imagesDir, 'side-panel-bookmark.png'), fullPage: true })
+
+  await page.locator('.side-panel-tab[data-tab="tagsTree"]').click()
+  await page.waitForSelector('#tagsTreePanel:not([hidden])', { timeout: 10000 })
+  await page.waitForTimeout(700)
+  await page.screenshot({ path: path.join(imagesDir, 'side-panel-tags-tree.png'), fullPage: true })
+
+  await page.locator('.side-panel-tab[data-tab="browserTabs"]').click()
+  await page.waitForSelector('#browserTabsPanel:not([hidden])', { timeout: 10000 })
+  await page.waitForTimeout(700)
+  await page.screenshot({ path: path.join(imagesDir, 'side-panel-tabs.png'), fullPage: true })
+
+  await page.close()
+  await auxOne.close()
+  await auxTwo.close()
+}
+
+async function captureLocalBookmarksIndex (context, extensionId) {
+  // [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] Select the Local store because seeded records are local-backed.
+  const page = await context.newPage()
+  await page.setViewportSize(TOOL_VIEWPORT)
+  await page.goto(`chrome-extension://${extensionId}/src/ui/bookmarks-table/bookmarks-table.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
+  await page.locator('.bookmarks-table tbody, .empty-state').first().waitFor({ state: 'attached', timeout: 10000 })
+  await page.locator('#store-local').check()
+  await page.waitForTimeout(700)
+  await page.screenshot({ path: path.join(imagesDir, 'local-bookmarks-index.png'), fullPage: true })
+  await page.close()
+}
+
+/**
+ * [IMPL-SCREENSHOT_MODE] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] CAPTURE_STANDALONE_TOOL
+ * INPUT: extension context and id. OUTPUT: browser-bookmarks.png. EFFECTS: full-page browser capture.
+ */
+async function captureBrowserBookmarks (context, extensionId) {
+  // [IMPL-SCREENSHOT_MODE] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] Capture the standalone Browser Bookmarks page, not a removed side-panel tab.
+  const page = await context.newPage()
+  await page.setViewportSize(TOOL_VIEWPORT)
+  await page.goto(`chrome-extension://${extensionId}/src/ui/browser-bookmarks/browser-bookmarks.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
+  await page.locator('#browserBookmarksPanel').waitFor({ state: 'visible', timeout: 10000 })
+  await page.waitForTimeout(1000)
+  await page.screenshot({ path: path.join(imagesDir, 'browser-bookmarks.png'), fullPage: true })
+  await page.close()
+}
+
+/**
+ * [IMPL-SCREENSHOT_MODE] [REQ-BOOKMARK_USAGE_TRACKING] CAPTURE_STANDALONE_TOOL
+ * INPUT: extension context and id. OUTPUT: visit-history.png. EFFECTS: full-page browser capture.
+ */
+async function captureVisitHistory (context, extensionId) {
+  // [IMPL-SCREENSHOT_MODE] [REQ-BOOKMARK_USAGE_TRACKING] Capture the standalone Visit History page from seeded usage and navigation data.
+  const page = await context.newPage()
+  await page.setViewportSize(TOOL_VIEWPORT)
+  await page.goto(`chrome-extension://${extensionId}/src/ui/visit-history/visit-history.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
+  await page.locator('#visitHistoryPanel').waitFor({ state: 'visible', timeout: 10000 })
+  await page.waitForTimeout(1000)
+  await page.screenshot({ path: path.join(imagesDir, 'visit-history.png'), fullPage: true })
+  await page.close()
+}
+
+/**
+ * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-BOOKMARK_USAGE_TRACKING] CAPTURE_README_MEDIA
+ * INPUT: built dist/ extension and optional seed. OUTPUT: current README image set.
+ * PRE: dist/manifest.json exists. FAILURE_MODES: missing build, seed, timeout, or capture.
+ */
 async function main () {
-  if (!fs.existsSync(extPath) || !fs.existsSync(path.join(extPath, 'manifest.json'))) {
-    console.error('Extension not built. Run: npm run build:dev')
-    process.exit(1)
+  if (!fs.existsSync(path.join(extPath, 'manifest.json'))) {
+    throw new Error('Extension not built. Run: npm run build:dev')
   }
-
-  const seedPath = getSeedFilePath()
-  let placeholderStorageSeed = defaultLocalSeed
-  let placeholderSyncSeed = defaultSyncSeed
-  if (seedPath) {
-    if (!fs.existsSync(seedPath)) {
-      console.error('Seed file not found:', seedPath)
-      process.exit(1)
-    }
-    const loaded = loadSeedFromFile(seedPath)
-    placeholderStorageSeed = loaded.placeholderStorageSeed
-    placeholderSyncSeed = loaded.placeholderSyncSeed
-    console.log('Using seed file:', seedPath)
-  }
-
-  const userDataDir = path.join(os.tmpdir(), `hoverboard-screenshots-${Date.now()}`)
-  fs.mkdirSync(userDataDir, { recursive: true })
   fs.mkdirSync(imagesDir, { recursive: true })
 
-  console.log('Launching Chromium with extension from', extPath)
+  const seedPath = getSeedFilePath()
+  const loaded = seedPath ? loadSeedFromFile(seedPath) : { local: defaultLocalSeed, sync: defaultSyncSeed }
+  const localSeed = {
+    ...loaded.local,
+    ...(loaded.local.hoverboard_bookmark_usage ? {} : getPlaceholderUsageSeed(placeholderSeedTimestamp)),
+    ...(loaded.local.hoverboard_bookmark_nav_edges ? {} : getPlaceholderEdgesSeed(placeholderSeedTimestamp))
+  }
+
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hoverboard-screenshots-'))
   const context = await chromium.launchPersistentContext(userDataDir, {
     headless: false,
-    args: [
-      `--disable-extensions-except=${extPath}`,
-      `--load-extension=${extPath}`
-    ]
+    args: [`--disable-extensions-except=${extPath}`, `--load-extension=${extPath}`]
   })
 
-  let [serviceWorker] = context.serviceWorkers()
-  if (!serviceWorker) {
-    serviceWorker = await context.waitForEvent('serviceworker', { timeout: 15000 })
-  }
-  const extensionId = serviceWorker.url().split('/')[2]
-  console.log('Extension ID:', extensionId)
-
-  const baseUrl = `chrome-extension://${extensionId}`
-
-  // Seed storage from extension context (options page has chrome.storage).
-  // [IMPL-SCREENSHOT_MODE] Await storage set so popup/bookmarks-table see seeded data.
-  // [IMPL-BOOKMARK_USAGE_TRACKING_UI] Merge rich usage + nav edges so Usage tab screenshot shows robust data.
-  const localSeed = {
-    ...placeholderStorageSeed,
-    ...getPlaceholderUsageSeed(),
-    ...getPlaceholderEdgesSeed()
-  }
-  const optionsPage = await context.newPage()
-  await optionsPage.goto(`${baseUrl}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
-  await optionsPage.evaluate(async ({ seed, syncSeed }) => {
-    await chrome.storage.local.set(seed)
-    if (syncSeed && typeof chrome.storage.sync !== 'undefined') {
-      await chrome.storage.sync.set(syncSeed)
-    }
-  }, { seed: localSeed, syncSeed: placeholderSyncSeed })
-  await optionsPage.waitForTimeout(500)
-
-  // 1) Overlay on content page (Pinboard) – capture to temp for compositing (popup + later pinboard+side-panel composite)
-  const pinboardTempPath = path.join(os.tmpdir(), `hoverboard-pinboard-${Date.now()}.png`)
-  const pinboardOnlyPath = path.join(os.tmpdir(), `hoverboard-pinboard-only-${Date.now()}.png`)
-  const overlayPage = await context.newPage()
-  await overlayPage.setViewportSize(PINBOARD_VIEWPORT)
-  await overlayPage.goto(PINBOARD_CONTENT_URL, { waitUntil: 'domcontentloaded', timeout: 20000 })
-  await overlayPage.waitForTimeout(SCREENSHOT_WAIT_MS)
-  const overlayEl = overlayPage.locator(OVERLAY_SELECTOR)
   try {
-    await overlayEl.waitFor({ state: 'visible', timeout: 8000 })
-  } catch (_) {
-    console.warn('Overlay may not be visible; capturing page anyway.')
+    const extensionId = await getExtensionId(context)
+    await seedExtension(context, extensionId, localSeed, loaded.sync)
+    await seedBrowserBookmarks(context, extensionId)
+    await captureLocalBookmarksIndex(context, extensionId)
+    await captureSidePanel(context, extensionId)
+    await captureBrowserBookmarks(context, extensionId)
+    await captureVisitHistory(context, extensionId)
+    console.log('README screenshots written to images/')
+  } finally {
+    await context.close()
   }
-  await overlayPage.screenshot({ path: pinboardTempPath, fullPage: false })
-  fs.copyFileSync(pinboardTempPath, pinboardOnlyPath)
-  await overlayPage.close()
-
-  // 2) Popup (screenshot mode) – crop to #mainInterface only, then composite onto Pinboard and save standalone
-  const popupUrl = `${baseUrl}/src/ui/popup/popup.html?screenshot=1&url=${encodeURIComponent(screenshotPopupUrl)}&title=${encodeURIComponent(screenshotPopupTitle)}`
-  const popupPage = await context.newPage()
-  await popupPage.goto(popupUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
-  await popupPage.locator(POPUP_MAIN_SELECTOR).waitFor({ state: 'visible', timeout: 10000 })
-  await popupPage.locator(POPUP_READY_ATTR).waitFor({ state: 'attached', timeout: 15000 })
-  await popupPage.waitForTimeout(300)
-  const popupBuffer = await popupPage.locator(POPUP_MAIN_SELECTOR).screenshot()
-  await popupPage.close()
-
-  // Save cropped popup (tight to content, no extra whitespace)
-  const popupPath = path.join(imagesDir, 'Hoverboard_v1.0.7.0_Chrome_Popup.png')
-  fs.writeFileSync(popupPath, popupBuffer)
-  console.log('Saved: images/Hoverboard_v1.0.7.0_Chrome_Popup.png (cropped to popup content)')
-
-  // Composite popup onto Pinboard page image (overlay + popup in one image)
-  const pageImage = sharp(pinboardTempPath)
-  const pageMeta = await pageImage.metadata()
-  const popupImage = sharp(popupBuffer)
-  const popupMeta = await popupImage.metadata()
-  const left = pageMeta.width - popupMeta.width - POPUP_COMPOSITE_INSET
-  const top = POPUP_COMPOSITE_INSET
-  await pageImage
-    .composite([{ input: popupBuffer, left: Math.max(0, left), top }])
-    .toFile(path.join(imagesDir, 'Hoverboard_v1.0.7.0_Chrome_Pinboard.png'))
-  console.log('Saved: images/Hoverboard_v1.0.7.0_Chrome_Pinboard.png (overlay + popup composited)')
-  try { fs.unlinkSync(pinboardTempPath) } catch (_) {}
-  // pinboardOnlyPath kept for pinboard+side-panel composite after step 5a
-
-  // 3) Options
-  await optionsPage.reload({ waitUntil: 'domcontentloaded', timeout: 15000 })
-  await optionsPage.locator(OPTIONS_LOAD_SELECTOR).first().waitFor({ state: 'attached', timeout: 10000 })
-  await optionsPage.waitForTimeout(500)
-  await optionsPage.screenshot({
-    path: path.join(imagesDir, 'Hoverboard_v1.0.7.0_Chrome_Options.png'),
-    fullPage: true
-  })
-  console.log('Saved: images/Hoverboard_v1.0.7.0_Chrome_Options.png')
-  await optionsPage.close()
-
-  // 4) Local bookmarks index – check Local (L) so seeded bookmarks (storage: local) are visible
-  const indexPage = await context.newPage()
-  await indexPage.goto(`${baseUrl}/src/ui/bookmarks-table/bookmarks-table.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
-  await indexPage.locator(TABLE_SELECTOR).first().waitFor({ state: 'attached', timeout: 10000 })
-  await indexPage.locator(STORE_LOCAL_CHECKBOX).check()
-  await indexPage.waitForTimeout(500)
-  await indexPage.screenshot({
-    path: path.join(imagesDir, 'local-bookmarks-index.png'),
-    fullPage: true
-  })
-  console.log('Saved: images/local-bookmarks-index.png')
-  await indexPage.close()
-
-  // 5) Side panel – tabbed page (This Page + By Tag); sized viewport so capture matches real side panel width [IMPL-SCREENSHOT_MODE]
-  // [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] Open with ?screenshot=1&url&title so Bookmark tab shows Pinboard bookmark (fake current tab).
-  const sidePanelUrl = `${baseUrl}/src/ui/side-panel/side-panel.html?screenshot=1&url=${encodeURIComponent(screenshotPopupUrl)}&title=${encodeURIComponent(screenshotPopupTitle)}`
-  const sidePanelPage = await context.newPage()
-  await sidePanelPage.setViewportSize(SIDE_PANEL_VIEWPORT)
-  await sidePanelPage.goto(sidePanelUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
-  await sidePanelPage.waitForTimeout(2000)
-
-  // 5a) This Page tab (default): wait for content then capture (file + buffer for pinboard+side-panel composite)
-  await sidePanelPage.locator(SIDE_PANEL_BOOKMARK_READY).first().waitFor({ state: 'attached', timeout: 10000 })
-  await sidePanelPage.waitForTimeout(800)
-  // [IMPL-SCREENSHOT_MODE] Wait for demo Suggested Tags (and thus Recent Tags) to be applied so screenshot shows all three tag sections
-  const suggestedTagSelector = '#bookmarkPanel [data-popup-ref="suggestedTagsContainer"] .tag'
-  try {
-    await sidePanelPage.locator(suggestedTagSelector).first().waitFor({ state: 'attached', timeout: 3000 })
-  } catch (_) {
-    // Timeout: capture anyway (demo tags may still be visible; avoid failing the script)
-  }
-  await sidePanelPage.waitForTimeout(300)
-  const sidePanelBookmarkBuffer = await sidePanelPage.screenshot({ fullPage: true })
-  fs.writeFileSync(path.join(imagesDir, 'side-panel-bookmark.png'), sidePanelBookmarkBuffer)
-  console.log('Saved: images/side-panel-bookmark.png')
-
-  // 5a') Composite: Pinboard page (with overlay) + side panel This Page tab → pinboard-side-panel-bookmark.png [IMPL-SCREENSHOT_MODE]
-  const pinboardOnlyBuf = fs.readFileSync(pinboardOnlyPath)
-  const panelTop = sharp(sidePanelBookmarkBuffer).extract({ left: 0, top: 0, width: SIDE_PANEL_VIEWPORT.width, height: SIDE_PANEL_VIEWPORT.height })
-  const panelTopBuf = await panelTop.png().toBuffer()
-  const compositeCanvas = sharp({
-    create: {
-      width: PINBOARD_SIDE_PANEL_COMPOSITE_WIDTH,
-      height: PINBOARD_VIEWPORT.height,
-      channels: 3,
-      background: { r: 30, g: 30, b: 30 }
-    }
-  })
-  await compositeCanvas
-    .composite([
-      { input: pinboardOnlyBuf, left: 0, top: 0 },
-      { input: panelTopBuf, left: PINBOARD_VIEWPORT.width, top: 0 }
-    ])
-    .png()
-    .toFile(path.join(imagesDir, 'pinboard-side-panel-bookmark.png'))
-  console.log('Saved: images/pinboard-side-panel-bookmark.png (Pinboard + side panel This Page tab)')
-  try { fs.unlinkSync(pinboardOnlyPath) } catch (_) {}
-
-  // 5b) By Tag tab: switch tab, wait for tree content, capture
-  await sidePanelPage.locator(SIDE_PANEL_TAB_TAGS_TREE).click()
-  await sidePanelPage.waitForTimeout(2000)
-  await sidePanelPage.locator(SIDE_PANEL_READY_SELECTOR).first().waitFor({ state: 'attached', timeout: 10000 })
-  await sidePanelPage.waitForTimeout(500)
-  await sidePanelPage.screenshot({
-    path: path.join(imagesDir, 'side-panel-tags-tree.png'),
-    fullPage: true
-  })
-  console.log('Saved: images/side-panel-tags-tree.png')
-
-  // 5c) Tabs tab: switch tab, wait for panel content, capture [IMPL-SCREENSHOT_MODE] side-panel-tabs.png
-  await sidePanelPage.locator(SIDE_PANEL_TAB_BROWSER_TABS).click()
-  await sidePanelPage.waitForTimeout(2000)
-  await sidePanelPage.locator(SIDE_PANEL_BROWSER_TABS_READY).first().waitFor({ state: 'attached', timeout: 10000 })
-  await sidePanelPage.waitForTimeout(500)
-  await sidePanelPage.screenshot({
-    path: path.join(imagesDir, 'side-panel-tabs.png'),
-    fullPage: true
-  })
-  console.log('Saved: images/side-panel-tabs.png')
-
-  // 5d) Bookmarks tab: switch tab, wait for panel content, capture side-panel-bookmarks.png
-  await sidePanelPage.locator(SIDE_PANEL_TAB_BROWSER_BOOKMARKS).click()
-  await sidePanelPage.waitForTimeout(2000)
-  await sidePanelPage.locator(SIDE_PANEL_BROWSER_BOOKMARKS_READY).first().waitFor({ state: 'attached', timeout: 10000 })
-  await sidePanelPage.waitForTimeout(500)
-  await sidePanelPage.screenshot({
-    path: path.join(imagesDir, 'side-panel-bookmarks.png'),
-    fullPage: true
-  })
-  console.log('Saved: images/side-panel-bookmarks.png')
-
-  // 5e) Usage tab: switch tab, wait for panel content, capture side-panel-usage.png [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
-  await sidePanelPage.locator(SIDE_PANEL_TAB_USAGE).click()
-  await sidePanelPage.waitForTimeout(2000)
-  await sidePanelPage.locator(SIDE_PANEL_USAGE_READY).first().waitFor({ state: 'attached', timeout: 10000 })
-  await sidePanelPage.waitForTimeout(500)
-  await sidePanelPage.screenshot({
-    path: path.join(imagesDir, 'side-panel-usage.png'),
-    fullPage: true
-  })
-  console.log('Saved: images/side-panel-usage.png')
-  await sidePanelPage.close()
-
-  // 6) Browser Import in the Local Bookmarks Index (uses chrome.bookmarks.getTree from profile)
-  const importPage = await context.newPage()
-  await importPage.goto(`${baseUrl}/src/ui/bookmarks-table/bookmarks-table.html?source=browser`, {
-    waitUntil: 'domcontentloaded',
-    timeout: 15000
-  })
-  await importPage.locator('#table-wrapper, #empty-state').first().waitFor({ state: 'attached', timeout: 10000 })
-  await importPage.waitForTimeout(1000)
-  await importPage.screenshot({
-    path: path.join(imagesDir, 'browser-bookmark-import.png'),
-    fullPage: true
-  })
-  console.log('Saved: images/browser-bookmark-import.png')
-  await importPage.close()
-
-  await context.close()
-  console.log('Done. Screenshots in images/')
 }
 
-main().catch((err) => {
-  console.error(err)
+main().catch((error) => {
+  console.error(error)
   process.exit(1)
 })

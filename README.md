@@ -1,247 +1,174 @@
-# Hoverboard Chrome Extension
+# Hoverboard
 
-[![Build Status](https://github.com/fareedst/hoverboard/workflows/Build%20and%20Test/badge.svg)](https://github.com/fareedst/hoverboard/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore)
+Hoverboard is a local-first bookmark and tab workspace for Chromium browsers. Its primary home is the Chrome side panel: tag the current page, browse bookmarks by tag, search and manage tabs, and move from saved pages to durable offline archives.
 
-A modern Chrome extension for local-first bookmark management and web page tagging with optional Pinboard.in integration and optional file-based storage for privacy and sharing.
+The popup, badge, and optional on-page overlay remain available as secondary quick-access surfaces. The side panel and its full-page tools are the main workflow.
 
-## Supported Browsers
+## The side panel
 
-This extension uses the Chrome (Manifest V3) extension format and works in:
+On supported web pages, clicking the Hoverboard extension icon opens the side panel by default. The panel has three tabs:
 
-- **Chrome** – Primary target; full support
-- **Brave** – Works with Brave Browser; load the unpacked extension the same way as in Chrome (Brave supports Chrome extensions). **Known limitation:** With Hoverboard’s **side panel** or Brave’s **native sidebar** open, OS window arrange (maximize / half-screen) may overshoot the display or ignore arrange keystrokes. Workaround: close the panel or sidebar, arrange the window, then reopen. See [docs/troubleshooting/brave-side-panel-window-arrange.md](docs/troubleshooting/brave-side-panel-window-arrange.md) and upstream [brave-browser#55575](https://github.com/brave/brave-browser/issues/55575).
-- **Other Chromium-based browsers** – Any browser that supports Chrome extensions (e.g. Microsoft Edge, Opera, Vivaldi) can typically load and run the extension; install as an unpacked extension from the built files
+### This Page
 
-Safari is not currently supported (legacy Safari extension format is no longer maintained for this project).
+Manage the bookmark for the active page without leaving the side panel:
 
-### Extension Interface on Pinboard.in
+- **Quick Actions**: Show Hover, Toggle Privacy, Read Later, Delete, Save page archive, Save page screenshot, and Open offline Reader.
+- **Save to**: choose among Pinboard, File, Local, Sync, and Browser storage.
+- **Details**: edit the bookmark title and notes where the selected backend supports them.
+- **Tags**: add Current Tags, use Recent Tags, inspect Suggested Tags, and choose **Sort tags** by A–Z, Frequency, or Relevance.
+- **Tag with AI**: optionally request suggestions from OpenAI or Gemini after configuring an API key in Options.
+- **Search Bookmarks**: send a metadata query to the Local Bookmarks Index.
+- **Search Tabs**: quickly find an open tab by title; use the Tabs tab for deeper search and tab management.
 
-![Hoverboard Extension on Pinboard.in](images/Hoverboard_v1.0.7.0_Chrome_Pinboard.png)
+![Hoverboard This Page side panel](images/side-panel-bookmark.png)
 
-The screenshot above shows Hoverboard on a Pinboard.in placeholder page (overlay + popup composite, dark theme; demo tags "Pinboard" and "tags"). It showcases:
+_This Page example with placeholder bookmark data._
 
-- **Extension Badge**: The Hoverboard icon in the browser toolbar displays "3!" indicating 3 tags are associated with the current page and the site is marked as "Read Later"
-- **Transparent Overlay**: A dark overlay at the bottom showing the current bookmark status (placeholder tags, e.g. "Pinboard" and "tags")
-- **Popup Interface**: The main Hoverboard popup (dark theme) provides:
-  - **Visibility Controls**: Eye icon and "Show on page load" checkbox for overlay display
-  - **Tag Management**: "Add a tag..." input field with current tags displayed below; **Tag with AI** button ([REQ-AI_TAGGING_POPUP], [ARCH-AI_TAGGING_FLOW], [IMPL-AI_TAGGING_POPUP_UI]) submits the current page to the configured AI provider (OpenAI or Gemini) for tag suggestions. Page content is obtained by the extension (works even when the tab was opened before the extension was loaded); when the content script is present, Readability.js is used for main-article extraction. AI returns up to N tags (default 64). Tags you have already added to any site this session are auto-applied to the bookmark; the rest appear first in **Suggested Tags**. New bookmarks created from this flow use the default storage (local/file/sync per your default). The button is enabled only when an AI API key is set in Options and the current tab is http(s).
-  - **Search Functionality**: "Search tabs by title..." for finding related bookmarks. Tab search shows button border feedback on no match (no error message), and in the side panel the scroll position is preserved when searching.
-  - **Quick Actions**: Reload and Options buttons for easy access to settings
+![This Page demo](docs/demo-side-panel-this-page.gif)
 
-### Extension Configuration Options
+### By Tag
 
-![Hoverboard Extension Options](images/Hoverboard_v1.0.7.0_Chrome_Options.png)
+Browse the bookmark library as a hierarchical tag-and-bookmark view. Select tags, show all tags or only selected tags, expand **Filters & view**, and filter by dates, included tags, or domains. Search bookmark titles, URLs, tags, and notes with match counts and Previous/Next navigation. Selecting a URL opens it in a new tab.
 
-The configuration page provides comprehensive settings for customizing the extension experience:
+![Hoverboard By Tag side panel](images/side-panel-tags-tree.png)
 
-- **Storage Mode:** Choose among **Pinboard (cloud)**, **Local Storage (offline)**—default for new bookmarks—**File (cloud-sync folder)**, or **Sync (browser, synced)**. Sync has a quota of approximately 100 KB. Authentication section is used when Pinboard is selected.
-- **Overlay Visibility Defaults**: 
-  - Dark/Light theme selection with live preview
-  - Transparency controls with opacity slider (currently set to 90%)
+_By Tag example with placeholder bookmark data._
 
-- **Font Size Settings**:
-  - Customizable font sizes for suggested tags (default: 10px, smaller for less visual intrusion)
-  - Configurable sizes for labels, tag elements, base UI text, and input fields
-  - Recommended ranges: 8-20px for suggested tags, 10-16px for labels/tags, 12-18px for UI/inputs
-  - Accessibility-friendly: increase sizes for better readability
+![By Tag demo](docs/demo-side-panel-by-tag.gif)
 
-- **Badge Settings**: 
-  - Customizable text indicators for different bookmark states
-  - "-" for not bookmarked, "0" for bookmarked with no tags
-  - "." for private bookmarks, "!" for to-read bookmarks
+### Tabs
 
-- **Site Management**: 
-  - Disabled sites list to prevent extension activation on specific domains
-  - Example entries: "example.com" and "subdomain.example.org"
+Use the Tabs tab as a workspace for open and recently closed browser tabs:
 
-- **AI Tagging** ([REQ-AI_TAGGING_CONFIG], [ARCH-AI_TAGGING_CONFIG], [IMPL-AI_CONFIG_OPTIONS], [IMPL-AI_TAG_TEST]): Optional AI API key (textbox with label), provider selector (OpenAI or Gemini), optional tag limit (default 64), and **Test API key** button. When no key is set, AI tagging is disabled; settings are persisted in config.
+- Choose **Open**, **Recently closed**, or **Both**, and scope the list to the current window or all windows.
+- Search in **Tab info**, **Page text**, or **Elements** such as headings, metadata, image alt text, and link titles.
+- Display tabs as Title, URL, or full Block cards.
+- Add tags in batches, set or clear Read Later, copy URLs or records, close visible/tagged/untagged tabs, and refresh the list.
+- **Gather into this window** or **One window per tab** to reorganize visible tabs.
 
-- **Extension icon** ([REQ-ICON_CLICK_BEHAVIOR], [IMPL-ICON_CLICK_BEHAVIOR]): Toggle **Single click on extension icon opens side panel** (checked by default). When unchecked, clicking the toolbar icon opens the popup instead of the side panel. Clicking the icon in a window opens (or toggles) the side panel in that same window.
+Recently closed tabs can be restored. Page text and Elements searches apply to open pages; closed tabs remain searchable by tab information.
 
-- **Advanced Options**: 
-  - URL hash stripping when saving bookmarks
-  - Auto-close timeout configuration (currently disabled at 0ms)
+![Hoverboard Tabs side panel](images/side-panel-tabs.png)
 
-### Side Panel – This Page, By Tag, and Tabs
+_Tabs example with placeholder browser tabs._
 
-![Pinboard.in with side panel (This Page tab)](images/pinboard-side-panel-bookmark.png)
+![Tabs demo](docs/demo-side-panel-tabs.gif)
 
-The snapshot above shows **pinboard.in** in the main content area with the Hoverboard **side panel** open and the **This Page** tab visible (popup-equivalent: quick actions, storage, tag management including **Sort tags** A–Z / Frequency / Relevance, search). All side-panel screenshots and demo GIFs in this section use the same **placeholder data**: 15+ bookmarks (with a “hero” Pinboard entry: multiple tags and notes), plus seeded **Current**, **Recent**, and **Suggested** tags so every tab and animation reflects a realistic use case. The side panel header is a single line: extension name and version on the left ("Hoverboard vX.Y.Z") and build time (UTC) on the right.
+## Full-page tools
 
-#### This Page tab
-
-![Side Panel – This Page tab](images/side-panel-bookmark.png)
-
-![Demo: This Page tab](docs/demo-side-panel-this-page.gif)
-
-A short demo animation walks through the **This Page** tab with highlighted sections and overlay descriptions: **Quick Actions** (Show Hover, Toggle Privacy, Read Later, Delete), **Save to** (Pinboard, File, Local, Sync), **Sort tags** (A–Z, by bookmark usage count, by in-page relevance—reorders Current, Recent, and Suggested chips together; side panel only), **Tag with AI** (AI-suggested tags; set API key in Options), **Recent Tags** and **Suggested Tags**, **Search Tabs**, and the **footer** (Reload, Options, Bookmarks index, By Tag, Browser bookmark import).
-
-Close-up of the **This Page** tab. When the current bookmark has visit data, a **Usage** section appears (visit count, last visited time, top referrer) ([REQ-BOOKMARK_USAGE_TRACKING], [ARCH-BOOKMARK_USAGE_TRACKING_UI], [IMPL-BOOKMARK_USAGE_TRACKING_UI]).
-
-On **http(s)** pages, **Suggested Tags** from the page extractor are **trimmed** and whitespace-only or invalid labels are **discarded** before display; tags already on the bookmark stay hidden. **Recent Tags** are loaded **before** suggested tags refresh so both chip rows stay consistent when the panel opens. While the **This Page** tab is active, **Recent Tags** also **refresh when the browser window regains focus** ([REQ-RECENT_TAGS_SYSTEM], [IMPL-SIDE_PANEL_TABS])—for example after tagging in another window—without switching tabs.
-
-#### By Tag tab
-
-![Side Panel – By Tag tab](images/side-panel-tags-tree.png)
-
-![Demo: By Tag tab](docs/demo-side-panel-by-tag.gif)
-
-A short demo shows the **By Tag** tab: **Viewing the By Tag tab**, **Filtering by tag**, **Tree updated**, **Search bookmarks** and **Match count**, and **Opening URL** (opens in new tab).
-
-The snapshot above shows the **By Tag** tab (tag selector and collapsible tree with sample URLs).
-
-#### Tabs tab
-
-![Side Panel – Tabs tab](images/side-panel-tabs.png)
-
-![Demo: Tabs tab – find and export](docs/demo-side-panel-tabs.gif)
-
-A short demo shows using the Tabs tab to find and export a set of pages (filter then **Copy Records** or **Copy URLs**), with per-step highlights for the tab bar, list, filter, display mode, and Copy buttons. Extension E2E (`extension-demo-tabs.spec.js`, run via `npm run test:e2e:extension`) additionally checks the **Windows/Tabs** stats line, the batch **Tags** row, and **Title** vs **Block** display mode in a real `chrome-extension://` side panel page.
-
-**Tab source** ([REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS], [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]): Choose **Open** (default), **Recently closed**, or **Both** to list open tabs, recently closed tabs (Chrome only, via `chrome.sessions`), or both. Recently closed tabs are searchable by title and URL; **Restore** reopens a closed tab. **Copy Records** for closed tabs includes `sessionId` and `lastModified`. When the tab source includes closed tabs, **Page text** and **Elements** search scopes are disabled (only **Tab info** applies). Gather and Distribute are hidden when the list contains only closed tabs.
-
-The **Tabs** tab lists browser tabs with title, URL, and referrer. Each row has a **Close tab** button (✕) before the window/tab id (or before the title/URL in Title/URL mode) to close that tab; the remove-from-display control (×) remains after the tab id. Controls are grouped into sections (Scope, Filter & display, Batch bookmark, List actions, Window actions) with control groups using very narrow margins; each has a tooltip. Each list item shows the tab’s **favicon**. A textbox **Elements** (comma-separated) configures which DOM sources are used when filtering by **Elements** (saved on blur; empty uses default list). Control groups use very narrow margins; the **Title** | **URL** | **Block** line stays above the filter textbox. **Gather into this window** moves visible tabs into the current window; **One window per tab** puts each visible tab in its own window. You can choose how each tab is shown: **Title** only, **URL** only, or **Block** (default: full card with title, URL, referrer, window/tab ids, and Tags). In Title or URL mode the displayed text is clickable to switch to that window and tab; the remove icon (×) appears after the text. In Block view the remove icon is before the Tags line. **Refresh** clears the hidden set and reloads so all tabs can reappear. It includes a **Current window / All windows** toggle, **Search in** scope (Tab info, Page text, or Elements), a filter input, and batch bookmark actions: **Tags** textbox with **Add tags** (adds comma-separated tags to visible tabs’ bookmarks, creating a bookmark if missing), **Set to-read** (preserves existing tags when updating; creates bookmark if missing), and **Clear to-read** (only for existing bookmarks). Then **Copy URLs**, **Copy Records**, **Close visible tabs**, **Close tagged** (only tabs with bookmark tags), **Close untagged** (only tabs with no tags), and **Refresh** (reload the list). Each row shows window id and tab id (clickable: focuses that window and tab) and the bookmark tags for that tab's URL (or — if none).
-
-#### Browser Bookmarks page (standalone)
-
-![Demo: Browser Bookmarks](docs/demo-side-panel-bookmarks.gif)
-
-([REQ-SIDE_PANEL_BROWSER_BOOKMARKS], [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS], [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS], [REQ-NON_WEB_TOOLS_TOOLBAR]) **Browser Bookmarks** is a standalone full-page tool (`browser-bookmarks.html`), not a side-panel tab (legacy token name keeps `SIDE_PANEL_`). It lists Chrome browser bookmarks from `chrome.bookmarks.getTree`. Each row shows checkbox, favicon, title, URL (click to open, double-click to edit), and folder path. **Search** filters by title, URL, or folder path (case-insensitive). **Folder** dropdown filters to a selected folder. **Sort** by Date (newest/oldest), Name (A–Z/Z–A), or Chrome default (persisted). **Bulk:** Select all / Deselect all; Open in tabs, Open in window; Copy URLs; Move to folder; Delete (with confirmation); Export selected or all as HTML (Netscape) or CSV. **Undo:** After delete, "Deleted N bookmarks. Undo" with 10s auto-dismiss. **Import:** HTML or CSV into selected folder; conflict resolution (skip duplicates or overwrite). **Keyboard:** Ctrl+F focus search, Escape clear selection. Open via the **tools toolbar** (non-web badge popup), command `open-side-panel-browser-bookmarks` (legacy id → standalone page), or related launchers.
-
-#### Visit History page (standalone)
-
-![Visit History](images/side-panel-usage.png)
-
-*Close-up of Visit History (Most Visited, Recently Visited, Navigation Graph).*
-
-![Demo: Visit History](docs/demo-side-panel-usage.gif)
-
-([REQ-BOOKMARK_USAGE_TRACKING], [ARCH-BOOKMARK_USAGE_TRACKING_UI], [IMPL-BOOKMARK_USAGE_TRACKING_UI], [REQ-NON_WEB_TOOLS_TOOLBAR]) **Visit History** is a standalone full-page tool (`visit-history.html`), not a side-panel tab (legacy UI name: Usage). It shows bookmark visit analytics: **Most Visited** (top 10 by visit count), **Recently Visited** (top 10 by last visit time), and **Navigation Graph** (referrer → URL edges). Data is stored locally; a **Refresh** button reloads all three sections. Each URL is clickable to open in a new tab. Open from the **tools toolbar** Visit History launcher.
-
-([REQ-SIDE_PANEL_POPUP_EQUIVALENT], [ARCH-SIDE_PANEL_TABS], [IMPL-SIDE_PANEL_TABS], [IMPL-SIDE_PANEL_BOOKMARK], [REQ-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS], [REQ-NON_WEB_TOOLS_TOOLBAR]) The **Chrome side panel** has three tabs: **This Page**, **By Tag**, and **Tabs**. On non-`http(s)` active tabs the side panel dismisses and the badge opens the **tools toolbar** (Index, Import, Options, Browser Bookmarks, Visit History). The **Tabs** tab lists browser tabs (title, URL, referrer) with a **Current window / All windows** toggle (default: current window), a **Search in** scope (**Tab info** for title/URL/referrer, **Page text** for body text, or **Elements** for headings, alt, meta description, etc.), a case-insensitive filter, a button to copy visible tab URLs to the clipboard (with success count), and a button to close visible tabs after confirmation (with success count). Each tab row shows window id and tab id for identification. Open the panel from the popup footer via **Tags tree**. In the panel you can switch between **This Page** (popup-equivalent UI for the current tab: quick actions, storage, tag management—including **Sort tags** with **A–Z**, **Frequency**, and **Relevance** for Current / Recent / Suggested chip order, [REQ-THIS_PAGE_TAG_SORT]—and search) and **By Tag** (hierarchical view). The **popup** does not show the sort row; chip order there stays as provided by the controller. The last-selected tab is persisted (legacy `browserBookmarks` / `usage` storage falls back to This Page). Tab content fills the available vertical space (full panel height and width, not popup dimensions). The **This Page** tab refreshes promptly when the active browser tab changes or the tab's page completes (like the badge), and when you switch to the This Page tab it shows the current tab's bookmark. When you open the panel with the **By Tag** tab visible (restored tab) or switch to it, the tag selector is set to the current bookmark's tags and the tree shows only bookmarks that share at least one of those tags.
-
-([REQ-SIDE_PANEL_TAGS_TREE], [ARCH-SIDE_PANEL_TAGS_TREE], [IMPL-SIDE_PANEL_TAGS_TREE]) The **By Tag** tab shows a hierarchical view of bookmarks by tag (or a grouped list). The tag selector uses a **compact** list of checkboxes and labels; a **Show all tags** toggle lets you switch between displaying every tag and only the selected (checked) tags, and that choice is persisted. ([REQ-SIDE_PANEL_BOOKMARK_SEARCH], [ARCH-SIDE_PANEL_BOOKMARK_SEARCH], [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]) A **Search bookmarks** box filters the displayed list by text (title, URL, tags, notes); the match count is shown and **Previous** / **Next** move through matches with scroll and highlight. A **Filters & view** bar can be expanded or collapsed to maximize space for the bookmarks list. In the side panel, the header/filters/search/tag selector can scroll out of the way so the bookmarks list can use the full visible height. When expanded, you can filter by **create time** or **last updated** (date range), **tags to include** (comma-separated), and **domains** (URL hostnames, comma-separated); set **Group by** (none, create date, update date, tag, or domain) and **Sort by** with **Sort order** (newest/oldest first). You can select one or more tags and control their display order; below that, each tag is shown with a collapsible list of bookmarks (title and URL), or when grouped, sections by the chosen axis. Clicking a URL opens it in a new tab. Config state (expanded/collapsed and filter, sort, group values) is persisted. Data comes from the same local, file, and sync bookmarks as the Local Bookmarks Index (no Pinboard in this view). The panel stays open when you switch tabs. Requires Chrome 114+ and the `sidePanel` permission.
-
-### Extension icon and quick access (keyboard and context menu)
-
-([REQ-ICON_CLICK_BEHAVIOR], [IMPL-ICON_CLICK_BEHAVIOR], [REQ-NON_WEB_TOOLS_TOOLBAR]) **Single click on the extension toolbar icon** opens the **side panel** by default on `http(s)` tabs. On non-web tabs the badge opens the **tools toolbar** instead. In **Options** → **Extension icon**, you can uncheck “Single click on extension icon opens side panel” to have the icon open the **popup** on web tabs.
-
-([REQ-QUICK_ACCESS_ENTRY], [ARCH-QUICK_ACCESS_ENTRY], [IMPL-EXTENSION_COMMANDS], [IMPL-CONTEXT_MENU_QUICK_ACCESS], [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS]) You can open the **side panel**, **options**, **bookmarks index**, or **browser bookmark import** page without using the popup or side panel footer links:
-
-- **Extension commands (global shortcuts):** Assign keyboard shortcuts in Chrome at `chrome://extensions/shortcuts`. Up to four commands can have suggested shortcuts; by default: **Ctrl+Shift+1** (side panel – This Page tab), **Ctrl+Shift+2** (side panel – By Tag tab), **Ctrl+Shift+3** (side panel – Tabs tab), **Ctrl+Shift+B** (open bookmarks index). Other commands (open side panel, options, import, open Browser Bookmarks page — legacy command id `open-side-panel-browser-bookmarks`) have no default shortcut; you can assign any.
-- **Context menu:** Right-click anywhere and choose **Hoverboard** → **Open side panel**, **Open options**, **Open bookmarks index**, or **Open browser bookmark import**.
-- **In-popup / in-panel shortcuts:** When the popup or the side panel This Page tab has focus, the same four actions are available with **Ctrl+Shift+B**, **Ctrl+Shift+O**, **Ctrl+Shift+M**, and **Ctrl+Shift+I** (same as the extension commands by default).
+The side panel is the workspace for the active browser context. These standalone pages handle larger libraries, native browser data, and analysis:
 
 ### Local Bookmarks Index
 
+The **Local Bookmarks Index** is the full-page manager for Hoverboard bookmark records. Its Stores view can include:
+
+- Local storage
+- File storage
+- Sync storage
+- Browser storage (the native Chrome bookmark tree)
+
+The Index supports search by metadata, **Archived content**, or **All resources**; tag, privacy, Read Later, date, domain, and store filters; sorting; visit data; link health checks; and bulk selection. From the Index you can move, delete, add or remove tags, apply regex find-and-replace, import rich CSV/JSON, export records, and use portable library package workflows.
+
+**Browser Bookmark Import** is integrated into the Index. Load the live Chrome bookmark tree, filter by title, URL, or folder, select rows, map folder names to tags, choose Skip/Overwrite/Merge tags, and import into Local, File, or Sync.
+
+See [Bookmark import and export](docs/BOOKMARK_IMPORT_EXPORT.md) for the distinction between rich Hoverboard CSV/JSON, browser bookmark HTML, and live Browser Bookmark Import.
+
 ![Local Bookmarks Index](images/local-bookmarks-index.png)
 
-**Import/export guide:** [docs/BOOKMARK_IMPORT_EXPORT.md](docs/BOOKMARK_IMPORT_EXPORT.md) — use this page’s **Import** for Hoverboard CSV (`Title,URL,Tags,…`); use the standalone **Browser Bookmarks** page for Netscape HTML into Chrome.
+_Local Bookmarks Index example with placeholder data._
 
-The snapshot above shows the dedicated full-page view of all locally stored bookmarks (placeholder data):
+### Browser Bookmarks
 
-- **Header:** Compact banner with Hoverboard logo and name, "Local Bookmarks Index" title, and subtitle (minimal height)
-- **Stores:** Checkboxes for Local (L), File (F), Sync (S); no bookmarks shown until at least one is checked
-- **Show only:** Tags (comma-separated, include), To read only, Private only, Time range (Start, End, Time field: Create time | Last updated)
-- **Hide:** Tags (comma-separated, exclude)
-- **Table Display:** Search, Time column, and Time format sit just above the table. When you scroll past this section, the Table Display block and the **table column headers** stay at the top of the viewport; the table body scrolls underneath. Actions for selected and the row count scroll with the content.
-- **Bookmark count always visible:** The row count (# bookmarks) is sticky to the bottom of the viewport so it stays visible when scrolling long content. When the page is short, a flex spacer pushes it to the visual bottom. Implemented with `.footer-spacer` (flex: 1 1 0) and `.footer-info { position: sticky; bottom: 0 }`.
-- **Table:** **Select** column (checkboxes per row, select-all in header), Title, URL, Tags, Time, **Visits** and **Last Visited** ([REQ-BOOKMARK_USAGE_TRACKING], [IMPL-BOOKMARK_USAGE_TRACKING_UI]), Storage, Shared, To read; URL column is clickable with **external-link indicator** (opens in new tab)
-- **Actions for selected:** Export all / Export displayed / Export selected, Move selected to (Local | File | Sync), **Delete** (confirmation with count; names if ≤8), **Add tags** and **Delete tags** (same textbox: enter tag(s) comma-separated; Add tags merges with selected bookmarks, Delete tags removes them from selected). **Regex find-and-replace:** Regex and Replacement textboxes, checkboxes for Title / URL / Tags / Notes, and **Replace** button; regex supports named groups, negative lookahead, and backreferences (JavaScript semantics). After Add tags, Delete tags, or Replace, the same records remain selected where still visible; if a record is no longer displayed (e.g. filtered out), it is no longer marked. Import
-- **Footer:** Row count (e.g. "N bookmarks")
+**Browser Bookmarks** is a standalone full-page manager for the native Chrome bookmark tree, not a side-panel tab. Search by title, URL, or folder path; filter by folder; sort; open selected bookmarks in tabs or a window; move or delete them; undo deletions; and import or export Netscape HTML and CSV.
 
-The diagram below shows which bookmarks are shown in the table and what actions are available for selected rows.
+![Browser Bookmarks](images/browser-bookmarks.png)
 
-```mermaid
-flowchart TB
-  subgraph whichShown [Which bookmarks are shown]
-    All[allBookmarks]
-    Stores[Stores: L / F / S checkboxes]
-    Search[Search: title, URL, tags, notes]
-    ShowOnly[Show only: tags include, to-read, private, time range]
-    Hide[Hide: tags exclude]
-    Filtered[filteredBookmarks]
-    Table[Table]
-    All --> Stores
-    Stores --> Search
-    Search --> ShowOnly
-    ShowOnly --> Hide
-    Hide --> Filtered
-    Filtered --> Table
-  end
-  subgraph actions [Actions for selected]
-    Selected[Selected rows]
-    ExportAll[Export all]
-    ExportDisplayed[Export displayed]
-    ExportSelected[Export selected]
-    Move[Move selected to L / F / S]
-    Delete[Delete with confirmation]
-    AddTags[Add tags to selected]
-    DeleteTags[Delete tags from selected]
-    RegexReplace[Regex find-and-replace]
-    Import[Import CSV or JSON]
-    Selected --> ExportAll
-    Selected --> ExportDisplayed
-    Selected --> ExportSelected
-    Selected --> Move
-    Selected --> Delete
-    Selected --> AddTags
-    Selected --> DeleteTags
-    Selected --> RegexReplace
-    Selected --> Import
-  end
-  Table --> Selected
-```
+_Browser Bookmarks example with seeded native bookmark data._
 
-### Browser Bookmark Import in the Local Bookmarks Index
+![Browser Bookmarks demo](docs/demo-browser-bookmarks.gif)
 
-![Browser Bookmark Import](images/browser-bookmark-import.png)
+### Visit History
 
-The Local Bookmarks Index Import control copies selected bookmarks from the live browser tree into Hoverboard. The former standalone URL remains a compatibility redirect to this workflow.
+**Visit History** is a standalone full-page view of local bookmark usage:
 
-- **Source:** Choose **Browser bookmarks (live)** from the Index Import group.
-- **Browser controls:** Search title, URL, or folder; filter by folder; select visible rows or clear selection.
-- **Import options:** When a URL already exists in the selected Local, File, or Sync target: **Skip** / **Overwrite** / **Merge tags**. Optionally use root-stripped folder names as tags and add sanitized extra tags.
-- **Import action row:** "Import to" (Local | File | Sync for the live Browser source), "Import selected", and imported/skipped/failed result counts.
-- **File import remains available:** Switch the source to File (CSV or JSON) to retain the existing Only new / Overwrite workflow, including Browser as a file-import target.
+- **Most Visited**
+- **Recently Visited**
+- **Navigation Graph** showing referrer-to-URL relationships
 
-**How to open the page:**
+![Visit History](images/visit-history.png)
 
-- **From the popup:** Click **Browser bookmark import**. The Local Bookmarks Index opens with `?source=browser`.
-- **From Options:** In the footer, click the **Browser bookmark import** link.
+_Visit History example with placeholder usage data._
 
-**How to use it:** Open the Index Import group; browser bookmarks load via `chrome.bookmarks.getTree`. Optionally search (title, URL, folder) and filter by folder. Select rows (or use select-all), then choose conflict mode, optionally folder tags and extra tags, and a target. Click **Import selected** and read the result. The extension must have the `bookmarks` permission.
+![Visit History demo](docs/demo-visit-history.gif)
 
-**Example scenario:** You keep work links in a Chrome folder "Work/Projects". Open the Local Bookmarks Index Import group, choose **Browser bookmarks (live)**, set **Folder** to that path, check **Use folder names as tags**, add the tag `work`, set **Import to** Local and conflict mode to **Skip**. Select all visible rows and click **Import selected**. Duplicate URLs are collapsed before import, and target conflicts are skipped.
+### Offline Reader
 
-The diagram below shows the import pipeline from load through user choices to the import run.
+**Offline Reader** is a standalone reader for stored page archives. It renders sanitized archived content without fetching the live page and can present archived screenshot artifacts separately.
 
-```mermaid
-flowchart TB
-  subgraph userChoices [User choices]
-    SelectRows[Select rows]
-    ConflictMode[Conflict: Skip / Overwrite / Merge]
-    UseFolderTags[Use folder names as tags]
-    ExtraTags[Add tags]
-    ImportTo[Import to L / F / S]
-  end
-  SelectRows --> ConflictMode
-  ConflictMode --> UseFolderTags
-  UseFolderTags --> ExtraTags
-  ExtraTags --> ImportTo
-```
+### Options
 
-## 🚀 Quick Start
+Options controls storage, Pinboard authentication, optional AI tagging, native-host connectivity, link health, site exclusions, overlay appearance, text sizes, badge indicators, and extension-icon behavior.
 
-### Install from GitHub Releases
+### Tools toolbar
 
-1. **Download** the latest release from [Releases](https://github.com/fareedst/hoverboard/releases)
-2. **Chrome or Brave**: Extract the package and load as an unpacked extension (Chrome: `chrome://extensions` → Developer mode → Load unpacked; Brave: `brave://extensions` → same steps)
-3. **Other Chromium-based browsers**: Use that browser’s extension management page and load the unpacked folder
+On non-web tabs such as browser settings or extension pages, the side panel is dismissed and the badge opens the **tools toolbar**. It provides launchers for the Local Bookmarks Index, Browser Import in the Index, Options, Browser Bookmarks, and Visit History.
 
-### Build from Source
+## Search and offline archives
+
+Hoverboard has several intentionally separate search surfaces:
+
+- **Tabs** searches tab information, page text, or selected page Elements.
+- **By Tag** searches the displayed bookmark tree and navigates between matches.
+- **Search Bookmarks** opens the Local Bookmarks Index with a metadata query.
+- The Index searches metadata, stored **Archived content**, or **All resources**. All resources is a read-only cross-resource search scope.
+
+On eligible HTTP(S) pages, **Save page archive** stores a sanitized readable archive and **Save page screenshot** stores a separate screenshot artifact. Durable page archives are currently supported by the Local and File storage backends. The archive remains separate from bookmark metadata, and the Reader opens stored content rather than refetching the live URL.
+
+## Storage and privacy
+
+Hoverboard is local-first: Local storage is the default for new bookmarks and does not require an account or external API. Choose the storage backend that fits the workflow:
+
+| Backend | Use |
+| --- | --- |
+| **Local** | Browser-local extension storage for offline bookmark management. |
+| **File** | A JSON bookmark file in a chosen directory, useful with a cloud-synced folder. Path-based File storage uses the optional native host. |
+| **Sync** | Browser-synced storage with an approximately 100 KB quota. |
+| **Browser** | Native Chrome bookmarks; tags map to folders, while Private, Read Later, and Notes are not stored in the native tree. |
+| **Pinboard** | Optional Pinboard synchronization using an API token. |
+
+Bookmark routing is per URL, so records can be moved between supported backends. Page archives and screenshot artifacts have their own Local/File lifecycle and do not get folded into bookmark metadata.
+
+Optional AI tagging is disabled until an API key is configured. Site exclusions, URL inhibit rules, Private bookmarks, and Read Later provide additional control over where and how Hoverboard operates.
+
+## How to open Hoverboard
+
+- On an HTTP(S) page, click the extension icon to open the side panel by default.
+- In Options, disable **Single click on extension icon opens side panel** if the compact popup is preferred.
+- On non-web pages, click the icon to open the tools toolbar.
+- Use Hoverboard’s context-menu entries or assign commands from `chrome://extensions/shortcuts` for direct access to the side panel, Options, the Index, or Browser Import.
+
+The remaining on-page surface is the optional **overlay** (also called Hover). It appears at the foot of a page when requested or configured for page load, and provides lightweight bookmark status and actions. It is useful for quick feedback, but the side panel is the primary tagging and management interface.
+
+## Supported browsers
+
+Hoverboard uses Chrome Manifest V3 APIs and targets Chromium browsers:
+
+- **Chrome** is the primary target. The side panel requires Chrome 114 or newer.
+- **Brave** and other Chromium browsers can generally load the unpacked extension.
+- In Brave, the browser’s native sidebar and Hoverboard’s side panel can affect OS window-arrange shortcuts. See [Brave side-panel window arrange](docs/troubleshooting/brave-side-panel-window-arrange.md).
+- **Safari is not currently supported.**
+
+## Install and build
+
+### Install a release
+
+1. Download a package from [GitHub Releases](https://github.com/fareedst/hoverboard/releases).
+2. Extract it.
+3. Open `chrome://extensions` or `brave://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the extracted `dist` directory.
+
+Other Chromium browsers provide an equivalent extension-management page.
+
+### Build from source
 
 ```bash
 git clone https://github.com/fareedst/hoverboard.git
@@ -250,218 +177,58 @@ npm install
 npm run build:dev
 ```
 
-**Load the built extension** (required): In Chrome/Brave go to `chrome://extensions` (or `brave://extensions`), turn on **Developer mode**, click **Load unpacked**, and select the **`dist`** folder inside the repo (not the repo root). The extension must be loaded from `dist` because the service worker and content scripts use bundled dependencies (e.g. `fast-xml-parser`); loading from the repo root will fail with "Failed to resolve module specifier".
+Load the `dist` directory—not the repository root—as the unpacked extension. The build bundles the service worker and content-script dependencies required at runtime.
 
-### Optional: Native messaging host
+### Optional native host
 
-For features that need to run local code (e.g. outside the browser sandbox), the extension can talk to a **native messaging host**. The host is a thin wrapper that runs code installed next to it (not from the extension folder). You install it once:
+Install the native host only when using native-host features such as path-based File storage or other local-code integrations:
 
-1. **Build the native host** (requires [Go](https://go.dev/)):
-   ```bash
-   cd native_host && go build -o native_host . && cd ..
-   ```
-   Or use `npm run build:native` to build and copy into `dist/native_host/`.
+```bash
+npm run build:native
+```
 
-2. **Run the installer** from the `native_host` directory (or from `dist/native_host/` after a build):
-   - **macOS/Linux**: `./install.sh [SOURCE_DIR] [EXTENSION_ID] [chrome|chromium]`  
-     Example: `./install.sh . $(cat dist/.extension-id 2>/dev/null || echo "YOUR_EXTENSION_ID")`
-   - **Windows**: `.\install.ps1 -ExtensionId "YOUR_EXTENSION_ID"`
-
-   Get your extension ID from `chrome://extensions` (Developer mode on, then copy the ID under the extension).
-
-3. **Test**: Open the extension Options page and click **Test native host**. You should see "Native host OK (pong)" if the host is installed and allowed for your extension.
-
-Install directory: `~/.hoverboard/` (macOS/Linux) or `%LOCALAPPDATA%\Hoverboard\` (Windows). The installer writes the Chrome/Chromium native messaging manifest so the browser can start the host.
-
-## 📋 Status
-
-**Current Version:** 1.5.0  
-**Last Updated:** 2026-02-20
-**Chrome Extension Status:** Production Ready
-
-**Latest Enhancement:** **Local Bookmarks Index – Sticky Table Display and count always visible** – When you scroll past the Table Display section, the **Table Display** block (search, Time column, Time format) and the **table column headers** stay at the top of the viewport while the table body scrolls underneath. The **bookmark count** (# bookmarks) is sticky to the bottom of the viewport so it stays visible when scrolling long content; when the page is short, a spacer pushes it to the visual bottom. Toolbar remains organized into **Stores**, **Show only**, **Hide**, and **Actions for selected** (Export, Move, **Delete**, **Add tags**, **Delete tags**, **Regex replace**, Import).
-
-### Chrome Extension Features
-
-Hoverboard is a fully-featured Chrome extension that provides seamless bookmark management with local-first storage and optional Pinboard sync:
-
-#### **Core Features**
-- ✅ **Local-first storage** - Bookmarks stored in your browser by default (chrome.storage.local); no account or API required. Options: choose among **(P)** Pinboard, **(F)** File, **(L)** Local, **(S)** Sync. Default for new bookmarks is **chrome.storage.local**.
-- ✅ **File-based storage** - Store bookmarks in a **file** (e.g. cloud-synced). Options: Storage Mode > File, then either **enter a path** (default `~/.hoverboard`; the native host reads/writes `hoverboard-bookmarks.json` there—no folder picker, native host required). The helper normalizes the path so the file is created correctly even when the system sets `HOME` with a trailing slash (`IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE`). Alternatively use **"Select folder"** (browser picker) for the classic flow.
-- ✅ **Bookmark create-time and updated-time** - Each bookmark tracks create-time (`time`) and most-recent-update-time (`updated_at`); for new records they are equal; local/file/sync set `updated_at` on save; Pinboard has only create-time so `updated_at` equals `time`. CSV export includes an optional **Updated** column.
-- ✅ **Per-bookmark storage and move** - Each bookmark has a storage location (Pinboard, Local, File, or Sync). **Move** a bookmark between storages from the popup (Storage select-one buttons). The current storage is **highlighted**. When the bookmark is in non-API storage (Local, File, or Sync), clicking another non-API option **moves** the bookmark; the UI reflects the actual move result and uses the bookmark’s URL so moves succeed even when the tab URL differs (e.g. query string).
-- ✅ **Smart Bookmarking** - Save pages with intelligent tag suggestions from 11 content sources (title, URL, meta tags, headings, emphasis elements, definition terms, table headers, navigation, breadcrumbs, images, links)
-- ✅ **Selection to tag input** - Highlight text on a page, click the extension icon; the selection (up to 8 words, punctuation stripped) is prefilled in the New Tag textbox so you can submit it as tags in one step
-- ✅ **Tag Management** - Organize bookmarks with custom tags and categories
-- ✅ **Recent Tags** - Quick access to frequently used tags; list refreshes every time the **popup** is displayed, when the **side panel** window regains focus on the **This Page** tab, and stays in sync across windows within the configured activity window ([REQ-RECENT_TAGS_SYSTEM], [IMPL-RECENT_TAGS_POPUP_REFRESH], [IMPL-SIDE_PANEL_TABS])
-- ✅ **Dark Theme Support** - Modern UI with dark theme default
-- ✅ **Overlay System** - Visual feedback with transparency controls
-- ✅ **Local Bookmarks Index** - Full-page index of **local, file, and sync** bookmarks with a **compact header**. **Sticky Table Display:** when you scroll past the Table Display section, that block and the **table column headers** stay at the top while the table body scrolls underneath. The **bookmark count** (# bookmarks) is sticky to the bottom of the viewport so it stays visible when scrolling; when content is short, it sits at the visual bottom. **Stores** (Local / File / Sync checkboxes; default unchecked so no bookmarks shown until at least one store is selected), **Show only** (tags include, to-read, private, time range), **Hide** (tags exclude). **Storage** column and **Time column** (Create time | Last updated) and **Time format** (Absolute | Age). **Select** column (checkboxes, select-all); search (title, URL, tags, notes); sortable columns; clickable URLs with **external-link indicator**. **Actions for selected:** Export all / Export displayed / Export selected, **Move selected**, **Delete** (confirmation), **Add tags** and **Delete tags** (selection retained for still-visible rows after apply), and **Import** (CSV or JSON: Only new or Overwrite, Import to Local | File | Sync). Open from popup ("Bookmarks index") or Options ("Local bookmarks index").
-- ✅ **Browser Bookmark Import** - Dedicated page to **copy browser bookmarks** into Hoverboard. Loads native bookmarks via the browser’s bookmark API; **search** (title, URL) and **filter by folder**; **Select** column with checkboxes and select-all; **conflict mode** (Skip / Overwrite / Merge) when a URL already exists in Hoverboard; **Use folder names as tags** and optional **Add tags** (comma-separated); **Import to** Local | File | Sync. Result shows imported, skipped, and failed counts. Open from popup ("Browser bookmark import") or Options ("Browser bookmark import"). Requires the `bookmarks` permission.
-- ✅ **Optional Pinboard integration** - Use Storage Mode in Options to sync with Pinboard.in (requires API token)
-- ✅ **Optional native messaging host** - For features that need local code: thin Go wrapper + helper scripts; one-time install to `~/.hoverboard/` (macOS/Linux) or `%LOCALAPPDATA%\Hoverboard\` (Windows); test from Options ("Test native host"). See [Optional: Native messaging host](#optional-native-messaging-host) below.
-- ✅ **Badge Indicators** - Visual status indicators in the extension icon
-- ✅ **Site Management** - Disable extension on specific domains
-- ✅ **Search** - Search through bookmarked tabs by title
-- ✅ **Privacy** - Mark bookmarks as private or to-read
-- ✅ **Customizable font sizes** - Configure font sizes for suggested tags, labels, tags, and UI elements in Options
-
-#### **Test Coverage:**
-- **1187+ tests** across 87 test suites (1 skipped). **Coverage gates** ([PROC-TEST_STRATEGY]): Jest `coverageThreshold` in `jest.config.js` (global ~28% line/branch/function/statement) fails CI if coverage drops; `npm run coverage:gap-report` lists `src/` files below threshold and IMPLs with empty `traceability.tests`. See [Development](#development) for `npm run test:coverage` and `npm run coverage:gap-report`. **Jest env:** `restoreMocks` is `false` so `global.chrome` mock implementations in `tests/setup.js` persist between tests; `clearMocks` still clears call history. Setup re-seeds storage/runtime tab mocks each test via `resetChromeMockImplementations` and tolerates minimal `global.chrome` stubs in focused tests.
-- **Complete Chrome extension testing** with Manifest V3 compliance
-- **Integration tests** ([PROC-TEST_STRATEGY], [IMPL-TESTING]) – MessageHandler + BookmarkRouter + StorageIndex + LocalBookmarkService (`tests/integration/message-handler-router-storage.integration.test.js`); ConfigManager auth and storage mode (`tests/integration/config-manager-load.integration.test.js`); This Page tag sort composition (`tests/integration/this-page-tag-sort-composition.integration.test.js`, [REQ-THIS_PAGE_TAG_SORT]); side panel **window-focus → Recent Tags** wiring (`tests/integration/window-focus-recent-tags-composition.integration.test.js`, [REQ-RECENT_TAGS_SYSTEM], [IMPL-SIDE_PANEL_TABS]); side panel **Tabs tab init** wiring (`tests/integration/browser-tabs-tab-composition.integration.test.js`, [REQ-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]). Run with `npm run test:integration`.
-- **Messaging protocol tests** ([IMPL-MESSAGE_HANDLING], [ARCH-MESSAGE_HANDLING]) – Unit and E2E tests validate extension messaging: MessageHandler contracts (all critical types, sender context), service worker routing (NATIVE_PING, SWITCH_STORAGE_MODE, DEV_COMMAND vs processMessage), content/offscreen/popup message contracts, MessageClient retry and lastError, moveBookmarkToStorage schema, message-type drift. See `docs/architecture/extension-messaging-protocols.md`. Tests: `message-handler-contracts.test.js`, `service-worker-messaging-routing.test.js`, `content-messaging-contracts.test.js`, `popup-message-contract.test.js`, `offscreen-file-bookmark-messaging.test.js`, `message-client.test.js`, `message-type-drift.test.js`, and E2E content→SW getTabId in `extension-messaging.spec.js`. **Recommended before push:** run full validation (see [Validating before push](#validating-before-push)).
-- **Runtime validation** ([IMPL-RUNTIME_VALIDATION], [ARCH-MESSAGE_HANDLING]) – Zod schemas validate message envelope and critical payloads (getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag, moveBookmarkToStorage) at the service worker; merged config validated in getConfig() with fallback to defaults. `getCurrentBookmark` and `saveBookmark` data schemas use `.passthrough()` for extra sender fields (e.g. overlay `title`, `tabId`); narrow types use `.strict()`. Content hover uses the same `url` / `value` shapes as the overlay for saveTag/deleteTag. Unit tests: `tests/unit/message-schemas.test.js`, `tests/unit/message-handler-runtime-validation.test.js`, `tests/unit/message-handler-local-save-recall.test.js`, `tests/unit/config-manager.test.js`.
-- **TypeScript** ([ARCH-LANGUAGE_SELECTION], [IMPL-TYPESCRIPT_MIGRATION]) – Incremental typing: `npm run typecheck` (tsc --noEmit) validates type-checked .js files and shared .d.ts; `message-types.d.ts` and `config-types.d.ts`; `// @ts-check` and JSDoc on config-manager, message-handler, message-schemas, message-client. Typecheck runs as part of `npm run validate`; run `npm run validate && npm run test && npm run test:e2e:extension` for full pre-push validation.
-- **Extension E2E** ([IMPL-PLAYWRIGHT_E2E_EXTENSION], [REQ-UI_INSPECTION], [ARCH-UI_TESTABILITY], [IMPL-SIDE_PANEL_SNAPSHOT], [REQ-THIS_PAGE_TAG_SORT], [REQ-RECENT_TAGS_SYSTEM], [REQ-SIDE_PANEL_BROWSER_TABS]) – Playwright loads the unpacked extension and runs extension E2E (popup structure; popup↔background messaging; popup→content script; GET_PAGE_CONTENT; suggested tags MAIN world; GET_PAGE_SELECTION; overlay; options and side panel messaging; side panel snapshot; bookmarks table, browser import, offscreen; side panel **This Page** tag sort toolbar [`extension-this-page-tag-sort.spec.js`]; side panel **This Page Recent Tags** mount in a real `chrome-extension://` page [`extension-side-panel-recent-tags-e2e.spec.js`]; **Tabs** tab [`extension-demo-tabs.spec.js`]: open panel, filter, Copy Records, persisted default tab, plus **stats line**, batch **Tags** row, and **Title**/**Block** display mode in a real extension document). Shared fixture: `tests/playwright/extension-fixture.js`; specs include `extension-popup.spec.js`, `extension-messaging.spec.js`, `extension-evaluation.spec.js`, `extension-lower.spec.js`, `extension-this-page-tag-sort.spec.js`, `extension-side-panel-recent-tags-e2e.spec.js`, plus usage/icon-click/demo-tabs specs. Run with `npm run test:e2e:extension`.
-- **Native host tests** – Go tests for protocol and ping-pong; Jest tests for NATIVE_PING and `pingNativeHost`
-- **Pinboard API integration testing** for reliable bookmark management
-
-## 📸 Screenshots
-
-Screenshots and demo GIFs in this README use **placeholder bookmark data** (no live account) and **dark theme**.
-
-### Popup (dark theme)
-
-![Hoverboard Popup](images/Hoverboard_v1.0.7.0_Chrome_Popup.png)
-
-The popup in dark theme: visibility controls, tag management, search, and quick actions.
-
-## Architecture
-
-### Chrome Extension Architecture
-- **Manifest V3:** Modern Chrome extension architecture with service workers
-- **Four storage modes:** **(P)** Pinboard.in API, **(F)** File (user-chosen directory; single JSON file), **(L)** chrome.storage.local (default for new bookmarks), **(S)** chrome.storage.sync (~100 KB quota). Per-bookmark routing via storage index and BookmarkRouter; default storage configurable in Options. File I/O via offscreen document or native host; directory handle in IndexedDB. No external service required for local, file, or sync.
-- **Pinboard API Integration:** Optional; used when Storage Mode is set to Pinboard (cloud)
-- **Chrome Storage API:** Efficient local storage for extension state, settings, and local bookmarks
-- **Chrome Tabs API:** Tab management and search functionality
-
-### Core Components
-- **Service Worker:** Background script handling bookmark operations and API calls
-- **Content Scripts:** Overlay system with transparency controls and visual feedback
-- **Popup Interface:** Modern UI with quick actions and tag management
-- **Local Bookmarks Index:** Dedicated extension page (`src/ui/bookmarks-table/`) with four UI groups (Stores, Show only, Hide, Actions for selected); sticky Table Display and column headers when scrolling; search, filter pipeline, sort, select (checkboxes, select-all), move, bulk delete with confirmation, add tags and delete tags to/from selected, regex find-and-replace on selected (Title/URL/Tags/Notes); data from `getAggregatedBookmarksForIndex` (local + file + sync)
-- **Storage System:** Local state management with Chrome storage API
-- **Error Handling:** Comprehensive error recovery and user feedback
-- **Badge Management:** Visual indicators in the extension icon
+The installer scripts are in `native_host/`. After installation, test the connection from Options with **Test native host**. The default local installation directory is `~/.hoverboard/` on macOS/Linux and `%LOCALAPPDATA%\Hoverboard\` on Windows.
 
 ## Development
 
-### Prerequisites
-- Node.js 18+ and npm
-- Chrome browser for development and testing
-- Pinboard.in account optional (only needed if using Pinboard storage mode)
+### Common commands
 
-### Setup
 ```bash
-# Install dependencies
-npm install
+# Build, lint, type-check, validate the manifest and tokens, and run security checks
+npm run build:dev
 
-# Build the extension
-npm run build
-
-# Run tests
+# Run the Jest suite
 npm test
 
-# Development mode with hot reload
+# Run integration tests
+npm run test:integration
+
+# Run extension Playwright tests
+npm run test:e2e:extension
+
+# Start development mode with rebuilds
 npm run dev
 ```
 
-### Chrome Extension Development
-```bash
-# Build for development (includes lint, typecheck, manifest validation)
-npm run build:dev
-
-# Build for production
-npm run build
-
-# Type-check only (TypeScript/JSDoc; no emit)
-npm run typecheck
-
-# Run unit tests (Jest)
-npm test
-
-# Run tests with coverage (enforces coverage threshold; see [PROC-TEST_STRATEGY])
-npm run test:coverage
-
-# Run integration tests (MessageHandler+Router+StorageIndex, ConfigManager auth/storage mode)
-npm run test:integration
-
-# Coverage gap report (lists src/ files below threshold and IMPLs with empty traceability.tests; run after test:coverage)
-npm run coverage:gap-report
-# With threshold, e.g. 30%: npm run coverage:gap-report -- 30
-
-# Run extension E2E (Playwright: load unpacked extension; popup, messaging, evaluation, overlay, options, side panel)
-npm run test:e2e:extension
-
-# Validate manifest
-npm run validate-manifest
-
-# Validate TIED tokens (included in npm run validate)
-npm run validate:tokens
-
-# Create release package
-npm run create-release
-```
-
-### Validating before push
-
-**Recommended CLI to validate the entire project before pushing** (lint, typecheck, manifest, security, unit tests including messaging protocol tests, and extension E2E):
+Before pushing, the broad validation path is:
 
 ```bash
 npm run validate && npm run test && npm run test:e2e:extension
 ```
 
-- **`npm run validate`** – Runs lint, typecheck (`tsc --noEmit`), manifest validation, TIED token validation (`scripts/validate_tokens.sh`), and security audit. This is the same gate used by `npm run build:dev`.
-- **`npm run test`** – Unit and integration tests (Jest), including messaging protocol tests (MessageHandler contracts, SW routing, content/offscreen/popup contracts, MessageClient retry, message-type drift).
-- **`npm run test:e2e:extension`** – Playwright E2E tests (load unpacked extension, popup, messaging, overlay, options, side panel).
-
-For a quicker check without E2E: `npm run validate && npm run test`.
-
-### Code and test quality (TIED)
-
-Development is guided by the TIED process: implementation decisions are captured in pseudo-code and decision docs (`tied/`) before tests or code. Code and tests carry semantic tokens (`[REQ-*]`, `[ARCH-*]`, `[IMPL-*]`) for traceability from requirements → architecture → implementation → tests → code.
-
-- **Token validation** – `npm run validate` (and CI) runs `npm run validate:tokens`, which ensures every `[REQ-*]` / `[ARCH-*]` / `[IMPL-*]` referenced in `src/` and `tests/` is registered in `tied/semantic-tokens.yaml`. Run manually: `bash scripts/validate_tokens.sh`.
-- **TIED consistency validation** – The TIED MCP tool `tied_validate_consistency` checks index files and detail YAML (REQ/ARCH/IMPL) for parse errors, token references, and cross-index consistency. All `tied/requirements/`, `tied/architecture-decisions/`, and `tied/implementation-decisions/` detail files are valid YAML and pass this validation. See `docs/ai-agent-tied-mcp-usage.md` for MCP usage. **Detail file shape** – Do not put index-only fields (e.g. `detail_file`) inside detail YAML; keep `cross_references` and `traceability.*` as lists; quote scalars with YAML-special characters. See `tied/detail-files-schema.md` and `AGENTS.md` (TIED data access).
-- **Test strategy ([PROC-TEST_STRATEGY])** – E2E is reserved for critical user journeys; unit and integration tests cover IMPL/ARCH/REQ logic. Jest coverage thresholds (`jest.config.js`) fail CI if coverage drops; `npm run coverage:gap-report` lists `src/` files below threshold and IMPLs with empty `traceability.tests`. See `tied/processes.md` § PROC-TEST_STRATEGY.
-- **Quality summary** – Module boundaries and provider-style contracts are documented; unit tests use mocks and reference REQ/IMPL in describe/test names; messaging and contract tests cover extension protocols; integration tests exercise MessageHandler+BookmarkRouter+StorageIndex and ConfigManager with minimal mocks. Debug output uses `debugLog`/`debugError` per TIED. See CHANGELOG for the latest quality and token-validation notes.
+Useful focused commands include `npm run typecheck`, `npm run validate:manifest`, `npm run validate:tokens`, `npm run test:coverage`, `npm run coverage:gap-report`, and `npm run analyze:side-panel`.
 
 ## Documentation
 
-### TIED Documentation (Token-Integrated Engineering & Development)
-This project follows the TIED methodology for comprehensive requirements tracking and traceability. Canonical product and methodology terms: [`tied/vocab/routing.md`](tied/vocab/routing.md) (session PRELOAD) and [`tied/vocab/domain-references.md`](tied/vocab/domain-references.md) (full glossary index).
-- **Requirements**: [`tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml`](tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml) - Detailed tag extraction requirements and validation criteria
-- **Architecture**: [`tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml`](tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml) - Multi-source extraction architecture and design decisions
-- **Implementation**: [`tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml`](tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) - Implementation details, modifiable decisions, and performance considerations
-- **Recent Tags Refresh**: [`tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml`](tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml) (popup visibility) and [`tied/implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml`](tied/implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) (side panel window focus on **This Page** tab)—cross-window sync per [REQ-RECENT_TAGS_SYSTEM]
-- **Local Bookmarks Index**: [`tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml`](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml`](tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml`](tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) - Full-page index with sticky Table Display and column headers, bookmark count at bottom and always visible (sticky), UI groups (Stores, Show only, Hide, Actions for selected), Delete selected, Add tags and Delete tags to/from selected ([REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml)), Regex find-and-replace on selected ([REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml))
-- **Implementation Map**: [`tied/docs/suggested-tags-implementation-map.md`](tied/docs/suggested-tags-implementation-map.md) - Quick reference mapping TIED tokens to code locations
-
-### Architecture Documents
-- [Extension Messaging Protocols](docs/architecture/extension-messaging-protocols.md) - Message types, channels (SW, content, offscreen, popup), and response contracts; [ARCH-MESSAGE_HANDLING], [IMPL-MESSAGE_HANDLING]
-- [Chrome Extension Architecture](docs/architecture/chrome-extension-architecture.md) - Core architectural decisions and implementation strategy
-- [Development Guide](docs/development/development-guide.md) - Development setup and guidelines
-- [CONTRIBUTING](CONTRIBUTING.md) - Contributor guidelines and commit message format (types, scopes)
-- [Feature Tracking Matrix](docs/development/feature-tracking-matrix.md) - Feature implementation status
-
-### Chrome Extension Development
-- [Chrome Extension Implementation Guide](docs/development/chrome-extension-guide.md) - Chrome-specific development guidelines
-- [Pinboard API Integration](docs/development/pinboard-api-integration.md) - API integration and error handling
-- [Chrome Extension Testing](docs/development/chrome-extension-testing.md) - Testing strategy and best practices
-
-### Implementation Guides
-- [Error Handling Framework](docs/development/error-handling-framework.md) - Error handling implementation details
-- [Content Script Implementation](docs/development/content-script-implementation.md) - Content script implementation details
-- [UI Component Development](docs/development/ui-component-development.md) - UI component implementation details
-- [Chrome Storage Management](docs/development/chrome-storage-management.md) - Storage API usage and best practices
+- [Architecture documentation](docs/architecture/README.md)
+- [Extension messaging protocols](docs/architecture/extension-messaging-protocols.md)
+- [Development guide](docs/development/development-guide.md)
+- [Bookmark import and export](docs/BOOKMARK_IMPORT_EXPORT.md)
+- [Local Query API](docs/LOCAL_API.md)
+- [Troubleshooting](docs/troubleshooting/README.md)
+- [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- **Chrome Extensions API:** For comprehensive browser extension support
-- **Pinboard.in:** For providing the bookmarking service and API
-- **Manifest V3:** For modern Chrome extension architecture
+Hoverboard is licensed under the [MIT License](LICENSE).

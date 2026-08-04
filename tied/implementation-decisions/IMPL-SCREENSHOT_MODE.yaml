@@ -1,18 +1,20 @@
 IMPL-SCREENSHOT_MODE:
   code_locations:
     files:
-      - path: "src/ui/popup/PopupController.js"
-        description: "Screenshot mode param check, _screenshotMode, data-screenshot-ready in finally"
-      - path: "src/core/message-handler.js"
-        description: "handleGetCurrentBookmark prefers data.url when http(s)"
       - path: "scripts/screenshot-placeholder-data.js"
-        description: "Placeholder bookmark and sync seed data; rich localBookmarks (15+), hero Pinboard entry"
+        description: "Placeholder bookmark, stable usage, navigation-edge, and sync seed data"
       - path: "scripts/screenshots-placeholder.js"
-        description: "Playwright script; await seed; side panel URL with ?screenshot=1&url&title; check store-local"
+        description: "README media capture orchestration for current side-panel tabs, Local Bookmarks Index, and standalone tools"
       - path: "scripts/record-demo-side-panel-this-page.js"
-        description: "Seeds storage; opens side panel with ?screenshot=1&url&title for demo GIF"
-      - path: "scripts/screenshot-seed.example.json"
-        description: "Example seed file for --seed / SCREENSHOT_SEED_FILE"
+        description: "This Page side-panel demo seed and visual capture"
+      - path: "scripts/record-demo-side-panel-bookmarks.js"
+        description: "Standalone Browser Bookmarks demo seed and visual capture"
+      - path: "scripts/record-demo-side-panel-usage.js"
+        description: "Standalone Visit History demo seed and visual capture"
+      - path: "src/ui/popup/PopupController.js"
+        description: "Screenshot mode URL parameters and ready marker for This Page capture"
+      - path: "src/core/message-handler.js"
+        description: "Screenshot-mode current bookmark resolution from data.url"
     functions: []
   cross_references:
     - "IMPL-LOCAL_BOOKMARK_SERVICE"
@@ -23,13 +25,12 @@ IMPL-SCREENSHOT_MODE:
   essence_pseudocode_path: "implementation-decisions/IMPL-SCREENSHOT_MODE-pseudocode.md"
   implementation_approach:
     details:
-      - "Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme dark (see IMPL-POPUP_THEME_CSS)"
-      - "PopupController.loadInitialData checks URL params; when screenshot=1 and url present, skip getCurrentTab() and use decoded url/title; in finally, set data-screenshot-ready on"
-      - "scripts/screenshot-placeholder-data.js exports placeholderStorageSeed (local bookmarks + storage index, hoverboard_theme, hoverboard_demo_suggested_tags, hoverboard_demo_recent_tags) and placeholderSyncSeed (showHoverOnPageLoad); placeholderRecentTags for demo Recent Tags; when _screenshotMode the controller reads hoverboard_demo_suggested_tags and calls updateSuggestedTags, and in loadRecentTags reads hoverboard_demo_recent_tags and calls updateRecentTags (filtering out current bookmark tags) so all three tag sections are visible in screenshots/demo GIF"
-      - MessageHandler.handleGetCurrentBookmark: "when data.url is present and is http(s), use it as targetUrl so popup-opened-as-tab gets bookmark for the screenshot URL, not the extension tab URL"
-      - scripts/screenshot-seed.example.json: "example seed file matching the expected JSON shape"
-      - scripts/screenshots-placeholder.js: "await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_demo_suggested_tags?, hoverboard_demo_recent_tags?, hoverboard_settings?); loadSeedFromFile adds default placeholderSuggestedTags and placeholderRecentTags when keys missing; wait for [data-screenshot-ready=\"true\"] before popup screenshot; check"
-    summary: "Popup reads ?screenshot=1&url=...&title=... and uses them as fake current tab; script awaits storage seed, waits for data-screenshot-ready; message handler prefers data.url when http(s); script can load seed from file; script checks Local store before index screenshot"
+      - "BUILD_STABLE_USAGE_FIXTURES uses a fixed seed timestamp when fixture data is absent, removing Date.now() drift from generated media"
+      - "CAPTURE_SIDE_PANEL_SURFACES captures This Page, By Tag, and Tabs at 360x800"
+      - "CAPTURE_STANDALONE_TOOL captures browser-bookmarks.html and visit-history.html at 1200x900; neither is represented as a side-panel tab"
+      - "LOAD_SCREENSHOT_SEED preserves caller-provided usage and navigation-edge fixtures and derives a storage index when omitted"
+      - "SEED_EXTENSION_DATA awaits local and sync storage writes before any capture surface opens"
+    summary: "Generate README media from a temporary Chromium profile seeded with stable Hoverboard records, usage data, navigation edges, and native Chrome bookmarks; capture only the three current side-panel tabs, Local Bookmarks Index, Browser Bookmarks page, and Visit History page."
   metadata:
     created:
       author: "AI Agent"
@@ -37,7 +38,7 @@ IMPL-SCREENSHOT_MODE:
     last_updated:
       author: "AI Agent"
       date: "2026-08-04"
-      reason: "Close screenshot seed to popup theme composition evidence"
+      reason: "Separate stable seed construction, current surface capture, standalone tools, and theme validation"
   name: "Screenshot/Demo mode for placeholder screenshots"
   rationale:
     benefits:
@@ -59,15 +60,29 @@ IMPL-SCREENSHOT_MODE:
       - "REQ-LOCAL_BOOKMARKS_INDEX"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit tests validate placeholder shape, stable timestamp behavior, and seed preservation; composition tests validate theme/screenshot bindings and standalone page entry wiring; extension E2E validates current standalone and side-panel boundaries; rendered PNG generation remains visual E2E-only because it requires real Chromium, native bookmark APIs, and full-page artifacts."
   traceability:
     architecture: []
     code_annotations:
       - "IMPL-SCREENSHOT_MODE"
     requirements:
+      - "REQ-BOOKMARK_USAGE_TRACKING"
       - "REQ-LOCAL_BOOKMARKS_INDEX"
       - "REQ-RECENT_TAGS_SYSTEM"
+      - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "REQ-SIDE_PANEL_BROWSER_TABS"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SIDE_PANEL_TAGS_TREE"
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+    test_coverage_note: "Unit and composition suites cover pure seed and UI-free bindings; E2E covers page boundaries; media scripts provide visual evidence only for real-Chromium rendering and generated PNG outputs."
     tests:
       - "tests/integration/popup-theme-css-x-screenshot-mode-binding-composition.integration.test.js"
+      - "tests/integration/standalone-tool-pages-composition.integration.test.js"
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      - "tests/playwright/extension-demo-tabs.spec.js"
+      - "tests/playwright/extension-messaging.spec.js"
+      - "tests/playwright/extension-usage-tracking.spec.js"
+      - "tests/unit/browser-bookmarks-panel.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
       - "tests/unit/screenshot-placeholder-data.test.js"
+      - "tests/unit/usage-panel.test.js"

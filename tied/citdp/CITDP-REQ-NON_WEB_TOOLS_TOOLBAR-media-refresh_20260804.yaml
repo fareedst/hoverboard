@@ -1,0 +1,89 @@
+CITDP-REQ-NON_WEB_TOOLS_TOOLBAR-media-refresh_20260804:
+  change_definition:
+    current_behavior: "README and capture tooling still referenced retired popup and side-panel Browser Bookmarks/Usage surfaces, while current product behavior exposes Browser Bookmarks and Visit History as standalone pages."
+    desired_behavior: "Generate and document current side-panel and standalone-tool screenshots/GIFs with synchronized IMPL pseudo-code, canonical terminology, and reproducible seeded data."
+    non_goals:
+      - "Committing or publishing the changes"
+      - "Local API automation design or implementation"
+      - "New product requirements or architecture for Browser Bookmarks or Visit History"
+    success_criteria:
+      - "Every changed IMPL pseudo-code block has token comments and contract precision"
+      - "README and CHANGELOG reference only current media names and surfaces"
+      - "Source and test traceability comments match the authoritative sidecars"
+      - "Unit, composition, E2E, media, token, and TIED validation evidence is recorded"
+    unchanged_behavior: "Product REQ/ARCH behavior remains unchanged: Browser Bookmarks and Visit History stay standalone pages; This Page, By Tag, and Tabs remain side-panel tabs."
+  docs_updated:
+    - "CHANGELOG.md"
+    - "docs/development/demo-gif-standard.md"
+    - "README.md"
+    - "tied/implementation-decisions/IMPL-DEMO_OVERLAY-pseudocode.md"
+    - "tied/implementation-decisions/IMPL-DEMO_OVERLAY.yaml"
+    - "tied/implementation-decisions/IMPL-SCREENSHOT_MODE-pseudocode.md"
+    - "tied/implementation-decisions/IMPL-SCREENSHOT_MODE.yaml"
+    - "tied/vocab/ui-surfaces.md"
+  impact_analysis:
+    leap_decision: "Existing REQ and ARCH records already define the standalone-page boundary. No REQ or ARCH propagation is required unless implementation review finds a product-scope drift; the IMPL and output documentation are synchronized to those existing decisions."
+    modules:
+      - "IMPL-DEMO_OVERLAY"
+      - "IMPL-SCREENSHOT_MODE"
+      - "README and CHANGELOG media references"
+      - "scripts/record-demo-side-panel-*.js"
+      - "scripts/screenshots-placeholder.js"
+      - "standalone Browser Bookmarks page"
+      - "standalone Visit History page"
+    tied_tokens_affected:
+      - "IMPL-BOOKMARK_USAGE_TRACKING_UI"
+      - "IMPL-DEMO_OVERLAY"
+      - "IMPL-SCREENSHOT_MODE"
+      - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "REQ-BOOKMARK_USAGE_TRACKING"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "REQ-SIDE_PANEL_BROWSER_TABS"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SIDE_PANEL_TAGS_TREE"
+    tied_tokens_new: []
+  record_identity:
+    change_request_id: "REQ-NON_WEB_TOOLS_TOOLBAR"
+    primary_tokens:
+      - "REQ-BOOKMARK_USAGE_TRACKING"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-08-04"
+    title: "README media refresh for current side-panel and standalone tool surfaces"
+  risk_analysis:
+    risks:
+      - id: "RISK-MEDIA-001"
+        description: "Pseudo-code and full-block source comments can drift when capture scope changes."
+        mitigation: "Refactor sidecars into logical token-commented blocks, copy authoritative block text into mapped scripts/tests, and run TIED plus Layer B validation."
+        residual: "low"
+        severity: "medium"
+      - id: "RISK-MEDIA-002"
+        description: "Generated media can claim deterministic output while usage fixtures use the current clock."
+        mitigation: "Use stable seed timestamps or preserve explicit caller-provided usage and edge fixtures; add unit evidence."
+        residual: "low"
+        severity: "medium"
+      - id: "RISK-MEDIA-003"
+        description: "Visual capture paths require real Chromium extension and native Chrome API boundaries."
+        mitigation: "Retain UI-free composition coverage for page entry wiring and classify only rendered media/native bookmark capture as visual E2E-only with a named platform reason."
+        residual: "medium"
+        severity: "medium"
+  status: "planned"
+  summary: "Align staged README screenshot and demo GIF media with the existing standalone Browser Bookmarks and Visit History product boundaries while preserving current REQ/ARCH scope."
+  test_strategy:
+    composition:
+      - "tests/integration/standalone-tool-pages-composition.integration.test.js"
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+    e2e:
+      - "tests/playwright/extension-demo-tabs.spec.js"
+      - "tests/playwright/extension-messaging.spec.js"
+      - "tests/playwright/extension-usage-tracking.spec.js"
+    summary: "Unit-test seed and pure product helpers, composition-test standalone page and tools-toolbar bindings without UI, run extension E2E for real standalone and side-panel surfaces, then run the media workflows and inspect generated assets."
+    unit:
+      - "tests/unit/browser-bookmarks-panel.test.js"
+      - "tests/unit/screenshot-placeholder-data.test.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/side-panel-tabs.test.js"
+      - "tests/unit/usage-panel.test.js"
+    visual_boundary: "scripts/screenshots-placeholder.js and record-demo-side-panel-*.js require a real Chromium extension context, native chrome.bookmarks, full-page rendering, and ffmpeg artifact generation; this boundary is visual E2E/manual media evidence, not a substitute for composition tests."

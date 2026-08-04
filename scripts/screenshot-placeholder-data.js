@@ -2,7 +2,7 @@
  * === IMPL-FULL-BLOCK: IMPL-SCREENSHOT_MODE ===
  * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] — Placeholder screenshot flow: seed storage, fake tab params, data-screenshot-ready, handleGetCurrentBookmark prefers data.url. Contract: URL params and seed; placeholder UI and script capture.
  *
- * ## MAIN
+ * ## BUILD_STABLE_USAGE_FIXTURES
  *
  * - [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] How: Rich placeholder data: 15+ bookmarks so index and By Tag tree look robust; hero Pinboard entry with 6+ tags and non-empty extended for This Page view. Side panel: open with ?screenshot=1&url=screenshotPopupUrl&title=screenshotPopupTitle so Bookmark tab shows Pinboard bookmark (same doc, PopupController reads window.location.search).
  * - Contract:
@@ -245,14 +245,16 @@ export const placeholderSyncSeed = {
 /** URL and title for popup screenshot mode (Pinboard page) */
 export const screenshotPopupUrl = PINBOARD_URL
 export const screenshotPopupTitle = PINBOARD_TITLE
+/** [IMPL-SCREENSHOT_MODE] [REQ-BOOKMARK_USAGE_TRACKING] Stable default base for generated README media fixtures. */
+export const placeholderSeedTimestamp = Date.parse('2025-01-20T12:00:00.000Z')
 
 /**
- * [IMPL-BOOKMARK_USAGE_TRACKING_UI] Rich usage seed for screenshot/demo so Usage tab shows robust data.
+ * [IMPL-BOOKMARK_USAGE_TRACKING_UI] Rich usage seed for screenshot/demo so standalone Visit History shows robust data.
  * Returns hoverboard_bookmark_usage with varied visitCount and lastVisitedAt (relative to baseDate).
- * @param {number} [baseDate=Date.now()]
+ * @param {number} [baseDate=placeholderSeedTimestamp]
  * @returns {{ hoverboard_bookmark_usage: Record<string, { url: string, visitCount: number, lastVisitedAt: string, firstVisitedAt: string, recentVisits: string[] }> }}
  */
-export function getPlaceholderUsageSeed (baseDate = Date.now()) {
+export function getPlaceholderUsageSeed (baseDate = placeholderSeedTimestamp) {
   const t = (minsAgo) => new Date(baseDate - minsAgo * 60 * 1000).toISOString()
   const entries = [
     { url: 'https://pinboard.in', visitCount: 42, lastMinsAgo: 120, firstMinsAgo: 60 * 24 * 30 },
@@ -277,12 +279,12 @@ export function getPlaceholderUsageSeed (baseDate = Date.now()) {
 }
 
 /**
- * [IMPL-BOOKMARK_USAGE_TRACKING_UI] Rich navigation edges seed for screenshot/demo so Usage tab graph has multiple sources/targets.
+ * [IMPL-BOOKMARK_USAGE_TRACKING_UI] Rich navigation edges seed for screenshot/demo so standalone Visit History graph has multiple sources/targets.
  * Edges are keyed by targetUrl; each value is array of { sourceUrl, targetUrl, count, lastTraversedAt, firstTraversedAt }.
- * @param {number} [baseDate=Date.now()]
+ * @param {number} [baseDate=placeholderSeedTimestamp]
  * @returns {{ hoverboard_bookmark_nav_edges: Record<string, Array<{ sourceUrl: string, targetUrl: string, count: number, lastTraversedAt: string, firstTraversedAt: string }>> }}
  */
-export function getPlaceholderEdgesSeed (baseDate = Date.now()) {
+export function getPlaceholderEdgesSeed (baseDate = placeholderSeedTimestamp) {
   const t = (minsAgo) => new Date(baseDate - minsAgo * 60 * 1000).toISOString()
   const hoverboard_bookmark_nav_edges = {
     'https://github.com': [

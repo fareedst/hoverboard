@@ -1,6 +1,6 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-DEMO_OVERLAY ===
- * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] — Demo overlay: DOM inject in side-panel page before key-frame groups; position top; larger font; five text classes with colors. Used by record-demo-side-panel-tabs.js, record-demo-side-panel-this-page.js, record-demo-side-panel-by-tag.js.
+ * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-BOOKMARK_USAGE_TRACKING] — Shared overlay contract is implemented here by CAPTURE_VISIT_HISTORY_DEMO and BUILD_DEMO_GIF for the standalone Visit History page.
  * 
  * ## SET_OVERLAY
  * 
@@ -43,13 +43,12 @@
  * 
  * === END IMPL-FULL-BLOCK: IMPL-DEMO_OVERLAY ===
  */
-#!/usr/bin/env node
 /**
- * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
- * Standalone script: launch extension, seed usage/edges, open Visit History page,
+ * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] CAPTURE_VISIT_HISTORY_DEMO
+ * Standalone script: launch extension, seed usage/edges, open the standalone Visit History page,
  * capture screenshot sequence per demo_gif_standard, assemble GIF via ffmpeg 3-part concat.
  * Run: node scripts/record-demo-side-panel-usage.js
- * Output: docs/demo-side-panel-usage.gif
+ * Output: docs/demo-visit-history.gif
  */
 
 import path from 'path'
@@ -59,6 +58,7 @@ import { fileURLToPath } from 'url'
 import { chromium } from 'playwright'
 import {
   placeholderStorageSeed,
+  placeholderSeedTimestamp,
   getPlaceholderUsageSeed,
   getPlaceholderEdgesSeed
 } from './screenshot-placeholder-data.js'
@@ -67,7 +67,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.join(__dirname, '..')
 const pathToExtension = path.join(rootDir, 'dist')
 const framesDir = path.join(rootDir, 'test-results', 'demo-usage-frames')
-const gifOut = path.join(rootDir, 'docs', 'demo-side-panel-usage.gif')
+const gifOut = path.join(rootDir, 'docs', 'demo-visit-history.gif')
 
 /** [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] Presentation rate 25% slower: multiply all wait durations by RATE */
 const RATE = 1.25
@@ -75,6 +75,11 @@ const RATE = 1.25
 fs.mkdirSync(framesDir, { recursive: true })
 fs.mkdirSync(path.dirname(gifOut), { recursive: true })
 
+/**
+ * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-BOOKMARK_USAGE_TRACKING] CAPTURE_VISIT_HISTORY_DEMO
+ * INPUT: Chromium context, deterministic usage/edge records, and built extension. OUTPUT: PNG frames and docs/demo-visit-history.gif.
+ * PRE: visit-history.html and #visitHistoryPanel are reachable. EFFECTS: extension storage, DOM, and filesystem state.
+ */
 async function main () {
   const context = await chromium.launchPersistentContext('', {
     headless: false,
@@ -116,8 +121,8 @@ async function main () {
   // [IMPL-BOOKMARK_USAGE_TRACKING_UI] [IMPL-DEMO_OVERLAY] Seed rich usage + nav edges for Visit History page.
   const localSeed = {
     ...placeholderStorageSeed,
-    ...getPlaceholderUsageSeed(),
-    ...getPlaceholderEdgesSeed(),
+    ...getPlaceholderUsageSeed(placeholderSeedTimestamp),
+    ...getPlaceholderEdgesSeed(placeholderSeedTimestamp)
   }
   const optionsPage = await context.newPage()
   await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
@@ -134,7 +139,7 @@ async function main () {
     await page.screenshot({ path: p })
   }
 
-  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] Overlay at top; larger font; five text classes with colors
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] SET_OVERLAY: top annotation, five text classes, rgba(0,0,0,0.78).
   const OVERLAY_CLASSES = {
     intro: { color: '#e0e0e0' },
     navigation: { color: '#42a5f5' },
@@ -173,7 +178,7 @@ async function main () {
     })
   }
 
-  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-BOOKMARK_USAGE_TRACKING] Element highlight: scope to #visitHistoryPanel
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-BOOKMARK_USAGE_TRACKING] APPLY_DEMO_HIGHLIGHT: scope to #visitHistoryPanel.
   async function highlightElement (selector) {
     await page.evaluate((sel) => {
       const panel = document.getElementById('visitHistoryPanel')
@@ -203,7 +208,7 @@ async function main () {
     })
   }
 
-  // [IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] Open Visit History standalone page.
+  // [IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] CAPTURE_VISIT_HISTORY_DEMO: open the standalone page.
   await page.goto(`chrome-extension://${extensionId}/src/ui/visit-history/visit-history.html`)
   await page.waitForLoadState('domcontentloaded')
   await page.waitForSelector('#visitHistoryPanel', { timeout: 8000 }).catch(() => {})
@@ -332,7 +337,7 @@ async function main () {
   const frame0Path = path.join(framesDir, 'frame-0000.png')
   const lastFramePath = path.join(framesDir, `frame-${String(lastFrameIdx).padStart(4, '0')}.png`)
 
-  // [IMPL-DEMO_OVERLAY] 3-part concat: no-overlay (frame 0, 1 s) + main (frames 1..N-2, 1 fps) + end logo (frame N-1, 0.5 s).
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] BUILD_DEMO_GIF: no-overlay (frame 0, 1 s) + main (frames 1..N-2, 1 fps) + end logo (frame N-1, 0.5 s).
   const palettePath = path.join(rootDir, 'test-results', 'demo-usage-palette.png')
   const framesPattern = path.join(framesDir, 'frame-%04d.png')
   const noOverlayGifPath = path.join(rootDir, 'test-results', 'demo-usage-nooverlay.gif')

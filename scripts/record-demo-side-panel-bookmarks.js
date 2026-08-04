@@ -1,6 +1,6 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-DEMO_OVERLAY ===
- * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] — Demo overlay: DOM inject in side-panel page before key-frame groups; position top; larger font; five text classes with colors. Used by record-demo-side-panel-tabs.js, record-demo-side-panel-this-page.js, record-demo-side-panel-by-tag.js.
+ * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] — Shared overlay contract is implemented here by CAPTURE_BROWSER_BOOKMARKS_DEMO and BUILD_DEMO_GIF for the standalone Browser Bookmarks page.
  * 
  * ## SET_OVERLAY
  * 
@@ -43,13 +43,12 @@
  * 
  * === END IMPL-FULL-BLOCK: IMPL-DEMO_OVERLAY ===
  */
-#!/usr/bin/env node
 /**
- * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+ * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] CAPTURE_BROWSER_BOOKMARKS_DEMO
  * Standalone script: launch extension with software rendering (SwiftShader), seed Chrome bookmarks (medium-complexity),
- * run Bookmarks-tab flow, capture screenshot sequence, assemble GIF via ffmpeg two-pass palette.
+ * run the standalone Browser Bookmarks page flow, capture screenshot sequence, assemble GIF via ffmpeg two-pass palette.
  * Run: node scripts/record-demo-side-panel-bookmarks.js
- * Output: docs/demo-side-panel-bookmarks.gif
+ * Output: docs/demo-browser-bookmarks.gif
  */
 
 import path from 'path'
@@ -62,7 +61,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.join(__dirname, '..')
 const pathToExtension = path.join(rootDir, 'dist')
 const framesDir = path.join(rootDir, 'test-results', 'demo-frames-bookmarks')
-const gifOut = path.join(rootDir, 'docs', 'demo-side-panel-bookmarks.gif')
+const gifOut = path.join(rootDir, 'docs', 'demo-browser-bookmarks.gif')
 
 /** [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] Presentation rate 25% slower: multiply all wait durations by RATE */
 const RATE = 1.25
@@ -82,6 +81,11 @@ const DEMO_BOOKMARKS = [
 fs.mkdirSync(framesDir, { recursive: true })
 fs.mkdirSync(path.dirname(gifOut), { recursive: true })
 
+/**
+ * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] CAPTURE_BROWSER_BOOKMARKS_DEMO
+ * INPUT: Chromium context, native bookmark records, and built extension. OUTPUT: PNG frames and docs/demo-browser-bookmarks.gif.
+ * PRE: browser-bookmarks.html and #browserBookmarksPanel are reachable. EFFECTS: native bookmark, DOM, and filesystem state.
+ */
 async function main () {
   const context = await chromium.launchPersistentContext('', {
     headless: false,
@@ -120,7 +124,7 @@ async function main () {
     throw new Error('Extension ID not found')
   }
 
-  // [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-DEMO_OVERLAY] Seed Chrome bookmarks and persist Bookmarks tab so panel opens with Bookmarks visible from first frame.
+  // [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-DEMO_OVERLAY] Seed Chrome bookmarks for the standalone Browser Bookmarks page.
   const seedPage = await context.newPage()
   await seedPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
   await seedPage.evaluate(async (items) => {
@@ -130,11 +134,6 @@ async function main () {
     const folder = await chrome.bookmarks.create({ parentId, title: 'Hoverboard Demo' })
     for (const { title, url } of items) {
       await chrome.bookmarks.create({ parentId: folder.id, title, url })
-    }
-    if (chrome.storage?.local?.set) {
-      await new Promise((resolve) => {
-        chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'browserBookmarks' }, () => resolve())
-      })
     }
   }, DEMO_BOOKMARKS)
   await seedPage.waitForTimeout(Math.round(500 * RATE))
@@ -147,7 +146,7 @@ async function main () {
     await page.screenshot({ path: p })
   }
 
-  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] Overlay at top; larger font; five text classes with colors
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] SET_OVERLAY: top annotation, five text classes, rgba(0,0,0,0.78).
   const OVERLAY_CLASSES = {
     intro: { color: '#e0e0e0' },
     navigation: { color: '#42a5f5' },
@@ -186,7 +185,7 @@ async function main () {
     })
   }
 
-  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] Element highlight: scope to #browserBookmarksPanel
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] APPLY_DEMO_HIGHLIGHT: scope to #browserBookmarksPanel.
   async function highlightElement (selector) {
     await page.evaluate((sel) => {
       const panel = document.getElementById('browserBookmarksPanel')
@@ -216,10 +215,10 @@ async function main () {
     })
   }
 
-  // [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] Open side panel; storage already set to Bookmarks tab so first frame shows Bookmarks.
-  await page.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+  // [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] CAPTURE_BROWSER_BOOKMARKS_DEMO: open the standalone page.
+  await page.goto(`chrome-extension://${extensionId}/src/ui/browser-bookmarks/browser-bookmarks.html`)
   await page.waitForLoadState('domcontentloaded')
-  await page.waitForSelector('#browserBookmarksPanel:not([hidden])', { timeout: 8000 }).catch(() => {})
+  await page.waitForSelector('#browserBookmarksPanel', { timeout: 8000 }).catch(() => {})
   await page.waitForTimeout(Math.round(2000 * RATE))
 
   // [IMPL-DEMO_OVERLAY] 1 s with no header so the beginning is a useful static image (frame 0).
@@ -227,11 +226,11 @@ async function main () {
   await page.waitForTimeout(Math.round(1000 * RATE))
   await snap()
 
-  // Step 1: First frame — Bookmarks tab already visible; overlay describes the tab (descriptions 30–50% longer).
+  // Step 1: First frame — standalone Browser Bookmarks page is visible; overlay describes the page (descriptions 30–50% longer).
   await clearHighlight()
   await setOverlay(
-    'Viewing the Bookmarks tab',
-    'The side panel opens on the Bookmarks tab so you can browse Chrome bookmarks with search, folder filter, and sort.',
+    'Viewing Browser Bookmarks',
+    'The standalone Browser Bookmarks page lets you browse Chrome bookmarks with search, folder filter, and sort.',
     'intro'
   )
   await page.waitForTimeout(Math.round(400 * RATE))
@@ -244,8 +243,8 @@ async function main () {
   // Step 2: List loaded
   await clearHighlight()
   await setOverlay(
-    'Bookmarks tab loaded',
-    'The list shows your Chrome bookmarks with favicon, title, and URL in a scrollable list.',
+    'Browser Bookmarks loaded',
+    'The standalone page shows Chrome bookmarks with favicon, title, URL, and folder context.',
     'state'
   )
   await highlightElement('#browserBookmarksList')
@@ -386,7 +385,7 @@ async function main () {
   const frame0Path = path.join(framesDir, 'frame-0000.png')
   const lastFramePath = path.join(framesDir, `frame-${String(lastFrameIdx).padStart(4, '0')}.png`)
 
-  // [IMPL-DEMO_OVERLAY] 3-part concat: no-overlay (frame 0, 1 s) + main (frames 1..N-2, 1 fps) + end logo (frame N-1, 0.5 s).
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] BUILD_DEMO_GIF: no-overlay (frame 0, 1 s) + main (frames 1..N-2, 1 fps) + end logo (frame N-1, 0.5 s).
   const palettePath = path.join(rootDir, 'test-results', 'demo-palette-bookmarks.png')
   const framesPattern = path.join(framesDir, 'frame-%04d.png')
   const noOverlayGifPath = path.join(rootDir, 'test-results', 'demo-bookmarks-nooverlay.gif')

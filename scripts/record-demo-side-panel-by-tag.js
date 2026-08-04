@@ -1,6 +1,6 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-DEMO_OVERLAY ===
- * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] — Demo overlay: DOM inject in side-panel page before key-frame groups; position top; larger font; five text classes with colors. Used by record-demo-side-panel-tabs.js, record-demo-side-panel-this-page.js, record-demo-side-panel-by-tag.js.
+ * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE] — Shared overlay contract is implemented here by CAPTURE_SIDE_PANEL_DEMO and BUILD_DEMO_GIF for the By Tag side-panel surface.
  * 
  * ## SET_OVERLAY
  * 
@@ -43,9 +43,8 @@
  * 
  * === END IMPL-FULL-BLOCK: IMPL-DEMO_OVERLAY ===
  */
-#!/usr/bin/env node
 /**
- * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+ * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] CAPTURE_SIDE_PANEL_DEMO
  * Standalone script: launch extension with software rendering (SwiftShader), run By Tag-tab flow,
  * capture screenshot sequence per demo_gif_standard, assemble GIF via ffmpeg 3-part concat.
  * Run: node scripts/record-demo-side-panel-by-tag.js
@@ -70,6 +69,11 @@ const RATE = 1.25
 fs.mkdirSync(framesDir, { recursive: true })
 fs.mkdirSync(path.dirname(gifOut), { recursive: true })
 
+/**
+ * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE] CAPTURE_SIDE_PANEL_DEMO
+ * INPUT: Chromium context and built extension. OUTPUT: By Tag PNG frames and GIF.
+ * PRE: #tagsTreePanel is reachable. EFFECTS: DOM, browser, and filesystem state.
+ */
 async function main () {
   const context = await chromium.launchPersistentContext('', {
     headless: false,
@@ -127,7 +131,7 @@ async function main () {
     await page.screenshot({ path: p })
   }
 
-  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] Overlay at top; larger font; five text classes with colors
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] SET_OVERLAY: top annotation, five text classes, rgba(0,0,0,0.78).
   const OVERLAY_CLASSES = {
     intro: { color: '#e0e0e0' },
     navigation: { color: '#42a5f5' },
@@ -166,7 +170,7 @@ async function main () {
     })
   }
 
-  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE] Element highlight: scope to #tagsTreePanel so only By Tag tab content is highlighted.
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE] APPLY_DEMO_HIGHLIGHT: scope to #tagsTreePanel so only By Tag content is highlighted.
   async function highlightElement (selector) {
     await page.evaluate((sel) => {
       const panel = document.getElementById('tagsTreePanel')
@@ -197,6 +201,7 @@ async function main () {
   }
 
   // [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_TAGS_TREE] Open side panel; storage already set to By Tag tab so first frame shows By Tag.
+  await page.addInitScript(() => { window.close = () => {} })
   await page.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html?demo=1`)
   await page.waitForLoadState('domcontentloaded')
   await page.waitForSelector('#tagsTreePanel:not([hidden])', { timeout: 8000 }).catch(() => {})
@@ -390,7 +395,7 @@ async function main () {
   const frame0Path = path.join(framesDir, 'frame-0000.png')
   const lastFramePath = path.join(framesDir, `frame-${String(lastFrameIdx).padStart(4, '0')}.png`)
 
-  // [IMPL-DEMO_OVERLAY] 3-part concat: no-overlay (frame 0, 1 s) + main (frames 1..N-2, 1 fps) + end logo (frame N-1, 0.5 s).
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] BUILD_DEMO_GIF: no-overlay (frame 0, 1 s) + main (frames 1..N-2, 1 fps) + end logo (frame N-1, 0.5 s).
   const palettePath = path.join(rootDir, 'test-results', 'demo-palette-tags-tree.png')
   const framesPattern = path.join(framesDir, 'frame-%04d.png')
   const noOverlayGifPath = path.join(rootDir, 'test-results', 'demo-tags-tree-nooverlay.gif')

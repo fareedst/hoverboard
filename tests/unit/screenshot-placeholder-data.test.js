@@ -2,7 +2,7 @@
  * === IMPL-FULL-BLOCK: IMPL-SCREENSHOT_MODE ===
  * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] — Placeholder screenshot flow: seed storage, fake tab params, data-screenshot-ready, handleGetCurrentBookmark prefers data.url. Contract: URL params and seed; placeholder UI and script capture.
  *
- * ## MAIN
+ * ## BUILD_STABLE_USAGE_FIXTURES
  *
  * - [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] How: Rich placeholder data: 15+ bookmarks so index and By Tag tree look robust; hero Pinboard entry with 6+ tags and non-empty extended for This Page view. Side panel: open with ?screenshot=1&url=screenshotPopupUrl&title=screenshotPopupTitle so Bookmark tab shows Pinboard bookmark (same doc, PopupController reads window.location.search).
  * - Contract:
@@ -52,6 +52,7 @@ import {
   placeholderRecentTags,
   screenshotPopupUrl,
   screenshotPopupTitle,
+  placeholderSeedTimestamp,
   getPlaceholderUsageSeed,
   getPlaceholderEdgesSeed,
   cleanUrl
@@ -156,6 +157,11 @@ describe('screenshot-placeholder-data [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARK
   })
 
   describe('getPlaceholderUsageSeed', () => {
+    test('[IMPL-SCREENSHOT_MODE] defaults to a stable seed timestamp', () => {
+      expect(getPlaceholderUsageSeed()).toEqual(getPlaceholderUsageSeed())
+      expect(placeholderSeedTimestamp).toBe(Date.parse('2025-01-20T12:00:00.000Z'))
+    })
+
     test('returns hoverboard_bookmark_usage with expected shape per URL', () => {
       const base = Date.now()
       const out = getPlaceholderUsageSeed(base)

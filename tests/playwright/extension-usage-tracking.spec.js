@@ -1,6 +1,6 @@
 /**
  * [IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
- * E2E: Usage tracking UX – Visit History page, bookmarks index Visits/Last Visited columns, This Page usage section.
+ * E2E: Visit History standalone page, bookmarks index Visits/Last Visited columns, and This Page usage section.
  * Run with: npm run test:e2e:extension
  */
 
@@ -24,7 +24,7 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-BOOKMARK_USAGE_TRACKING] [IM
     await page.close()
   })
 
-  test('side panel has no Usage tab; legacy usage storage falls back to This Page', async ({ context }) => {
+  test('side panel has no Visit History tab; legacy usage storage falls back to This Page', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const optionsPage = await context.newPage()
     await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded' })
@@ -65,7 +65,7 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS
     await page.close()
   })
 
-  test('side panel has no Bookmarks tab; legacy browserBookmarks storage falls back to This Page', async ({ context }) => {
+  test('side panel has no Browser Bookmarks tab; legacy browserBookmarks storage falls back to This Page', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const optionsPage = await context.newPage()
     await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded' })

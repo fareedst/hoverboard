@@ -24,7 +24,7 @@
       "description": "Open Hoverboard side panel"
     },
     "open-options": {
-      "suggested_key": { "default": "Ct8l+Shift+O" },
+      "suggested_key": { "default": "Ctrl+Shift+O" },
       "description": "Open Hoverboard options"
     },
     "open-bookmarks-index": {

@@ -111,6 +111,8 @@
 - **archive artifact status** — Selected-backend presence state for the readable archive and screenshot artifact legs on the current tab URL.
 - **saved-state indicator** — Independent visual and accessible state applied to the Save page archive and Save page screenshot actions.
 - **archive status description** — Live accessible explanation for why Offline Reader is unavailable until a readable archive is saved.
+- **README media capture** — Repeatable screenshot and demo-GIF generation from seeded extension data; documentation output only, not a product surface.
+- **standalone tool capture** — Visual capture of a full-page Browser Bookmarks or Visit History surface outside the side panel.
 
 ---
 
@@ -136,6 +138,9 @@
 | Archive association feedback | `ARCHIVE_ASSOCIATION_RESULT_BOUNDARY` | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
 | Normalize archive artifact status | `NORMALIZE_ARCHIVE_ARTIFACT_STATUS` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
 | Apply archive status UI | `APPLY_ARCHIVE_STATUS_UI` | [IMPL-PAGE_ARCHIVE_STATUS_UI] |
+| Capture README media | `CAPTURE_README_MEDIA` | [IMPL-SCREENSHOT_MODE](../implementation-decisions/IMPL-SCREENSHOT_MODE.yaml) |
+| Capture standalone Browser Bookmarks | `CAPTURE_BROWSER_BOOKMARKS_DEMO` | [IMPL-DEMO_OVERLAY](../implementation-decisions/IMPL-DEMO_OVERLAY.yaml) |
+| Capture standalone Visit History | `CAPTURE_VISIT_HISTORY_DEMO` | [IMPL-DEMO_OVERLAY](../implementation-decisions/IMPL-DEMO_OVERLAY.yaml) |
 
 ---
 
@@ -147,6 +152,9 @@
 | archive association feedback | Preferred terms / Named concepts |
 | archive status description | Preferred terms / Named concepts / Naming bridge |
 | badge | Preferred terms |
+| CAPTURE_BROWSER_BOOKMARKS_DEMO | Pseudo-code block names |
+| CAPTURE_README_MEDIA | Pseudo-code block names |
+| CAPTURE_VISIT_HISTORY_DEMO | Pseudo-code block names |
 | CONTENT_MESSAGE_TYPES | Named concepts |
 | dark theme / light theme | Preferred terms |
 | Hoverboard | Preferred terms |
@@ -163,6 +171,7 @@
 | popup | Preferred terms |
 | Quick Actions | Preferred terms |
 | quick access | Preferred terms |
+| README media capture | Named concepts |
 | readLater event | Preferred terms / Named concepts |
 | SAVE_BOOKMARK_DETAILS | Pseudo-code block names |
 | Search Bookmarks | Preferred terms / Named concepts |
@@ -172,6 +181,7 @@
 | Show Hover | Preferred terms |
 | Show on page load | Preferred terms |
 | SYNC_BOOKMARK_NOTES_FIELDS | Pseudo-code block names |
+| standalone tool capture | Named concepts |
 | Title/Notes Details | Preferred terms / Named concepts |
 | tool page shell | Preferred terms / Named concepts |
 | tools toolbar | Preferred terms / Named concepts |

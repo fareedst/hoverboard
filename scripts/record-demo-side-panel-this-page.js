@@ -1,6 +1,6 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-DEMO_OVERLAY ===
- * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] — Demo overlay: DOM inject in side-panel page before key-frame groups; position top; larger font; five text classes with colors. Used by record-demo-side-panel-tabs.js, record-demo-side-panel-this-page.js, record-demo-side-panel-by-tag.js.
+ * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] — Shared overlay contract is implemented here by CAPTURE_SIDE_PANEL_DEMO and BUILD_DEMO_GIF for the This Page side-panel surface.
  * 
  * ## SET_OVERLAY
  * 
@@ -89,9 +89,8 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-SCREENSHOT_MODE ===
  */
-#!/usr/bin/env node
 /**
- * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SCREENSHOT_MODE]
+ * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SCREENSHOT_MODE] CAPTURE_SIDE_PANEL_DEMO
  * Standalone script: launch extension with software rendering (SwiftShader), seed placeholder bookmark data,
  * run This Page-tab flow with ?screenshot=1&url&title so panel shows rich Pinboard bookmark, capture sequence, assemble GIF.
  * Run: node scripts/record-demo-side-panel-this-page.js
@@ -100,9 +99,10 @@
 
 import path from 'path'
 import fs from 'fs'
+import os from 'os'
 import { execSync } from 'child_process'
 import { fileURLToPath } from 'url'
-import { chromium } from 'playwright'
+import { chromium } from '@playwright/test'
 import {
   placeholderStorageSeed,
   screenshotPopupUrl,
@@ -121,10 +121,14 @@ const RATE = 1.25
 fs.mkdirSync(framesDir, { recursive: true })
 fs.mkdirSync(path.dirname(gifOut), { recursive: true })
 
+/**
+ * [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] CAPTURE_SIDE_PANEL_DEMO
+ * INPUT: Chromium context, placeholder seed, and screenshot URL/title. OUTPUT: This Page PNG frames and GIF.
+ * PRE: side-panel screenshot entry is reachable. EFFECTS: extension storage, DOM, and filesystem state.
+ */
 async function main () {
-  const context = await chromium.launchPersistentContext('', {
+  const context = await chromium.launchPersistentContext(fs.mkdtempSync(path.join(os.tmpdir(), 'hoverboard-demo-bookmark-')), {
     headless: false,
-    channel: 'chromium',
     args: [
       `--disable-extensions-except=${pathToExtension}`,
       `--load-extension=${pathToExtension}`,
@@ -179,7 +183,7 @@ async function main () {
     await page.screenshot({ path: p })
   }
 
-  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] Overlay at top; larger font; five text classes with colors
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] SET_OVERLAY: top annotation, five text classes, rgba(0,0,0,0.78).
   const OVERLAY_CLASSES = {
     intro: { color: '#e0e0e0' },
     navigation: { color: '#42a5f5' },
@@ -218,7 +222,7 @@ async function main () {
     })
   }
 
-  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] Element highlight: apply outline/box-shadow to selector inside #bookmarkPanel; clear before next highlight.
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] APPLY_DEMO_HIGHLIGHT: scope selector inside #bookmarkPanel; clear before next highlight.
   async function highlightElement (selector) {
     await page.evaluate((sel) => {
       const panel = document.getElementById('bookmarkPanel')
@@ -250,6 +254,7 @@ async function main () {
 
   // [IMPL-SCREENSHOT_MODE] Load side panel with screenshot params so This Page tab shows Pinboard bookmark
   const sidePanelUrl = `chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html?screenshot=1&url=${encodeURIComponent(screenshotPopupUrl)}&title=${encodeURIComponent(screenshotPopupTitle)}`
+  await page.addInitScript(() => { window.close = () => {} })
   await page.goto(sidePanelUrl)
   await page.waitForLoadState('domcontentloaded')
   await page.waitForSelector('#bookmarkPanel [data-popup-ref="mainInterface"]:not(.hidden)', { timeout: 8000 }).catch(() => {})
@@ -473,7 +478,7 @@ async function main () {
   const frame0Path = path.join(framesDir, 'frame-0000.png')
   const lastFramePath = path.join(framesDir, `frame-${String(lastFrameIdx).padStart(4, '0')}.png`)
 
-  // [IMPL-DEMO_OVERLAY] 3-part concat: no-overlay (frame 0, 1 s) + main (frames 1..N-2, 1 fps) + end logo (frame N-1, 0.5 s).
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] BUILD_DEMO_GIF: no-overlay (frame 0, 1 s) + main (frames 1..N-2, 1 fps) + end logo (frame N-1, 0.5 s).
   const palettePath = path.join(rootDir, 'test-results', 'demo-palette-bookmark.png')
   const framesPattern = path.join(framesDir, 'frame-%04d.png')
   const noOverlayGifPath = path.join(rootDir, 'test-results', 'demo-bookmark-nooverlay.gif')
