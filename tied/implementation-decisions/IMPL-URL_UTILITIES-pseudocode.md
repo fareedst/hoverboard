@@ -50,3 +50,19 @@
 - PROCEDURE: GET_DOMAIN
   - parsed = parse url
   - RETURN parsed.hostname or parsed.host or ""
+
+## SHARED_UTILITIES_COMPOSITION
+
+- [IMPL-URL_UTILITIES] [IMPL-ARRAY_OBJECT_UTILITIES] [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Exposes URL normalization as a pure shared-utility composition alongside array/object and text helpers.
+- Contract:
+  - INPUT: URL string and shared helper module
+  - PRE: URL helper and shared utility functions are available
+  - OUTPUT: normalized URL, validity result, or domain
+  - POST:
+    - success => URL helper returns deterministic output without mutating input
+  - EFFECTS: pure
+  - TERMINATION: total
+- PROCEDURE: SHARED_UTILITIES_COMPOSITION
+  - Receive URL input
+  - APPLY shared text/array helper contracts where needed
+  - RETURN URL utility result

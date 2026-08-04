@@ -6,9 +6,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_CREATE_UPDATE_TIMES ===
  * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] — Every bookmark has time (create) and updated_at (last update); provider-specific set/normalize; export/import include.
- * 
+ *
  * ## PINBOARD
- * 
+ *
  * - [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] — import create preserves CSV/JSON Time and Updated. How: Implements Pinboard behavior for IMPL-BOOKMARK_CREATE_UPDATE_TIMES.
  * - Contract:
  *   - INPUT: bookmark data (for save), API response (for Pinboard), raw record (for normalize)
@@ -28,15 +28,36 @@
  *   - IF bookmark has no updated_at: SET updated_at = time   // legacy
  *   - ELSE: keep updated_at
  *   - Include updated_at in payload/CSV/JSON
- * 
+ *
+ * ## ROUTER_STORAGE_BOOKMARK_TIMES
+ *
+ * - [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-RELIABILITY] How: Preserves bookmark time fields while router storage operations select a provider and update the storage index.
+ * - Contract:
+ *   - INPUT: bookmark data, preferred backend, storage providers, storage index
+ *   - PRE: bookmark URL and provider map are available
+ *   - OUTPUT: provider result with normalized time fields and updated storage index
+ *   - POST:
+ *     - success => saved bookmark retains time and updated_at; index points to the selected backend
+ *   - FAILURE_MODES: ProviderSaveFailed
+ *   - DATA: bookmark time fields and storage-index backend mapping
+ *   - DATA_TRANSITION: successful save updates the selected URL mapping; failed save leaves the mapping unchanged
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_BOOKMARK_TIMES
+ *   - Normalize missing updated_at from time
+ *   - Resolve provider from preferred backend
+ *   - AWAIT provider save
+ *   - IF save succeeds: update storage index for the URL
+ *   - RETURN provider result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_CREATE_UPDATE_TIMES ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_ROUTER ===
  * [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-STORAGE_MODE_DEFAULT] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Delegate by URL via storage index; preferredBackend for save/delete; aggregate getRecentBookmarks; moveBookmarkToStorage; fifth provider browser with 2C getBookmarkForUrl rule.
- * 
+ *
  * ## RESOLVE_PROVIDER
- * 
+ *
  * - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-STORAGE_MODE_DEFAULT] [REQ-BROWSER_BOOKMARK_STORAGE] How: preferredBackend (or legacy data.backend) if valid, else index.getBackendForUrl(url), else defaultStorageMode.
  * - Contract:
  *   - INPUT: url, data (optional preferredBackend or legacy backend)
@@ -53,9 +74,9 @@
  *   - 3. backend = storageIndex.getBackendForUrl(url)
  *   - 4. IF backend: RETURN providerMap[backend]
  *   - 5. RETURN providerMap[defaultStorageMode]
- * 
+ *
  * ## GET_BOOKMARK_FOR_URL
- * 
+ *
  * - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE] How: parallel best-of among pinboard/local/file/sync only (2C: exclude browser from race); consult browser only via resolveProvider when race empty or ownership already browser.
  * - Contract:
  *   - INPUT: url, title
@@ -76,11 +97,11 @@
  *   - 3. best = reduce candidates by (hasTags wins, else newer time)
  *   - 4. IF index missing or differs: storageIndex.setBackendForUrl(url, best.backend)
  *   - 5. RETURN best.bookmark
- * 
+ *
  * > Note: browser is never in the parallel race; save/delete/move use RESOLVE_PROVIDER when preferredBackend or index says browser.
- * 
+ *
  * ## SAVE_BOOKMARK
- * 
+ *
  * - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE] How: resolve provider (preferredBackend may be browser); delegate save; on success update index.
  * - Contract:
  *   - INPUT: data (url, fields, optional preferredBackend)
@@ -99,9 +120,9 @@
  *   - 2. result = provider.saveBookmark(data)
  *   - 3. IF result.success: storageIndex.setBackendForUrl(url, providerBackend)
  *   - 4. RETURN result
- * 
+ *
  * ## DELETE_BOOKMARK
- * 
+ *
  * - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: accept url string or { url, preferredBackend }; Index Delete passes preferredBackend so File/Sync/Browser rows delete even when index is wrong.
  * - Contract:
  *   - INPUT: urlOrData (string | { url, preferredBackend? })
@@ -121,9 +142,9 @@
  *   - 3. result = provider.deleteBookmark(url)
  *   - 4. IF result.success: storageIndex.removeUrl(url)
  *   - 5. RETURN result
- * 
+ *
  * ## SAVE_TAG_DELETE_TAG
- * 
+ *
  * - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE] How: resolve provider and delegate saveTag/deleteTag.
  * - Contract:
  *   - INPUT: data (url, tag fields)
@@ -137,9 +158,9 @@
  * - PROCEDURE: SAVE_TAG_OR_DELETE_TAG
  *   - 1. provider = RESOLVE_PROVIDER(data.url, data)
  *   - 2. RETURN provider.saveTag(data) OR provider.deleteTag(data)
- * 
+ *
  * ## GET_RECENT_BOOKMARKS
- * 
+ *
  * - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE] How: aggregate all five providers; sort by time descending; return top count.
  * - Contract:
  *   - INPUT: count
@@ -154,9 +175,9 @@
  *   - 2. FOR each provider IN [pinboard, local, file, sync, browser]: merged = merged CONCAT provider.getRecentBookmarks(count)
  *   - 3. SORT merged BY time DESCENDING
  *   - 4. RETURN merged[0..count-1]
- * 
+ *
  * ## GET_ALL_BOOKMARKS_FOR_INDEX
- * 
+ *
  * - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: aggregate local+file+sync+browser with storage field; pinboard excluded from index aggregation.
  * - Contract:
  *   - INPUT: none
@@ -169,9 +190,9 @@
  * - PROCEDURE: GET_ALL_BOOKMARKS_FOR_INDEX
  *   - 1. lists = PARALLEL [local, file, sync, browser].getAllBookmarks()
  *   - 2. RETURN concat with storage tags 'local'|'file'|'sync'|'browser', SORT BY time DESC
- * 
+ *
  * ## MOVE_BOOKMARK_TO_STORAGE
- * 
+ *
  * - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE] How: get from source; ensure time; save to target; delete from source; update index (targetBackend may be browser).
  * - Contract:
  *   - INPUT: url, targetBackend (pinboard|local|file|sync|browser)
@@ -193,7 +214,46 @@
  *   - 5. targetProvider.saveBookmark(bookmark)
  *   - 6. sourceProvider.deleteBookmark(url)
  *   - 7. storageIndex.setBackendForUrl(url, targetBackend)
- * 
+ *
+ * ## GET_BOOKMARK_FOR_BACKEND
+ *
+ * - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-PAGE_ARCHIVE_STORAGE] How: Query only the provider selected by the archive association request, normalize URL comparison, and treat every non-null record including a stub as existing.
+ * - Contract:
+ *   - INPUT: url, backend, optional title
+ *   - PRE: backend is one of pinboard|local|file|sync|browser; selected provider is wired
+ *   - OUTPUT: selected-backend bookmark | null
+ *   - POST:
+ *     - success => no other provider is queried and no aggregate 2C/storage-index choice is made
+ *   - FAILURE_MODES: InvalidBackend, ProviderQueryFailed
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_BOOKMARK_FOR_BACKEND
+ *   - 1. IF backend is invalid: RETURN null
+ *   - 2. provider = providerMap[backend]
+ *   - 3. IF provider.getAllBookmarks exists: records = AWAIT provider.getAllBookmarks(); RETURN first record whose normalized URL equals normalized input
+ *   - 4. ELSE: RETURN provider.getBookmarkForUrl(url, title) OR null
+ *
+ * ## ROUTER_STORAGE_PROVIDER_COMPOSITION
+ *
+ * - [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-RELIABILITY] How: Connects router provider selection and aggregation to storage-index persistence while preserving backend-specific routing.
+ * - Contract:
+ *   - INPUT: bookmark URL or recent-count request, preferred backend, provider map, storage index
+ *   - PRE: router providers and storage index are initialized
+ *   - OUTPUT: provider result or time-ordered recent bookmarks
+ *   - POST:
+ *     - success => the selected provider receives the original data and successful writes update the matching index entry
+ *   - FAILURE_MODES: ProviderSaveFailed, ProviderQueryFailed
+ *   - DATA: provider map and storage-index backend mapping
+ *   - DATA_TRANSITION: successful save writes the provider backend for the URL; read-only aggregation leaves the index unchanged
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_PROVIDER_COMPOSITION
+ *   - Resolve provider from preferred backend or storage index
+ *   - AWAIT provider operation
+ *   - IF operation is a successful save: update storage index
+ *   - IF operation is recent retrieval: merge provider results and sort by time descending
+ *   - RETURN operation result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_ROUTER ===
  */
 /**

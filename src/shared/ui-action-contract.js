@@ -131,6 +131,22 @@
  *   - 15. CSS .tags-tree-above-list: flex none (natural height; scrolls off with panel scroll)
  *   - 16. CSS .tree-section: min-height 100%; overflow-y auto
  *
+ * ## SEARCH_TAG_TREE_COMPOSITION
+ *
+ * - [IMPL-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-USABILITY] How: Groups only the rows selected by the side-panel bookmark search pipeline.
+ * - Contract:
+ *   - INPUT: filtered bookmark rows and available tags
+ *   - PRE: FILTER_BOOKMARKS_BY_SEARCH has produced the matching rows
+ *   - OUTPUT: tag-to-bookmark map for the matching rows
+ *   - POST:
+ *     - success => tags with no matching rows are absent
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SEARCH_TAG_TREE_COMPOSITION
+ *   - Receive matching bookmark rows
+ *   - BUILD_TAG_TO_BOOKMARKS from matching rows
+ *   - RETURN grouped map
+ *
  * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_TAGS_TREE ===
  */
 /**
@@ -157,6 +173,22 @@
  *   - 4.   EXPORT POPUP_ACTION_TO_MESSAGE (actionId -> message type)
  *   - 5.   EXPORT CONTENT_MESSAGE_TYPES, OVERLAY_ACTION_IDS
  *   - 6. Tests and E2E IMPORT from this module; same IDs for send/assert
+ *
+ * ## MESSAGE_DISPATCH_TESTABILITY
+ *
+ * - [IMPL-UI_ACTION_CONTRACT] [IMPL-UI_TESTABILITY_HOOKS] [IMPL-MESSAGE_HANDLING] [ARCH-UI_TESTABILITY] [ARCH-MESSAGE_HANDLING] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Provides the shared message/action identifiers used by dispatch and testability-hook composition assertions.
+ * - Contract:
+ *   - INPUT: exported message and action identifiers
+ *   - PRE: the contract module is loaded by sender, handler, and test seam
+ *   - OUTPUT: identical identifiers at every participating boundary
+ *   - POST:
+ *     - success => dispatch tests can trigger and assert the same action/message values
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_TESTABILITY
+ *   - LOAD shared contract
+ *   - PROVIDE identifiers to dispatch and callback seams
+ *   - ASSERT sender and receiver use the same identifiers
  *
  * === END IMPL-FULL-BLOCK: IMPL-UI_ACTION_CONTRACT ===
  */

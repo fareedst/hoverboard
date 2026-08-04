@@ -110,6 +110,27 @@
  *   - How (sub-block): Show when message or storage condition met.
  *   - 1. Auto-show: IF condition (e.g. message or storage): show()
  *
+ * ## OVERLAY_REFRESH_COMPOSITION
+ *
+ * - [IMPL-OVERLAY] [IMPL-OVERLAY_CONTROLS] [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] How: Connects OverlayManager.show to refresh-control creation, message retrieval, and a second overlay render in the deterministic DOM harness.
+ * - Contract:
+ *   - INPUT: overlay content, refresh control, message service, DOM harness
+ *   - PRE: overlay manager and message service are initialized
+ *   - OUTPUT: refreshed overlay content and visible control state
+ *   - POST:
+ *     - success => refresh sends getCurrentBookmark and renders the returned bookmark
+ *   - FAILURE_MODES: BookmarkRefreshFailed
+ *   - DATA: overlay DOM and current bookmark snapshot
+ *   - DATA_TRANSITION: refreshed bookmark replaces the displayed content while visibility remains true
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OVERLAY_REFRESH_COMPOSITION
+ *   - SHOW overlay with initial bookmark
+ *   - CREATE refresh control
+ *   - ON refresh click: SEND getCurrentBookmark through message service
+ *   - AWAIT response
+ *   - SHOW overlay with refreshed bookmark
+ *
  * === END IMPL-FULL-BLOCK: IMPL-OVERLAY ===
  */
 /**
@@ -133,6 +154,26 @@
  *   - CREATE button; SET position top 8px right 8px, size (min 24px); SET aria-label
  *   - APPLY theme vars; ATTACH click -> callback; ATTACH key (Escape)
  *   - RETURN element
+ *
+ * ## OVERLAY_REFRESH_COMPOSITION
+ *
+ * - [IMPL-OVERLAY_CONTROLS] [IMPL-OVERLAY] [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_CONTROLS] [ARCH-OVERLAY] [REQ-OVERLAY_CONTROL_LAYOUT] [REQ-OVERLAY_SYSTEM] How: Connects the refresh control callback to OverlayManager message retrieval and redraw in the deterministic DOM harness.
+ * - Contract:
+ *   - INPUT: overlay manager, refresh button, message service, DOM harness
+ *   - PRE: refresh button is attached to a visible overlay
+ *   - OUTPUT: refresh callback causes updated overlay content
+ *   - POST:
+ *     - success => callback sends getCurrentBookmark and the updated bookmark is rendered
+ *   - FAILURE_MODES: BookmarkRefreshFailed
+ *   - DATA: refresh control and overlay content
+ *   - DATA_TRANSITION: overlay content is replaced after a successful refresh
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OVERLAY_REFRESH_COMPOSITION
+ *   - ATTACH refresh callback
+ *   - ON click: SEND getCurrentBookmark
+ *   - AWAIT response
+ *   - UPDATE overlay content
  *   - How (sub-block): Create refresh button with position, size, ARIA, theme, click handler.
  *
  * ## CREATE_REFRESH_BUTTON
@@ -324,6 +365,23 @@
  *   - How (sub-block): Set callbacks, trigger, assert args.
  *   - 4. Tests: SET callbacks; TRIGGER message/action; ASSERT callback invoked with expected args
  *
+ * ## MESSAGE_DISPATCH_TESTABILITY
+ *
+ * - [IMPL-UI_TESTABILITY_HOOKS] [IMPL-MESSAGE_HANDLING] [IMPL-UI_ACTION_CONTRACT] [ARCH-UI_TESTABILITY] [ARCH-MESSAGE_HANDLING] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Exposes stable callback seams so a message dispatch can be asserted without DOM or browser UI invocation.
+ * - Contract:
+ *   - INPUT: processed message/result, callback registration, action/state callback
+ *   - PRE: callback setters are available to the test harness
+ *   - OUTPUT: callback receives the dispatched message/result or action/state payload
+ *   - POST:
+ *     - success => the registered callback observes the expected arguments
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_TESTABILITY
+ *   - SET callback
+ *   - TRIGGER message or action
+ *   - CALL callback with observable payload
+ *   - ASSERT callback arguments
+ *
  * === END IMPL-FULL-BLOCK: IMPL-UI_TESTABILITY_HOOKS ===
  */
 /**
@@ -474,6 +532,8 @@ const debugError = (message, error = null) => {
   }
 }
 
+// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-PERFORMANCE]
+// Overlay DOM creation is covered by the deterministic responsiveness budget.
 class OverlayManager {
   constructor (document, config) {
     this.document = document

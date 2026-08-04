@@ -7,8 +7,8 @@ REQ-ERROR_HANDLING:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 5: placeholder NFR criteria"
+      date: "2026-08-04"
+      reason: "Connect error-handling umbrella to validation, timeout, and rendering tests"
   name: "Error Handling"
   priority: "P2"
   rationale:
@@ -20,14 +20,24 @@ REQ-ERROR_HANDLING:
       - "REQ-USABILITY"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Umbrella: detailed error UX owned by feature REQs; this token tracks the cross-cutting policy."
+    - criterion: "Message validation, timeout, and popup error rendering are covered by named tests; feature-specific error ownership remains under related REQs."
+    - criterion: "Umbrella NFR for consistent error surfacing across popup, overlay, Options, and service worker."
     - criterion: "User-facing failures show a recoverable message rather than silent no-ops on primary save/delete/move paths."
   status: "Active"
   traceability:
-    architecture: []
+    architecture:
+      - "ARCH-ERROR_HANDLING"
+      - "ARCH-MESSAGE_HANDLING"
     code_annotations:
       - "REQ-ERROR_HANDLING"
-    implementation: []
-    tests: []
+    implementation:
+      - "IMPL-ERROR_HANDLING"
+      - "IMPL-MESSAGE_HANDLING"
+      - "IMPL-POPUP_MESSAGE_TIMEOUT"
+    tests:
+      - "tests/unit/message-handler-runtime-validation.test.js"
+      - "tests/unit/popup-error-message.test.js"
+      - "tests/unit/popup-message-timeout.test.js"
+      - "tests/unit/runtime-message-listener-contract.test.js"
   validation_criteria:
     - method: "TIED consistency validation"

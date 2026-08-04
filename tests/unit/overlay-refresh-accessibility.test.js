@@ -1,9 +1,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-OVERLAY_CONTROLS ===
  * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] — Close and refresh buttons with fixed position, 24px min touch target, ARIA, theme vars. Contract: parent and theme and callback; control elements and styles.
- * 
+ *
  * ## CREATE_CLOSE_BUTTON
- * 
+ *
  * - Layout contract [ARCH-OVERLAY]/[ARCH-OVERLAY_CONTROLS]: Close at top/right 8/8 (px from edges). How: Implements createCloseButton() behavior for IMPL-OVERLAY_CONTROLS.
  * - Contract:
  *   - INPUT: parent element; theme CSS variables; callback (close/refresh)
@@ -19,10 +19,30 @@
  *   - CREATE button; SET position top 8px right 8px, size (min 24px); SET aria-label
  *   - APPLY theme vars; ATTACH click -> callback; ATTACH key (Escape)
  *   - RETURN element
+ *
+ * ## OVERLAY_REFRESH_COMPOSITION
+ *
+ * - [IMPL-OVERLAY_CONTROLS] [IMPL-OVERLAY] [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_CONTROLS] [ARCH-OVERLAY] [REQ-OVERLAY_CONTROL_LAYOUT] [REQ-OVERLAY_SYSTEM] How: Connects the refresh control callback to OverlayManager message retrieval and redraw in the deterministic DOM harness.
+ * - Contract:
+ *   - INPUT: overlay manager, refresh button, message service, DOM harness
+ *   - PRE: refresh button is attached to a visible overlay
+ *   - OUTPUT: refresh callback causes updated overlay content
+ *   - POST:
+ *     - success => callback sends getCurrentBookmark and the updated bookmark is rendered
+ *   - FAILURE_MODES: BookmarkRefreshFailed
+ *   - DATA: refresh control and overlay content
+ *   - DATA_TRANSITION: overlay content is replaced after a successful refresh
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OVERLAY_REFRESH_COMPOSITION
+ *   - ATTACH refresh callback
+ *   - ON click: SEND getCurrentBookmark
+ *   - AWAIT response
+ *   - UPDATE overlay content
  *   - How (sub-block): Create refresh button with position, size, ARIA, theme, click handler.
- * 
+ *
  * ## CREATE_REFRESH_BUTTON
- * 
+ *
  * - Layout contract [ARCH-OVERLAY]/[ARCH-OVERLAY_CONTROLS]: Refresh at top/right 8/40 (px from edges). How: Implements createRefreshButton() behavior for IMPL-OVERLAY_CONTROLS.
  * - Contract:
  *   - INPUT: parent element; theme CSS variables; callback (close/refresh)
@@ -38,15 +58,15 @@
  *   - CREATE button; SET position top 8px right 40px, size; SET aria-label
  *   - APPLY theme vars; ATTACH click -> callback
  *   - RETURN element
- * 
+ *
  * === END IMPL-FULL-BLOCK: IMPL-OVERLAY_CONTROLS ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-UI_TESTABILITY_HOOKS ===
  * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] — setOnMessageProcessed, setOnAction, setOnStateChange so tests assert without DOM. Contract: callbacks set by tests; message/action/state trigger callbacks.
- * 
+ *
  * ## MAIN
- * 
+ *
  * - [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Logical block for IMPL-UI_TESTABILITY_HOOKS.
  * - Contract:
  *   - INPUT: optional callback fn (set by tests); message (processMessage); popup/overlay action or state change
@@ -66,7 +86,24 @@
  *   - 3. OverlayManager: ON visibility/content change: IF _onStateChange: CALL with { visible, contentSnapshot }
  *   - How (sub-block): Set callbacks, trigger, assert args.
  *   - 4. Tests: SET callbacks; TRIGGER message/action; ASSERT callback invoked with expected args
- * 
+ *
+ * ## MESSAGE_DISPATCH_TESTABILITY
+ *
+ * - [IMPL-UI_TESTABILITY_HOOKS] [IMPL-MESSAGE_HANDLING] [IMPL-UI_ACTION_CONTRACT] [ARCH-UI_TESTABILITY] [ARCH-MESSAGE_HANDLING] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Exposes stable callback seams so a message dispatch can be asserted without DOM or browser UI invocation.
+ * - Contract:
+ *   - INPUT: processed message/result, callback registration, action/state callback
+ *   - PRE: callback setters are available to the test harness
+ *   - OUTPUT: callback receives the dispatched message/result or action/state payload
+ *   - POST:
+ *     - success => the registered callback observes the expected arguments
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_TESTABILITY
+ *   - SET callback
+ *   - TRIGGER message or action
+ *   - CALL callback with observable payload
+ *   - ASSERT callback arguments
+ *
  * === END IMPL-FULL-BLOCK: IMPL-UI_TESTABILITY_HOOKS ===
  */
 import { OverlayManager } from '../../src/features/content/overlay-manager.js'

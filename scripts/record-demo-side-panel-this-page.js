@@ -46,9 +46,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-SCREENSHOT_MODE ===
  * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] — Placeholder screenshot flow: seed storage, fake tab params, data-screenshot-ready, handleGetCurrentBookmark prefers data.url. Contract: URL params and seed; placeholder UI and script capture.
- * 
+ *
  * ## MAIN
- * 
+ *
  * - [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] How: Rich placeholder data: 15+ bookmarks so index and By Tag tree look robust; hero Pinboard entry with 6+ tags and non-empty extended for This Page view. Side panel: open with ?screenshot=1&url=screenshotPopupUrl&title=screenshotPopupTitle so Bookmark tab shows Pinboard bookmark (same doc, PopupController reads window.location.search).
  * - Contract:
  *   - INPUT: ?screenshot=1&url=...&title=... (popup/side panel); seed JSON (local bookmarks, storage index, theme); optional --seed=path
@@ -70,7 +70,23 @@
  *   - 4. handleGetCurrentBookmark: IF data.url present and http(s): USE as targetUrl so popup-as-tab gets bookmark for screenshot URL
  *   - 5. Side panel URL: GOTO side-panel.html?screenshot=1&url=encode(screenshotPopupUrl)&title=encode(screenshotPopupTitle); SET viewport width 360 (or 240); WAIT for tab content; CAPTURE screenshot (This Page, then By Tag, Tabs, etc.); output side-panel-bookmark.png, side-panel-tags-tree.png, side-panel-tabs.png
  *   - 6. record-demo-side-panel-this-page: SEED chrome.storage.local with placeholderStorageSeed via options page; GOTO side-panel.html?screenshot=1&url=...&title=...; record frames; assemble GIF
- * 
+ *
+ * ## SCREENSHOT_THEME_CONTRACT
+ *
+ * - [IMPL-SCREENSHOT_MODE] [IMPL-POPUP_THEME_CSS] [ARCH-THEME] [REQ-DARK_THEME] How: Connects screenshot seed theme selection to the popup stylesheet contract before browser capture.
+ * - Contract:
+ *   - INPUT: screenshot seed, selected theme, popup stylesheet
+ *   - PRE: screenshot seed and popup stylesheet are readable
+ *   - OUTPUT: screenshot capture configuration with a supported theme
+ *   - POST:
+ *     - success => selected/default theme has a matching popup CSS rule
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SCREENSHOT_THEME_CONTRACT
+ *   - Read selected/default theme from screenshot seed
+ *   - Read theme selectors from popup stylesheet
+ *   - ASSERT selected/default theme is supported
+ *
  * === END IMPL-FULL-BLOCK: IMPL-SCREENSHOT_MODE ===
  */
 #!/usr/bin/env node

@@ -29,6 +29,27 @@
  *   - ELSE: keep updated_at
  *   - Include updated_at in payload/CSV/JSON
  *
+ * ## ROUTER_STORAGE_BOOKMARK_TIMES
+ *
+ * - [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-RELIABILITY] How: Preserves bookmark time fields while router storage operations select a provider and update the storage index.
+ * - Contract:
+ *   - INPUT: bookmark data, preferred backend, storage providers, storage index
+ *   - PRE: bookmark URL and provider map are available
+ *   - OUTPUT: provider result with normalized time fields and updated storage index
+ *   - POST:
+ *     - success => saved bookmark retains time and updated_at; index points to the selected backend
+ *   - FAILURE_MODES: ProviderSaveFailed
+ *   - DATA: bookmark time fields and storage-index backend mapping
+ *   - DATA_TRANSITION: successful save updates the selected URL mapping; failed save leaves the mapping unchanged
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_BOOKMARK_TIMES
+ *   - Normalize missing updated_at from time
+ *   - Resolve provider from preferred backend
+ *   - AWAIT provider save
+ *   - IF save succeeds: update storage index for the URL
+ *   - RETURN provider result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_CREATE_UPDATE_TIMES ===
  */
 /**
@@ -61,6 +82,27 @@
  *   - 3. saveBookmark(data): request("/posts/add", data); RETURN result
  *   - 4. deleteBookmark(url): request("/posts/delete", { url }); RETURN result
  *
+ * ## ROUTER_STORAGE_PINBOARD
+ *
+ * - [IMPL-PINBOARD_API] [IMPL-PINBOARD_POSTS_ADD_ENCODING] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-PINBOARD_API] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PINBOARD_COMPATIBILITY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Connects BookmarkRouter preferred-backend selection to Pinboard save and encoded posts/add parameters without a live network call.
+ * - Contract:
+ *   - INPUT: bookmark data, preferred backend, Pinboard provider, storage index
+ *   - PRE: Pinboard provider and router storage index are initialized
+ *   - OUTPUT: Pinboard save result and encoded request parameters
+ *   - POST:
+ *     - success => router delegates to Pinboard and encoded values preserve fragments and plus characters
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: bookmark fields, encoded parameter pairs, storage-index backend mapping
+ *   - DATA_TRANSITION: successful router save records pinboard as the URL backend
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_PINBOARD
+ *   - Resolve pinboard from preferred backend
+ *   - AWAIT provider save
+ *   - Encode each posts/add value
+ *   - Update storage index after successful save
+ *   - RETURN provider result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-PINBOARD_API ===
  */
 /**
@@ -88,6 +130,23 @@
  *   - RETURN pairs.join("&")
  *   - How (sub-block): Use result in posts/add URL so fragment and plus are not misinterpreted.
  *   - 1. usage: BUILD posts/add request URL as baseUrl + "?" + buildSaveParams(bookmarkData) so fragment and plus are not misinterpreted by server or transport.
+ *
+ * ## ROUTER_STORAGE_PINBOARD
+ *
+ * - [IMPL-PINBOARD_POSTS_ADD_ENCODING] [IMPL-PINBOARD_API] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-PINBOARD_API] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PINBOARD_COMPATIBILITY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Ensures router-selected Pinboard saves use encoded posts/add values before provider persistence.
+ * - Contract:
+ *   - INPUT: bookmark fields and router-selected Pinboard provider
+ *   - PRE: posts/add parameter builder and provider save path are available
+ *   - OUTPUT: encoded parameter string and successful provider result
+ *   - POST:
+ *     - success => reserved URL/value characters remain encoded through the router path
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_PINBOARD
+ *   - Receive bookmark data from router
+ *   - BUILD encoded posts/add parameters
+ *   - AWAIT Pinboard provider save
+ *   - RETURN provider result
  *
  * === END IMPL-FULL-BLOCK: IMPL-PINBOARD_POSTS_ADD_ENCODING ===
  */

@@ -23,6 +23,22 @@
  *   - How (sub-block): Logger.shouldLog(level): emit only if level >= getLogLevel().
  *   - 1. Used by Logger.shouldLog(level): IF level >= getLogLevel() then emit else skip.
  *
+ * ## LOGGER_CONFIG_COMPOSITION
+ *
+ * - [IMPL-LOG_LEVEL_CONFIG] [IMPL-LOGGER_CONTEXT_LEVELS] [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Supplies the environment-derived severity threshold consumed by context and legacy logger adapters.
+ * - Contract:
+ *   - INPUT: environment and requested log severity
+ *   - PRE: environment access is available
+ *   - OUTPUT: severity threshold used by logger callers
+ *   - POST:
+ *     - success => production resolves warn and non-production resolves debug unless configured otherwise
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: LOGGER_CONFIG_COMPOSITION
+ *   - Read environment
+ *   - Resolve threshold with GET_LOG_LEVEL
+ *   - RETURN threshold to Logger and legacy log callers
+ *
  * === END IMPL-FULL-BLOCK: IMPL-LOG_LEVEL_CONFIG ===
  */
 /**
@@ -96,6 +112,24 @@
  *   - IF shouldLog(level): OUTPUT formatMessage(level, ...args)
  *   - 1. logger = default Logger; createLogger(context) = new Logger(context).
  *
+ * ## LOGGER_CONFIG_COMPOSITION
+ *
+ * - [IMPL-LOGGER_CONTEXT_LEVELS] [IMPL-LOG_LEVEL_CONFIG] [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Connects environment-derived log level configuration to context and legacy logger calls with consistent severity filtering.
+ * - Contract:
+ *   - INPUT: environment, logger context, severity, message arguments
+ *   - PRE: log-level configuration and logger adapters are available
+ *   - OUTPUT: emitted or suppressed formatted log line
+ *   - POST:
+ *     - success => production suppresses debug below warn while development emits the legacy path
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LOGGER_CONFIG_COMPOSITION
+ *   - level = GET_LOG_LEVEL()
+ *   - IF requested severity is below level: suppress output
+ *   - ELSE: format context and arguments
+ *   - Route legacy log calls through the configured logger
+ *   - Emit the resulting line
+ *
  * === END IMPL-FULL-BLOCK: IMPL-LOGGER_CONTEXT_LEVELS ===
  */
 /**
@@ -136,6 +170,23 @@
  * - PROCEDURE: NOISY
  *   - EMIT log line regardless of level (or at debug)
  *   - Used for temporary migration/debug; can be removed when call sites use Logger directly.
+ *
+ * ## LOGGER_CONFIG_COMPOSITION
+ *
+ * - [IMPL-LOGGER_LEGACY] [IMPL-LOGGER_CONTEXT_LEVELS] [IMPL-LOG_LEVEL_CONFIG] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Keeps legacy log calls on the same configured severity path as context-aware Logger calls.
+ * - Contract:
+ *   - INPUT: legacy context and message arguments, configured severity threshold
+ *   - PRE: legacy adapter and configured logger are available
+ *   - OUTPUT: emitted or suppressed legacy log line
+ *   - POST:
+ *     - success => legacy calls use the configured logger threshold
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LOGGER_CONFIG_COMPOSITION
+ *   - Receive legacy log call
+ *   - AWAIT configured logger severity decision
+ *   - IF allowed: emit formatted legacy line
+ *   - ELSE: suppress line
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOGGER_LEGACY ===
  */

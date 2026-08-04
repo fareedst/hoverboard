@@ -19,3 +19,21 @@
   - 3.     tab = sender.tab IF present
   - 4.     IF no tab AND message.type = saveBookmark: tab = query active tab
   - 5.     IF tab: updateBadgeForTab(tab)
+
+## MESSAGE_DISPATCH_BADGE_REFRESH
+
+- [IMPL-BADGE_REFRESH] [IMPL-MESSAGE_HANDLING] [ARCH-BADGE] [ARCH-MESSAGE_HANDLING] [REQ-BADGE_INDICATORS] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] How: Completes a successful message dispatch before refreshing the affected tab badge.
+- Contract:
+  - INPUT: message, sender tab, message-processing result
+  - PRE: message processing has a resolvable result; badge updater is available
+  - OUTPUT: updated badge state for the affected tab
+  - POST:
+    - success => badge refresh runs only for saveTag, deleteTag, or saveBookmark
+  - EFFECTS: Async, IO
+  - TERMINATION: total
+- PROCEDURE: MESSAGE_DISPATCH_BADGE_REFRESH
+  - AWAIT processMessage(message)
+  - IF message type is saveTag, deleteTag, or saveBookmark:
+    - tab = sender tab when present
+    - IF tab is absent and message type is saveBookmark: AWAIT active-tab lookup
+    - IF tab exists: AWAIT updateBadgeForTab(tab)

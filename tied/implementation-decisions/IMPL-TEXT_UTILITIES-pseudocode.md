@@ -49,3 +49,19 @@
 - PROCEDURE: ESCAPE_HTML
   - ENCODE characters that are significant in HTML (e.g. <, >, &, ") so string is safe for textContent or attribute use
   - RETURN encoded string
+
+## SHARED_UTILITIES_COMPOSITION
+
+- [IMPL-TEXT_UTILITIES] [IMPL-ARRAY_OBJECT_UTILITIES] [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Keeps text normalization available to the shared URL and array/object utility composition without mutating caller data.
+- Contract:
+  - INPUT: text or URL value and shared helper module
+  - PRE: text helper functions are available
+  - OUTPUT: normalized text value consumed by a shared utility
+  - POST:
+    - success => normalized output is deterministic and source input is unchanged
+  - EFFECTS: pure
+  - TERMINATION: total
+- PROCEDURE: SHARED_UTILITIES_COMPOSITION
+  - Receive text value
+  - NORMALIZE text
+  - RETURN normalized value to the composing utility

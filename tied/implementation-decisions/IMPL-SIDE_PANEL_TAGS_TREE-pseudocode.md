@@ -122,3 +122,19 @@
   - 14. CSS #tagsTreePanel: display block; flex 1 1 0; min-height 0; overflow-y auto; background var(--color-background)
   - 15. CSS .tags-tree-above-list: flex none (natural height; scrolls off with panel scroll)
   - 16. CSS .tree-section: min-height 100%; overflow-y auto
+
+## SEARCH_TAG_TREE_COMPOSITION
+
+- [IMPL-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-USABILITY] How: Groups only the rows selected by the side-panel bookmark search pipeline.
+- Contract:
+  - INPUT: filtered bookmark rows and available tags
+  - PRE: FILTER_BOOKMARKS_BY_SEARCH has produced the matching rows
+  - OUTPUT: tag-to-bookmark map for the matching rows
+  - POST:
+    - success => tags with no matching rows are absent
+  - EFFECTS: pure
+  - TERMINATION: total
+- PROCEDURE: SEARCH_TAG_TREE_COMPOSITION
+  - Receive matching bookmark rows
+  - BUILD_TAG_TO_BOOKMARKS from matching rows
+  - RETURN grouped map

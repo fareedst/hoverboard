@@ -33,6 +33,27 @@
  *   - 3. saveBookmark(data): request("/posts/add", data); RETURN result
  *   - 4. deleteBookmark(url): request("/posts/delete", { url }); RETURN result
  *
+ * ## ROUTER_STORAGE_PINBOARD
+ *
+ * - [IMPL-PINBOARD_API] [IMPL-PINBOARD_POSTS_ADD_ENCODING] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-PINBOARD_API] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PINBOARD_COMPATIBILITY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Connects BookmarkRouter preferred-backend selection to Pinboard save and encoded posts/add parameters without a live network call.
+ * - Contract:
+ *   - INPUT: bookmark data, preferred backend, Pinboard provider, storage index
+ *   - PRE: Pinboard provider and router storage index are initialized
+ *   - OUTPUT: Pinboard save result and encoded request parameters
+ *   - POST:
+ *     - success => router delegates to Pinboard and encoded values preserve fragments and plus characters
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: bookmark fields, encoded parameter pairs, storage-index backend mapping
+ *   - DATA_TRANSITION: successful router save records pinboard as the URL backend
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_PINBOARD
+ *   - Resolve pinboard from preferred backend
+ *   - AWAIT provider save
+ *   - Encode each posts/add value
+ *   - Update storage index after successful save
+ *   - RETURN provider result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-PINBOARD_API ===
  */
 export class PinboardService {

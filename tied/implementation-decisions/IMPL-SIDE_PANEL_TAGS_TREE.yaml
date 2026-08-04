@@ -119,8 +119,8 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       date: "2026-02-21"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "ARCH close-out: aggregate includes Browser"
+      date: "2026-08-04"
+      reason: "Add search-to-tags-tree composition evidence"
   name: "Side Panel Tags and Bookmarks Tree Implementation"
   rationale:
     benefits:
@@ -145,6 +145,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     requirements:
       - "REQ-SIDE_PANEL_TAGS_TREE"
     tests:
+      - "tests/integration/side-panel-bookmark-search-x-side-panel-tags-tree-binding-composition.integration.test.js"
       - "tests/playwright/extension-messaging.spec.js"
       - "tests/unit/side-panel-open.test.js"
       - "tests/unit/tags-tree-data.test.js"

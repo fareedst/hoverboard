@@ -66,3 +66,21 @@
 - PROCEDURE: DEBUG
   - IF shouldLog(level): OUTPUT formatMessage(level, ...args)
   - 1. logger = default Logger; createLogger(context) = new Logger(context).
+
+## LOGGER_CONFIG_COMPOSITION
+
+- [IMPL-LOGGER_CONTEXT_LEVELS] [IMPL-LOG_LEVEL_CONFIG] [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Connects environment-derived log level configuration to context and legacy logger calls with consistent severity filtering.
+- Contract:
+  - INPUT: environment, logger context, severity, message arguments
+  - PRE: log-level configuration and logger adapters are available
+  - OUTPUT: emitted or suppressed formatted log line
+  - POST:
+    - success => production suppresses debug below warn while development emits the legacy path
+  - EFFECTS: IO
+  - TERMINATION: total
+- PROCEDURE: LOGGER_CONFIG_COMPOSITION
+  - level = GET_LOG_LEVEL()
+  - IF requested severity is below level: suppress output
+  - ELSE: format context and arguments
+  - Route legacy log calls through the configured logger
+  - Emit the resulting line

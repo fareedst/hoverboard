@@ -41,8 +41,8 @@ IMPL-MESSAGE_HANDLING:
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-30"
-      reason: "Add message-response-missing composition suite"
+      date: "2026-08-04"
+      reason: "Align message-handler composition evidence after dispatch batch"
   name: "Message Handling System Implementation"
   rationale:
     benefits:
@@ -70,8 +70,11 @@ IMPL-MESSAGE_HANDLING:
       - "REQ-RECENT_TAGS_SYSTEM"
       - "REQ-SMART_BOOKMARKING"
     tests:
+      - "tests/integration/badge-refresh-message-dispatch-composition.integration.test.js"
+      - "tests/integration/cross-browser-message-dispatch-composition.integration.test.js"
       - "tests/integration/message-handler-router-storage.integration.test.js"
       - "tests/integration/message-response-missing-composition.integration.test.js"
+      - "tests/integration/ui-testability-hooks-message-dispatch-composition.integration.test.js"
       - "tests/playwright/extension-messaging.spec.js"
       - "tests/unit/content-message-response-missing.test.js"
       - "tests/unit/content-messaging-contracts.test.js"
@@ -82,9 +85,3 @@ IMPL-MESSAGE_HANDLING:
       - "tests/unit/message-response-unwrap.test.js"
       - "tests/unit/message-schemas.test.js"
       - "tests/unit/message-service.test.js"
-      - "tests/unit/message-type-drift.test.js"
-      - "tests/unit/module-import-fix.test.js"
-      - "tests/unit/offscreen-file-bookmark-messaging.test.js"
-      - "tests/unit/popup-message-contract.test.js"
-      - "tests/unit/runtime-message-listener-contract.test.js"
-      - "tests/unit/service-worker-messaging-routing.test.js"

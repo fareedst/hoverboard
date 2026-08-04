@@ -28,8 +28,8 @@ IMPL-CROSS_BROWSER:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Primary REQ REQ-CROSS_BROWSER; wire essence_pseudocode_path"
+      date: "2026-08-04"
+      reason: "Add shared browser shim message composition evidence"
   name: "Cross-Browser Browser API Shim"
   rationale:
     benefits:
@@ -54,6 +54,7 @@ IMPL-CROSS_BROWSER:
     requirements:
       - "REQ-CROSS_BROWSER"
     tests:
+      - "tests/integration/cross-browser-message-dispatch-composition.integration.test.js"
       - "tests/unit/badge-refresh-service-worker.test.js"
       - "tests/unit/browser-api-shim-platform.test.js"
       - "tests/unit/message-client.test.js"

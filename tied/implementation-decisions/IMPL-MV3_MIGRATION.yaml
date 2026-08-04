@@ -16,8 +16,8 @@ IMPL-MV3_MIGRATION:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Full-block three-way sync"
+      date: "2026-08-04"
+      reason: "Close MV3 manifest-to-service-worker entry-point evidence"
   name: "MV3 Migration"
   rationale:
     why: "Manifest V3 migration"
@@ -35,4 +35,5 @@ IMPL-MV3_MIGRATION:
     requirements:
       - "REQ-MANIFEST_V3_MIGRATION"
     tests:
+      - "tests/integration/mv3-migration-binding-composition.integration.test.js"
       - "tests/unit/theme-and-search-stubs.test.js"

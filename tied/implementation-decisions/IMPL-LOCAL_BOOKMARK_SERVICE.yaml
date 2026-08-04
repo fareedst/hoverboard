@@ -24,8 +24,8 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "ARCH close-out: untangle ARCH-STORAGE bookmark role"
+      date: "2026-08-04"
+      reason: "Align local provider composition evidence"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -58,5 +58,7 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
       - "REQ-STORAGE_MODE_DEFAULT"
     tests:
+      - "tests/integration/bookmark-create-update-times-router-storage-composition.integration.test.js"
+      - "tests/integration/local-bookmarks-index-regex-replace-x-bookmark-router-router-storage-composition.integration.test.js"
       - "tests/unit/local-bookmark-service.test.js"
       - "tests/unit/message-handler-local-save-recall.test.js"

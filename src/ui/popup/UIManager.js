@@ -220,6 +220,8 @@
  *     - success => Stores is selected and exactly one head panel is visible
  *     - success => activeFooterGroup is null, all footer tabs are unselected, and all footer panels are hidden
  *     - success => Actions is the sole footer tab with tabindex 0 while the footer is collapsed
+ *   - DATA: activeHeadGroup, activeFooterGroup, footer tab and panel DOM state
+ *   - DATA_TRANSITION: initialization selects Stores at the head and sets the footer to its collapsed state
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: INITIALIZE_INDEX_CONTROL_TABS
@@ -240,6 +242,8 @@
  *   - INPUT: headPanel (element), footerPanel (element), root (element)
  *   - PRE: root exists; missing panel elements are allowed
  *   - OUTPUT: root CSS variables for head offset and footer spacing
+ *   - DATA: root CSS variables --index-head-sticky-height and --index-footer-sticky-height
+ *   - DATA_TRANSITION: measured panel heights replace the root CSS variable values after initialization, transition, or resize
  *   - POST:
  *     - success => CSS variables equal the current measured compact or active panel heights
  *   - EFFECTS: State
@@ -258,6 +262,8 @@
  *   - INPUT: tableWrapper (element), headPanel (element), root (element)
  *   - PRE: root, tableWrapper, and headPanel exist
  *   - OUTPUT: root sticky-thead-offset class state
+ *   - DATA: root sticky-thead-offset class
+ *   - DATA_TRANSITION: class is present only while the table top is above the measured head-panel height
  *   - POST:
  *     - tableWrapper top >= headPanel height => root does not have sticky-thead-offset
  *     - tableWrapper top < headPanel height => root has sticky-thead-offset
@@ -325,6 +331,27 @@
  *   - 4. Popup: bookmarksIndexBtn -> openBookmarksIndex -> SEND OPEN_BOOKMARKS_INDEX
  *   - 5. Options: bookmarks-index-link href -> extension URL (no dismiss; out of scope)
  *   - How (sub-block): Index page init must NOT send REQUEST_SIDE_PANEL_CLOSE (refresh must not re-dismiss after icon reopen).
+ *
+ * ## ROUTER_STORAGE_REGEX_SAVE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-RELIABILITY] How: Connects selected-bookmark regex replacement to preferred-backend router persistence and storage-index refresh.
+ * - Contract:
+ *   - INPUT: selected URLs, bookmark map, regex options, router save operation
+ *   - PRE: selected URLs and replacement options are available
+ *   - OUTPUT: refreshed bookmark rows with unchanged selections restored
+ *   - POST:
+ *     - success => only changed payloads are sent to the router and the display is reloaded
+ *   - FAILURE_MODES: InvalidPattern, BookmarkSaveFailed
+ *   - DATA: selected URL set and displayed bookmark rows
+ *   - DATA_TRANSITION: changed rows are persisted; selection is cleared during reload and restored for visible URLs
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_REGEX_SAVE
+ *   - Build replacement payload for each selected URL
+ *   - IF replacement is unchanged: skip router save
+ *   - AWAIT router save for each changed payload
+ *   - Reload bookmark rows
+ *   - Restore visible selections
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
  */
@@ -850,6 +877,22 @@
  *   - 14. CSS #tagsTreePanel: display block; flex 1 1 0; min-height 0; overflow-y auto; background var(--color-background)
  *   - 15. CSS .tags-tree-above-list: flex none (natural height; scrolls off with panel scroll)
  *   - 16. CSS .tree-section: min-height 100%; overflow-y auto
+ *
+ * ## SEARCH_TAG_TREE_COMPOSITION
+ *
+ * - [IMPL-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-USABILITY] How: Groups only the rows selected by the side-panel bookmark search pipeline.
+ * - Contract:
+ *   - INPUT: filtered bookmark rows and available tags
+ *   - PRE: FILTER_BOOKMARKS_BY_SEARCH has produced the matching rows
+ *   - OUTPUT: tag-to-bookmark map for the matching rows
+ *   - POST:
+ *     - success => tags with no matching rows are absent
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SEARCH_TAG_TREE_COMPOSITION
+ *   - Receive matching bookmark rows
+ *   - BUILD_TAG_TO_BOOKMARKS from matching rows
+ *   - RETURN grouped map
  *
  * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_TAGS_TREE ===
  */

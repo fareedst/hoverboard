@@ -1,9 +1,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-STORAGE_INDEX ===
  * [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE] — Per-URL backend in chrome.storage.local; getIndex, getBackendForUrl, setBackendForUrl, removeUrl; migration from local bookmarks when empty.
- * 
+ *
  * ## GET_INDEX
- * 
+ *
  * - [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE] How: Load and return index from storage (or {}).
  * - Contract:
  *   - INPUT: storage key (hoverboard_storage_index)
@@ -17,9 +17,9 @@
  * - PROCEDURE: GET_INDEX
  *   - 1. LOAD index from storage under key
  *   - 2. RETURN index (or empty map if missing)
- * 
+ *
  * ## GET_BACKEND_FOR_URL
- * 
+ *
  * - [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE] How: Lookup backend for URL.
  * - Contract:
  *   - INPUT: url
@@ -33,9 +33,9 @@
  * - PROCEDURE: GET_BACKEND_FOR_URL
  *   - 1. index = GET_INDEX()
  *   - 2. RETURN index[url] or null
- * 
+ *
  * ## SET_BACKEND_FOR_URL
- * 
+ *
  * - [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE] How: Set backend for URL and persist.
  * - Contract:
  *   - INPUT: url, backend (pinboard|local|file|sync|browser)
@@ -51,9 +51,9 @@
  *   - 1. index = GET_INDEX()
  *   - 2. SET index[url] = backend
  *   - 3. PERSIST index to storage
- * 
+ *
  * ## REMOVE_URL
- * 
+ *
  * - [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE] How: Remove URL from index and persist.
  * - Contract:
  *   - INPUT: url
@@ -69,9 +69,9 @@
  *   - 1. index = GET_INDEX()
  *   - 2. REMOVE index[url]
  *   - 3. PERSIST index to storage
- * 
+ *
  * ## MIGRATE_FROM_LOCAL_WHEN_EMPTY
- * 
+ *
  * - [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Seed index from local bookmarks when empty.
  * - Contract:
  *   - INPUT: optional localBookmarkProvider
@@ -87,7 +87,26 @@
  *   - 1. IF GET_INDEX() is empty AND localBookmarkProvider given:
  *   - 2. bookmarks = localBookmarkProvider.getAllBookmarks()
  *   - 3. FOR each bookmark WITH url: SET_BACKEND_FOR_URL(url, "local")
- * 
+ *
+ * ## ROUTER_STORAGE_INDEX
+ *
+ * - [IMPL-STORAGE_INDEX] [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-RELIABILITY] How: Persists the backend selected by BookmarkRouter after successful provider operations and leaves the index unchanged on failed writes.
+ * - Contract:
+ *   - INPUT: URL, selected backend, provider operation result
+ *   - PRE: URL and selected backend are valid
+ *   - OUTPUT: persisted backend mapping
+ *   - POST:
+ *     - success => index maps URL to the selected backend
+ *   - FAILURE_MODES: ProviderSaveFailed
+ *   - DATA: storage index map
+ *   - DATA_TRANSITION: successful provider writes set the URL mapping; failed writes do not mutate it
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_INDEX
+ *   - AWAIT provider operation
+ *   - IF operation succeeds: SET_BACKEND_FOR_URL(url, backend)
+ *   - RETURN operation result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-STORAGE_INDEX ===
  */
 import { StorageIndex } from '../../src/features/storage/storage-index.js'

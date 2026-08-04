@@ -24,8 +24,8 @@ IMPL-PINBOARD_API:
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Add router/provider composition evidence"
   name: "Pinboard API Service Implementation"
   rationale:
     benefits:
@@ -52,5 +52,6 @@ IMPL-PINBOARD_API:
       - "REQ-PINBOARD_COMPATIBILITY"
     test_coverage_note: "Unit: auth/retry/401/no-auth in pinboard-service.test.js"
     tests:
+      - "tests/integration/pinboard-api-router-binding-composition.integration.test.js"
       - "tests/unit/pinboard-bookmark-times.test.js"
       - "tests/unit/pinboard-service.test.js"

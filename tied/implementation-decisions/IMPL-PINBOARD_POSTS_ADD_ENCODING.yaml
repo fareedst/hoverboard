@@ -23,8 +23,8 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire path; ARCH/REQ in sidecar"
+      date: "2026-08-04"
+      reason: "Add encoded posts/add composition evidence"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -54,4 +54,5 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
     requirements:
       - "REQ-PINBOARD_COMPATIBILITY"
     tests:
+      - "tests/integration/pinboard-api-router-binding-composition.integration.test.js"
       - "tests/unit/pinboard-service.test.js"

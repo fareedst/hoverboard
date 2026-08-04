@@ -28,6 +28,27 @@
  *   - ELSE: keep updated_at
  *   - Include updated_at in payload/CSV/JSON
  *
+ * ## ROUTER_STORAGE_BOOKMARK_TIMES
+ *
+ * - [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-RELIABILITY] How: Preserves bookmark time fields while router storage operations select a provider and update the storage index.
+ * - Contract:
+ *   - INPUT: bookmark data, preferred backend, storage providers, storage index
+ *   - PRE: bookmark URL and provider map are available
+ *   - OUTPUT: provider result with normalized time fields and updated storage index
+ *   - POST:
+ *     - success => saved bookmark retains time and updated_at; index points to the selected backend
+ *   - FAILURE_MODES: ProviderSaveFailed
+ *   - DATA: bookmark time fields and storage-index backend mapping
+ *   - DATA_TRANSITION: successful save updates the selected URL mapping; failed save leaves the mapping unchanged
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_BOOKMARK_TIMES
+ *   - Normalize missing updated_at from time
+ *   - Resolve provider from preferred backend
+ *   - AWAIT provider save
+ *   - IF save succeeds: update storage index for the URL
+ *   - RETURN provider result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_CREATE_UPDATE_TIMES ===
  */
 /**
@@ -316,6 +337,8 @@
  *     - success => Stores is selected and exactly one head panel is visible
  *     - success => activeFooterGroup is null, all footer tabs are unselected, and all footer panels are hidden
  *     - success => Actions is the sole footer tab with tabindex 0 while the footer is collapsed
+ *   - DATA: activeHeadGroup, activeFooterGroup, footer tab and panel DOM state
+ *   - DATA_TRANSITION: initialization selects Stores at the head and sets the footer to its collapsed state
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: INITIALIZE_INDEX_CONTROL_TABS
@@ -336,6 +359,8 @@
  *   - INPUT: headPanel (element), footerPanel (element), root (element)
  *   - PRE: root exists; missing panel elements are allowed
  *   - OUTPUT: root CSS variables for head offset and footer spacing
+ *   - DATA: root CSS variables --index-head-sticky-height and --index-footer-sticky-height
+ *   - DATA_TRANSITION: measured panel heights replace the root CSS variable values after initialization, transition, or resize
  *   - POST:
  *     - success => CSS variables equal the current measured compact or active panel heights
  *   - EFFECTS: State
@@ -354,6 +379,8 @@
  *   - INPUT: tableWrapper (element), headPanel (element), root (element)
  *   - PRE: root, tableWrapper, and headPanel exist
  *   - OUTPUT: root sticky-thead-offset class state
+ *   - DATA: root sticky-thead-offset class
+ *   - DATA_TRANSITION: class is present only while the table top is above the measured head-panel height
  *   - POST:
  *     - tableWrapper top >= headPanel height => root does not have sticky-thead-offset
  *     - tableWrapper top < headPanel height => root has sticky-thead-offset
@@ -421,6 +448,27 @@
  *   - 4. Popup: bookmarksIndexBtn -> openBookmarksIndex -> SEND OPEN_BOOKMARKS_INDEX
  *   - 5. Options: bookmarks-index-link href -> extension URL (no dismiss; out of scope)
  *   - How (sub-block): Index page init must NOT send REQUEST_SIDE_PANEL_CLOSE (refresh must not re-dismiss after icon reopen).
+ *
+ * ## ROUTER_STORAGE_REGEX_SAVE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-RELIABILITY] How: Connects selected-bookmark regex replacement to preferred-backend router persistence and storage-index refresh.
+ * - Contract:
+ *   - INPUT: selected URLs, bookmark map, regex options, router save operation
+ *   - PRE: selected URLs and replacement options are available
+ *   - OUTPUT: refreshed bookmark rows with unchanged selections restored
+ *   - POST:
+ *     - success => only changed payloads are sent to the router and the display is reloaded
+ *   - FAILURE_MODES: InvalidPattern, BookmarkSaveFailed
+ *   - DATA: selected URL set and displayed bookmark rows
+ *   - DATA_TRANSITION: changed rows are persisted; selection is cleared during reload and restored for visible URLs
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_REGEX_SAVE
+ *   - Build replacement payload for each selected URL
+ *   - IF replacement is unchanged: skip router save
+ *   - AWAIT router save for each changed payload
+ *   - Reload bookmark rows
+ *   - Restore visible selections
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
  */
@@ -1039,6 +1087,22 @@
  *   - 5. Side panel URL: GOTO side-panel.html?screenshot=1&url=encode(screenshotPopupUrl)&title=encode(screenshotPopupTitle); SET viewport width 360 (or 240); WAIT for tab content; CAPTURE screenshot (This Page, then By Tag, Tabs, etc.); output side-panel-bookmark.png, side-panel-tags-tree.png, side-panel-tabs.png
  *   - 6. record-demo-side-panel-this-page: SEED chrome.storage.local with placeholderStorageSeed via options page; GOTO side-panel.html?screenshot=1&url=...&title=...; record frames; assemble GIF
  *
+ * ## SCREENSHOT_THEME_CONTRACT
+ *
+ * - [IMPL-SCREENSHOT_MODE] [IMPL-POPUP_THEME_CSS] [ARCH-THEME] [REQ-DARK_THEME] How: Connects screenshot seed theme selection to the popup stylesheet contract before browser capture.
+ * - Contract:
+ *   - INPUT: screenshot seed, selected theme, popup stylesheet
+ *   - PRE: screenshot seed and popup stylesheet are readable
+ *   - OUTPUT: screenshot capture configuration with a supported theme
+ *   - POST:
+ *     - success => selected/default theme has a matching popup CSS rule
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SCREENSHOT_THEME_CONTRACT
+ *   - Read selected/default theme from screenshot seed
+ *   - Read theme selectors from popup stylesheet
+ *   - ASSERT selected/default theme is supported
+ *
  * === END IMPL-FULL-BLOCK: IMPL-SCREENSHOT_MODE ===
  */
 /**
@@ -1202,6 +1266,22 @@
  *   - 14. CSS #tagsTreePanel: display block; flex 1 1 0; min-height 0; overflow-y auto; background var(--color-background)
  *   - 15. CSS .tags-tree-above-list: flex none (natural height; scrolls off with panel scroll)
  *   - 16. CSS .tree-section: min-height 100%; overflow-y auto
+ *
+ * ## SEARCH_TAG_TREE_COMPOSITION
+ *
+ * - [IMPL-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-USABILITY] How: Groups only the rows selected by the side-panel bookmark search pipeline.
+ * - Contract:
+ *   - INPUT: filtered bookmark rows and available tags
+ *   - PRE: FILTER_BOOKMARKS_BY_SEARCH has produced the matching rows
+ *   - OUTPUT: tag-to-bookmark map for the matching rows
+ *   - POST:
+ *     - success => tags with no matching rows are absent
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SEARCH_TAG_TREE_COMPOSITION
+ *   - Receive matching bookmark rows
+ *   - BUILD_TAG_TO_BOOKMARKS from matching rows
+ *   - RETURN grouped map
  *
  * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_TAGS_TREE ===
  */
@@ -1605,6 +1685,23 @@
  *   - How (sub-block): Set callbacks, trigger, assert args.
  *   - 4. Tests: SET callbacks; TRIGGER message/action; ASSERT callback invoked with expected args
  *
+ * ## MESSAGE_DISPATCH_TESTABILITY
+ *
+ * - [IMPL-UI_TESTABILITY_HOOKS] [IMPL-MESSAGE_HANDLING] [IMPL-UI_ACTION_CONTRACT] [ARCH-UI_TESTABILITY] [ARCH-MESSAGE_HANDLING] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Exposes stable callback seams so a message dispatch can be asserted without DOM or browser UI invocation.
+ * - Contract:
+ *   - INPUT: processed message/result, callback registration, action/state callback
+ *   - PRE: callback setters are available to the test harness
+ *   - OUTPUT: callback receives the dispatched message/result or action/state payload
+ *   - POST:
+ *     - success => the registered callback observes the expected arguments
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_TESTABILITY
+ *   - SET callback
+ *   - TRIGGER message or action
+ *   - CALL callback with observable payload
+ *   - ASSERT callback arguments
+ *
  * === END IMPL-FULL-BLOCK: IMPL-UI_TESTABILITY_HOOKS ===
  */
 /**
@@ -1628,6 +1725,23 @@
  *   - 1. Logging: WHEN category enabled: debugLogger.trace(msg) or debugLogger.debug(msg) with category
  *   - How (sub-block): Debug panel: on load request last actions/messages/current bookmark and render.
  *   - 2. Debug panel (debug.html): ON load SEND DEV_COMMAND getLastActions/getLastMessages/getCurrentBookmark (or getStorageSnapshot); RENDER in panel
+ *
+ * ## MESSAGE_DISPATCH_TESTABILITY
+ *
+ * - [IMPL-DEBUG_PANEL] [IMPL-MESSAGE_HANDLING] [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [ARCH-MESSAGE_HANDLING] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Consumes the message-processing callback seam to expose diagnostics without requiring the debug panel UI.
+ * - Contract:
+ *   - INPUT: processed message/result and debug inspector callback
+ *   - PRE: debug inspector callback is registered
+ *   - OUTPUT: observable diagnostic action containing message/result
+ *   - POST:
+ *     - success => diagnostic callback receives the processed message and result
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_TESTABILITY
+ *   - REGISTER inspector callback
+ *   - AWAIT message processing
+ *   - CALL inspector callback with message and result
+ *   - RETURN diagnostic observation
  *
  * === END IMPL-FULL-BLOCK: IMPL-DEBUG_PANEL ===
  */

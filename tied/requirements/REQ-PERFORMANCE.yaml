@@ -1,14 +1,14 @@
 REQ-PERFORMANCE:
   category: "Non-Functional"
-  description: "Umbrella NFR for extension responsiveness. Owning measurements deferred to feature REQs until dedicated perf suite exists."
+  description: "Umbrella NFR for extension responsiveness, with an explicit overlay harness budget while broader feature budgets remain owned by feature REQs."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 5: placeholder NFR policy"
+      date: "2026-08-04"
+      reason: "Add measurable overlay responsiveness criteria and owning test"
   name: "Performance"
   priority: "P2"
   rationale:
@@ -20,13 +20,18 @@ REQ-PERFORMANCE:
       - "REQ-USABILITY"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Umbrella: no dedicated perf suite yet; regressions tracked under related feature REQs and manual smoke."
+    - criterion: "Additional feature-specific budgets are added under the owning REQ when a performance-sensitive path changes."
+    - criterion: "Overlay element creation completes under 100ms in the deterministic harness."
+    - criterion: "Overlay selector queries complete under 50ms in the deterministic harness."
   status: "Active"
   traceability:
-    architecture: []
+    architecture:
+      - "ARCH-OVERLAY_TESTABILITY"
     code_annotations:
       - "REQ-PERFORMANCE"
-    implementation: []
-    tests: []
+    implementation:
+      - "IMPL-OVERLAY_TEST_HARNESS"
+    tests:
+      - "tests/unit/overlay-test-debug.test.js"
   validation_criteria:
     - method: "TIED consistency validation"

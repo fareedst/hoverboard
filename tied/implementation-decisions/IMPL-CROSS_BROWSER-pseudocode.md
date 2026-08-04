@@ -46,3 +46,20 @@
   - How (sub-block): Call sites use shim export, not raw chrome only, for future expansion readiness.
   - 1. ON service worker / content / message-handler import:
   - USE browser from safari-shim (or utils re-export)
+
+## MESSAGE_DISPATCH_SHARED_BROWSER
+
+- [IMPL-CROSS_BROWSER] [IMPL-MESSAGE_HANDLING] [ARCH-CROSS_BROWSER] [ARCH-MESSAGE_HANDLING] [REQ-CROSS_BROWSER] How: Routes a MessageClient request through the shared browser shim and resolves the callback response without UI or host-specific behavior.
+- Contract:
+  - INPUT: message payload, retry options, shared browser runtime
+  - PRE: shared browser runtime is available; callback-style sendMessage is supported
+  - OUTPUT: resolved message response
+  - POST:
+    - success => runtime receives the message with a generated messageId and the response is returned
+  - EFFECTS: Async, IO
+  - TERMINATION: total
+- PROCEDURE: MESSAGE_DISPATCH_SHARED_BROWSER
+  - message = ADD messageId to input payload
+  - SEND message through shared browser runtime
+  - AWAIT callback response
+  - RETURN response

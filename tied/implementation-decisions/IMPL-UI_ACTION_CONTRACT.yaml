@@ -17,8 +17,8 @@ IMPL-UI_ACTION_CONTRACT:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Add shared action contract composition evidence"
   name: "UI Action Contract"
   rationale:
     benefits:
@@ -43,4 +43,5 @@ IMPL-UI_ACTION_CONTRACT:
     requirements:
       - "REQ-UI_INSPECTION"
     tests:
+      - "tests/integration/ui-testability-hooks-message-dispatch-composition.integration.test.js"
       - "tests/unit/ui-action-contract.test.js"

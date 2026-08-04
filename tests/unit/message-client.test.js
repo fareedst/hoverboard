@@ -1,9 +1,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-MESSAGE_HANDLING ===
  * [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] — Central message allowlist + validation + handler dispatch; recent-tag message types delegate to [IMPL-TAG_SYSTEM] TagService and SW recentTagsMemory policy per ARCH-TAG_SYSTEM. Contract: Promise result or reject on validation; recent handlers return safe shapes on internal failure.
- * 
+ *
  * ## SEND
- * 
+ *
  * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] How: client-side validate type/payload; dispatch to background; return Promise (path for popup/content/offscreen callers).
  * - Contract:
  *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
@@ -22,9 +22,9 @@
  *   - ROUTE to handler for message.type
  *   - handler(message) -> result; RETURN Promise.resolve(result)
  *   - ON error: RETURN Promise.reject; optional log
- * 
+ *
  * ## UNWRAP_MESSAGE_RESPONSE
- * 
+ *
  * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-UI_INSPECTION] How: shared null-tolerant unwrap for runtime replies (src/shared/message-response.js), because any extension context can win the response-channel race and answer null (Chrome 144+ promise-returning listeners / observer listeners that return promises). Callers must not dereference response.success. Observer BOOKMARK_UPDATED paths are IMPL-BOOKMARK_STATE_SYNC OBSERVER_BOOKMARK_UPDATED_APPLY_EXTERNAL and IMPL-POPUP_SESSION OBSERVER_BOOKMARK_UPDATED_FULL_REFRESH.
  * - Contract:
  *   - INPUT: response from runtime.sendMessage — { success, data } wrapper, plain payload, or null/undefined missing response; optional type + surface for readMessageResponse
@@ -45,9 +45,9 @@
  *   - 1. CALLER: actual = readMessageResponse(response, type[, surface])
  *   - 2.   # readMessageResponse = unwrap + IF missing: recordAction messageResponseMissing; debugWarn
  *   - 3.   IF actual == null: KEEP defaults; RETURN
- * 
+ *
  * ## HANDLE_GET_RECENT_BOOKMARKS
- * 
+ *
  * - How: SW entry resolves handler by message.type; missing handler → reject or structured error per router; AWAIT handler(data, senderUrl); optional BOOKMARK_UPDATED broadcast after mutating handlers ([REQ-BOOKMARK_STATE_SYNCHRONIZATION]).
  * - Contract:
  *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
@@ -65,9 +65,9 @@
  *   - recentTags = AWAIT tagService.getUserRecentTagsExcludingCurrent(data?.currentTags OR [])
  *   - RETURN { ...data, recentTags }
  *   - How (sub-block): How: addTagToRecent — validate tagName + currentSiteUrl; tagService.addTagToUserRecentList; structured { success } / error (same REQ/ARCH/IMPL cross-IMPL set as handleGetRecentBookmarks).
- * 
+ *
  * ## HANDLE_ADD_TAG_TO_RECENT
- * 
+ *
  * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] How: Implements handleAddTagToRecent(data) behavior for IMPL-MESSAGE_HANDLING.
  * - Contract:
  *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
@@ -85,9 +85,9 @@
  *   - success = AWAIT tagService.addTagToUserRecentList(tagName, currentSiteUrl)
  *   - RETURN { success } OR { success: false, error: message }
  *   - How (sub-block): How: getUserRecentTags message — raw policy list for diagnostics/tools; TRY/CATCH → { recentTags: [], error } on failure.
- * 
+ *
  * ## HANDLE_GET_USER_RECENT_TAGS
- * 
+ *
  * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] How: Implements handleGetUserRecentTags(data) behavior for IMPL-MESSAGE_HANDLING.
  * - Contract:
  *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
@@ -103,9 +103,9 @@
  * - PROCEDURE: HANDLE_GET_USER_RECENT_TAGS
  *   - TRY: RETURN { recentTags: AWAIT tagService.getUserRecentTags() }
  *   - CATCH: LOG; RETURN { recentTags: [], error }
- * 
+ *
  * ## BLOCK_5
- * 
+ *
  * - --- Composition: composed_with [IMPL-POPUP_MESSAGE_TIMEOUT] [IMPL-BOOKMARK_STATE_SYNC] --- How: Ordering: client send may apply timeout/retry () before this IMPL’s send completes. Post successful bookmark mutations,  may broadcast; recent-tag handlers are read/mutation for user-recent only unless caller chains. Shared DATA: single MessageHandler TagService reference; no second recentTagsMemory writer.
  * - Contract:
  *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
@@ -120,15 +120,33 @@
  *   - TERMINATION: total
  * - PROCEDURE: BLOCK_5
  *   - How (sub-block): --- Cross-IMPL ---
- * 
+ *
+ * ## MESSAGE_DISPATCH_TESTABILITY
+ *
+ * - [IMPL-MESSAGE_HANDLING] [IMPL-UI_TESTABILITY_HOOKS] [IMPL-DEBUG_PANEL] [IMPL-UI_ACTION_CONTRACT] [ARCH-MESSAGE_HANDLING] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Dispatches a validated message through the handler and exposes the result to testability hooks and inspection consumers.
+ * - Contract:
+ *   - INPUT: message, sender, handler map, optional processed callback
+ *   - PRE: message type and payload satisfy the allowlist
+ *   - OUTPUT: handler result and optional inspection callback payload
+ *   - POST:
+ *     - success => handler result is returned and the processed callback receives message/result
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_TESTABILITY
+ *   - VALIDATE message
+ *   - AWAIT handler result
+ *   - IF processed callback exists: CALL callback with message and result
+ *   - RETURN result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-MESSAGE_HANDLING ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-CROSS_BROWSER ===
  * [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] — Chrome-first browser API shim; shared `browser` export for messaging and storage helpers. Contract: callers import { browser } from safari-shim (via utils); Promise-friendly messaging.
- * 
+ *
  * ## INITIALIZE_BROWSER_API
- * 
+ *
  * - [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] How: Implements initializeBrowserAPI() behavior for IMPL-CROSS_BROWSER.
  * - Contract:
  *   - INPUT: chrome (or future browser) extension APIs; caller operations (sendMessage, tabs, storage)
@@ -149,9 +167,9 @@
  *   - PROVIDE storage helpers (quota monitoring, graceful degradation) for Chromium storage
  *   - DO NOT attach Safari-only platform metadata on messages (Safari product deferred)
  *   - How (sub-block): Reserved hooks for deferred multi-browser; Safari product not active.
- * 
+ *
  * ## PLATFORM_UTILS
- * 
+ *
  * - [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] How: Implements platformUtils behavior for IMPL-CROSS_BROWSER.
  * - Contract:
  *   - INPUT: chrome (or future browser) extension APIs; caller operations (sendMessage, tabs, storage)
@@ -173,7 +191,24 @@
  *   - How (sub-block): Call sites use shim export, not raw chrome only, for future expansion readiness.
  *   - 1. ON service worker / content / message-handler import:
  *   - USE browser from safari-shim (or utils re-export)
- * 
+ *
+ * ## MESSAGE_DISPATCH_SHARED_BROWSER
+ *
+ * - [IMPL-CROSS_BROWSER] [IMPL-MESSAGE_HANDLING] [ARCH-CROSS_BROWSER] [ARCH-MESSAGE_HANDLING] [REQ-CROSS_BROWSER] How: Routes a MessageClient request through the shared browser shim and resolves the callback response without UI or host-specific behavior.
+ * - Contract:
+ *   - INPUT: message payload, retry options, shared browser runtime
+ *   - PRE: shared browser runtime is available; callback-style sendMessage is supported
+ *   - OUTPUT: resolved message response
+ *   - POST:
+ *     - success => runtime receives the message with a generated messageId and the response is returned
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_SHARED_BROWSER
+ *   - message = ADD messageId to input payload
+ *   - SEND message through shared browser runtime
+ *   - AWAIT callback response
+ *   - RETURN response
+ *
  * === END IMPL-FULL-BLOCK: IMPL-CROSS_BROWSER ===
  */
 import { MessageClient } from '../../src/features/content/message-client.js'

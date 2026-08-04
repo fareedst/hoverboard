@@ -6,9 +6,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_CREATE_UPDATE_TIMES ===
  * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] — Every bookmark has time (create) and updated_at (last update); provider-specific set/normalize; export/import include.
- * 
+ *
  * ## PINBOARD
- * 
+ *
  * - [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] — import create preserves CSV/JSON Time and Updated. How: Implements Pinboard behavior for IMPL-BOOKMARK_CREATE_UPDATE_TIMES.
  * - Contract:
  *   - INPUT: bookmark data (for save), API response (for Pinboard), raw record (for normalize)
@@ -28,15 +28,36 @@
  *   - IF bookmark has no updated_at: SET updated_at = time   // legacy
  *   - ELSE: keep updated_at
  *   - Include updated_at in payload/CSV/JSON
- * 
+ *
+ * ## ROUTER_STORAGE_BOOKMARK_TIMES
+ *
+ * - [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-RELIABILITY] How: Preserves bookmark time fields while router storage operations select a provider and update the storage index.
+ * - Contract:
+ *   - INPUT: bookmark data, preferred backend, storage providers, storage index
+ *   - PRE: bookmark URL and provider map are available
+ *   - OUTPUT: provider result with normalized time fields and updated storage index
+ *   - POST:
+ *     - success => saved bookmark retains time and updated_at; index points to the selected backend
+ *   - FAILURE_MODES: ProviderSaveFailed
+ *   - DATA: bookmark time fields and storage-index backend mapping
+ *   - DATA_TRANSITION: successful save updates the selected URL mapping; failed save leaves the mapping unchanged
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_BOOKMARK_TIMES
+ *   - Normalize missing updated_at from time
+ *   - Resolve provider from preferred backend
+ *   - AWAIT provider save
+ *   - IF save succeeds: update storage index for the URL
+ *   - RETURN provider result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_CREATE_UPDATE_TIMES ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARK_SERVICE ===
  * [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] [REQ-PER_BOOKMARK_STORAGE_BACKEND] — chrome.storage.local bookmark provider (one of five BookmarkRouter peers); same contract as Pinboard; keyed by URL. ARCH-STORAGE is settings/portability only — not this bookmark backend. Contract: url/bookmark/tag inputs and provider-shaped outputs; storage key and shape.
- * 
+ *
  * ## GET_BOOKMARK_FOR_URL
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements getBookmarkForUrl(url) behavior for IMPL-LOCAL_BOOKMARK_SERVICE.
  * - Contract:
  *   - INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
@@ -55,9 +76,9 @@
  *   - urlNorm = normalize(url)
  *   - RETURN bookmarks[urlNorm] or null
  *   - How (sub-block): Merge data into bookmark shape and persist to storage.
- * 
+ *
  * ## SAVE_BOOKMARK
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements saveBookmark(data) behavior for IMPL-LOCAL_BOOKMARK_SERVICE.
  * - Contract:
  *   - INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
@@ -78,9 +99,9 @@
  *   - PERSIST bookmarks to storage under key
  *   - RETURN { success: true }
  *   - How (sub-block): Remove by normalized URL and persist.
- * 
+ *
  * ## DELETE_BOOKMARK
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements deleteBookmark(url) behavior for IMPL-LOCAL_BOOKMARK_SERVICE.
  * - Contract:
  *   - INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
@@ -100,9 +121,9 @@
  *   - PERSIST bookmarks to storage
  *   - RETURN { success: true }
  *   - How (sub-block): Update tags on bookmark and persist.
- * 
+ *
  * ## SAVE_TAG
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements saveTag(data), deleteTag(data) behavior for IMPL-LOCAL_BOOKMARK_SERVICE.
  * - Contract:
  *   - INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
@@ -122,9 +143,9 @@
  *   - saveBookmark(bookmark) or equivalent
  *   - RETURN { success: true }
  *   - How (sub-block): Sort by time descending and return first count.
- * 
+ *
  * ## GET_RECENT_BOOKMARKS
- * 
+ *
  * - [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements getRecentBookmarks(count) behavior for IMPL-LOCAL_BOOKMARK_SERVICE.
  * - Contract:
  *   - INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
@@ -142,7 +163,27 @@
  *   - list = values(bookmarks)
  *   - SORT list BY time DESCENDING
  *   - RETURN list[0..count-1]
- * 
+ *
+ * ## ROUTER_STORAGE_LOCAL_PROVIDER
+ *
+ * - [IMPL-LOCAL_BOOKMARK_SERVICE] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-RELIABILITY] How: Supplies the local provider operation used by BookmarkRouter and persists the selected URL mapping through StorageIndex.
+ * - Contract:
+ *   - INPUT: bookmark data, preferred backend, local provider, storage index
+ *   - PRE: local provider storage and router index are initialized
+ *   - OUTPUT: provider save result and updated backend mapping
+ *   - POST:
+ *     - success => local storage contains the normalized bookmark and the index identifies local
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: local bookmark map and storage-index backend mapping
+ *   - DATA_TRANSITION: local bookmark map and index update only after a successful provider save
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_LOCAL_PROVIDER
+ *   - Normalize bookmark URL and time fields
+ *   - AWAIT local provider save
+ *   - IF save succeeds: set the URL backend in StorageIndex
+ *   - RETURN provider result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARK_SERVICE ===
  */
 import { LocalBookmarkService } from '../../src/features/storage/local-bookmark-service.js'

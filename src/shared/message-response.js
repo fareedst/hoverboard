@@ -201,6 +201,24 @@
  * - PROCEDURE: BLOCK_5
  *   - How (sub-block): --- Cross-IMPL ---
  *
+ * ## MESSAGE_DISPATCH_TESTABILITY
+ *
+ * - [IMPL-MESSAGE_HANDLING] [IMPL-UI_TESTABILITY_HOOKS] [IMPL-DEBUG_PANEL] [IMPL-UI_ACTION_CONTRACT] [ARCH-MESSAGE_HANDLING] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Dispatches a validated message through the handler and exposes the result to testability hooks and inspection consumers.
+ * - Contract:
+ *   - INPUT: message, sender, handler map, optional processed callback
+ *   - PRE: message type and payload satisfy the allowlist
+ *   - OUTPUT: handler result and optional inspection callback payload
+ *   - POST:
+ *     - success => handler result is returned and the processed callback receives message/result
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_TESTABILITY
+ *   - VALIDATE message
+ *   - AWAIT handler result
+ *   - IF processed callback exists: CALL callback with message and result
+ *   - RETURN result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-MESSAGE_HANDLING ===
  */
 /**

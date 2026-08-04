@@ -7,8 +7,8 @@ REQ-RELIABILITY:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 5: placeholder NFR policy"
+      date: "2026-08-04"
+      reason: "Connect reliability umbrella to storage routing and message failure tests"
   name: "Reliability"
   priority: "P2"
   rationale:
@@ -21,13 +21,24 @@ REQ-RELIABILITY:
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     supersedes: []
   satisfaction_criteria:
+    - criterion: "Message validation and storage routing expose named tests for failure isolation and persistence behavior."
+    - criterion: "Provider timestamp aggregation preserves bookmark time fields and deterministic ordering across router backends."
     - criterion: "Umbrella: provider/router failures must not corrupt the storage index; detailed cases under related storage REQs."
   status: "Active"
   traceability:
-    architecture: []
+    architecture:
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "REQ-RELIABILITY"
-    implementation: []
-    tests: []
+    implementation:
+      - "IMPL-BOOKMARK_CREATE_UPDATE_TIMES"
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-MESSAGE_HANDLING"
+      - "IMPL-STORAGE_INDEX"
+    tests:
+      - "tests/integration/bookmark-create-update-times-router-storage-composition.integration.test.js"
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/message-handler-runtime-validation.test.js"
   validation_criteria:
     - method: "TIED consistency validation"

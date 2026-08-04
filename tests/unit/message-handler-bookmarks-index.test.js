@@ -300,6 +300,27 @@
  *   - 5. Options: bookmarks-index-link href -> extension URL (no dismiss; out of scope)
  *   - How (sub-block): Index page init must NOT send REQUEST_SIDE_PANEL_CLOSE (refresh must not re-dismiss after icon reopen).
  *
+ * ## ROUTER_STORAGE_REGEX_SAVE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-RELIABILITY] How: Connects selected-bookmark regex replacement to preferred-backend router persistence and storage-index refresh.
+ * - Contract:
+ *   - INPUT: selected URLs, bookmark map, regex options, router save operation
+ *   - PRE: selected URLs and replacement options are available
+ *   - OUTPUT: refreshed bookmark rows with unchanged selections restored
+ *   - POST:
+ *     - success => only changed payloads are sent to the router and the display is reloaded
+ *   - FAILURE_MODES: InvalidPattern, BookmarkSaveFailed
+ *   - DATA: selected URL set and displayed bookmark rows
+ *   - DATA_TRANSITION: changed rows are persisted; selection is cleared during reload and restored for visible URLs
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_REGEX_SAVE
+ *   - Build replacement payload for each selected URL
+ *   - IF replacement is unchanged: skip router save
+ *   - AWAIT router save for each changed payload
+ *   - Reload bookmark rows
+ *   - Restore visible selections
+ *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
  */
 import { MessageHandler } from '../../src/core/message-handler.js'

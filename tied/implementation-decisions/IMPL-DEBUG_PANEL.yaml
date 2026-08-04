@@ -27,8 +27,8 @@ IMPL-DEBUG_PANEL:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Add DEV_COMMAND provider composition evidence"
   name: "Debug panel and structured UI/message logging"
   rationale:
     benefits:
@@ -54,4 +54,5 @@ IMPL-DEBUG_PANEL:
       - "REQ-UI_INSPECTION"
     test_coverage_note: "Unit: LOG_CATEGORIES filter in debug-logger.test.js; panel UI composition/E2E"
     tests:
+      - "tests/integration/ui-testability-hooks-message-dispatch-composition.integration.test.js"
       - "tests/unit/debug-logger.test.js"

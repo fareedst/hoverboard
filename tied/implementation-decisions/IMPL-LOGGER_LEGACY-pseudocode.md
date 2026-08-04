@@ -34,3 +34,20 @@
 - PROCEDURE: NOISY
   - EMIT log line regardless of level (or at debug)
   - Used for temporary migration/debug; can be removed when call sites use Logger directly.
+
+## LOGGER_CONFIG_COMPOSITION
+
+- [IMPL-LOGGER_LEGACY] [IMPL-LOGGER_CONTEXT_LEVELS] [IMPL-LOG_LEVEL_CONFIG] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Keeps legacy log calls on the same configured severity path as context-aware Logger calls.
+- Contract:
+  - INPUT: legacy context and message arguments, configured severity threshold
+  - PRE: legacy adapter and configured logger are available
+  - OUTPUT: emitted or suppressed legacy log line
+  - POST:
+    - success => legacy calls use the configured logger threshold
+  - EFFECTS: IO
+  - TERMINATION: total
+- PROCEDURE: LOGGER_CONFIG_COMPOSITION
+  - Receive legacy log call
+  - AWAIT configured logger severity decision
+  - IF allowed: emit formatted legacy line
+  - ELSE: suppress line

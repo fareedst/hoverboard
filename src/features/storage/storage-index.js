@@ -88,6 +88,25 @@
  *   - 2. bookmarks = localBookmarkProvider.getAllBookmarks()
  *   - 3. FOR each bookmark WITH url: SET_BACKEND_FOR_URL(url, "local")
  *
+ * ## ROUTER_STORAGE_INDEX
+ *
+ * - [IMPL-STORAGE_INDEX] [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-RELIABILITY] How: Persists the backend selected by BookmarkRouter after successful provider operations and leaves the index unchanged on failed writes.
+ * - Contract:
+ *   - INPUT: URL, selected backend, provider operation result
+ *   - PRE: URL and selected backend are valid
+ *   - OUTPUT: persisted backend mapping
+ *   - POST:
+ *     - success => index maps URL to the selected backend
+ *   - FAILURE_MODES: ProviderSaveFailed
+ *   - DATA: storage index map
+ *   - DATA_TRANSITION: successful provider writes set the URL mapping; failed writes do not mutate it
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_INDEX
+ *   - AWAIT provider operation
+ *   - IF operation succeeds: SET_BACKEND_FOR_URL(url, backend)
+ *   - RETURN operation result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-STORAGE_INDEX ===
  */
 import { debugLog, debugError } from '../../shared/utils.js'

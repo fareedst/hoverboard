@@ -107,3 +107,23 @@
   - list = values(bookmarks)
   - SORT list BY time DESCENDING
   - RETURN list[0..count-1]
+
+## ROUTER_STORAGE_LOCAL_PROVIDER
+
+- [IMPL-LOCAL_BOOKMARK_SERVICE] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-RELIABILITY] How: Supplies the local provider operation used by BookmarkRouter and persists the selected URL mapping through StorageIndex.
+- Contract:
+  - INPUT: bookmark data, preferred backend, local provider, storage index
+  - PRE: local provider storage and router index are initialized
+  - OUTPUT: provider save result and updated backend mapping
+  - POST:
+    - success => local storage contains the normalized bookmark and the index identifies local
+  - FAILURE_MODES: OperationFailed
+  - DATA: local bookmark map and storage-index backend mapping
+  - DATA_TRANSITION: local bookmark map and index update only after a successful provider save
+  - EFFECTS: Async, IO, State
+  - TERMINATION: total
+- PROCEDURE: ROUTER_STORAGE_LOCAL_PROVIDER
+  - Normalize bookmark URL and time fields
+  - AWAIT local provider save
+  - IF save succeeds: set the URL backend in StorageIndex
+  - RETURN provider result

@@ -23,8 +23,8 @@ IMPL-BADGE_REFRESH:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Add mutation message-dispatch composition evidence"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -55,4 +55,5 @@ IMPL-BADGE_REFRESH:
     requirements:
       - "REQ-BADGE_INDICATORS"
     tests:
+      - "tests/integration/badge-refresh-message-dispatch-composition.integration.test.js"
       - "tests/unit/badge-refresh-service-worker.test.js"

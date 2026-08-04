@@ -56,3 +56,19 @@
   - 8. searchNext: searchMatchIndex = (searchMatchIndex + 1) % total; scrollToMatch(searchMatchIndex); setHighlight(searchMatchIndex)
   - 9. WHEN rendering tree or grouped: for each bookmark link set data-search-index = index (0-based in display order)
   - 10. scrollToMatch(idx): links = querySelectorAll('.tree-bookmark-link[data-search-index]'); el = links[idx]; IF el THEN el.scrollIntoView({ block: 'nearest' }); remove .search-current from all; el.classList.add('search-current')
+
+## SEARCH_TAG_TREE_COMPOSITION
+
+- [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-USABILITY] How: Passes filtered side-panel bookmark rows into tag-tree grouping without invoking the side-panel UI.
+- Contract:
+  - INPUT: bookmark rows, search query, available tags
+  - PRE: search filter and tag-tree grouping procedures are available
+  - OUTPUT: grouped matching bookmarks
+  - POST:
+    - success => non-matching rows and empty groups are excluded
+  - EFFECTS: pure
+  - TERMINATION: total
+- PROCEDURE: SEARCH_TAG_TREE_COMPOSITION
+  - matching = FILTER_BOOKMARKS_BY_SEARCH(bookmarks, query)
+  - grouped = BUILD_TAG_TO_BOOKMARKS(matching, available tags)
+  - RETURN grouped

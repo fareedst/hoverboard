@@ -29,8 +29,8 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Add regex payload to router/storage composition evidence"
     last_validated:
       date: "2026-02-20"
       result: "pass"
@@ -60,4 +60,5 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
     requirements:
       - "REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
     tests:
+      - "tests/integration/local-bookmarks-index-regex-replace-x-bookmark-router-router-storage-composition.integration.test.js"
       - "tests/unit/bookmarks-table-index.test.js (applyRegexReplace, regex replace UI)"

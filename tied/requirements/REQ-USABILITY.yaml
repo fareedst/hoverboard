@@ -7,8 +7,8 @@ REQ-USABILITY:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 5: placeholder NFR policy"
+      date: "2026-08-04"
+      reason: "Connect usability umbrella to side-panel and popup interaction tests"
   name: "Usability"
   priority: "P2"
   rationale:
@@ -20,13 +20,23 @@ REQ-USABILITY:
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     supersedes: []
   satisfaction_criteria:
+    - criterion: "Popup and side-panel controls expose recoverable, testable interactions through the owning UI decisions."
+    - criterion: "Side-panel search results are grouped into the tags tree without losing matching bookmarks."
     - criterion: "Umbrella: primary bookmarking flows remain operable without leaving the extension chrome; details under related UX REQs."
   status: "Active"
   traceability:
-    architecture: []
+    architecture:
+      - "ARCH-OVERLAY"
+      - "ARCH-SIDE_PANEL_TABS"
     code_annotations:
       - "REQ-USABILITY"
-    implementation: []
-    tests: []
+    implementation:
+      - "IMPL-OVERLAY"
+      - "IMPL-SIDE_PANEL_BOOKMARK"
+      - "IMPL-SIDE_PANEL_BOOKMARK_SEARCH"
+    tests:
+      - "tests/integration/side-panel-bookmark-search-x-side-panel-tags-tree-binding-composition.integration.test.js"
+      - "tests/unit/popup-close-behavior.test.js"
+      - "tests/unit/side-panel-open.test.js"
   validation_criteria:
     - method: "TIED consistency validation"

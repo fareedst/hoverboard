@@ -23,3 +23,20 @@
   - text = document.body ? document.body.innerText : ''
   - IF text.length > maxLength THEN text = text.slice(0, maxLength)
   - RETURN { title, textContent: text }
+
+## MESSAGE_DISPATCH_GET_PAGE_CONTENT
+
+- [IMPL-AI_TAGGING_READABILITY] [IMPL-CROSS_BROWSER] [ARCH-AI_TAGGING_FLOW] [ARCH-CROSS_BROWSER] [REQ-AI_TAGGING_POPUP] [REQ-CROSS_BROWSER] How: Dispatches GET_PAGE_CONTENT to EXTRACT_PAGE_CONTENT and returns the extracted payload through the runtime response channel.
+- Contract:
+  - INPUT: runtime message, sender, response callback
+  - PRE: runtime listener is registered; response callback is callable
+  - OUTPUT: response channel containing { success: true, data: { title, textContent } }
+  - POST:
+    - success => response callback receives the extracted page payload
+  - EFFECTS: Async, IO
+  - TERMINATION: total
+- PROCEDURE: MESSAGE_DISPATCH_GET_PAGE_CONTENT
+  - ON runtime message with type GET_PAGE_CONTENT:
+    - data = AWAIT EXTRACT_PAGE_CONTENT(document)
+    - SEND response callback { success: true, data }
+    - RETURN true to keep the response channel open

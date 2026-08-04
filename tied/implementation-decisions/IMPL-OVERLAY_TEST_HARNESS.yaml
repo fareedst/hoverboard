@@ -21,8 +21,8 @@ IMPL-OVERLAY_TEST_HARNESS:
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Add mock-DOM composition evidence"
   name: "Overlay Test Harness Implementation"
   rationale:
     benefits:
@@ -49,6 +49,7 @@ IMPL-OVERLAY_TEST_HARNESS:
       - "REQ-OVERLAY_CONTROL_LAYOUT"
       - "REQ-OVERLAY_SYSTEM"
     tests:
+      - "tests/integration/overlay-x-overlay-controls-binding-composition.integration.test.js"
       - "tests/unit/overlay-test-debug.test.js"
       - "tests/utils/mock-dom.js"
       - "tests/utils/overlay-test-harness.js"

@@ -40,8 +40,8 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "ARCH close-out: Browser time via Chrome dateAdded on read"
+      date: "2026-08-04"
+      reason: "Add provider timestamp aggregation composition evidence"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -77,6 +77,7 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
     requirements:
       - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
     tests:
+      - "tests/integration/bookmark-create-update-times-router-storage-composition.integration.test.js"
       - "tests/unit/bookmark-router.test.js"
       - "tests/unit/bookmarks-table-export.test.js"
       - "tests/unit/bookmarks-table-import.test.js"

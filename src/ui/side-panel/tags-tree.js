@@ -59,6 +59,22 @@
  *   - 9. WHEN rendering tree or grouped: for each bookmark link set data-search-index = index (0-based in display order)
  *   - 10. scrollToMatch(idx): links = querySelectorAll('.tree-bookmark-link[data-search-index]'); el = links[idx]; IF el THEN el.scrollIntoView({ block: 'nearest' }); remove .search-current from all; el.classList.add('search-current')
  *
+ * ## SEARCH_TAG_TREE_COMPOSITION
+ *
+ * - [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-USABILITY] How: Passes filtered side-panel bookmark rows into tag-tree grouping without invoking the side-panel UI.
+ * - Contract:
+ *   - INPUT: bookmark rows, search query, available tags
+ *   - PRE: search filter and tag-tree grouping procedures are available
+ *   - OUTPUT: grouped matching bookmarks
+ *   - POST:
+ *     - success => non-matching rows and empty groups are excluded
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SEARCH_TAG_TREE_COMPOSITION
+ *   - matching = FILTER_BOOKMARKS_BY_SEARCH(bookmarks, query)
+ *   - grouped = BUILD_TAG_TO_BOOKMARKS(matching, available tags)
+ *   - RETURN grouped
+ *
  * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BOOKMARK_SEARCH ===
  */
 /**
@@ -387,6 +403,22 @@
  *   - 14. CSS #tagsTreePanel: display block; flex 1 1 0; min-height 0; overflow-y auto; background var(--color-background)
  *   - 15. CSS .tags-tree-above-list: flex none (natural height; scrolls off with panel scroll)
  *   - 16. CSS .tree-section: min-height 100%; overflow-y auto
+ *
+ * ## SEARCH_TAG_TREE_COMPOSITION
+ *
+ * - [IMPL-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-USABILITY] How: Groups only the rows selected by the side-panel bookmark search pipeline.
+ * - Contract:
+ *   - INPUT: filtered bookmark rows and available tags
+ *   - PRE: FILTER_BOOKMARKS_BY_SEARCH has produced the matching rows
+ *   - OUTPUT: tag-to-bookmark map for the matching rows
+ *   - POST:
+ *     - success => tags with no matching rows are absent
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SEARCH_TAG_TREE_COMPOSITION
+ *   - Receive matching bookmark rows
+ *   - BUILD_TAG_TO_BOOKMARKS from matching rows
+ *   - RETURN grouped map
  *
  * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_TAGS_TREE ===
  */
@@ -949,7 +981,7 @@ export function setSelectedTagsFromCurrentBookmark (tags) {
 }
 
 /**
- * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
+ * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-USABILITY] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
  * initTagsTreeTab: run when Tags tree tab is shown (standalone tags-tree.html or from side-panel.js). Optional currentBookmarkTags applied when loadBookmarks completes.
  * Attaches handlers and loads bookmarks; only runs once (guard).
  * @param {{ currentBookmarkTags?: string[] }} [options]

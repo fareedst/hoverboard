@@ -20,8 +20,8 @@ IMPL-LOGGER_LEGACY:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Add legacy logger composition evidence"
   name: "Logger Legacy Compatibility"
   rationale:
     benefits:
@@ -48,4 +48,5 @@ IMPL-LOGGER_LEGACY:
       - "REQ-STRUCTURED_LOGGING"
     test_coverage_note: "Unit: log() and noisy in logger.test.js"
     tests:
+      - "tests/integration/logger-level-config-composition.integration.test.js"
       - "tests/unit/logger.test.js"

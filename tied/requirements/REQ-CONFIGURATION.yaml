@@ -7,8 +7,8 @@ REQ-CONFIGURATION:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 5: NFR/umbrella links owning REQs"
+      date: "2026-08-04"
+      reason: "Connect configuration umbrella to owning decisions and executable tests"
   name: "Configuration"
   priority: "P2"
   rationale:
@@ -23,13 +23,20 @@ REQ-CONFIGURATION:
     supersedes: []
   satisfaction_criteria:
     - criterion: "Canonical ConfigManager, privacy, and site-management terms: tied/vocab/config-and-privacy.md."
+    - criterion: "Owning configuration structure, migration, and backup/restore decisions expose named unit and integration tests."
     - criterion: "Umbrella: concrete Options/config behaviors are validated under related_to REQs (storage mode, privacy, site management)."
   status: "Active"
   traceability:
-    architecture: []
+    architecture:
+      - "ARCH-CONFIG_STRUCTURE"
     code_annotations:
       - "REQ-CONFIGURATION"
-    implementation: []
-    tests: []
+    implementation:
+      - "IMPL-CONFIG_BACKUP_RESTORE"
+      - "IMPL-CONFIG_MIGRATION"
+      - "IMPL-CONFIG_STRUCT"
+    tests:
+      - "tests/integration/config-manager-load.integration.test.js"
+      - "tests/unit/config-manager.test.js"
   validation_criteria:
     - method: "TIED consistency validation"

@@ -29,8 +29,8 @@ IMPL-OVERLAY_CONTROLS:
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Add overlay/control binding evidence"
   name: "Overlay Control Layout Implementation"
   rationale:
     benefits:
@@ -56,6 +56,7 @@ IMPL-OVERLAY_CONTROLS:
     requirements:
       - "REQ-OVERLAY_CONTROL_LAYOUT"
     tests:
+      - "tests/integration/overlay-x-overlay-controls-binding-composition.integration.test.js"
       - "tests/unit/overlay-close-button-positioning.test.js"
       - "tests/unit/overlay-refresh-accessibility.test.js"
       - "tests/unit/overlay-refresh-button.test.js"

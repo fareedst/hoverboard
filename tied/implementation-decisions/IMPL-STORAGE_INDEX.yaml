@@ -22,8 +22,8 @@ IMPL-STORAGE_INDEX:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "LEAP close-loop: index shape and requirements include browser"
+      date: "2026-08-04"
+      reason: "Align storage-index persistence composition evidence"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -55,5 +55,8 @@ IMPL-STORAGE_INDEX:
       - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     tests:
+      - "tests/integration/bookmark-create-update-times-router-storage-composition.integration.test.js"
+      - "tests/integration/local-bookmarks-index-regex-replace-x-bookmark-router-router-storage-composition.integration.test.js"
       - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/integration/pinboard-api-router-binding-composition.integration.test.js"
       - "tests/unit/storage-index.test.js"

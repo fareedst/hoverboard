@@ -20,8 +20,8 @@ IMPL-URL_UTILITIES:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Full-block three-way sync"
+      date: "2026-08-04"
+      reason: "Close shared utility composition edge with shared utility evidence"
   name: "URL Utilities"
   rationale:
     benefits:
@@ -47,4 +47,5 @@ IMPL-URL_UTILITIES:
       - "REQ-SHARED_UTILITIES"
     test_coverage_note: "Unit: shared-utils.test.js"
     tests:
+      - "tests/integration/shared-utilities-url-composition.integration.test.js"
       - "tests/unit/shared-utils.test.js"

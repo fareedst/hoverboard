@@ -176,3 +176,24 @@
   - 2. provider = providerMap[backend]
   - 3. IF provider.getAllBookmarks exists: records = AWAIT provider.getAllBookmarks(); RETURN first record whose normalized URL equals normalized input
   - 4. ELSE: RETURN provider.getBookmarkForUrl(url, title) OR null
+
+## ROUTER_STORAGE_PROVIDER_COMPOSITION
+
+- [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-RELIABILITY] How: Connects router provider selection and aggregation to storage-index persistence while preserving backend-specific routing.
+- Contract:
+  - INPUT: bookmark URL or recent-count request, preferred backend, provider map, storage index
+  - PRE: router providers and storage index are initialized
+  - OUTPUT: provider result or time-ordered recent bookmarks
+  - POST:
+    - success => the selected provider receives the original data and successful writes update the matching index entry
+  - FAILURE_MODES: ProviderSaveFailed, ProviderQueryFailed
+  - DATA: provider map and storage-index backend mapping
+  - DATA_TRANSITION: successful save writes the provider backend for the URL; read-only aggregation leaves the index unchanged
+  - EFFECTS: Async, IO, State
+  - TERMINATION: total
+- PROCEDURE: ROUTER_STORAGE_PROVIDER_COMPOSITION
+  - Resolve provider from preferred backend or storage index
+  - AWAIT provider operation
+  - IF operation is a successful save: update storage index
+  - IF operation is recent retrieval: merge provider results and sort by time descending
+  - RETURN operation result

@@ -1,7 +1,100 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-PINBOARD_API ===
- * Token auth, 429 retry, 401 handling; get/save/delete/recent wrappers.
+ * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] — Token auth, endpoint wrappers, 429 retry, 401 handling; get/save/delete/recent. Contract: token and params; API response; base URL and endpoints.
+ *
+ * ## REQUEST
+ *
+ * - [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] How: Implements request(endpoint, params) behavior for IMPL-PINBOARD_API.
+ * - Contract:
+ *   - INPUT: auth token; endpoint params (url, tag, etc.); optional retry policy
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: API response (bookmark list, success/error); 401/429 handled | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: base URL; token in query; endpoints /posts/get, /posts/recent, /posts/add, /posts/delete
+ *   - EFFECTS: Http, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: REQUEST
+ *   - URL = base + endpoint + "?auth_token=" + token + queryString(params)
+ *   - response = FETCH URL
+ *   - IF 429: WAIT; RETRY with backoff
+ *   - IF 401: RETURN error (auth failed)
+ *   - RETURN parsed response
+ *   - How (sub-block): Provider methods delegate to request with appropriate endpoint.
+ *   - 1. getBookmarkForUrl(url): request("/posts/get", { url }); RETURN single post or null
+ *   - 2. getRecentBookmarks(count): request("/posts/recent", { count }); RETURN list
+ *   - 3. saveBookmark(data): request("/posts/add", data); RETURN result
+ *   - 4. deleteBookmark(url): request("/posts/delete", { url }); RETURN result
+ *
+ * ## ROUTER_STORAGE_PINBOARD
+ *
+ * - [IMPL-PINBOARD_API] [IMPL-PINBOARD_POSTS_ADD_ENCODING] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-PINBOARD_API] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PINBOARD_COMPATIBILITY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Connects BookmarkRouter preferred-backend selection to Pinboard save and encoded posts/add parameters without a live network call.
+ * - Contract:
+ *   - INPUT: bookmark data, preferred backend, Pinboard provider, storage index
+ *   - PRE: Pinboard provider and router storage index are initialized
+ *   - OUTPUT: Pinboard save result and encoded request parameters
+ *   - POST:
+ *     - success => router delegates to Pinboard and encoded values preserve fragments and plus characters
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: bookmark fields, encoded parameter pairs, storage-index backend mapping
+ *   - DATA_TRANSITION: successful router save records pinboard as the URL backend
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_PINBOARD
+ *   - Resolve pinboard from preferred backend
+ *   - AWAIT provider save
+ *   - Encode each posts/add value
+ *   - Update storage index after successful save
+ *   - RETURN provider result
+ *
  * === END IMPL-FULL-BLOCK: IMPL-PINBOARD_API ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-PINBOARD_POSTS_ADD_ENCODING ===
+ * [IMPL-PINBOARD_POSTS_ADD_ENCODING] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] — buildSaveParams with encodeURIComponent for posts/add so #, +, etc. are safe. Contract: bookmarkData in; encoded query string out.
+ *
+ * ## BUILD_SAVE_PARAMS
+ *
+ * - [IMPL-PINBOARD_POSTS_ADD_ENCODING] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] How: Implements buildSaveParams(bookmarkData) behavior for IMPL-PINBOARD_POSTS_ADD_ENCODING.
+ * - Contract:
+ *   - INPUT: bookmarkData (url, description, extended, tags, shared, toread)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: query string safe for posts/add URL (no raw #, +, &, = in values)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: param names and values from bookmarkData
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_SAVE_PARAMS
+ *   - pairs = []
+ *   - FOR each key in [url, description, extended, tags, shared, toread]:
+ *   - value = bookmarkData[key] (or default)
+ *   - encoded = encodeURIComponent(value)
+ *   - pairs.push(key + "=" + encoded)
+ *   - RETURN pairs.join("&")
+ *   - How (sub-block): Use result in posts/add URL so fragment and plus are not misinterpreted.
+ *   - 1. usage: BUILD posts/add request URL as baseUrl + "?" + buildSaveParams(bookmarkData) so fragment and plus are not misinterpreted by server or transport.
+ *
+ * ## ROUTER_STORAGE_PINBOARD
+ *
+ * - [IMPL-PINBOARD_POSTS_ADD_ENCODING] [IMPL-PINBOARD_API] [IMPL-BOOKMARK_ROUTER] [IMPL-STORAGE_INDEX] [ARCH-PINBOARD_API] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PINBOARD_COMPATIBILITY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Ensures router-selected Pinboard saves use encoded posts/add values before provider persistence.
+ * - Contract:
+ *   - INPUT: bookmark fields and router-selected Pinboard provider
+ *   - PRE: posts/add parameter builder and provider save path are available
+ *   - OUTPUT: encoded parameter string and successful provider result
+ *   - POST:
+ *     - success => reserved URL/value characters remain encoded through the router path
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: ROUTER_STORAGE_PINBOARD
+ *   - Receive bookmark data from router
+ *   - BUILD encoded posts/add parameters
+ *   - AWAIT Pinboard provider save
+ *   - RETURN provider result
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-PINBOARD_POSTS_ADD_ENCODING ===
  */
 import { PinboardService } from '../../src/features/pinboard/pinboard-service.js'
 

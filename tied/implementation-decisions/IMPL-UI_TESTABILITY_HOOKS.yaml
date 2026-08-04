@@ -22,8 +22,8 @@ IMPL-UI_TESTABILITY_HOOKS:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Add message callback composition evidence"
   name: "UI Testability Hooks"
   rationale:
     benefits:
@@ -48,4 +48,5 @@ IMPL-UI_TESTABILITY_HOOKS:
       - "REQ-MODULE_VALIDATION"
       - "REQ-UI_INSPECTION"
     tests:
+      - "tests/integration/ui-testability-hooks-message-dispatch-composition.integration.test.js"
       - "tests/unit/overlay-refresh-accessibility.test.js"

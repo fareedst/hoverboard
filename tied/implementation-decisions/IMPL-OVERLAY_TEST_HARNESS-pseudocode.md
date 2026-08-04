@@ -1,8 +1,8 @@
-# [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] — Mock DOM with auto-registration by className/id and classList tracking for overlay tests. Contract: test setup and overlay create calls; mock registry and classList log.
+# [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] [REQ-PERFORMANCE] — Mock DOM with auto-registration by className/id and classList tracking for overlay tests. Contract: test setup and overlay create calls; mock registry and classList log.
 
 ## MAIN
 
-- [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] How: Logical block for IMPL-OVERLAY_TEST_HARNESS.
+- [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] [REQ-PERFORMANCE] How: Logical block for IMPL-OVERLAY_TEST_HARNESS.
 - Contract:
   - INPUT: test setup (no real DOM); overlay manager create calls
   - PRE: caller supplies valid inputs for this block; dependencies wired
@@ -21,3 +21,20 @@
   - 3. classList.add/remove: RECORD operation for assertions
   - How (sub-block): Create mock document/body; inject overlay; run show; assert registry and classList.
   - 4. Test setup: CREATE mock document/body; INJECT overlay into mock; RUN show(); ASSERT registry and classList state
+
+## OVERLAY_REFRESH_COMPOSITION
+
+- [IMPL-OVERLAY_TEST_HARNESS] [IMPL-OVERLAY] [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_TESTABILITY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] [REQ-PERFORMANCE] How: Provides a deterministic DOM seam for asserting refresh-control wiring and the refreshed overlay snapshot without Playwright.
+- Contract:
+  - INPUT: mock document, overlay manager, message-service double
+  - PRE: mock document can register controls and trigger click callbacks
+  - OUTPUT: observable refresh message and updated overlay snapshot
+  - POST:
+    - success => harness exposes the refreshed bookmark and control interactions
+  - EFFECTS: State
+  - TERMINATION: total
+- PROCEDURE: OVERLAY_REFRESH_COMPOSITION
+  - CREATE mock document and message-service double
+  - RUN overlay show
+  - TRIGGER refresh control
+  - ASSERT message-service call and refreshed DOM snapshot

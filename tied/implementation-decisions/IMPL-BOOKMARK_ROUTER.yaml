@@ -34,8 +34,8 @@ IMPL-BOOKMARK_ROUTER:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-08-01"
-      reason: "Align selected-backend lookup with archive association"
+      date: "2026-08-04"
+      reason: "Align router source marker and provider composition evidence"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -81,8 +81,12 @@ IMPL-BOOKMARK_ROUTER:
       - "REQ-LOCAL_BOOKMARKS_INDEX"
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+      - "REQ-RELIABILITY"
       - "REQ-STORAGE_MODE_DEFAULT"
     tests:
+      - "tests/integration/bookmark-create-update-times-router-storage-composition.integration.test.js"
+      - "tests/integration/local-bookmarks-index-regex-replace-x-bookmark-router-router-storage-composition.integration.test.js"
       - "tests/integration/message-handler-router-storage.integration.test.js"
       - "tests/integration/page-archive-bookmark-association-message-dispatch-composition.integration.test.js"
+      - "tests/integration/pinboard-api-router-binding-composition.integration.test.js"
       - "tests/unit/bookmark-router.test.js"

@@ -30,8 +30,8 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
       date: "2026-02-22"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Add search-to-tags-tree composition evidence"
   name: "Side Panel Bookmark Search Implementation"
   rationale:
     benefits:
@@ -56,4 +56,5 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
     requirements:
       - "REQ-SIDE_PANEL_BOOKMARK_SEARCH"
     tests:
+      - "tests/integration/side-panel-bookmark-search-x-side-panel-tags-tree-binding-composition.integration.test.js"
       - "tests/unit/tags-tree-filter.test.js"

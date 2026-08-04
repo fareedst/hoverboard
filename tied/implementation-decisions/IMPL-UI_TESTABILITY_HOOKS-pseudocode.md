@@ -21,3 +21,20 @@
   - 3. OverlayManager: ON visibility/content change: IF _onStateChange: CALL with { visible, contentSnapshot }
   - How (sub-block): Set callbacks, trigger, assert args.
   - 4. Tests: SET callbacks; TRIGGER message/action; ASSERT callback invoked with expected args
+
+## MESSAGE_DISPATCH_TESTABILITY
+
+- [IMPL-UI_TESTABILITY_HOOKS] [IMPL-MESSAGE_HANDLING] [IMPL-UI_ACTION_CONTRACT] [ARCH-UI_TESTABILITY] [ARCH-MESSAGE_HANDLING] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Exposes stable callback seams so a message dispatch can be asserted without DOM or browser UI invocation.
+- Contract:
+  - INPUT: processed message/result, callback registration, action/state callback
+  - PRE: callback setters are available to the test harness
+  - OUTPUT: callback receives the dispatched message/result or action/state payload
+  - POST:
+    - success => the registered callback observes the expected arguments
+  - EFFECTS: State
+  - TERMINATION: total
+- PROCEDURE: MESSAGE_DISPATCH_TESTABILITY
+  - SET callback
+  - TRIGGER message or action
+  - CALL callback with observable payload
+  - ASSERT callback arguments

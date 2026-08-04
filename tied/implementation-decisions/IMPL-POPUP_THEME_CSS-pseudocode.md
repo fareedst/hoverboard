@@ -19,3 +19,19 @@
   - 3.   ELSE IF prefers-color-scheme dark: APPLY @media (prefers-color-scheme: dark) variables
   - 4.   ELSE: APPLY light variables
   - 5. Popup elements USE --bg-primary, --text-primary, etc. from resolved rule
+
+## SCREENSHOT_THEME_CONTRACT
+
+- [IMPL-POPUP_THEME_CSS] [IMPL-SCREENSHOT_MODE] [ARCH-THEME] [REQ-DARK_THEME] How: Confirms screenshot seed theme values select a popup CSS theme rule without requiring browser rendering.
+- Contract:
+  - INPUT: screenshot seed theme value and popup stylesheet
+  - PRE: screenshot seed and popup CSS are available as project artifacts
+  - OUTPUT: compatible theme selector and dark-root rule
+  - POST:
+    - success => screenshot mode defaults to a theme represented by popup CSS
+  - EFFECTS: pure
+  - TERMINATION: total
+- PROCEDURE: SCREENSHOT_THEME_CONTRACT
+  - Read screenshot seed theme selector
+  - Read popup CSS theme selectors
+  - ASSERT the default/selected theme is represented by the stylesheet

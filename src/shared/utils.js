@@ -144,6 +144,22 @@
  *   - FOR each key IN keys: IF obj[key] present THEN result[key] = obj[key]
  *   - RETURN result
  *
+ * ## SHARED_UTILITIES_COMPOSITION
+ *
+ * - [IMPL-ARRAY_OBJECT_UTILITIES] [IMPL-URL_UTILITIES] [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Composes pure shared utility modules so URL normalization can consume the same non-mutating helper contract as array and object utilities.
+ * - Contract:
+ *   - INPUT: bookmark URL and shared utility functions
+ *   - PRE: utility functions are imported from the shared module
+ *   - OUTPUT: normalized URL and unchanged source data
+ *   - POST:
+ *     - success => normalization returns the expected URL while helper inputs remain unchanged
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SHARED_UTILITIES_COMPOSITION
+ *   - Preserve source bookmark data
+ *   - APPLY URL normalization
+ *   - RETURN normalized URL
+ *
  * === END IMPL-FULL-BLOCK: IMPL-ARRAY_OBJECT_UTILITIES ===
  */
 /**
@@ -196,6 +212,23 @@
  *   - How (sub-block): Call sites use shim export, not raw chrome only, for future expansion readiness.
  *   - 1. ON service worker / content / message-handler import:
  *   - USE browser from safari-shim (or utils re-export)
+ *
+ * ## MESSAGE_DISPATCH_SHARED_BROWSER
+ *
+ * - [IMPL-CROSS_BROWSER] [IMPL-MESSAGE_HANDLING] [ARCH-CROSS_BROWSER] [ARCH-MESSAGE_HANDLING] [REQ-CROSS_BROWSER] How: Routes a MessageClient request through the shared browser shim and resolves the callback response without UI or host-specific behavior.
+ * - Contract:
+ *   - INPUT: message payload, retry options, shared browser runtime
+ *   - PRE: shared browser runtime is available; callback-style sendMessage is supported
+ *   - OUTPUT: resolved message response
+ *   - POST:
+ *     - success => runtime receives the message with a generated messageId and the response is returned
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_SHARED_BROWSER
+ *   - message = ADD messageId to input payload
+ *   - SEND message through shared browser runtime
+ *   - AWAIT callback response
+ *   - RETURN response
  *
  * === END IMPL-FULL-BLOCK: IMPL-CROSS_BROWSER ===
  */
@@ -330,6 +363,22 @@
  *   - ENCODE characters that are significant in HTML (e.g. <, >, &, ") so string is safe for textContent or attribute use
  *   - RETURN encoded string
  *
+ * ## SHARED_UTILITIES_COMPOSITION
+ *
+ * - [IMPL-TEXT_UTILITIES] [IMPL-ARRAY_OBJECT_UTILITIES] [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Keeps text normalization available to the shared URL and array/object utility composition without mutating caller data.
+ * - Contract:
+ *   - INPUT: text or URL value and shared helper module
+ *   - PRE: text helper functions are available
+ *   - OUTPUT: normalized text value consumed by a shared utility
+ *   - POST:
+ *     - success => normalized output is deterministic and source input is unchanged
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SHARED_UTILITIES_COMPOSITION
+ *   - Receive text value
+ *   - NORMALIZE text
+ *   - RETURN normalized value to the composing utility
+ *
  * === END IMPL-FULL-BLOCK: IMPL-TEXT_UTILITIES ===
  */
 /**
@@ -442,6 +491,22 @@
  * - PROCEDURE: GET_DOMAIN
  *   - parsed = parse url
  *   - RETURN parsed.hostname or parsed.host or ""
+ *
+ * ## SHARED_UTILITIES_COMPOSITION
+ *
+ * - [IMPL-URL_UTILITIES] [IMPL-ARRAY_OBJECT_UTILITIES] [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Exposes URL normalization as a pure shared-utility composition alongside array/object and text helpers.
+ * - Contract:
+ *   - INPUT: URL string and shared helper module
+ *   - PRE: URL helper and shared utility functions are available
+ *   - OUTPUT: normalized URL, validity result, or domain
+ *   - POST:
+ *     - success => URL helper returns deterministic output without mutating input
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SHARED_UTILITIES_COMPOSITION
+ *   - Receive URL input
+ *   - APPLY shared text/array helper contracts where needed
+ *   - RETURN URL utility result
  *
  * === END IMPL-FULL-BLOCK: IMPL-URL_UTILITIES ===
  */

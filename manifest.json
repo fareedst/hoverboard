@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Hoverboard",
-  "version": "3.1.17",
+  "version": "3.1.18",
   "author": "Fareed Stevenson",
   "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
   "background": {
@@ -24,7 +24,7 @@
       "description": "Open Hoverboard side panel"
     },
     "open-options": {
-      "suggested_key": { "default": "Ctrl+Shift+O" },
+      "suggested_key": { "default": "Ct8l+Shift+O" },
       "description": "Open Hoverboard options"
     },
     "open-bookmarks-index": {

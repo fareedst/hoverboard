@@ -122,6 +122,23 @@
  *   - IF text.length > maxLength THEN text = text.slice(0, maxLength)
  *   - RETURN { title, textContent: text }
  *
+ * ## MESSAGE_DISPATCH_GET_PAGE_CONTENT
+ *
+ * - [IMPL-AI_TAGGING_READABILITY] [IMPL-CROSS_BROWSER] [ARCH-AI_TAGGING_FLOW] [ARCH-CROSS_BROWSER] [REQ-AI_TAGGING_POPUP] [REQ-CROSS_BROWSER] How: Dispatches GET_PAGE_CONTENT to EXTRACT_PAGE_CONTENT and returns the extracted payload through the runtime response channel.
+ * - Contract:
+ *   - INPUT: runtime message, sender, response callback
+ *   - PRE: runtime listener is registered; response callback is callable
+ *   - OUTPUT: response channel containing { success: true, data: { title, textContent } }
+ *   - POST:
+ *     - success => response callback receives the extracted page payload
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_GET_PAGE_CONTENT
+ *   - ON runtime message with type GET_PAGE_CONTENT:
+ *     - data = AWAIT EXTRACT_PAGE_CONTENT(document)
+ *     - SEND response callback { success: true, data }
+ *     - RETURN true to keep the response channel open
+ *
  * === END IMPL-FULL-BLOCK: IMPL-AI_TAGGING_READABILITY ===
  */
 /**
@@ -145,6 +162,23 @@
  *   - 1. Logging: WHEN category enabled: debugLogger.trace(msg) or debugLogger.debug(msg) with category
  *   - How (sub-block): Debug panel: on load request last actions/messages/current bookmark and render.
  *   - 2. Debug panel (debug.html): ON load SEND DEV_COMMAND getLastActions/getLastMessages/getCurrentBookmark (or getStorageSnapshot); RENDER in panel
+ *
+ * ## MESSAGE_DISPATCH_TESTABILITY
+ *
+ * - [IMPL-DEBUG_PANEL] [IMPL-MESSAGE_HANDLING] [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [ARCH-MESSAGE_HANDLING] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Consumes the message-processing callback seam to expose diagnostics without requiring the debug panel UI.
+ * - Contract:
+ *   - INPUT: processed message/result and debug inspector callback
+ *   - PRE: debug inspector callback is registered
+ *   - OUTPUT: observable diagnostic action containing message/result
+ *   - POST:
+ *     - success => diagnostic callback receives the processed message and result
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_TESTABILITY
+ *   - REGISTER inspector callback
+ *   - AWAIT message processing
+ *   - CALL inspector callback with message and result
+ *   - RETURN diagnostic observation
  *
  * === END IMPL-FULL-BLOCK: IMPL-DEBUG_PANEL ===
  */
@@ -340,6 +374,24 @@
  *   - TERMINATION: total
  * - PROCEDURE: BLOCK_5
  *   - How (sub-block): --- Cross-IMPL ---
+ *
+ * ## MESSAGE_DISPATCH_TESTABILITY
+ *
+ * - [IMPL-MESSAGE_HANDLING] [IMPL-UI_TESTABILITY_HOOKS] [IMPL-DEBUG_PANEL] [IMPL-UI_ACTION_CONTRACT] [ARCH-MESSAGE_HANDLING] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Dispatches a validated message through the handler and exposes the result to testability hooks and inspection consumers.
+ * - Contract:
+ *   - INPUT: message, sender, handler map, optional processed callback
+ *   - PRE: message type and payload satisfy the allowlist
+ *   - OUTPUT: handler result and optional inspection callback payload
+ *   - POST:
+ *     - success => handler result is returned and the processed callback receives message/result
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_TESTABILITY
+ *   - VALIDATE message
+ *   - AWAIT handler result
+ *   - IF processed callback exists: CALL callback with message and result
+ *   - RETURN result
  *
  * === END IMPL-FULL-BLOCK: IMPL-MESSAGE_HANDLING ===
  */

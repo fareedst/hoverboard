@@ -20,8 +20,8 @@ IMPL-POPUP_THEME_CSS:
       date: "2026-02-19"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-08-04"
+      reason: "Close screenshot seed to popup CSS theme evidence"
   name: "Popup CSS honors ThemeManager (hb-theme-dark)"
   rationale:
     benefits:
@@ -45,4 +45,5 @@ IMPL-POPUP_THEME_CSS:
     requirements:
       - "REQ-DARK_THEME"
     tests:
+      - "tests/integration/popup-theme-css-x-screenshot-mode-binding-composition.integration.test.js"
       - "tests/unit/dark-theme-default.test.js"

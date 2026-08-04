@@ -17,3 +17,22 @@
   - ON message: DELEGATE to MessageHandler; KEEP channel alive until AWAIT completes
   - ON alarm/idle as needed: wake worker for deferred work
   - RETURN
+
+## MV3_ENTRY_POINT_BINDING
+
+- [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] How: Verifies the Manifest V3 background declaration resolves to the shipped service-worker entry point without invoking a browser UI.
+- Contract:
+  - INPUT: manifest file and service-worker entry path
+  - PRE: manifest JSON and repository entry file are readable
+  - OUTPUT: validated manifest_version and existing service-worker path
+  - POST:
+    - success => manifest declares version 3 and points to src/core/service-worker.js
+  - FAILURE_MODES: InvalidManifest, MissingServiceWorker
+  - EFFECTS: pure, IO
+  - TERMINATION: total
+- PROCEDURE: MV3_ENTRY_POINT_BINDING
+  - READ manifest
+  - ASSERT manifest_version = 3
+  - READ background.service_worker
+  - ASSERT entry path = src/core/service-worker.js
+  - ASSERT entry file exists

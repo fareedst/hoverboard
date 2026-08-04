@@ -1,9 +1,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-BADGE_REFRESH ===
  * [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS] — Service worker refreshes badge after saveTag, deleteTag, saveBookmark so icon reflects tag count and flags.
- * 
+ *
  * ## MAIN
- * 
+ *
  * - [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS] How: Logical block for IMPL-BADGE_REFRESH.
  * - Contract:
  *   - INPUT: message result (after processMessage) with type saveTag | deleteTag | saveBookmark
@@ -21,15 +21,33 @@
  *   - 3.     tab = sender.tab IF present
  *   - 4.     IF no tab AND message.type = saveBookmark: tab = query active tab
  *   - 5.     IF tab: updateBadgeForTab(tab)
- * 
+ *
+ * ## MESSAGE_DISPATCH_BADGE_REFRESH
+ *
+ * - [IMPL-BADGE_REFRESH] [IMPL-MESSAGE_HANDLING] [ARCH-BADGE] [ARCH-MESSAGE_HANDLING] [REQ-BADGE_INDICATORS] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] How: Completes a successful message dispatch before refreshing the affected tab badge.
+ * - Contract:
+ *   - INPUT: message, sender tab, message-processing result
+ *   - PRE: message processing has a resolvable result; badge updater is available
+ *   - OUTPUT: updated badge state for the affected tab
+ *   - POST:
+ *     - success => badge refresh runs only for saveTag, deleteTag, or saveBookmark
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_BADGE_REFRESH
+ *   - AWAIT processMessage(message)
+ *   - IF message type is saveTag, deleteTag, or saveBookmark:
+ *     - tab = sender tab when present
+ *     - IF tab is absent and message type is saveBookmark: AWAIT active-tab lookup
+ *     - IF tab exists: AWAIT updateBadgeForTab(tab)
+ *
  * === END IMPL-FULL-BLOCK: IMPL-BADGE_REFRESH ===
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-CROSS_BROWSER ===
  * [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] — Chrome-first browser API shim; shared `browser` export for messaging and storage helpers. Contract: callers import { browser } from safari-shim (via utils); Promise-friendly messaging.
- * 
+ *
  * ## INITIALIZE_BROWSER_API
- * 
+ *
  * - [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] How: Implements initializeBrowserAPI() behavior for IMPL-CROSS_BROWSER.
  * - Contract:
  *   - INPUT: chrome (or future browser) extension APIs; caller operations (sendMessage, tabs, storage)
@@ -50,9 +68,9 @@
  *   - PROVIDE storage helpers (quota monitoring, graceful degradation) for Chromium storage
  *   - DO NOT attach Safari-only platform metadata on messages (Safari product deferred)
  *   - How (sub-block): Reserved hooks for deferred multi-browser; Safari product not active.
- * 
+ *
  * ## PLATFORM_UTILS
- * 
+ *
  * - [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] How: Implements platformUtils behavior for IMPL-CROSS_BROWSER.
  * - Contract:
  *   - INPUT: chrome (or future browser) extension APIs; caller operations (sendMessage, tabs, storage)
@@ -74,7 +92,24 @@
  *   - How (sub-block): Call sites use shim export, not raw chrome only, for future expansion readiness.
  *   - 1. ON service worker / content / message-handler import:
  *   - USE browser from safari-shim (or utils re-export)
- * 
+ *
+ * ## MESSAGE_DISPATCH_SHARED_BROWSER
+ *
+ * - [IMPL-CROSS_BROWSER] [IMPL-MESSAGE_HANDLING] [ARCH-CROSS_BROWSER] [ARCH-MESSAGE_HANDLING] [REQ-CROSS_BROWSER] How: Routes a MessageClient request through the shared browser shim and resolves the callback response without UI or host-specific behavior.
+ * - Contract:
+ *   - INPUT: message payload, retry options, shared browser runtime
+ *   - PRE: shared browser runtime is available; callback-style sendMessage is supported
+ *   - OUTPUT: resolved message response
+ *   - POST:
+ *     - success => runtime receives the message with a generated messageId and the response is returned
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MESSAGE_DISPATCH_SHARED_BROWSER
+ *   - message = ADD messageId to input payload
+ *   - SEND message through shared browser runtime
+ *   - AWAIT callback response
+ *   - RETURN response
+ *
  * === END IMPL-FULL-BLOCK: IMPL-CROSS_BROWSER ===
  */
 /**

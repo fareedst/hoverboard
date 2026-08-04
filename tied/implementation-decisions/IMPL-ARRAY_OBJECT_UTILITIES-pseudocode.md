@@ -95,3 +95,19 @@
   - result = {}
   - FOR each key IN keys: IF obj[key] present THEN result[key] = obj[key]
   - RETURN result
+
+## SHARED_UTILITIES_COMPOSITION
+
+- [IMPL-ARRAY_OBJECT_UTILITIES] [IMPL-URL_UTILITIES] [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Composes pure shared utility modules so URL normalization can consume the same non-mutating helper contract as array and object utilities.
+- Contract:
+  - INPUT: bookmark URL and shared utility functions
+  - PRE: utility functions are imported from the shared module
+  - OUTPUT: normalized URL and unchanged source data
+  - POST:
+    - success => normalization returns the expected URL while helper inputs remain unchanged
+  - EFFECTS: pure
+  - TERMINATION: total
+- PROCEDURE: SHARED_UTILITIES_COMPOSITION
+  - Preserve source bookmark data
+  - APPLY URL normalization
+  - RETURN normalized URL
