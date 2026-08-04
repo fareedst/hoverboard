@@ -8,8 +8,8 @@ REQ-BROWSER_BOOKMARK_IMPORT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 1+6: document Browser import-target exclusion and panel vs Store B boundary"
+      date: "2026-08-03"
+      reason: "Align Index-owned Browser import surface and validation evidence"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -47,9 +47,12 @@ REQ-BROWSER_BOOKMARK_IMPORT:
     implementation:
       - "IMPL-BROWSER_BOOKMARK_IMPORT"
     tests:
-      - "tests/unit/browser-bookmark-import.test.js"
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      - "tests/playwright/extension-bookmarks-index-controls.spec.js"
+      - "tests/playwright/extension-lower.spec.js"
+      - "tests/unit/bookmarks-table-browser-import.test.js"
   validation_criteria:
     - method: "Manual verification"
-      coverage: "Open page from popup/options; load browser bookmarks; search, folder filter, sort, select; run import with each conflict mode and tag options; confirm result message and data in Hoverboard index."
+      coverage: "Open the Index from legacy, popup, options, command, context-menu, toolbar, or keyboard entry; confirm ?source=browser selects Import; load the live Browser tree; search and folder-filter rows; select records; run Skip, Overwrite, and Merge tags into Local, File, or Sync; confirm imported, skipped, and failed counts and refreshed Index."
     - method: "Unit tests"
-      coverage: "tests/unit/browser-bookmark-import.test.js — sanitizeTag, folderPathToTags, parseExtraTags, flattenTree; conflict logic (skip, overwrite, merge)."
+      coverage: "tests/unit/bookmarks-table-browser-import.test.js — duplicate cleaned-URL collapse, folder-path list/filter, root-stripped folder tags, sanitized extra tags, target-scoped conflict lookup, and Merge metadata preservation."

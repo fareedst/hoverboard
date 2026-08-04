@@ -44,8 +44,15 @@
 | **link health hint** | health badge (capture) | Compact This Page/popup text from stored map when opt-in on |
 | **Refresh API snapshot** | write aggregate snapshot | Index/Options action → `REFRESH_API_SNAPSHOT` writes `aggregate-snapshot.json` for Local Query API |
 | **fixed head control panel** | head controls | Sticky Local Bookmarks Index filter region with one active control group |
-| **fixed footer control panel** | footer controls | Sticky Local Bookmarks Index action region with one active control group |
-| **one-visible-group rule** | multiple visible control groups | Each control region exposes exactly one selected tab and visible fieldset |
+| **fixed footer control panel** | footer controls | Sticky Local Bookmarks Index action region with a nullable active group: no visible group when collapsed, otherwise one active control group |
+| **one-visible-group rule** | multiple visible control groups | Each expanded control region exposes exactly one selected tab and visible fieldset; a collapsed footer exposes none |
+| **collapsed footer state** | Actions default, compact footer | Footer state with `activeFooterGroup = null`, all footer panels hidden, and Actions as the sole roving-tabindex entry |
+| **activeFooterGroup** | selected footer, open action panel | Nullable state value identifying the expanded Actions, Import, or Export group |
+| **live Browser source** | Chrome import page | Index Import source backed by `chrome.bookmarks.getTree`; distinct from Browser storage as a destination |
+| **target-scoped conflict lookup** | global duplicate check | Conflict map built only from the selected Local, File, or Sync target; Browser source rows never conflict with themselves |
+| **cleaned URL collapse** | duplicate browser rows | One live Browser import row per URL after trimming and removing trailing slashes, with folder paths/tags unioned |
+| **Browser-import deep link** | legacy import URL | `?source=browser` entry that selects the Index Import group and live Browser source |
+| **legacy import compatibility redirect** | standalone import page | `browser-bookmark-import.html` replaces location with Index `?source=browser` |
 
 ---
 
@@ -66,6 +73,9 @@
 | Index Refresh API snapshot UI | Refresh API snapshot | `REFRESH_API_SNAPSHOT` | — | `runRefreshApiSnapshot` ([IMPL-LOCAL_QUERY_API]) |
 | Aggregated index | Storage column | `getAggregatedBookmarksForIndex` | storage field on row | BookmarkRouter aggregate |
 | Store row counts | `filtered / total` beside each Stores checkbox | `COUNT_INDEX_ROWS_BY_STORE` | provider-row counts before Store selection | bookmarks-table-filter |
+| Browser import source | Browser source selector | `chrome.bookmarks.getTree` | collapsed live-tree records | `loadBrowserImportRecords` |
+| Browser import target conflicts | Skip / Overwrite / Merge | `buildTargetBookmarksByUrl` | selected target rows only | bookmarks-table-browser-import |
+| Browser import deep link | Index Import group | `source=browser` query | live Browser source selected | bookmarks-table |
 | Retrieval scope validation | — | supported source registry | validated canonical scope list | `validateRetrievalScopes` / `VALIDATE_RETRIEVAL_SCOPES` |
 | Bulk Delete | Delete (Actions for selected) | `deleteBookmark` | `preferredBackend` from row **Storage column** (same bridge as Add tags) | `buildDeletePayload` → BookmarkRouter |
 | Delete status | `#delete-result` | — | pending `Deleting…` / final `Deleted N…` | `bookmarks-table-delete-status` |
@@ -90,8 +100,15 @@
 - **timeColumnSource / timeDisplayMode / sortKey** — Table time-column controls.
 - **Show only / Hide** — Tag include/exclude, to-read, private, and time-range filters.
 - **fixed head control panel** — Sticky Local Bookmarks Index filter region; its accessible tabs select exactly one of **Stores**, **Show only**, **Hide**, or **Table Display**.
-- **fixed footer control panel** — Sticky Local Bookmarks Index action region; its accessible tabs select exactly one of **Actions**, **Import**, or **Export**.
-- **one-visible-group rule** — Each control region exposes one selected tab and one visible fieldset; inactive panels are hidden without losing their form values.
+- **fixed footer control panel** — Sticky Local Bookmarks Index action region; its accessible tabs select exactly one of **Actions**, **Import**, or **Export**, or collapse the footer when the active tab is activated again.
+- **one-visible-group rule** — Each expanded control region exposes one selected tab and one visible fieldset; the collapsed footer hides all fieldsets without losing their form values.
+- **collapsed footer state** — The normal Index initialization state: `activeFooterGroup` is `null`, no footer tab is selected, all footer panels are hidden, and Actions retains `tabindex="0"` for keyboard entry.
+- **activeFooterGroup** — The nullable runtime state used by `selectControlGroup` to open a footer group or collapse it when the active tab is activated again.
+- **live Browser source** — A source mode in the Index Import control that reads the native Chrome bookmark tree directly; it is not the Browser storage backend target.
+- **target-scoped conflict lookup** — Conflict detection that filters aggregate rows to the selected Local, File, or Sync destination before applying Skip, Overwrite, or Merge tags.
+- **cleaned URL collapse** — Normalization that trims a Browser URL and removes trailing slashes before merging duplicate tree nodes into one selectable import record.
+- **Browser-import deep link** — The `?source=browser` query used by legacy page, command, context-menu, toolbar, and keyboard entry points to select the Index Import group.
+- **legacy import compatibility redirect** — `browser-bookmark-import.html` no longer hosts import UI; on load it replaces location with `bookmarks-table.html?source=browser`.
 - **Visits / Last Visited** — Usage columns when usage tracking data exists.
 - **Add tags / Delete tags** — Bulk tag ops on selected rows (merge/dedupe case-insensitive).
 - **Skip / Overwrite / Merge tags** — When imported URL already exists: leave alone; replace record; or merge tag sets.
@@ -156,6 +173,7 @@
 | Import records | `(proposed) IMPORT_BOOKMARKS_INDEX` | [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml) |
 | Regex replace | `(proposed) REGEX_REPLACE_BOOKMARK_FIELDS` | [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml) |
 | Browser import conflict | Skip / Overwrite / Merge handlers | [IMPL-BROWSER_BOOKMARK_IMPORT](../implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml) |
+| Legacy import compatibility redirect | `LEGACY_IMPORT_COMPATIBILITY_REDIRECT` | [IMPL-BROWSER_BOOKMARK_IMPORT](../implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml) |
 | Query archive content | `QUERY_ARCHIVED_CONTENT` | [IMPL-ARCHIVED_CONTENT_SEARCH](../implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH.yaml) |
 | Apply archive-content scope | `APPLY_ARCHIVE_CONTENT_SCOPE` | [IMPL-ARCHIVED_CONTENT_SEARCH](../implementation-decisions/IMPL-ARCHIVED_CONTENT_SEARCH.yaml) |
 | Cross-resource retrieval | `CROSS_RESOURCE_RETRIEVAL` | [IMPL-CROSS_RESOURCE_RETRIEVAL](../implementation-decisions/IMPL-CROSS_RESOURCE_RETRIEVAL.yaml) |
@@ -171,6 +189,7 @@
 |------|---------|
 | Add tags / Delete tags | Named concepts |
 | All resources scope | Preferred terms / Named concepts |
+| activeFooterGroup | Preferred terms / Named concepts |
 | APPLY_ALL_RESOURCES_READ_ONLY_CONTROL_GATE | Pseudo-code block names |
 | archive-content scope | Preferred terms / Named concepts |
 | archive snippet | Preferred terms / Named concepts |
@@ -180,6 +199,9 @@
 | Bulk Delete | Pseudo-code block names / Naming bridge |
 | delete result pending / final | Named concepts |
 | Browser Bookmark Import | Preferred terms |
+| Browser-import deep link | Preferred terms / Named concepts |
+| cleaned URL collapse | Preferred terms / Named concepts |
+| collapsed footer state | Preferred terms / Named concepts |
 | export scope | Preferred terms |
 | fixed footer control panel | Named concepts |
 | fixed head control panel | Named concepts |
@@ -190,6 +212,7 @@
 | Import to | Preferred terms |
 | Import control group | Named concepts |
 | import result pending / final | Named concepts |
+| live Browser source | Preferred terms / Named concepts |
 | BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY | Pseudo-code block names |
 | APPLY_LINK_HEALTH_CONTROLS_GATE | Pseudo-code block names |
 | BUILD_HEALTH_RECORD | Pseudo-code block names |
@@ -207,6 +230,7 @@
 | link health hint | Preferred terms |
 | linkHealthChecksEnabled | Preferred terms |
 | storage normalization | Preferred terms / Named concepts |
+| target-scoped conflict lookup | Preferred terms / Named concepts |
 | Manual-only link health dispatch | Pseudo-code block names |
 | Count Store rows | Pseudo-code block names |
 | URL_MATCHES_INHIBIT_LIST | Pseudo-code block names |

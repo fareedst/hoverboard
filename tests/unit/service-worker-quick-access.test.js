@@ -41,7 +41,7 @@
  *   - 3.     "hoverboard-open-side-panel": same as open-side-panel command (chrome.sidePanel.open({ windowId: this._sidePanelWindowId }))
  *   - 4.     "hoverboard-open-options": chrome.runtime.openOptionsPage()
  *   - 5.     "hoverboard-open-bookmarks-index": OPEN_BOOKMARKS_INDEX_TAB  # [IMPL-LOCAL_BOOKMARKS_INDEX]
- *   - 6.     "hoverboard-open-import": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html') })
+ *   - 6.     "hoverboard-open-import": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html?source=browser') })
  *   - 7. })
  * 
  * === END IMPL-FULL-BLOCK: IMPL-CONTEXT_MENU_QUICK_ACCESS ===
@@ -92,7 +92,7 @@
  *   - "open-side-panel-browser-tabs": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'browserTabs' }); THEN sidePanel.open({ windowId })
  *   - "open-options": chrome.runtime.openOptionsPage()
  *   - "open-bookmarks-index": OPEN_BOOKMARKS_INDEX_TAB  # tabs.create + REQUEST_SIDE_PANEL_CLOSE [IMPL-LOCAL_BOOKMARKS_INDEX]
- *   - "open-import": chrome.tabs.create({ url: ... browser-bookmark-import.html })
+ *   - "open-import": chrome.tabs.create({ url: ... bookmarks-table.html?source=browser })
  *   - How (sub-block): Side panel: storage.onChanged for SIDE_PANEL_TAB_STORAGE_KEY → switchTab(newValue) when panel already open.
  * 
  * === END IMPL-FULL-BLOCK: IMPL-EXTENSION_COMMANDS ===
@@ -374,11 +374,11 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COM
     })
   })
 
-  test('command open-import calls chrome.tabs.create with browser-bookmark-import URL', () => {
+  test('command open-import calls chrome.tabs.create with Index Browser source URL', () => {
     const listener = global.chrome.commands.onCommand.addListener.mock.calls[0][0]
     listener('open-import')
     expect(global.chrome.tabs.create).toHaveBeenCalledWith({
-      url: 'chrome-extension://test-id/src/ui/browser-bookmark-import/browser-bookmark-import.html'
+      url: 'chrome-extension://test-id/src/ui/bookmarks-table/bookmarks-table.html?source=browser'
     })
   })
 
@@ -466,12 +466,12 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_
     })
   })
 
-  test('context menu onClicked hoverboard-open-import calls tabs.create', () => {
+  test('context menu onClicked hoverboard-open-import opens Index Browser source', () => {
     sw.setupContextMenus()
     const onClicked = global.chrome.contextMenus.onClicked.addListener.mock.calls[0][0]
     onClicked({ menuItemId: 'hoverboard-open-import' }, {})
     expect(global.chrome.tabs.create).toHaveBeenCalledWith({
-      url: 'chrome-extension://test-id/src/ui/browser-bookmark-import/browser-bookmark-import.html'
+      url: 'chrome-extension://test-id/src/ui/bookmarks-table/bookmarks-table.html?source=browser'
     })
   })
 })

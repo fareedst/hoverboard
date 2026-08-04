@@ -39,17 +39,18 @@ IMPL-NON_WEB_TOOLS_TOOLBAR:
   description: "Shared isWebProtocolUrl; SW dismiss panel + setPopup sync; tools-toolbar page with five launchers; Browser Bookmarks and Visit History standalone pages."
   essence_pseudocode_path: "implementation-decisions/IMPL-NON_WEB_TOOLS_TOOLBAR-pseudocode.md"
   implementation_approach:
-    - "browser-bookmarks.html and visit-history.html standalone"
-    - "Command open-side-panel-browser-bookmarks -> tabs.create browser-bookmarks.html"
-    - "Pure isWebProtocolUrl in src/shared/web-protocol.js"
-    - "SW handleTabActivated/Updated call dismiss+sync"
-    - "tools-toolbar.html five buttons including Visit History"
+    details:
+      - "btn-browser-import uses tabs.create(getURL('src/ui/bookmarks-table/bookmarks-table.html?source=browser'))"
+      - "The Index import group owns live tree selection, folder filtering, folder tags, and target-specific conflicts"
+    summary: "The toolbar Browser Import launcher opens Local Bookmarks Index?source=browser, where the live Browser source is integrated; Browser Bookmarks and Visit History remain separate tools."
   metadata:
     last_updated:
       author: "AI Agent"
       date: "2026-07-31"
       reason: "Three-way: full-block comments in SW/web-protocol; TOOLS_TOOLBAR PRE aligned"
   name: "Non-web tools toolbar implementation"
+  rationale:
+    why: "Keep the toolbar entry point while consolidating the live Browser import workflow into the storage-aware Index."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_USAGE_TRACKING_UI"

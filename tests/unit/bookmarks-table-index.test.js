@@ -1,6 +1,6 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
- * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), metadata-first filter pipeline, table with Storage column, and per-store filtered / total provider-row counts; Stores L/F/S/B.
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), metadata-first filter pipeline, table with Storage column, per-store filtered / total provider-row counts, and collapsible fixed footer control panel; Stores L/F/S/B.
  *
  * ## LOAD_LOCAL_BOOKMARKS_INDEX
  *
@@ -46,7 +46,7 @@
  *
  * ## GET_ALLOWED_STORES
  *
- * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: getAllowedStores includes browser when #store-browser checked; Store selection is applied after count derivation.
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: getAllowedStores includes browser when #store-browser checked; Move/Import-to targets include browser.
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
@@ -99,7 +99,7 @@
  *
  * ## APPLY_SEARCH_AND_FILTER
  *
- * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: Apply metadata filters first, derive Store counts from all known provider rows, then apply Store selection for rendering and keep archive/aggregate scopes from showing stale named-Store counts.
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: Implements applySearchAndFilter() behavior for IMPL-LOCAL_BOOKMARKS_INDEX.
  * - Contract:
  *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
@@ -147,53 +147,73 @@
  *
  * ## FOOTER_CONTROL_PANEL
  *
- * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: FOOTER_CONTROL_PANEL keeps Actions, Import, and Export fixed at the viewport bottom and displays one control group at a time.
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: FOOTER_CONTROL_PANEL keeps Actions, Import, and Export fixed at the viewport bottom, starts collapsed, and displays one control group at a time when expanded.
  * - Contract:
- *   - INPUT: requestedGroup (string), currentGroup (string)
+ *   - INPUT: requestedGroup (string), currentGroup (string or null)
  *   - PRE: requestedGroup is one of actions | import | export
- *   - OUTPUT: active footer group and corresponding visible panel
+ *   - OUTPUT: active footer group (string or null) and corresponding visible panel(s)
  *   - POST:
- *     - success => exactly one footer panel is visible and its tab is selected
+ *     - success with a different requestedGroup => exactly one footer panel is visible and its tab is selected
+ *     - success with the already active requestedGroup => active footer group is null, all footer panels are hidden, and all footer tabs are unselected
+ *     - success with no active footer group => Actions is the sole footer tab with tabindex 0; Import and Export use tabindex -1
  *     - invalid group => currentGroup and panel visibility remain unchanged
  *   - FAILURE_MODES: InvalidGroup
  *   - DATA: activeFooterGroup
- *   - DATA_TRANSITION: activeFooterGroup changes only to a valid footer group
+ *   - DATA_TRANSITION: activeFooterGroup changes from null to a valid group, between valid groups, or from the active group to null
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: SET_FOOTER_CONTROL_GROUP
  *   - IF requestedGroup is not a valid footer group: RETURN { activeGroup: currentGroup, error: InvalidGroup }
+ *   - IF requestedGroup == currentGroup:
+ *   - SET activeFooterGroup = null
+ *   - SET selected = false for every footer tab
+ *   - SET tabindex = 0 for Actions and -1 for every other footer tab
+ *   - SET hidden = true for every footer panel
+ *   - RETURN { activeGroup: null }
  *   - SET activeFooterGroup = requestedGroup
  *   - SET selected tab state for requestedGroup
+ *   - SET tabindex = 0 for requestedGroup and -1 for every other footer tab
  *   - SET hidden = false only for requestedGroup panel
  *   - SET hidden = true for every other footer panel
  *   - RETURN { activeGroup: activeFooterGroup }
  *
  * ## INITIALIZE_INDEX_CONTROL_TABS
  *
- * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS defaults to Stores at the head and Actions at the footer, then binds accessible tab activation without changing control behavior.
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS keeps Stores selected at the head, starts the footer collapsed, and binds accessible tab activation without changing control behavior.
  * - Contract:
  *   - INPUT: headTabList, headPanels, footerTabList, footerPanels
  *   - PRE: each tab references a known panel through aria-controls
  *   - OUTPUT: initialized head and footer control panels
  *   - POST:
- *     - success => Stores and Actions are selected; exactly one panel in each region is visible
+ *     - success => Stores is selected and exactly one head panel is visible
+ *     - success => activeFooterGroup is null, all footer tabs are unselected, and all footer panels are hidden
+ *     - success => Actions is the sole footer tab with tabindex 0 while the footer is collapsed
+ *   - DATA: activeHeadGroup, activeFooterGroup, footer tab and panel DOM state
+ *   - DATA_TRANSITION: initialization selects Stores at the head and sets the footer to its collapsed state
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: INITIALIZE_INDEX_CONTROL_TABS
  *   - CALL SET_HEAD_CONTROL_GROUP("stores", "stores")
- *   - CALL SET_FOOTER_CONTROL_GROUP("actions", "actions")
+ *   - SET activeFooterGroup = null
+ *   - SET selected = false for every footer tab
+ *   - SET tabindex = 0 for Actions and -1 for every other footer tab
+ *   - SET hidden = true for every footer panel
  *   - ON head tab activation: CALL SET_HEAD_CONTROL_GROUP(requestedGroup, activeHeadGroup)
  *   - ON footer tab activation: CALL SET_FOOTER_CONTROL_GROUP(requestedGroup, activeFooterGroup)
+ *   - ON footer Enter or Space activation: CALL SET_FOOTER_CONTROL_GROUP(requestedGroup, activeFooterGroup)
+ *   - ON footer ArrowLeft, ArrowRight, Home, or End: move focus to the requested tab and CALL SET_FOOTER_CONTROL_GROUP(requestedGroup, activeFooterGroup)
  *
  * ## SYNC_CONTROL_PANEL_OFFSETS
  *
- * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SYNC_CONTROL_PANEL_OFFSETS measures the fixed head and footer regions so sticky table headers and list spacing avoid control overlap.
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SYNC_CONTROL_PANEL_OFFSETS measures compact or active fixed head/footer regions so sticky table headers and list spacing avoid control overlap after initialization and every footer transition.
  * - Contract:
  *   - INPUT: headPanel (element), footerPanel (element), root (element)
  *   - PRE: root exists; missing panel elements are allowed
  *   - OUTPUT: root CSS variables for head offset and footer spacing
+ *   - DATA: root CSS variables --index-head-sticky-height and --index-footer-sticky-height
+ *   - DATA_TRANSITION: measured panel heights replace the root CSS variable values after initialization, transition, or resize
  *   - POST:
- *     - success => CSS variables equal the current measured panel heights
+ *     - success => CSS variables equal the current measured compact or active panel heights
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: SYNC_CONTROL_PANEL_OFFSETS
@@ -201,7 +221,7 @@
  *   - IF headPanel exists: SET --index-head-sticky-height = headPanel.offsetHeight pixels
  *   - IF footerPanel exists: SET --index-footer-sticky-height = footerPanel.offsetHeight pixels
  *   - CALL APPLY_STICKY_THEAD_OFFSET
- *   - ON panel resize: REPEAT SYNC_CONTROL_PANEL_OFFSETS
+ *   - ON initialization, footer transition, or panel resize: REPEAT SYNC_CONTROL_PANEL_OFFSETS
  *
  * ## APPLY_STICKY_THEAD_OFFSET
  *
@@ -210,6 +230,8 @@
  *   - INPUT: tableWrapper (element), headPanel (element), root (element)
  *   - PRE: root, tableWrapper, and headPanel exist
  *   - OUTPUT: root sticky-thead-offset class state
+ *   - DATA: root sticky-thead-offset class
+ *   - DATA_TRANSITION: class is present only while the table top is above the measured head-panel height
  *   - POST:
  *     - tableWrapper top >= headPanel height => root does not have sticky-thead-offset
  *     - tableWrapper top < headPanel height => root has sticky-thead-offset
@@ -784,16 +806,18 @@ describe('fixed Local Bookmarks Index controls [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH
     expect(html).toContain('filtered / total provider rows')
   })
 
-  test('index HTML has Actions, Import, and Export footer tabs with Actions visible by default', () => {
+  test('index HTML has collapsed Actions, Import, and Export footer tabs by default', () => {
     const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
     const html = fs.readFileSync(htmlPath, 'utf8')
     const footer = html.slice(html.indexOf('class="index-footer"'), html.indexOf('</section>\n  </div>'))
     expect(footer.match(/data-control-tab="footer"/g)).toHaveLength(3)
-    expect(footer).toContain('data-control-group="actions" aria-controls="footer-panel-actions" aria-selected="true"')
+    expect(footer).toContain('data-control-group="actions" aria-controls="footer-panel-actions" aria-selected="false"')
     expect(footer).toContain('data-control-group="import"')
     expect(footer).toContain('data-control-group="export"')
     expect(footer).toContain('id="footer-panel-export"')
-    expect(footer.match(/data-control-panel="footer"[^>]* hidden/g)).toHaveLength(2)
+    expect(footer.match(/data-control-panel="footer"[^>]* hidden/g)).toHaveLength(3)
+    expect(footer).toContain('id="footer-tab-actions"')
+    expect(footer).toContain('id="footer-tab-actions" class="control-tab" role="tab" data-control-tab="footer" data-control-group="actions" aria-controls="footer-panel-actions" aria-selected="false" tabindex="0"')
     expect(footer).toContain('id="refresh-api-snapshot"')
     expect(footer).toContain('id="import-trigger"')
     expect(footer).toContain('id="export-all"')
@@ -865,6 +889,19 @@ describe('Import result status UI [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL
     const resultPos = html.indexOf('id="import-result"')
     expect(resultPos).toBeGreaterThan(btnPos)
     expect(html).toMatch(/id="import-result"[^>]*aria-live="polite"/)
+  })
+
+  test('index HTML exposes the live Browser source workflow', () => {
+    const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
+    const html = fs.readFileSync(htmlPath, 'utf8')
+    expect(html).toContain('id="import-source"')
+    expect(html).toContain('value="browser"')
+    expect(html).toContain('id="browser-import-search"')
+    expect(html).toContain('id="browser-import-folder"')
+    expect(html).toContain('id="browser-import-table-body"')
+    expect(html).toContain('name="browser-import-mode"')
+    expect(html).toContain('id="browser-import-use-folder-tags"')
+    expect(html).toContain('id="browser-import-extra-tags"')
   })
 })
 

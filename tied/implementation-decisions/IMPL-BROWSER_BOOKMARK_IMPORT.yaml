@@ -1,24 +1,16 @@
 IMPL-BROWSER_BOOKMARK_IMPORT:
   code_locations:
     files:
-      - path: "src/ui/browser-bookmark-import/browser-bookmark-import.html"
-        description: "Header, toolbar, table, actions-below-table"
-      - path: "src/ui/browser-bookmark-import/browser-bookmark-import.js"
-        description: "loadBrowserBookmarks, applySearchAndFilter, renderTable, selection, runImport"
-      - path: "src/ui/browser-bookmark-import/browser-bookmark-import.css"
-        description: "Layout and styles"
+      - path: "src/ui/bookmarks-table/bookmarks-table.html"
+        description: "Index Import source selector, live Browser filters, selection table, conflict controls, tags, target, and result"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "Index live Browser source load/filter/render/import orchestration"
+      - path: "src/ui/bookmarks-table/bookmarks-table-browser-import.js"
+        description: "Pure Browser-tree normalization, duplicate collapse, folder filtering, root-stripped tags, payload, and target conflict helpers"
       - path: "src/ui/browser-bookmark-import/browser-bookmark-import-utils.js"
-        description: "sanitizeTag, folderPathToTags, parseExtraTags, flattenTree"
-    functions:
-      - name: "flattenTree"
-        description: "Recurse bookmark tree; emit { id, url, title, dateAdded, folderPath } for each bookmark"
-        file: "src/ui/browser-bookmark-import/browser-bookmark-import-utils.js"
-      - name: "loadBrowserBookmarks"
-        description: "getTree then flattenTree; store allBookmarks, build folder list, applySearchAndFilter"
-        file: "src/ui/browser-bookmark-import/browser-bookmark-import.js"
-      - name: "runImport"
-        description: "getAggregatedBookmarksForIndex -> existingByUrl; for each selected build payload; conflict handling; saveBookmark per row; count and show result"
-        file: "src/ui/browser-bookmark-import/browser-bookmark-import.js"
+        description: "Shared tree flattening, tag sanitization, root stripping, and duplicate URL helpers"
+      - path: "src/ui/browser-bookmark-import/browser-bookmark-import.html"
+        description: "Legacy compatibility redirect to bookmarks-table.html?source=browser"
   cross_references:
     - "ARCH-BROWSER_BOOKMARK_IMPORT"
     - "REQ-BROWSER_BOOKMARK_IMPORT"
@@ -38,8 +30,8 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "ARCH close-out: document Browser Import-to exclusion"
+      date: "2026-08-03"
+      reason: "Synchronize live Browser import blocks and coverage"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -70,4 +62,7 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
     requirements:
       - "REQ-BROWSER_BOOKMARK_IMPORT"
     tests:
-      - "tests/unit/browser-bookmark-import.test.js"
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      - "tests/playwright/extension-bookmarks-index-controls.spec.js"
+      - "tests/playwright/extension-lower.spec.js"
+      - "tests/unit/bookmarks-table-browser-import.test.js"

@@ -39,5 +39,5 @@
   - 3.     "hoverboard-open-side-panel": same as open-side-panel command (chrome.sidePanel.open({ windowId: this._sidePanelWindowId }))
   - 4.     "hoverboard-open-options": chrome.runtime.openOptionsPage()
   - 5.     "hoverboard-open-bookmarks-index": OPEN_BOOKMARKS_INDEX_TAB  # [IMPL-LOCAL_BOOKMARKS_INDEX]
-  - 6.     "hoverboard-open-import": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html') })
+  - 6.     "hoverboard-open-import": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html?source=browser') })
   - 7. })

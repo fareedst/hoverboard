@@ -64,24 +64,24 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX-pseudocode.md"
   implementation_approach:
     details:
-      - "bookmarks-table-filter.js owns pure storage normalization and per-store total/filtered row count derivation for Local/File/Sync/Browser, including empty, unknown, duplicate-row, and Local-only fallback data."
-      - "bookmarks-table.css keeps count labels compact, readable, responsive, and keyboard-compatible; Archived and All resources scopes do not show stale metadata counts."
-      - "bookmarks-table.html starts all Stores checkboxes checked and exposes accessible filtered / total count elements beside each label."
-      - "bookmarks-table.js derives the metadata-filtered list once, refreshes Store counts on load and filter/health changes, then applies Stores selection for rendering without unnecessary reloads."
-      - "INITIALIZE_STORE_FILTERS and COUNT_INDEX_ROWS_BY_STORE are documented as separate testable boundaries; count labels remain based on pre-Store metadata-filtered rows."
-    summary: "Fixed accessible Local Bookmarks Index controls with checked Stores defaults and pure pre-store filtered / total provider-row counts."
+      - "bookmarks-table-controls.js owns pure active-group validation, nullable footer state, repeat-activation collapse, and independent head/footer tab state for unit testing"
+      - "bookmarks-table.css keeps compact and active footer heights measurable, offsets sticky table headers, keeps focus-visible tab styles, and prevents the list from being obscured"
+      - "bookmarks-table.html keeps Stores selected at the head and initializes all footer panels hidden with Actions as the sole collapsed keyboard entry tab"
+      - "bookmarks-table.js wires click and native Enter/Space activation, roving keyboard navigation, active-group collapse, ?source=browser Import deep-link handling, ARIA/hidden state, and offset synchronization without changing existing filter, import, export, snapshot, or link-health handlers"
+      - "INITIALIZE_INDEX_CONTROL_TABS, FOOTER_CONTROL_PANEL, and SYNC_CONTROL_PANEL_OFFSETS specify the nullable footer state, one-visible-group rule, form-value preservation, and compact/active sticky-height invariant"
+    summary: "Fixed accessible Local Bookmarks Index controls with checked Stores defaults, a collapsible fixed footer control panel, and pure pre-store filtered / total provider-row counts."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-08-02"
-      reason: "Align Store initialization and pre-selection count contracts with source and tests"
+      date: "2026-08-03"
+      reason: "Synchronize collapsed footer contracts and managed full-block loci"
     last_validated:
-      date: "2026-02-18"
+      date: "2026-08-03"
       result: "pass"
-      validator: "MCP converter"
+      validator: "pseudocode_validate and tied_validate_consistency"
   name: "Local Bookmarks Index Implementation"
   rationale:
     benefits:
@@ -106,10 +106,11 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   status: "Active"
   tests:
     - "tests/integration/message-handler-router-storage.integration.test.js"
-    - "tests/playwright/extension-bookmarks-index-controls.spec.js (runtime tab activation, keyboard navigation, checked Stores defaults, and count labels)"
-    - "tests/unit/bookmarks-table-controls.test.js"
+    - "tests/playwright/extension-bookmarks-index-controls.spec.js (compact initialization, group switching, collapse, keyboard activation, form preservation, and sticky offset)"
+    - "tests/playwright/extension-lower.spec.js (source=browser opens Import)"
+    - "tests/unit/bookmarks-table-controls.test.js (nullable footer state, valid selection, repeat collapse, invalid no-op, and independent head state)"
     - "tests/unit/bookmarks-table-filter.test.js (per-store count helper)"
-    - "tests/unit/bookmarks-table-index.test.js (filtering, fixed head/footer layout, checked Stores, and count DOM)"
+    - "tests/unit/bookmarks-table-index.test.js (initial ARIA/hidden/tabindex markup, filtering, fixed head/footer layout, checked Stores, and count DOM)"
     - "tests/unit/bookmarks-table-load.test.js"
     - "tests/unit/bookmarks-table-time.test.js"
     - "tests/unit/message-handler-bookmarks-index.test.js"
@@ -125,8 +126,9 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - "REQ-LOCAL_BOOKMARKS_INDEX"
     tests:
       - "tests/integration/message-handler-router-storage.integration.test.js"
-      - "tests/playwright/extension-bookmarks-index-controls.spec.js (runtime tab activation, keyboard navigation, and sticky positioning)"
-      - "tests/unit/bookmarks-table-controls.test.js (control tab state and full IMPL block)"
-      - "tests/unit/bookmarks-table-index.test.js (filtering, fixed head/footer layout, and full IMPL block)"
+      - "tests/playwright/extension-bookmarks-index-controls.spec.js (footer state transitions, keyboard, form preservation, offset, and sticky positioning)"
+      - "tests/playwright/extension-lower.spec.js (browser-import deep link)"
+      - "tests/unit/bookmarks-table-controls.test.js (nullable footer transition state and full IMPL block)"
+      - "tests/unit/bookmarks-table-index.test.js (initial footer DOM and full IMPL block)"
       - "tests/unit/bookmarks-table-time.test.js"
       - "tests/unit/message-handler-bookmarks-index.test.js"

@@ -281,6 +281,62 @@ body {
   color: var(--color-success-600);
 }
 
+/* [REQ-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT] Live Browser source controls stay in the Index Import group. */
+.import-source-row,
+.browser-import-filter-row,
+.browser-import-options .tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.import-source-row label,
+.browser-import-filter-row label,
+.browser-import-options .tags-row label[for="browser-import-extra-tags"] {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.browser-import-options {
+  width: 100%;
+}
+
+.browser-import-options .import-mode-fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  border: none;
+  padding: 0;
+  margin: 0 0 var(--space-2);
+}
+
+.browser-import-options .import-mode-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.browser-import-table-wrapper {
+  max-height: 18rem;
+  overflow: auto;
+  width: 100%;
+}
+
+.browser-import-table {
+  min-width: 48rem;
+}
+
+.browser-import-table .col-url {
+  max-width: 24rem;
+  overflow-wrap: anywhere;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

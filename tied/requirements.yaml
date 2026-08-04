@@ -329,8 +329,8 @@ REQ-BROWSER_BOOKMARK_IMPORT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "New requirement for browser bookmark import page"
+      date: "2026-08-03"
+      reason: "Align Index-owned Browser import surface and validation evidence"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -361,10 +361,15 @@ REQ-BROWSER_BOOKMARK_IMPORT:
     implementation:
       - "IMPL-BROWSER_BOOKMARK_IMPORT"
     tests:
-      - "tests/unit/browser-bookmark-import.test.js"
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      - "tests/playwright/extension-bookmarks-index-controls.spec.js"
+      - "tests/playwright/extension-lower.spec.js"
+      - "tests/unit/bookmarks-table-browser-import.test.js"
   validation_criteria:
     - method: "Manual verification"
-      coverage: "Load page, filter, select, import with each conflict mode; confirm result and data in index"
+      coverage: "Open the Index from legacy, popup, options, command, context-menu, toolbar, or keyboard entry; confirm ?source=browser selects Import; load the live Browser tree; search and folder-filter rows; select records; run Skip, Overwrite, and Merge tags into Local, File, or Sync; confirm imported, skipped, and failed counts and refreshed Index."
+    - method: "Unit tests"
+      coverage: "tests/unit/bookmarks-table-browser-import.test.js — duplicate cleaned-URL collapse, folder-path list/filter, root-stripped folder tags, sanitized extra tags, target-scoped conflict lookup, and Merge metadata preservation."
 REQ-BROWSER_BOOKMARK_STORAGE:
   category: "Functional"
   detail_file: "requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml"
@@ -1017,8 +1022,8 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       date: "2026-02-13T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 1: index criteria include Browser aggregate"
+      date: "2026-08-03"
+      reason: "Define compact fixed footer control panel behavior"
     last_validated:
       date: "2026-02-13T00:00:00.000Z"
       result: "pass"
@@ -1050,10 +1055,12 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     - criterion: "Existing filter semantics, import/export behavior, result announcements, snapshot behavior, link-health gating, and control IDs remain unchanged."
     - criterion: "Primary data uses getAggregatedBookmarksForIndex for local + file + sync + browser bookmarks with storage fields, with getLocalBookmarksForIndex as the LocalBookmarkService fallback."
     - criterion: "The bookmark list occupies the remaining viewport without being obscured by the fixed head or footer panels; the table header remains positioned below the head panel when sticky."
-    - criterion: "The Local Bookmarks Index has a fixed footer with accessible Actions, Import, and Export tabs; exactly one footer group is visible at a time and Actions is the default."
+    - criterion: "The fixed footer control panel preserves form values while switching or collapsing, keeps Actions as the sole footer keyboard entry tab when collapsed, and retains focus on the activated tab."
+    - criterion: "The fixed footer control panel recalculates --index-footer-sticky-height after initialization and every transition; ?source=browser intentionally opens the Import group."
+    - criterion: "The Local Bookmarks Index has a fixed footer control panel with accessible Actions, Import, and Export tabs; normal loads start with no visible footer group, selecting an inactive tab exposes only its group, and activating the current tab collapses the footer."
     - criterion: "The Local Bookmarks Index has a fixed head control panel with accessible tabs for Stores (L / F / S / B), Show only, Hide, and Table Display; exactly one head group is visible at a time."
   status: "Implemented"
-  summary: "Dedicated Local Bookmarks Index with aggregated Local/File/Sync/Browser rows, checked Stores defaults, and per-store filtered / total provider-row counts before store selection."
+  summary: "Dedicated Local Bookmarks Index with aggregated Local/File/Sync/Browser rows, checked Stores defaults, and a collapsible fixed footer control panel."
   traceability:
     architecture:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
@@ -1064,8 +1071,11 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       - "IMPL-BOOKMARK_ROUTER"
       - "IMPL-LOCAL_BOOKMARKS_INDEX"
     tests:
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js (toolbar Browser-import launcher)"
+      - "tests/playwright/extension-bookmarks-index-controls.spec.js (runtime head/footer activation and keyboard navigation)"
+      - "tests/playwright/extension-lower.spec.js (source=browser Import deep link)"
       - "tests/unit/bookmarks-table-controls.test.js (control tab state defaults and transitions)"
-      - "tests/unit/bookmarks-table-index.test.js (matchStoresFilter, getShowOnlyDefaultState, fixed head/footer layout)"
+      - "tests/unit/bookmarks-table-index.test.js (matchStoresFilter, fixed head/footer layout)"
       - "tests/unit/bookmarks-table-load.test.js"
       - "tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)"
       - "tests/unit/message-handler-bookmarks-index.test.js"

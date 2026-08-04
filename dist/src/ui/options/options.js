@@ -22148,7 +22148,7 @@ var OptionsController = class {
       this.elements.bookmarksIndexLink.href = chrome.runtime.getURL("src/ui/bookmarks-table/bookmarks-table.html");
     }
     if (this.elements.browserBookmarkImportLink && typeof chrome !== "undefined" && chrome.runtime) {
-      this.elements.browserBookmarkImportLink.href = chrome.runtime.getURL("src/ui/browser-bookmark-import/browser-bookmark-import.html");
+      this.elements.browserBookmarkImportLink.href = `${chrome.runtime.getURL("src/ui/bookmarks-table/bookmarks-table.html")}?source=browser`;
     }
     this.attachEventListeners();
     await this.loadSettings();

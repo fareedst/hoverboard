@@ -79,7 +79,7 @@
 - Contract:
   - INPUT: toolbar button clicks
   - PRE: tools-toolbar.html buttons present in document (action popup or test root)
-  - OUTPUT: Index via sendMessage OPEN_BOOKMARKS_INDEX; Import/Browser Bookmarks/Visit History via tabs.create; Options via openOptionsPage
+  - OUTPUT: Index via sendMessage OPEN_BOOKMARKS_INDEX; Browser Import source/Browser Bookmarks/Visit History via tabs.create; Options via openOptionsPage
   - POST: no bare npm module specifiers in tools-toolbar.js import graph
   - EFFECTS: IO
   - TERMINATION: total
@@ -87,7 +87,7 @@
   - OPEN_BOOKMARKS_INDEX = 'OPEN_BOOKMARKS_INDEX'  # do not import MESSAGE_TYPES from message-handler.js
   - IF typeof document === 'undefined': skip auto-bind (import-safe for composition tests)
   - ON btn-bookmarks-index: runtime.sendMessage({ type: OPEN_BOOKMARKS_INDEX })
-  - ON btn-browser-import: tabs.create(getURL(browser-bookmark-import.html))
+  - ON btn-browser-import: tabs.create(getURL(bookmarks-table.html?source=browser))
   - ON btn-options: runtime.openOptionsPage()
   - ON btn-browser-bookmarks: tabs.create(getURL(browser-bookmarks.html))
   - ON btn-visit-history: tabs.create(getURL(visit-history.html))

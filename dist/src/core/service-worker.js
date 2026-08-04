@@ -30003,7 +30003,7 @@ var HoverboardServiceWorker = class {
       return;
     }
     if (command === "open-import") {
-      const url2 = getURL("src/ui/browser-bookmark-import/browser-bookmark-import.html");
+      const url2 = `${getURL("src/ui/bookmarks-table/bookmarks-table.html")}?source=browser`;
       if (url2 && (chromeApi?.tabs?.create || safariEnhancements.tabs?.create)) {
         (chromeApi?.tabs ?? safariEnhancements.tabs).create({ url: url2 });
       }
@@ -30800,7 +30800,7 @@ var HoverboardServiceWorker = class {
         const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
         const runtime = chromeApi?.runtime || safariEnhancements.runtime;
         const getURL = runtime?.getURL ? (path) => runtime.getURL(path) : () => "";
-        const url2 = getURL("src/ui/browser-bookmark-import/browser-bookmark-import.html");
+        const url2 = `${getURL("src/ui/bookmarks-table/bookmarks-table.html")}?source=browser`;
         if (url2 && (chromeApi?.tabs?.create || safariEnhancements.tabs?.create)) (chromeApi?.tabs ?? safariEnhancements.tabs).create({ url: url2 });
       }
     });

@@ -728,22 +728,21 @@ IMPL-BOOKMARKING:
 IMPL-BROWSER_BOOKMARK_IMPORT:
   code_locations:
     files:
-      - "src/ui/browser-bookmark-import/browser-bookmark-import.css"
+      - "src/ui/bookmarks-table/bookmarks-table-browser-import.js"
+      - "src/ui/bookmarks-table/bookmarks-table.html"
+      - "src/ui/bookmarks-table/bookmarks-table.js"
+      - "src/ui/browser-bookmark-import/browser-bookmark-import-utils.js"
       - "src/ui/browser-bookmark-import/browser-bookmark-import.html"
-      - "src/ui/browser-bookmark-import/browser-bookmark-import.js"
-    functions:
-      - "flattenTree"
-      - "loadBrowserBookmarks"
-      - "runImport"
   cross_references:
     - "ARCH-BROWSER_BOOKMARK_IMPORT"
     - "REQ-BROWSER_BOOKMARK_IMPORT"
   detail_file: "implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml"
-  essence_pseudocode: "ON load: getTree -> flattenTree -> allBookmarks. runImport: existingByUrl = getAggregatedBookmarksForIndex; for each selected build payload; Skip/Overwrite/Merge; saveBookmark per row; show imported/skipped/failed.\n"
+  essence_pseudocode: "Index Import owns live Browser source: LOAD_BROWSER_SOURCE, NORMALIZE_BROWSER_IMPORT_RECORDS, APPLY_BROWSER_IMPORT_FILTER, RUN_BROWSER_IMPORT with target-scoped conflicts; legacy HTML redirects to bookmarks-table.html?source=browser."
   essence_pseudocode_path: "implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT-pseudocode.md"
   implementation_approach:
-    details: []
-    summary: "src/ui/browser-bookmark-import/ with HTML, JS (loadBrowserBookmarks, flattenTree, runImport), CSS; popup and options entry."
+    details:
+      - "Index Import owns live Browser-tree UI; legacy standalone HTML redirects to Index?source=browser"
+    summary: "Integrate live Browser-tree import into Local Bookmarks Index; preserve legacy entry URL as source=browser redirect."
   metadata:
     created:
       author: "AI Agent"
@@ -759,9 +758,9 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
   name: "Browser Bookmark Import Implementation"
   rationale:
     benefits:
-      - "browser-bookmark-import.html/.js/.css; getTree + flatten; search + folder filter; table; conflict mode; folder + extra tags; Import to; result message"
+      - "Local Bookmarks Index Import supports live tree selection, folder/search filtering, target-scoped conflicts, root-stripped folder tags, and extra tags"
     problems_solved:
-      - "No UI or logic for importing browser bookmarks into Hoverboard"
+      - "Duplicate Browser import surface and self-conflicting aggregate lookup"
     why: "Implement browser bookmark import page with getTree, flatten, filters, selection, conflict resolution, tags, saveBookmark loop."
   related_decisions:
     composed_with:
@@ -783,7 +782,10 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
     requirements:
       - "REQ-BROWSER_BOOKMARK_IMPORT"
     tests:
-      - "tests/unit/browser-bookmark-import.test.js"
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      - "tests/playwright/extension-bookmarks-index-controls.spec.js"
+      - "tests/playwright/extension-lower.spec.js"
+      - "tests/unit/bookmarks-table-browser-import.test.js"
 IMPL-BROWSER_BOOKMARK_SERVICE:
   detail_file: "implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE-pseudocode.md"
@@ -2016,19 +2018,18 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX-pseudocode.md"
   implementation_approach:
     details:
-      - "bookmarks-table-controls.js owns pure active-group validation and independent head/footer tab state for unit testing"
-      - "bookmarks-table.css reserves head/footer space, offsets sticky table headers, keeps focus-visible tab styles, and prevents the list from being obscured"
-      - "bookmarks-table.html groups Stores, Show only, Hide, and Table Display behind a head tablist with one visible panel; the footer tablist exposes Actions, Import, and Export with one visible panel"
-      - "bookmarks-table.js wires tab activation and ARIA/hidden state without changing existing filter, import, export, snapshot, or link-health handlers"
-    summary: "Fixed accessible head/footer control panels around a viewport-filling bookmark list; preserve existing index data, filter, selection, and action wiring."
+      - "bookmarks-table-controls.js owns nullable footer state and repeat-activation collapse"
+      - "bookmarks-table.js synchronizes ARIA, hidden panels, keyboard activation, browser-import deep links, and compact/active sticky offsets"
+      - "Existing filter, import, export, snapshot, link-health, head-control, and form-value behavior remains unchanged"
+    summary: "Fixed accessible Local Bookmarks Index controls with checked Stores defaults, a collapsible fixed footer control panel, and pure pre-store filtered / total provider-row counts."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-13T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-31"
-      reason: "Add fixed accessible head/footer control panels and viewport-filling bookmark list"
+      date: "2026-08-03"
+      reason: "Specify collapsible fixed footer control panel behavior"
     last_validated:
       date: "2026-02-13T00:00:00.000Z"
       result: "pass"
@@ -2053,7 +2054,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
     supersedes: []
   status: "Active"
-  summary: "Fixed accessible Local Bookmarks Index controls with checked Stores defaults and pure pre-store filtered / total per-store provider-row counts."
+  summary: "Fixed accessible Local Bookmarks Index controls with checked Stores defaults, a collapsible fixed footer control panel, and pure pre-store filtered / total provider-row counts."
   traceability:
     architecture:
       - "ARCH-BROWSER_BOOKMARK_PROVIDER"

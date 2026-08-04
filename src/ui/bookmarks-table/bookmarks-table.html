@@ -147,16 +147,16 @@
       </table>
     </div>
 
-    <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Fixed footer control panel; one action group is visible at a time. -->
+    <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Fixed footer control panel; collapsed by default and one action group is visible when expanded. -->
     <div class="footer-spacer" aria-hidden="true"></div>
     <section class="index-footer" data-control-region="footer" aria-label="Bookmark controls">
       <div class="control-tabs" role="tablist" aria-label="Bookmark controls">
-        <button type="button" id="footer-tab-actions" class="control-tab" role="tab" data-control-tab="footer" data-control-group="actions" aria-controls="footer-panel-actions" aria-selected="true">Actions</button>
+        <button type="button" id="footer-tab-actions" class="control-tab" role="tab" data-control-tab="footer" data-control-group="actions" aria-controls="footer-panel-actions" aria-selected="false" tabindex="0">Actions</button>
         <button type="button" id="footer-tab-import" class="control-tab" role="tab" data-control-tab="footer" data-control-group="import" aria-controls="footer-panel-import" aria-selected="false" tabindex="-1">Import</button>
         <button type="button" id="footer-tab-export" class="control-tab" role="tab" data-control-tab="footer" data-control-group="export" aria-controls="footer-panel-export" aria-selected="false" tabindex="-1">Export</button>
       </div>
       <div class="control-panels">
-    <fieldset id="footer-panel-actions" class="actions-below-table actions-group control-panel" data-control-panel="footer" data-control-group="actions" role="tabpanel" aria-labelledby="footer-tab-actions">
+    <fieldset id="footer-panel-actions" class="actions-below-table actions-group control-panel" data-control-panel="footer" data-control-group="actions" role="tabpanel" aria-labelledby="footer-tab-actions" hidden>
       <legend id="actions-legend" class="group-legend">Actions</legend>
       <!-- [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Export below table -->
       <!-- [REQ-LOCAL_QUERY_API] Refresh aggregate-snapshot.json for Local Query API -->

@@ -1,9 +1,7 @@
-# [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
-# Architecture: Three entry mechanisms (extension commands, context menu, in-UI keyboard shortcuts) target the same four actions;
-# service worker owns commands and context menu; popup/panel UI owns in-focus shortcuts via existing event flow.
 ARCH-QUICK_ACCESS_ENTRY:
   cross_references:
     - "REQ-QUICK_ACCESS_ENTRY"
+  decision: "Quick-access Browser Import entries remain available but all route to the Local Bookmarks Index with source=browser. The Index owns the live Browser-tree migration workflow; the legacy standalone path only redirects for compatibility."
   detail_file: "architecture-decisions/ARCH-QUICK_ACCESS_ENTRY.yaml"
   implementation_approach:
     details:

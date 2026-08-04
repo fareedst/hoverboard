@@ -1,0 +1,143 @@
+CITDP-REQ-BROWSER_BOOKMARK_IMPORT-index-integration_20260803:
+  change_definition:
+    current_behavior: "Browser import has a standalone compatibility surface and quick-access entry points that do not own the Index Browser source workflow."
+    desired_behavior: "The Local Bookmarks Index owns the live Browser source: flatten and collapse cleaned URLs, filter/select rows, resolve conflicts only against the selected Local/File/Sync target, and save through the shared saveBookmark route; legacy, command, context-menu, toolbar, and keyboard entry points open source=browser."
+    non_goals:
+      - "Browser as a live Browser-source destination"
+      - "Changing file CSV/JSON import target behavior"
+      - "Changing the side-panel Bookmarks provider"
+    success_criteria:
+      - "Browser rows collapse by cleaned URL and preserve folder paths, earliest date, and root-stripped tags."
+      - "Legacy source redirects to the Index Import group."
+      - "Quick-access entry points consistently open the Index source=browser URL."
+      - "Skip, Overwrite, and Merge tags use selected-target conflict lookup."
+  completion_criteria:
+    verification_gate_notes: "Focused unit: 152 passed. Full unit: 171 suites, 1689 passed and 1 skipped. Composition: 30 suites, 101 passed. Extension Playwright: 5 passed. ESLint, TypeScript, token, manifest, YAML, pseudo-code, and TIED consistency validation passed."
+    verification_gate_status: "passed"
+  evidence:
+    commands:
+      - "../../chatgpt/stdd/scripts/lint_yaml.sh -F tied"
+      - "npm run lint"
+      - "npm run test:integration -- --runInBand"
+      - "npm run test:unit -- --runInBand"
+      - "npm run typecheck"
+      - "npm run validate:manifest"
+      - "npm run validate:tokens"
+      - "npm test -- --runInBand tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      - "npm test -- --runInBand tests/unit/bookmarks-table-browser-import.test.js tests/unit/bookmarks-table-controls.test.js tests/unit/bookmarks-table-index.test.js tests/unit/bookmarks-table-time.test.js tests/unit/bookmarks-table-import.test.js tests/unit/bookmarks-table-import-status.test.js tests/unit/message-handler-bookmarks-index.test.js"
+      - "npx playwright test tests/playwright/extension-bookmarks-index-controls.spec.js tests/playwright/extension-lower.spec.js -c playwright.extension.config.js"
+      - "pseudocode_validate for IMPL-LOCAL_BOOKMARKS_INDEX, IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT, and IMPL-BROWSER_BOOKMARK_IMPORT"
+      - "tied_validate_consistency(include_detail_files=true, include_pseudocode=true)"
+    proof_boundaries:
+      - "Composition tests prove the toolbar Browser-import launcher binding; command, context-menu, popup keyboard, and service-worker routes remain covered by their existing staged suites."
+      - "Extension E2E proves Index footer/deep-link behavior in the tested Chromium extension host; live Chrome bookmark-provider data is intentionally not seeded."
+      - "TIED and pseudo-code validation prove artifact structure and traceability, not runtime security, performance, or cross-browser accessibility."
+      - "Unit tests prove pure Browser-tree normalization, filtering, payload/tag merging, and target-scoped conflict lookup; they do not seed live Chrome tree data."
+    results:
+      composition: "30 suites; 101 passed"
+      extension_e2e: "5 passed"
+      focused_unit: "152 passed"
+      full_unit: "171 suites; 1689 passed; 1 skipped"
+      lint_type_tokens_manifest_yaml_tied: "passed; manifest emits existing sessions permission warning"
+  impact_analysis:
+    modules_or_boundaries: "bookmarks-table Browser source; Browser import compatibility redirect; service worker commands/context menu; popup keyboard quick access; tools toolbar; REQ/ARCH/IMPL traceability."
+    tied_tokens_affected:
+      - "ARCH-BROWSER_BOOKMARK_IMPORT"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "ARCH-QUICK_ACCESS_ENTRY"
+      - "IMPL-BROWSER_BOOKMARK_IMPORT"
+      - "IMPL-CONTEXT_MENU_QUICK_ACCESS"
+      - "IMPL-EXTENSION_COMMANDS"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS"
+      - "REQ-BROWSER_BOOKMARK_IMPORT"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "REQ-QUICK_ACCESS_ENTRY"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "The previous Browser-storage CITDP treats Browser Bookmark Import as unchanged; this record covers the Index-owned source migration and its entry-point bindings."
+    out_of_scope_notes: "Live Chrome tree data is not seeded in extension E2E; helper behavior remains unit-testable."
+    record_status: "complete"
+    tied_stack_updates_required:
+      - "Completed: Browser-import validation wording aligned with the current UI controls."
+      - "Completed: IMPL sidecars and requested managed full-block comments synchronized."
+      - "Completed: stale Local Bookmarks Index footer-default wording updated in current REQ/ARCH records."
+  record_identity:
+    change_request_id: "REQ-BROWSER_BOOKMARK_IMPORT-index-integration-20260803"
+    primary_tokens:
+      - "REQ-BROWSER_BOOKMARK_IMPORT"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "REQ-QUICK_ACCESS_ENTRY"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-08-03"
+    title: "Local Bookmarks Index live Browser import and quick-access integration"
+  risk_analysis:
+    quality_evidence_matrix:
+      - attribute: "baseline-functional"
+        applicability: "applicable"
+        command_or_test: "Full unit, composition, extension Playwright, and TIED validation commands recorded in evidence.commands."
+        evidence_method: "Automated behavior and traceability checks"
+        limitation: "Does not prove all browser engines or manual assistive-technology behavior"
+        owner: "Hoverboard maintainers"
+        rationale: "Changes the import surface and entry-point routing."
+        result: "passed"
+        risk: "Users could import to the wrong backend or fail to reach the Index source."
+        threshold: "All affected tests and validators pass"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+      - attribute: "user-facing/accessibility"
+        applicability: "applicable"
+        command_or_test: "extension-bookmarks-index-controls.spec.js and extension-lower.spec.js"
+        evidence_method: "ARIA, keyboard, visible panel, and legacy redirect assertions"
+        limitation: "Automated checks do not replace manual assistive-technology review"
+        owner: "Hoverboard maintainers"
+        rationale: "Import is a user-facing control group and deep link."
+        result: "passed"
+        risk: "Keyboard or deep-link users could lose access to Import."
+        threshold: "Collapsed footer remains keyboard reachable and source=browser opens Import"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+    quality_profiles:
+      - "baseline-functional"
+      - "user-facing/accessibility"
+    residual_risk:
+      expiry: "2026-09-03"
+      owner: "Hoverboard maintainers"
+      summary: "Live Chrome bookmark-provider data and cross-browser assistive-technology behavior remain outside the extension fixture."
+    risks:
+      - id: "R1"
+        description: "Browser source rows could conflict with Browser target rows or duplicate cleaned URLs."
+        likelihood: "medium"
+        mitigation: "Exclude Browser as live-source target and build conflict map from selected target only; collapse source URLs before display."
+        residual: "low"
+        severity: "high"
+      - id: "R2"
+        description: "Entry points could open a stale standalone page or lose source selection."
+        likelihood: "medium"
+        mitigation: "Assert canonical source=browser URL in unit/composition/E2E entry-point tests and compatibility redirect."
+        residual: "low"
+        severity: "medium"
+      - id: "R3"
+        description: "Footer collapse or deep-link initialization could hide Import or lose form state."
+        likelihood: "medium"
+        mitigation: "Nullable footer state unit tests and focused extension Playwright assertions."
+        residual: "low"
+        severity: "medium"
+    test_strategy:
+      composition:
+        - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      e2e:
+        - "tests/playwright/extension-bookmarks-index-controls.spec.js"
+        - "tests/playwright/extension-lower.spec.js"
+      summary: "Unit: Browser helpers, conflicts, footer state, and quick-access routing. Composition: toolbar/entry-point bindings. E2E: Index footer/deep-link behavior; live tree data remains a documented fixture boundary."
+      unit:
+        - "tests/unit/bookmarks-table-browser-import.test.js"
+        - "tests/unit/bookmarks-table-controls.test.js"
+        - "tests/unit/bookmarks-table-index.test.js"
+        - "tests/unit/service-worker-quick-access.test.js"

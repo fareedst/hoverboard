@@ -195,28 +195,26 @@ flowchart TB
   Table --> Selected
 ```
 
-### Browser Bookmark Import
+### Browser Bookmark Import in the Local Bookmarks Index
 
 ![Browser Bookmark Import](images/browser-bookmark-import.png)
 
-The Browser Bookmark Import page copies bookmarks from the browser into Hoverboard. It opens in a new tab and uses the same visual style as the Local Bookmarks Index.
+The Local Bookmarks Index Import control copies selected bookmarks from the live browser tree into Hoverboard. The former standalone URL remains a compatibility redirect to this workflow.
 
-- **Header:** Hoverboard logo, "Browser Bookmark Import" title, and subtitle describing copy-from-browser, filter by folder, select which to import, resolve conflicts, and add tags.
-- **Toolbar:** Search (title, URL) with Clear button; Folder dropdown (All plus flattened folder list from browser bookmarks).
-- **Empty state:** Shown when no bookmarks are found or the bookmarks API is unavailable; message explains the `bookmarks` permission.
-- **Table:** **Select** column (checkboxes per row, select-all in header), Title, URL (clickable link), Folder, Date added; sortable columns.
-- **Import options:** When URL already in Hoverboard: **Skip** / **Overwrite** / **Merge tags**. Checkbox "Use folder names as tags"; optional "Add tags (comma-separated)" for all imported items.
-- **Import action row:** "Import to" (Local | File | Sync), "Import selected" button (enabled when at least one row is selected), and result text (imported, skipped, failed counts).
-- **Footer:** Row count (e.g. "N bookmarks").
+- **Source:** Choose **Browser bookmarks (live)** from the Index Import group.
+- **Browser controls:** Search title, URL, or folder; filter by folder; select visible rows or clear selection.
+- **Import options:** When a URL already exists in the selected Local, File, or Sync target: **Skip** / **Overwrite** / **Merge tags**. Optionally use root-stripped folder names as tags and add sanitized extra tags.
+- **Import action row:** "Import to" (Local | File | Sync for the live Browser source), "Import selected", and imported/skipped/failed result counts.
+- **File import remains available:** Switch the source to File (CSV or JSON) to retain the existing Only new / Overwrite workflow, including Browser as a file-import target.
 
 **How to open the page:**
 
-- **From the popup:** Click **Browser bookmark import**. The page opens in a new tab (`chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html')`).
-- **From Options:** In the footer, click the **Browser bookmark import** link (same URL).
+- **From the popup:** Click **Browser bookmark import**. The Local Bookmarks Index opens with `?source=browser`.
+- **From Options:** In the footer, click the **Browser bookmark import** link.
 
-**How to use it:** Open the page; browser bookmarks load via `chrome.bookmarks.getTree`. Optionally search (title, URL) and filter by folder. Select rows (or use select-all), then choose conflict mode, optionally "Use folder names as tags" and "Add tags", and "Import to" (Local / File / Sync). Click **Import selected** and read the result (imported, skipped, failed). The extension must have the `bookmarks` permission.
+**How to use it:** Open the Index Import group; browser bookmarks load via `chrome.bookmarks.getTree`. Optionally search (title, URL, folder) and filter by folder. Select rows (or use select-all), then choose conflict mode, optionally folder tags and extra tags, and a target. Click **Import selected** and read the result. The extension must have the `bookmarks` permission.
 
-**Example scenario:** You keep work links in a Chrome folder "Work/Projects". Open Browser Bookmark Import, set **Folder** to that path, check **Use folder names as tags**, add the tag `work`, set **Import to** to Local and **When URL already in Hoverboard** to Skip. Select all visible rows and click **Import selected**. You get Hoverboard bookmarks tagged e.g. `work`, `projects` and `work`, with duplicates skipped.
+**Example scenario:** You keep work links in a Chrome folder "Work/Projects". Open the Local Bookmarks Index Import group, choose **Browser bookmarks (live)**, set **Folder** to that path, check **Use folder names as tags**, add the tag `work`, set **Import to** Local and conflict mode to **Skip**. Select all visible rows and click **Import selected**. Duplicate URLs are collapsed before import, and target conflicts are skipped.
 
 The diagram below shows the import pipeline from load through user choices to the import run.
 

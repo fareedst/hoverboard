@@ -4,7 +4,9 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
       - path: "src/ui/bookmarks-table/bookmarks-table.html"
         description: "Import fieldset (file input, mode radios, Import to, Import button last, #import-result)"
       - path: "src/ui/bookmarks-table/bookmarks-table.js"
-        description: "runImport, pending/final import-result, parseImportFile"
+        description: "runImport, runBrowserImport, pending/final import-result, parseImportFile"
+      - path: "src/ui/bookmarks-table/bookmarks-table-browser-import.js"
+        description: "Browser-tree normalization, filtering, payload, and target conflict helpers"
       - path: "src/ui/bookmarks-table/bookmarks-table-csv.js"
         description: "parseCsv for import"
       - path: "src/ui/bookmarks-table/bookmarks-table.css"
@@ -27,8 +29,8 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus close-loop: Import to includes Browser"
+      date: "2026-08-03"
+      reason: "Synchronize shared Index Import Browser source coverage"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -59,5 +61,10 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
     requirements:
       - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
     tests:
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      - "tests/playwright/extension-bookmarks-index-controls.spec.js"
+      - "tests/playwright/extension-lower.spec.js"
+      - "tests/unit/bookmarks-table-browser-import.test.js"
       - "tests/unit/bookmarks-table-import-status.test.js"
       - "tests/unit/bookmarks-table-import.test.js"
+      - "tests/unit/local-bookmark-service.test.js"

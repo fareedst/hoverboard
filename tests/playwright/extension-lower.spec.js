@@ -62,8 +62,8 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Bookmarks table ↔ background', 
   })
 })
 
-test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Browser bookmark import ↔ background', () => {
-  test('browser bookmark import page loads', async ({ context }) => {
+test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Browser import compatibility ↔ Index', () => {
+  test('legacy browser bookmark import URL opens the Index Browser source', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const page = await context.newPage()
     await page.goto(`chrome-extension://${extensionId}/src/ui/browser-bookmark-import/browser-bookmark-import.html`)
@@ -71,6 +71,10 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Browser bookmark import ↔ backg
     await page.waitForTimeout(2000)
 
     await expect(page.locator('body')).toBeVisible()
+    await expect(page).toHaveURL(/bookmarks-table\/bookmarks-table\.html\?source=browser/)
+    await expect(page.locator('#footer-tab-import')).toHaveAttribute('aria-selected', 'true')
+    await expect(page.locator('#footer-panel-import')).toBeVisible()
+    await expect(page.locator('#footer-panel-actions')).toBeHidden()
     await page.close()
   })
 })

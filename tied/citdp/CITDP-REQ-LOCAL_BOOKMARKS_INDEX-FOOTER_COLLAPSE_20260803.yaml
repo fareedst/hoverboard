@@ -1,0 +1,128 @@
+CITDP-REQ-LOCAL_BOOKMARKS_INDEX-FOOTER_COLLAPSE_20260803:
+  change_definition:
+    current_behavior: "Normal loads select Actions and show one footer fieldset; repeated activation does not collapse the group."
+    desired_behavior: "Normal loads collapse the footer with activeFooterGroup=null; inactive footer selections open exactly one matching fieldset; repeat activation collapses the active group; Actions remains the sole collapsed-state keyboard entry; Enter/Space and roving arrows follow the same contract; source=browser opens Import; form values and sticky offset synchronization are preserved."
+    non_goals:
+      - "Bookmark data and filtering"
+      - "Export and action semantics"
+      - "Head controls"
+      - "Import conflict policy and browser bookmark parsing"
+      - "Responsive/sticky CSS redesign"
+      - "Storage routing, message contracts, and side-panel behavior"
+    success_criteria:
+      - "Actions, Import, and Export each open one panel and repeated active activation collapses it."
+      - "Existing unit and extension regression suites pass."
+      - "Keyboard activation, roving tabindex, deep link, form-state preservation, and footer offset behavior pass regression coverage."
+      - "Normal load has three visible footer tabs, no selected footer tab, and all three panels hidden."
+    unchanged_behavior: "All bookmark, import, export, action, head-control, storage, message, and responsive behaviors outside footer visibility state remain unchanged."
+  completion_criteria:
+    verification_gate_notes: "Focused unit tests: 108 passed. Full Jest: 171 suites passed, 1 skipped, 1689 tests passed. Extension Playwright: 5 passed. ESLint, TypeScript typecheck, token validation, manifest validation, full-block sync check, pseudo-code validation, YAML index validation, and tied_validate_consistency passed."
+    verification_gate_status: "passed"
+  evidence:
+    commands:
+      - "npm run lint"
+      - "npm run typecheck"
+      - "npm run validate:manifest"
+      - "npm run validate:tokens"
+      - "npm test -- --runInBand"
+      - "npx jest tests/unit/bookmarks-table-controls.test.js tests/unit/bookmarks-table-index.test.js --runInBand"
+      - "npx playwright test tests/playwright/extension-bookmarks-index-controls.spec.js tests/playwright/extension-lower.spec.js -c playwright.extension.config.js --project=extension"
+      - "python3 scripts/sync_impl_full_blocks.py --check --token IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "tied_validate_consistency(include_detail_files=true, include_pseudocode=true)"
+    manifest_reference: "manifest.json (no manifest change introduced by this feature)"
+    proof_boundaries:
+      - "Automated tests prove selected state, panel exclusivity, keyboard and deep-link behavior in the tested extension host."
+      - "TIED validation proves artifact and traceability consistency, not runtime security, performance, or cross-browser accessibility."
+  impact_analysis:
+    impl_inventory_notes: "Full-block IMPL-LOCAL_BOOKMARKS_INDEX copies were synchronized in managed source/test loci; runtime changes are limited to bookmarks-table-controls.js, bookmarks-table.js, and bookmarks-table.html with generated dist verification."
+    modules_or_boundaries: "Pure footer state transition; index DOM/ARIA synchronization and keyboard binding; fixed footer markup; extension-host deep-link/layout boundary; focused unit and Playwright regression boundaries."
+    tied_tokens_affected:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "none"
+    record_status: "complete"
+    tied_stack_updates_required:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX updated"
+      - "bookmarks-index vocabulary updated"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX and pseudo-code updated"
+      - "REQ-LOCAL_BOOKMARKS_INDEX updated"
+  record_identity:
+    change_request_id: "REQ-LOCAL_BOOKMARKS_INDEX"
+    recorded_at: "2026-08-03"
+    title: "Collapse Local Bookmarks Index fixed footer tabs"
+  risk_analysis:
+    abuse_cases:
+      - "Malformed or unknown footer group must not mutate state."
+      - "Repeated activation must not expose multiple panels or leave multiple selected tabs."
+    quality_evidence_matrix:
+      - attribute: "baseline-functional"
+        applicability: "applicable"
+        command_or_test: "npm test -- --runInBand; npx playwright test tests/playwright/extension-bookmarks-index-controls.spec.js tests/playwright/extension-lower.spec.js -c playwright.extension.config.js --project=extension"
+        evidence_method: "Automated unit regression plus extension-host Playwright coverage"
+        limitation: "Does not prove all browser engines or visual pixel fidelity"
+        owner: "Hoverboard maintainers"
+        rationale: "Behavior changes visible footer state and interaction"
+        result: "passed: 171 suites, 1689 tests; 5 extension tests"
+        risk: "Footer regressions could hide actions or import/export controls"
+        threshold: "All selected tests pass"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+      - attribute: "stateful-reliability"
+        applicability: "applicable"
+        command_or_test: "bookmarks-table-controls.test.js; extension-bookmarks-index-controls.spec.js"
+        evidence_method: "State transition assertions and switch/collapse/reopen browser flow"
+        limitation: "No long-duration or randomized interaction run"
+        owner: "Hoverboard maintainers"
+        rationale: "Footer state is nullable and transitions between active and collapsed states"
+        result: "passed"
+        risk: "Invalid transitions or stale panel visibility"
+        threshold: "Invalid state is a no-op; at most one panel visible"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+      - attribute: "user-facing/accessibility"
+        applicability: "applicable"
+        command_or_test: "extension-bookmarks-index-controls.spec.js; extension-lower.spec.js"
+        evidence_method: "ARIA selected/hidden assertions, roving tabindex, Enter/Space, arrows, and deep-link checks"
+        limitation: "Automated accessibility assertions do not replace manual assistive-technology review"
+        owner: "Hoverboard maintainers"
+        rationale: "Footer tabs are an accessible user-facing control surface"
+        result: "passed"
+        risk: "Keyboard users could lose entry or focus after collapse"
+        threshold: "Actions is sole collapsed tabindex=0; selected/hidden state remains exclusive"
+        waiver:
+          expiry: "~"
+          owner: "~"
+          reason: "~"
+          required: "false"
+    quality_profiles:
+      - "baseline-functional"
+      - "stateful-reliability"
+      - "user-facing/accessibility"
+    residual_risk:
+      expiry: "2026-09-03"
+      owner: "Hoverboard maintainers"
+      summary: "Cross-browser assistive-technology behavior and visual row-obscuration beyond the Chromium extension run remain residual risks."
+    risks:
+      - "Collapsed footer could remove keyboard entry if roving tabindex is not retained."
+      - "Hidden panel transitions could leave stale sticky spacing."
+      - "Nullable footer state could break selection or deep-link initialization."
+      - "State transitions could recreate controls and lose form values."
+    scenarios:
+      - "Activate footer tabs with Enter, Space, ArrowLeft, ArrowRight, Home, and End."
+      - "Load source=browser and verify Import opens."
+      - "Normal load, open each footer group, switch groups, repeat active activation, and reopen."
+      - "Populate a footer field, switch/collapse/reopen, and verify value preservation."
+  tdd_sequence:
+    summary: "Updated TIED and pseudo-code first; wrote honest RED tests; implemented minimal state, DOM, keyboard, markup, and offset changes; ran focused unit tests, full Jest regression, lint/type/token/manifest checks, full-block synchronization, and extension Playwright tests."
+  test_strategy:
+    matrix_notes: "Pure state is unit-testable; markup is static-testable; event wiring and layout require the extension host. No new security boundary or external input is introduced; invalid groups remain a no-op."
+    summary: "Unit RED/GREEN for nullable state and toggle transitions; static DOM assertions for initial ARIA/hidden/tabindex state; extension Playwright for UI-only keyboard, deep-link, form-preservation, sticky-offset, and row-layout behavior."

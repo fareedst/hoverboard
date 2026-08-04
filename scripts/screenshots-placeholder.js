@@ -338,9 +338,9 @@ async function main () {
   console.log('Saved: images/side-panel-usage.png')
   await sidePanelPage.close()
 
-  // 6) Browser Bookmark Import – table or empty state (uses chrome.bookmarks.getTree from profile)
+  // 6) Browser Import in the Local Bookmarks Index (uses chrome.bookmarks.getTree from profile)
   const importPage = await context.newPage()
-  await importPage.goto(`${baseUrl}/src/ui/browser-bookmark-import/browser-bookmark-import.html`, {
+  await importPage.goto(`${baseUrl}/src/ui/bookmarks-table/bookmarks-table.html?source=browser`, {
     waitUntil: 'domcontentloaded',
     timeout: 15000
   })

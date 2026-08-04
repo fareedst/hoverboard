@@ -12,7 +12,7 @@
  * - Contract:
  *   - INPUT: user focuses popup or side panel Bookmark tab; user presses Ctrl+Shift+B/O/M/I
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
- *   - OUTPUT: same as footer button click (side panel opens, options opens, bookmarks index tab, or import tab)
+ *   - OUTPUT: same as footer button click (side panel opens, options opens, bookmarks index tab, or Index Browser source)
  *   - POST:
  *     - success => block outputs match OUTPUT shape
  *   - EFFECTS: pure

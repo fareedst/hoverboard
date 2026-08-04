@@ -1114,7 +1114,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
     - "REQ-LOCAL_BOOKMARKS_INDEX"
-  decision: "A single extension page displays the aggregated Local, File, Sync, and Browser bookmark list. The page is divided into a fixed head control panel, the remaining bookmark-list viewport, and a fixed footer control panel. Head tabs expose Stores (L/F/S/B), Show only, Hide, and Table Display one group at a time; footer tabs expose Actions, Import, and Export one group at a time. Actions owns Refresh API snapshot and Check link health. Existing data loading, filtering, selection, move, delete, import, export, snapshot, and link-health wiring remains unchanged."
+  decision: "A single extension page displays the aggregated Local, File, Sync, and Browser bookmark list with a fixed head control panel, remaining bookmark-list viewport, and fixed footer control panel. Head tabs expose one selected group at a time. Footer tabs expose Actions, Import, and Export; normal page loads keep the footer collapsed, inactive-tab activation opens one group, and repeat activation collapses it while preserving keyboard and form-state behavior."
   detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml"
   implementation_approach:
     details:
@@ -1124,15 +1124,15 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
       - "Stores checkboxes Local/File/Sync/Browser; empty set yields 0 rows"
       - "SW OPEN_BOOKMARKS_INDEX_TAB; index-open dismisses side panel"
     summary: "Dedicated extension HTML page; data from getAggregatedBookmarksForIndex (local+file+sync+browser with storage field); Stores L/F/S/B; table Storage column Local|File|Sync|Browser; client-side search/filter/sort; Bulk Delete preferredBackend; Bulk Move via moveBookmarkToStorage."
-  layout: "Fixed head controls with accessible tab buttons and one visible panel at a time; flexible bookmark-list region with top/bottom spacing and sticky table-header offset; fixed footer with Actions, Import, and Export tabs and one visible panel at a time. Preserve responsive wrapping and keyboard focus visibility."
+  layout: "Fixed head controls with one visible group; flexible bookmark-list region with sticky table-header offset; fixed footer control panel with a nullable active group, one visible group when expanded, preserved form values, and measured compact/active sticky offsets."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-13"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "ARCH corpus Phase 1: index body five-backend LEAP"
+      date: "2026-08-03"
+      reason: "Define compact fixed footer control panel behavior"
   name: "Local Bookmarks Index Architecture"
   rationale:
     benefits:

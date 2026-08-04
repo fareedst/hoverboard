@@ -22,8 +22,8 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "ARCH corpus Phase 1: document Browser import-target exclusion"
+      date: "2026-08-03"
+      reason: "Align Index-owned Browser import architecture and test boundaries"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -31,9 +31,13 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
   name: "Browser Bookmark Import Architecture"
   rationale:
     benefits:
-      - "Single extension page (e.g. browser-bookmark-import.html); chrome.bookmarks.getTree in page script; flatten tree to list with folder path; filters (search, folder), sort, select; conflict resolution (Skip / Overwrite / Merge) using getAggregatedBookmarksForIndex; tags from folder path + extra; saveBookmark with preferredBackend per row"
+      - "Root-stripped folder tags and sanitized extra tags preserve the useful migration features of the former standalone page"
+      - "Single Local Bookmarks Index Import group supports live chrome.bookmarks.getTree selection with title, URL, folder, date, search, folder filter, and select-all"
+      - "Target-specific Skip | Overwrite | Merge handling avoids Browser source rows conflicting with themselves"
     problems_solved:
-      - "No import path from browser bookmarks into Hoverboard"
+      - "Aggregate conflict lookup incorrectly treated Browser source rows as target conflicts"
+      - "Duplicate import surfaces for file and browser migration"
+      - "No storage-aware selective migration from the live browser tree"
     why: "Reuse index-page layout and existing save path; add no backend for reading bookmarks (page calls chrome.bookmarks directly with \"bookmarks\" permission)."
   related:
     - "ARCH-LOCAL_BOOKMARKS_INDEX (layout reference)"
@@ -57,4 +61,7 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
     requirements:
       - "REQ-BROWSER_BOOKMARK_IMPORT"
     tests:
-      - "tests/unit/browser-bookmark-import.test.js"
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      - "tests/playwright/extension-bookmarks-index-controls.spec.js"
+      - "tests/playwright/extension-lower.spec.js"
+      - "tests/unit/bookmarks-table-browser-import.test.js"

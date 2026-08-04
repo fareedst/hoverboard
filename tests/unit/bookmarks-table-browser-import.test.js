@@ -149,153 +149,125 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT ===
  */
-import { flattenTree, folderPathToTags, parseExtraTags, sanitizeTag } from '../browser-bookmark-import/browser-bookmark-import-utils.js'
+import {
+  normalizeBrowserImportRecords,
+  buildBrowserImportFolderList,
+  filterBrowserImportRecords,
+  buildBrowserImportPayload,
+  buildTargetBookmarksByUrl
+} from '../../src/ui/bookmarks-table/bookmarks-table-browser-import.js'
 
-function cleanUrl (url) {
-  if (!url) return ''
-  return String(url).trim().replace(/\/+$/, '')
-}
-
-function uniqueStrings (values) {
-  return [...new Set((values || []).map(value => String(value || '').trim()).filter(Boolean))]
-}
-
-/**
- * [REQ-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT]
- * Flatten the live Chrome tree, collapse duplicate cleaned URLs, preserve the
- * earliest date, and union folder-derived tags for one import row per URL.
- */
-export function normalizeBrowserImportRecords (tree) {
-  const flattened = flattenTree(tree)
-  const byUrl = new Map()
-
-  for (const item of flattened) {
-    const url = cleanUrl(item.url)
-    if (!url) continue
-
-    const folderPath = String(item.folderPath || '').trim()
-    const folderPaths = folderPath ? [folderPath] : []
-    const tags = folderPathToTags(folderPath, { stripRoots: true })
-    const dateAdded = typeof item.dateAdded === 'number' ? item.dateAdded : 0
-    const existing = byUrl.get(url)
-
-    if (!existing) {
-      byUrl.set(url, {
-        id: item.id,
-        url,
-        title: item.title || '',
-        dateAdded,
-        folderPath,
-        folderPaths,
-        tags,
-        sourceIds: item.id != null ? [String(item.id)] : []
-      })
-      continue
-    }
-
-    existing.folderPaths = uniqueStrings([...existing.folderPaths, ...folderPaths])
-    existing.folderPath = existing.folderPaths.join(' | ')
-    existing.tags = uniqueStrings([...existing.tags, ...tags])
-    existing.sourceIds = uniqueStrings([...existing.sourceIds, item.id])
-    if (dateAdded && (!existing.dateAdded || dateAdded < existing.dateAdded)) {
-      existing.dateAdded = dateAdded
-    }
-    if (!existing.title && item.title) existing.title = item.title
+const browserTree = [
+  {
+    id: '1',
+    title: 'Bookmarks Bar',
+    children: [
+      {
+        id: '10',
+        title: 'Work',
+        children: [
+          { id: '11', title: 'Docs', url: 'https://example.com/', dateAdded: 2000 }
+        ]
+      }
+    ]
+  },
+  {
+    id: '2',
+    title: 'Other Bookmarks',
+    children: [
+      {
+        id: '20',
+        title: 'Read',
+        children: [
+          { id: '21', title: 'Example', url: 'https://example.com', dateAdded: 1000 }
+        ]
+      },
+      { id: '22', title: 'Unique', url: 'https://unique.test', dateAdded: 3000 }
+    ]
   }
+]
 
-  return [...byUrl.values()]
-}
+describe('Index live Browser source [REQ-BROWSER_BOOKMARK_IMPORT]', () => {
+  test('collapses cleaned duplicate URLs, unions folders/tags, and keeps earliest date', () => {
+    const records = normalizeBrowserImportRecords(browserTree)
+    const example = records.find(record => record.url === 'https://example.com')
 
-/**
- * [REQ-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT]
- * Build the full-folder choices from collapsed live Browser-tree records.
- */
-export function buildBrowserImportFolderList (records) {
-  return [...new Set((records || []).flatMap(record => record.folderPaths || [record.folderPath]))]
-    .map(path => String(path || '').trim())
-    .filter(Boolean)
-    .sort((a, b) => a.localeCompare(b))
-}
-
-/**
- * [REQ-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT]
- * Filter live Browser-tree rows by title, URL, folder path, and exact folder.
- */
-export function filterBrowserImportRecords (records, query = '', folderPath = '') {
-  const q = String(query || '').trim().toLowerCase()
-  const folder = String(folderPath || '').trim()
-  return (records || []).filter(record => {
-    const folderPaths = record.folderPaths || [record.folderPath || '']
-    if (folder && !folderPaths.includes(folder)) return false
-    if (!q) return true
-    const searchable = [
-      record.title,
-      record.url,
-      record.folderPath,
-      ...folderPaths
-    ].map(value => String(value || '').toLowerCase())
-    return searchable.some(value => value.includes(q))
+    expect(records).toHaveLength(2)
+    expect(example).toMatchObject({
+      title: 'Docs',
+      dateAdded: 1000,
+      tags: ['work', 'read']
+    })
+    expect(example.folderPaths).toEqual([
+      'Bookmarks Bar / Work',
+      'Other Bookmarks / Read'
+    ])
+    expect(example.folderPath).toBe('Bookmarks Bar / Work | Other Bookmarks / Read')
   })
-}
 
-/**
- * [REQ-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT]
- * Create a target payload. Merge preserves target metadata while adding
- * root-stripped folder tags and optional sanitized extra tags.
- */
-export function buildBrowserImportPayload (record, {
-  conflictMode = 'skip',
-  existing = null,
-  useFolderTags = false,
-  extraTags = ''
-} = {}) {
-  const folderPaths = record.folderPaths || [record.folderPath || '']
-  const folderTags = useFolderTags
-    ? folderPaths.flatMap(path => folderPathToTags(path, { stripRoots: true }))
-    : []
-  const tags = uniqueStrings([
-    ...(existing && conflictMode === 'merge' ? normalizeTags(existing.tags) : []),
-    ...folderTags,
-    ...parseExtraTags(extraTags)
-  ].map(sanitizeTag))
+  test('builds folder choices and filters by folder or searchable text', () => {
+    const records = normalizeBrowserImportRecords(browserTree)
 
-  const description = existing && conflictMode === 'merge'
-    ? (existing.description || record.title || '')
-    : (record.title || '')
-  const extended = existing && conflictMode === 'merge'
-    ? (existing.extended || '')
-    : ''
-  const time = record.dateAdded
-    ? new Date(record.dateAdded).toISOString()
-    : new Date().toISOString()
+    expect(buildBrowserImportFolderList(records)).toEqual([
+      'Bookmarks Bar / Work',
+      'Other Bookmarks',
+      'Other Bookmarks / Read'
+    ])
+    expect(filterBrowserImportRecords(records, '', 'Other Bookmarks / Read')).toHaveLength(1)
+    expect(filterBrowserImportRecords(records, 'unique.test')).toHaveLength(1)
+    expect(filterBrowserImportRecords(records, 'work')).toHaveLength(1)
+  })
 
-  return {
-    url: cleanUrl(record.url),
-    description,
-    extended,
-    tags,
-    time,
-    shared: existing && conflictMode === 'merge' ? (existing.shared || 'yes') : 'yes',
-    toread: existing && conflictMode === 'merge' ? (existing.toread || 'no') : 'no'
-  }
-}
+  test('builds root-stripped folder tags and sanitized extra tags', () => {
+    const [record] = normalizeBrowserImportRecords(browserTree)
+    const payload = buildBrowserImportPayload(record, {
+      useFolderTags: true,
+      extraTags: 'Imported, browser bookmarks'
+    })
 
-/**
- * [REQ-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT]
- * Keep conflict lookup scoped to the selected target backend. Browser source
- * rows must never make their own live import appear to be a conflict.
- */
-export function buildTargetBookmarksByUrl (bookmarks, targetBackend) {
-  const byUrl = new Map()
-  for (const bookmark of bookmarks || []) {
-    if (String(bookmark?.storage || '').trim().toLowerCase() !== targetBackend) continue
-    const url = cleanUrl(bookmark.url)
-    if (url) byUrl.set(url, bookmark)
-  }
-  return byUrl
-}
+    expect(payload).toMatchObject({
+      url: 'https://example.com',
+      description: 'Docs',
+      tags: ['work', 'read', 'imported', 'browser_bookmarks']
+    })
+    expect(payload.tags).not.toContain('bookmarks_bar')
+    expect(payload.tags).not.toContain('other_bookmarks')
+  })
 
-function normalizeTags (tags) {
-  if (Array.isArray(tags)) return tags
-  return String(tags || '').split(/\s+/).filter(Boolean)
-}
+  test('merge preserves target metadata and adds source tags', () => {
+    const [record] = normalizeBrowserImportRecords(browserTree)
+    const payload = buildBrowserImportPayload(record, {
+      conflictMode: 'merge',
+      existing: {
+        url: record.url,
+        description: 'Target title',
+        extended: 'Existing notes',
+        tags: ['existing'],
+        shared: 'no',
+        toread: 'yes'
+      },
+      useFolderTags: true,
+      extraTags: 'existing, imported'
+    })
+
+    expect(payload).toMatchObject({
+      description: 'Target title',
+      extended: 'Existing notes',
+      shared: 'no',
+      toread: 'yes',
+      tags: ['existing', 'work', 'read', 'imported']
+    })
+  })
+
+  test('conflict lookup is scoped to the selected target backend', () => {
+    const bookmarks = [
+      { url: 'https://same.test', storage: 'browser' },
+      { url: 'https://same.test', storage: 'local' },
+      { url: 'https://other.test', storage: 'file' }
+    ]
+
+    expect([...buildTargetBookmarksByUrl(bookmarks, 'local').keys()]).toEqual(['https://same.test'])
+    expect(buildTargetBookmarksByUrl(bookmarks, 'sync')).toEqual(new Map())
+    expect(buildTargetBookmarksByUrl(bookmarks, 'browser').get('https://same.test').storage).toBe('browser')
+  })
+})

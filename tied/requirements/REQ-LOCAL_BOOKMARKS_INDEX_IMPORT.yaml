@@ -10,8 +10,8 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 1: Import to includes Browser"
+      date: "2026-08-03"
+      reason: "Align live Browser source import coverage"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -46,6 +46,10 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
     implementation:
       - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
     tests:
+      - "tests/integration/tools-toolbar-launchers-composition.integration.test.js"
+      - "tests/playwright/extension-bookmarks-index-controls.spec.js"
+      - "tests/playwright/extension-lower.spec.js"
+      - "tests/unit/bookmarks-table-browser-import.test.js"
       - "tests/unit/bookmarks-table-import-status.test.js"
       - "tests/unit/bookmarks-table-import.test.js"
       - "tests/unit/local-bookmark-service.test.js"

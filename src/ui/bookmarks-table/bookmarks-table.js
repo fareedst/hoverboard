@@ -62,7 +62,7 @@
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
- * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), metadata-first filter pipeline, table with Storage column, and per-store filtered / total provider-row counts; Stores L/F/S/B.
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), metadata-first filter pipeline, table with Storage column, per-store filtered / total provider-row counts, and collapsible fixed footer control panel; Stores L/F/S/B.
  *
  * ## LOAD_LOCAL_BOOKMARKS_INDEX
  *
@@ -209,53 +209,73 @@
  *
  * ## FOOTER_CONTROL_PANEL
  *
- * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: FOOTER_CONTROL_PANEL keeps Actions, Import, and Export fixed at the viewport bottom and displays one control group at a time.
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: FOOTER_CONTROL_PANEL keeps Actions, Import, and Export fixed at the viewport bottom, starts collapsed, and displays one control group at a time when expanded.
  * - Contract:
- *   - INPUT: requestedGroup (string), currentGroup (string)
+ *   - INPUT: requestedGroup (string), currentGroup (string or null)
  *   - PRE: requestedGroup is one of actions | import | export
- *   - OUTPUT: active footer group and corresponding visible panel
+ *   - OUTPUT: active footer group (string or null) and corresponding visible panel(s)
  *   - POST:
- *     - success => exactly one footer panel is visible and its tab is selected
+ *     - success with a different requestedGroup => exactly one footer panel is visible and its tab is selected
+ *     - success with the already active requestedGroup => active footer group is null, all footer panels are hidden, and all footer tabs are unselected
+ *     - success with no active footer group => Actions is the sole footer tab with tabindex 0; Import and Export use tabindex -1
  *     - invalid group => currentGroup and panel visibility remain unchanged
  *   - FAILURE_MODES: InvalidGroup
  *   - DATA: activeFooterGroup
- *   - DATA_TRANSITION: activeFooterGroup changes only to a valid footer group
+ *   - DATA_TRANSITION: activeFooterGroup changes from null to a valid group, between valid groups, or from the active group to null
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: SET_FOOTER_CONTROL_GROUP
  *   - IF requestedGroup is not a valid footer group: RETURN { activeGroup: currentGroup, error: InvalidGroup }
+ *   - IF requestedGroup == currentGroup:
+ *   - SET activeFooterGroup = null
+ *   - SET selected = false for every footer tab
+ *   - SET tabindex = 0 for Actions and -1 for every other footer tab
+ *   - SET hidden = true for every footer panel
+ *   - RETURN { activeGroup: null }
  *   - SET activeFooterGroup = requestedGroup
  *   - SET selected tab state for requestedGroup
+ *   - SET tabindex = 0 for requestedGroup and -1 for every other footer tab
  *   - SET hidden = false only for requestedGroup panel
  *   - SET hidden = true for every other footer panel
  *   - RETURN { activeGroup: activeFooterGroup }
  *
  * ## INITIALIZE_INDEX_CONTROL_TABS
  *
- * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS defaults to Stores at the head and Actions at the footer, then binds accessible tab activation without changing control behavior.
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS keeps Stores selected at the head, starts the footer collapsed, and binds accessible tab activation without changing control behavior.
  * - Contract:
  *   - INPUT: headTabList, headPanels, footerTabList, footerPanels
  *   - PRE: each tab references a known panel through aria-controls
  *   - OUTPUT: initialized head and footer control panels
  *   - POST:
- *     - success => Stores and Actions are selected; exactly one panel in each region is visible
+ *     - success => Stores is selected and exactly one head panel is visible
+ *     - success => activeFooterGroup is null, all footer tabs are unselected, and all footer panels are hidden
+ *     - success => Actions is the sole footer tab with tabindex 0 while the footer is collapsed
+ *   - DATA: activeHeadGroup, activeFooterGroup, footer tab and panel DOM state
+ *   - DATA_TRANSITION: initialization selects Stores at the head and sets the footer to its collapsed state
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: INITIALIZE_INDEX_CONTROL_TABS
  *   - CALL SET_HEAD_CONTROL_GROUP("stores", "stores")
- *   - CALL SET_FOOTER_CONTROL_GROUP("actions", "actions")
+ *   - SET activeFooterGroup = null
+ *   - SET selected = false for every footer tab
+ *   - SET tabindex = 0 for Actions and -1 for every other footer tab
+ *   - SET hidden = true for every footer panel
  *   - ON head tab activation: CALL SET_HEAD_CONTROL_GROUP(requestedGroup, activeHeadGroup)
  *   - ON footer tab activation: CALL SET_FOOTER_CONTROL_GROUP(requestedGroup, activeFooterGroup)
+ *   - ON footer Enter or Space activation: CALL SET_FOOTER_CONTROL_GROUP(requestedGroup, activeFooterGroup)
+ *   - ON footer ArrowLeft, ArrowRight, Home, or End: move focus to the requested tab and CALL SET_FOOTER_CONTROL_GROUP(requestedGroup, activeFooterGroup)
  *
  * ## SYNC_CONTROL_PANEL_OFFSETS
  *
- * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SYNC_CONTROL_PANEL_OFFSETS measures the fixed head and footer regions so sticky table headers and list spacing avoid control overlap.
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SYNC_CONTROL_PANEL_OFFSETS measures compact or active fixed head/footer regions so sticky table headers and list spacing avoid control overlap after initialization and every footer transition.
  * - Contract:
  *   - INPUT: headPanel (element), footerPanel (element), root (element)
  *   - PRE: root exists; missing panel elements are allowed
  *   - OUTPUT: root CSS variables for head offset and footer spacing
+ *   - DATA: root CSS variables --index-head-sticky-height and --index-footer-sticky-height
+ *   - DATA_TRANSITION: measured panel heights replace the root CSS variable values after initialization, transition, or resize
  *   - POST:
- *     - success => CSS variables equal the current measured panel heights
+ *     - success => CSS variables equal the current measured compact or active panel heights
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: SYNC_CONTROL_PANEL_OFFSETS
@@ -263,7 +283,7 @@
  *   - IF headPanel exists: SET --index-head-sticky-height = headPanel.offsetHeight pixels
  *   - IF footerPanel exists: SET --index-footer-sticky-height = footerPanel.offsetHeight pixels
  *   - CALL APPLY_STICKY_THEAD_OFFSET
- *   - ON panel resize: REPEAT SYNC_CONTROL_PANEL_OFFSETS
+ *   - ON initialization, footer transition, or panel resize: REPEAT SYNC_CONTROL_PANEL_OFFSETS
  *
  * ## APPLY_STICKY_THEAD_OFFSET
  *
@@ -272,6 +292,8 @@
  *   - INPUT: tableWrapper (element), headPanel (element), root (element)
  *   - PRE: root, tableWrapper, and headPanel exist
  *   - OUTPUT: root sticky-thead-offset class state
+ *   - DATA: root sticky-thead-offset class
+ *   - DATA_TRANSITION: class is present only while the table top is above the measured head-panel height
  *   - POST:
  *     - tableWrapper top >= headPanel height => root does not have sticky-thead-offset
  *     - tableWrapper top < headPanel height => root has sticky-thead-offset
@@ -420,27 +442,28 @@
  */
 /**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT ===
- * [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] — Separate Import control group below Actions for selected; CSV/JSON import; Only new or Overwrite; saveBookmark per row; pending then final result in #import-result. Contract: file and mode and backend; counts and refreshed table; Import button is last control before result.
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] — One Import control group with File CSV/JSON and live Browser sources; target-scoped file conflicts plus selective Browser-tree migration; saveBookmark per row; pending then final result in #import-result.
  *
- * ## RUN_IMPORT
+ * ## RUN_FILE_IMPORT
  *
  * - [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] — group is independent of selection actions. How: Implements runImport(file) behavior for IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.
  * - Contract:
- *   - INPUT: file (CSV or JSON), mode (Only new | Overwrite), preferredBackend (Local | File | Sync | Browser), allBookmarks (existing set for "Only new")
+ *   - INPUT: source (File | Browser), file when source=File, mode (Only new | Overwrite) for File, conflict mode (Skip | Overwrite | Merge tags) for Browser, preferredBackend, allBookmarks
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
  *   - OUTPUT: imported count, skipped count, failed count; refreshed table; #import-result pending then final | { error: OperationFailed }
  *   - POST:
  *     - success => block outputs match OUTPUT success shape
  *     - error OperationFailed => no silent partial commit beyond documented best-effort
  *   - FAILURE_MODES: OperationFailed
- *   - DATA: rows = array of { url, description, tags, time, updated_at, shared, toread, extended }; existingByUrl = set of url from allBookmarks
+ *   - DATA: file rows = array of { url, description, tags, time, updated_at, shared, toread, extended }; Browser rows = collapsed live tree records; existingByUrl = set of URLs from selected target only
  *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
  *   - EFFECTS: IO, State
  *   - TERMINATION: total
- * - PROCEDURE: RUN_IMPORT
+ * - PROCEDURE: RUN_FILE_IMPORT
  *   - text = read file as text
  *   - rows = parseImportFile(text, filename)   // CSV -> parseCsv; JSON -> normalize array; skip empty url
  *   - IF rows empty: SHOW error in #import-result (not pending/final success); RETURN
+ *   - existingByUrl = BUILD_TARGET_BOOKMARKS_BY_URL(allBookmarks, preferredBackend)
  *   - IF mode = "Only new": rows = rows FILTER url NOT IN existingByUrl
  *   - SHOW "Importing…" in #import-result WITH class is-pending   // accepted; warning color
  *   - imported = 0; skipped = 0; failed = 0
@@ -451,6 +474,30 @@
  *   - ELSE: failed++
  *   - loadBookmarks()   // refresh table
  *   - SHOW "Imported N, skipped M, K failed" in #import-result WITH class is-final   // success color; clear is-pending
+ *
+ * ## RUN_BROWSER_IMPORT
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] How: The shared Index Import control delegates the live Browser source to IMPL-BROWSER_BOOKMARK_IMPORT while retaining one result/status surface.
+ * - Contract:
+ *   - INPUT: selected live Browser records, target Local|File|Sync, Skip|Overwrite|Merge tags, folder-tag toggle, extra tags
+ *   - PRE: Browser source records are collapsed by cleaned URL; Browser is excluded as a destination
+ *   - OUTPUT: imported/skipped/failed counts and refreshed Index
+ *   - POST:
+ *     - success => counts reflect best-effort per-row writes and the Index is refreshed
+ *     - error OperationFailed => no writes occur after target conflict lookup failure
+ *   - FAILURE_MODES: OperationFailed, InvalidTarget
+ *   - DATA: existingByUrl = selected target rows only; selected Browser rows; import result counters
+ *   - DATA_TRANSITION: each save outcome updates a result counter; completion refreshes the Index and result surface
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RUN_BROWSER_IMPORT
+ *   - existingByUrl = BUILD_TARGET_BOOKMARKS_BY_URL(aggregate rows, target)
+ *   - IF target conflict lookup fails: retry Local only for Local target; otherwise SHOW error and RETURN without writes
+ *   - FOR each selected Browser record:
+ *   - IF existingByUrl contains url AND mode = Skip: skipped++
+ *   - ELSE BUILD payload with root-stripped folder tags and sanitized extra tags
+ *   - SEND saveBookmark({ ...payload, preferredBackend: target })
+ *   - loadBookmarks(); SHOW final counts
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT ===
  */
@@ -1012,6 +1059,96 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-ARCHIVED_CONTENT_SEARCH ===
  */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-BROWSER_BOOKMARK_IMPORT ===
+ * [IMPL-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [REQ-BROWSER_BOOKMARK_IMPORT] — Local Bookmarks Index live Browser source: getTree, flatten/collapse, search/folder filter, selection, target-scoped conflicts, root-stripped folder tags, extra tags, and saveBookmark.
+ *
+ * ## LOAD_BROWSER_SOURCE
+ *
+ * - [IMPL-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [REQ-BROWSER_BOOKMARK_IMPORT] How: Implements live Browser source loading in the Local Bookmarks Index.
+ * - Contract:
+ *   - INPUT: chrome.bookmarks.getTree()
+ *   - PRE: `chrome.bookmarks.getTree` is available through the bookmarks permission
+ *   - OUTPUT: one import row per cleaned URL with title, URL, folderPaths, folderPath, dateAdded, and root-stripped folder tags
+ *   - POST:
+ *     - success => duplicate URL nodes are collapsed; folder paths and tags are unioned; earliest dateAdded is retained
+ *     - failure => empty source with an explanatory message
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: browserImportRecords, folderList, selectedBrowserImportUrls
+ *   - DATA_TRANSITION: load success replaces source records and folder choices and clears prior selection; load failure replaces them with an empty source and explanatory message
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: LOAD_BROWSER_SOURCE
+ *   - tree = AWAIT chrome.bookmarks.getTree()
+ *   - flattened = flattenTree(tree)
+ *   - records = NORMALIZE_BROWSER_IMPORT_RECORDS(flattened)
+ *   - folderList = BUILD_BROWSER_IMPORT_FOLDER_LIST(records)
+ *   - CLEAR selectedBrowserImportUrls
+ *   - APPLY_BROWSER_IMPORT_FILTER()
+ *   - ON error: SET browserImportRecords and filtered records to empty; SHOW explanatory message; APPLY_BROWSER_IMPORT_FILTER()
+ *
+ * ## NORMALIZE_BROWSER_IMPORT_RECORDS
+ *
+ * - [IMPL-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [REQ-BROWSER_BOOKMARK_IMPORT] How: Implements Browser provider-compatible duplicate handling and root stripping.
+ * - Contract:
+ *   - INPUT: flattened Browser bookmark nodes
+ *   - PRE: each node may contain id, url, title, dateAdded, and folderPath
+ *   - OUTPUT: collapsed record list keyed by cleaned URL
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: NORMALIZE_BROWSER_IMPORT_RECORDS
+ *   - FOR each node WITH url:
+ *   - key = cleanUrl(node.url)
+ *   - folderTags = folderPathToTags(node.folderPath, { stripRoots: true })
+ *   - IF key is new: create record with node title, dateAdded, folderPaths, folderTags, and sourceIds
+ *   - ELSE: union folderPaths, folderTags, and sourceIds; retain earliest dateAdded; fill an empty title from a later node
+ *   - RETURN records
+ *
+ * ## APPLY_BROWSER_IMPORT_FILTER
+ *
+ * - [IMPL-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [REQ-BROWSER_BOOKMARK_IMPORT] How: Implements selective live-tree browsing in the Index Import group.
+ * - Contract:
+ *   - INPUT: records, search query, selected folder
+ *   - PRE: records have collapsed folderPaths
+ *   - OUTPUT: filtered records and selectable rows
+ *   - DATA: filteredBrowserImportRecords, selectedBrowserImportUrls, count and empty-state DOM
+ *   - DATA_TRANSITION: filtering replaces visible rows and count/empty-state state while retaining selected URLs outside the current filter
+ *   - EFFECTS: State, DOM
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_BROWSER_IMPORT_FILTER
+ *   - IF selected folder is non-empty: keep records containing that exact folder path
+ *   - IF search is non-empty: keep records whose title, URL, or folder path contains the case-folded query
+ *   - RENDER rows with Select, Title, URL, Folder, and Date added
+ *   - Preserve selected URLs while filters change
+ *
+ * ## RUN_BROWSER_IMPORT
+ *
+ * - [IMPL-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [REQ-BROWSER_BOOKMARK_IMPORT] How: Implements target-specific live Browser migration through the shared Index saveBookmark route.
+ * - Contract:
+ *   - INPUT: selected browser records, conflict mode (Skip|Overwrite|Merge), folder-tag toggle, extra tags, target (Local|File|Sync)
+ *   - PRE: at least one record is selected; Browser is not a valid live-source target
+ *   - OUTPUT: imported/skipped/failed counts and refreshed Index
+ *   - POST:
+ *     - success => counts reflect best-effort per-record writes
+ *     - failure => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed, InvalidTarget
+ *   - DATA: existingByUrl = selected target rows only; Browser source rows are excluded
+ *   - DATA_TRANSITION: each save outcome increments its result counter; completion clears source selection and refreshes the Index
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RUN_BROWSER_IMPORT
+ *   - target = selected Local|File|Sync target; IF invalid: use Local
+ *   - existingByUrl = BUILD_TARGET_BOOKMARKS_BY_URL(aggregate rows, target)
+ *   - IF aggregate lookup fails AND target = Local: retry getLocalBookmarksForIndex; IF target is File|Sync or retry fails: SHOW conflict-detection error and RETURN without writes
+ *   - FOR each selected record:
+ *   - IF existingByUrl contains record.url AND mode = Skip: skipped++
+ *   - ELSE payload = BUILD_BROWSER_IMPORT_PAYLOAD(record, existingByUrl[record.url], mode, tags)
+ *   - SEND saveBookmark({ ...payload, preferredBackend: target })
+ *   - IF response.success: imported++ ELSE failed++
+ *   - CLEAR selectedBrowserImportUrls; loadBookmarks(); SHOW final counts
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-BROWSER_BOOKMARK_IMPORT ===
+ */
 import { initToolPageVersion } from '../styles/tool-page-version.js'
 import { matchStoresFilter, getIndexStoreCounts, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
@@ -1024,6 +1161,13 @@ import { runRefreshApiSnapshot } from './bookmarks-table-api-snapshot.js'
 import { buildArchiveSearchMessage, mapArchiveSearchResults } from './bookmarks-table-archive-search.js'
 import { isArchiveScopeValue, isCrossResourceScopeValue } from './bookmarks-table-archive-scope.js'
 import { createControlTabState, selectControlGroup } from './bookmarks-table-controls.js'
+import {
+  normalizeBrowserImportRecords,
+  buildBrowserImportFolderList,
+  filterBrowserImportRecords,
+  buildBrowserImportPayload,
+  buildTargetBookmarksByUrl
+} from './bookmarks-table-browser-import.js'
 import { filterBookmarksByHealth, isLinkHealthChecksEnabled, applyLinkHealthControlsGate } from '../../shared/link-health.js'
 import {
   isAggregatedIndexLoadFailure,
@@ -1054,6 +1198,10 @@ let archiveSearchRequestId = 0
 let crossResourceSearchRequestId = 0
 /** [REQ-LOCAL_BOOKMARKS_INDEX] Selected bookmark URLs for bulk operations (e.g. move to storage). */
 const selectedUrls = new Set()
+/** [REQ-BROWSER_BOOKMARK_IMPORT] Live Browser-tree source rows selected for Index import. */
+const selectedBrowserImportUrls = new Set()
+let browserImportRecords = []
+let filteredBrowserImportRecords = []
 /** [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] url -> health record */
 let linkHealthMap = {}
 /** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Independent active head/footer control groups. */
@@ -1131,6 +1279,21 @@ const elements = {
   regexReplaceNotes: document.getElementById('regex-replace-notes'),
   regexReplaceBtn: document.getElementById('regex-replace-btn'),
   regexReplaceError: document.getElementById('regex-replace-error'),
+  importSource: document.getElementById('import-source'),
+  fileImportOptions: document.getElementById('file-import-options'),
+  browserImportOptions: document.getElementById('browser-import-options'),
+  browserImportSearch: document.getElementById('browser-import-search'),
+  browserImportFolder: document.getElementById('browser-import-folder'),
+  browserImportSelectAll: document.getElementById('browser-import-select-all'),
+  browserImportClearSelection: document.getElementById('browser-import-clear-selection'),
+  browserImportSelectAllCheckbox: document.getElementById('browser-import-select-all-checkbox'),
+  browserImportCount: document.getElementById('browser-import-count'),
+  browserImportEmpty: document.getElementById('browser-import-empty'),
+  browserImportEmptyMessage: document.getElementById('browser-import-empty-message'),
+  browserImportTableWrapper: document.getElementById('browser-import-table-wrapper'),
+  browserImportTableBody: document.getElementById('browser-import-table-body'),
+  browserImportUseFolderTags: document.getElementById('browser-import-use-folder-tags'),
+  browserImportExtraTags: document.getElementById('browser-import-extra-tags'),
   importFile: document.getElementById('import-file'),
   importTrigger: document.getElementById('import-trigger'),
   importTarget: document.getElementById('import-target'),
@@ -1918,6 +2081,198 @@ function parseImportFile (text, filename) {
 }
 
 /**
+ * [REQ-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT]
+ * Render the live Browser-tree source inside the Local Bookmarks Index Import group.
+ */
+function renderBrowserImportTable () {
+  if (!elements.browserImportTableBody) return
+  elements.browserImportTableBody.innerHTML = ''
+  for (const bookmark of filteredBrowserImportRecords) {
+    const url = bookmark.url || ''
+    const checked = selectedBrowserImportUrls.has(url) ? ' checked' : ''
+    const dateAdded = bookmark.dateAdded
+      ? new Date(bookmark.dateAdded).toLocaleString()
+      : ''
+    const row = document.createElement('tr')
+    row.innerHTML = `
+      <td class="col-select">
+        <label>
+          <input type="checkbox" class="browser-import-row-select" data-url="${escapeHtml(url)}"${checked} aria-label="Select ${escapeHtml(bookmark.title || url || 'browser bookmark')}">
+        </label>
+      </td>
+      <td class="col-title">${escapeHtml(bookmark.title || '(no title)')}</td>
+      <td class="col-url">${escapeHtml(url)}</td>
+      <td class="col-folder">${escapeHtml(bookmark.folderPath || '')}</td>
+      <td class="col-date">${escapeHtml(dateAdded)}</td>
+    `
+    elements.browserImportTableBody.appendChild(row)
+  }
+  const visibleUrls = filteredBrowserImportRecords.map(bookmark => bookmark.url).filter(Boolean)
+  const allSelected = visibleUrls.length > 0 && visibleUrls.every(url => selectedBrowserImportUrls.has(url))
+  const someSelected = visibleUrls.some(url => selectedBrowserImportUrls.has(url))
+  if (elements.browserImportSelectAllCheckbox) {
+    elements.browserImportSelectAllCheckbox.checked = allSelected
+    elements.browserImportSelectAllCheckbox.indeterminate = someSelected && !allSelected
+    elements.browserImportSelectAllCheckbox.disabled = visibleUrls.length === 0
+  }
+}
+
+function applyBrowserImportFilter () {
+  filteredBrowserImportRecords = filterBrowserImportRecords(
+    browserImportRecords,
+    elements.browserImportSearch?.value || '',
+    elements.browserImportFolder?.value || ''
+  )
+  renderBrowserImportTable()
+  if (elements.browserImportCount) {
+    elements.browserImportCount.textContent = `${filteredBrowserImportRecords.length} bookmark${filteredBrowserImportRecords.length !== 1 ? 's' : ''}`
+  }
+  const hasRows = filteredBrowserImportRecords.length > 0
+  elements.browserImportTableWrapper?.classList.toggle('hidden', !hasRows)
+  elements.browserImportEmpty?.classList.toggle('hidden', hasRows || browserImportRecords.length === 0)
+  if (elements.browserImportEmpty && browserImportRecords.length === 0) {
+    elements.browserImportEmpty.classList.remove('hidden')
+  }
+}
+
+function populateBrowserImportFolderFilter () {
+  if (!elements.browserImportFolder) return
+  const current = elements.browserImportFolder.value
+  elements.browserImportFolder.innerHTML = '<option value="">All folders</option>'
+  for (const folderPath of buildBrowserImportFolderList(browserImportRecords)) {
+    const option = document.createElement('option')
+    option.value = folderPath
+    option.textContent = folderPath
+    elements.browserImportFolder.appendChild(option)
+  }
+  if (buildBrowserImportFolderList(browserImportRecords).includes(current)) {
+    elements.browserImportFolder.value = current
+  }
+}
+
+async function loadBrowserImportRecords () {
+  if (!elements.browserImportOptions) return
+  try {
+    if (typeof chrome === 'undefined' || !chrome.bookmarks?.getTree) {
+      throw new Error('Bookmarks API is not available')
+    }
+    const tree = await chrome.bookmarks.getTree()
+    browserImportRecords = normalizeBrowserImportRecords(tree)
+    selectedBrowserImportUrls.clear()
+    populateBrowserImportFolderFilter()
+    applyBrowserImportFilter()
+  } catch (error) {
+    browserImportRecords = []
+    filteredBrowserImportRecords = []
+    selectedBrowserImportUrls.clear()
+    if (elements.browserImportEmptyMessage) {
+      elements.browserImportEmptyMessage.textContent = error.message || 'Could not load browser bookmarks.'
+    }
+    populateBrowserImportFolderFilter()
+    applyBrowserImportFilter()
+    console.warn('[IMPL-BROWSER_BOOKMARK_IMPORT] live Browser source load failed:', error)
+  }
+}
+
+function syncBrowserImportSourceUi () {
+  const isBrowserSource = elements.importSource?.value === 'browser'
+  elements.fileImportOptions?.toggleAttribute('hidden', isBrowserSource)
+  elements.browserImportOptions?.toggleAttribute('hidden', !isBrowserSource)
+  const browserTargetOption = elements.importTarget?.querySelector('option[value="browser"]')
+  if (browserTargetOption) browserTargetOption.disabled = isBrowserSource
+  if (isBrowserSource && elements.importTarget?.value === 'browser') {
+    elements.importTarget.value = 'local'
+  }
+  if (elements.importTrigger) {
+    elements.importTrigger.textContent = isBrowserSource ? 'Import selected' : 'Choose file'
+    elements.importTrigger.title = isBrowserSource
+      ? 'Import selected live browser bookmarks into Local, File, or Sync'
+      : 'Choose a Hoverboard CSV or JSON file to import'
+    elements.importTrigger.setAttribute('aria-label', isBrowserSource
+      ? 'Import selected live browser bookmarks'
+      : 'Choose file to import')
+  }
+  if (isBrowserSource) loadBrowserImportRecords()
+}
+
+function getBrowserImportConflictMode () {
+  return document.querySelector('input[name="browser-import-mode"]:checked')?.value || 'skip'
+}
+
+/**
+ * [REQ-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT]
+ * Import selected live Browser records using only the selected target's rows
+ * for conflict detection. Browser is a source here, never a destination.
+ */
+async function runBrowserImport () {
+  const targetBackend = elements.importTarget?.value || 'local'
+  const validTarget = ['local', 'file', 'sync'].includes(targetBackend) ? targetBackend : 'local'
+  const conflictMode = getBrowserImportConflictMode()
+  const selected = browserImportRecords.filter(bookmark => selectedBrowserImportUrls.has(bookmark.url))
+  if (selected.length === 0) {
+    setImportResultError(elements.importResult, 'Select at least one browser bookmark.')
+    return
+  }
+
+  setImportResultPending(elements.importResult)
+  if (elements.importTrigger) elements.importTrigger.disabled = true
+  let existingList = []
+  try {
+    const response = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_AGGREGATED })
+    if (isAggregatedIndexLoadFailure(response)) {
+      if (validTarget !== 'local') throw new Error('Could not load target bookmarks for conflict detection.')
+      const fallback = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_LOCAL })
+      existingList = extractBookmarksList(fallback)
+      if (!Array.isArray(existingList)) throw new Error('Could not load Local bookmarks for conflict detection.')
+    } else {
+      existingList = extractBookmarksList(response)
+      if (!Array.isArray(existingList)) throw new Error('Could not load target bookmarks for conflict detection.')
+    }
+  } catch (error) {
+    console.warn('[IMPL-BROWSER_BOOKMARK_IMPORT] target conflict lookup failed:', error)
+    if (elements.importTrigger) elements.importTrigger.disabled = false
+    setImportResultError(elements.importResult, 'Could not load the selected target for conflict detection.')
+    return
+  }
+  const existingByUrl = buildTargetBookmarksByUrl(existingList, validTarget)
+  let imported = 0
+  let skipped = 0
+  let failed = 0
+  const useFolderTags = Boolean(elements.browserImportUseFolderTags?.checked)
+  const extraTags = elements.browserImportExtraTags?.value || ''
+
+  for (const bookmark of selected) {
+    const existing = existingByUrl.get(bookmark.url)
+    if (existing && conflictMode === 'skip') {
+      skipped++
+      continue
+    }
+    const payload = buildBrowserImportPayload(bookmark, {
+      conflictMode,
+      existing,
+      useFolderTags,
+      extraTags
+    })
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE_SAVE,
+        data: { ...payload, preferredBackend: validTarget }
+      })
+      if (response?.success) imported++
+      else failed++
+    } catch (error) {
+      console.warn('[IMPL-BROWSER_BOOKMARK_IMPORT] saveBookmark failed for', bookmark.url, error)
+      failed++
+    }
+  }
+
+  if (elements.importTrigger) elements.importTrigger.disabled = false
+  selectedBrowserImportUrls.clear()
+  await loadBookmarks()
+  setImportResultFinal(elements.importResult, formatImportResultMessage({ imported, skipped, failed }))
+}
+
+/**
  * [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]
  * Run import: parse file, optionally filter to only new URLs, send saveBookmark per row, refresh, show result.
  */
@@ -1939,7 +2294,8 @@ async function runImport (file) {
     setImportResultError(elements.importResult, 'No valid bookmarks in file (or invalid format).')
     return
   }
-  const existingUrls = new Set(allBookmarks.map(b => (b.url || '').trim()).filter(Boolean))
+  // [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Only-new is scoped to the selected target, so a same-URL row in another store does not suppress this import.
+  const existingUrls = new Set(buildTargetBookmarksByUrl(allBookmarks, preferredBackend).keys())
   const toSave = onlyNew ? records.filter(r => !existingUrls.has(r.url)) : records
   const skipped = records.length - toSave.length
   setImportResultPending(elements.importResult)
@@ -2014,27 +2370,28 @@ function handleStoreFilterChange () {
 }
 
 /**
- * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS defaults to Stores at the head and Actions at the footer, then binds accessible tab activation without changing control behavior.
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS keeps Stores selected at the head, starts the footer collapsed, and binds accessible tab activation without changing control behavior.
  */
 function updateControlTabDom (region, activeGroup) {
   const regionEl = document.querySelector(`[data-control-region="${region}"]`)
   if (!regionEl) return
+  const rovingGroup = activeGroup ?? (region === 'footer' ? 'actions' : null)
   regionEl.querySelectorAll('[data-control-tab]').forEach((tab) => {
     const selected = tab.dataset.controlGroup === activeGroup
     tab.setAttribute('aria-selected', String(selected))
-    tab.tabIndex = selected ? 0 : -1
+    tab.tabIndex = tab.dataset.controlGroup === rovingGroup ? 0 : -1
   })
   regionEl.querySelectorAll('[data-control-panel]').forEach((panel) => {
     panel.hidden = panel.dataset.controlGroup !== activeGroup
   })
 }
 
-/** [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SET_HEAD_CONTROL_GROUP and SET_FOOTER_CONTROL_GROUP reject invalid groups and synchronize one selected tab with one visible panel. */
+/** [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SET_HEAD_CONTROL_GROUP and SET_FOOTER_CONTROL_GROUP reject invalid groups, collapse the active footer group on repeat activation, and synchronize selected tabs with visible panels. */
 function activateControlGroup (region, group, focus = false) {
   const nextState = selectControlGroup(controlTabState, region, group)
   if (nextState === controlTabState) return
   controlTabState = nextState
-  updateControlTabDom(region, group)
+  updateControlTabDom(region, controlTabState[region])
   if (focus) {
     document.querySelector(`[data-control-region="${region}"] [data-control-group="${group}"][data-control-tab]`)?.focus()
   }
@@ -2053,7 +2410,7 @@ function syncStickyTableHeaderOffset () {
   container.classList.toggle('sticky-thead-offset', tableTop < headHeight)
 }
 
-/** [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SYNC_CONTROL_PANEL_OFFSETS measures fixed regions for sticky table headers and footer spacing. */
+/** [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: SYNC_CONTROL_PANEL_OFFSETS measures compact or active fixed regions for sticky table headers and footer spacing. */
 function syncControlPanelOffsets () {
   const container = document.querySelector('.container')
   if (!container) return
@@ -2066,7 +2423,7 @@ function syncControlPanelOffsets () {
 
 function initControlTabs () {
   /**
-   * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS defaults to Stores at the head and Actions at the footer, then binds accessible tab activation without changing control behavior.
+   * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: INITIALIZE_INDEX_CONTROL_TABS keeps Stores selected at the head, starts the footer collapsed, and binds accessible tab activation without changing control behavior.
    */
   updateControlTabDom('head', controlTabState.head)
   updateControlTabDom('footer', controlTabState.footer)
@@ -2075,6 +2432,12 @@ function initControlTabs () {
       activateControlGroup(tab.dataset.controlTab, tab.dataset.controlGroup)
     })
     tab.addEventListener('keydown', (event) => {
+      const activationKeys = ['Enter', ' ', 'Spacebar']
+      if (activationKeys.includes(event.key)) {
+        event.preventDefault()
+        activateControlGroup(tab.dataset.controlTab, tab.dataset.controlGroup)
+        return
+      }
       const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End']
       if (!keys.includes(event.key)) return
       event.preventDefault()
@@ -2177,13 +2540,54 @@ function init () {
     elements.regexReplaceInput.addEventListener('change', () => updateMoveControlsState())
   }
 
-  if (elements.importTrigger && elements.importFile) {
-    elements.importTrigger.addEventListener('click', () => elements.importFile.click())
+  if (elements.importSource) {
+    const sourceFromQuery = new URLSearchParams(window.location.search || '').get('source')
+    if (sourceFromQuery === 'browser') {
+      elements.importSource.value = 'browser'
+      activateControlGroup('footer', 'import')
+    }
+    elements.importSource.addEventListener('change', syncBrowserImportSourceUi)
+    syncBrowserImportSourceUi()
+  }
+  if (elements.importTrigger) {
+    elements.importTrigger.addEventListener('click', () => {
+      if (elements.importSource?.value === 'browser') {
+        runBrowserImport()
+      } else {
+        elements.importFile?.click()
+      }
+    })
+  }
+  if (elements.importFile) {
     elements.importFile.addEventListener('change', (e) => {
       const file = e.target.files?.[0]
       if (file) runImport(file)
     })
   }
+  elements.browserImportSearch?.addEventListener('input', applyBrowserImportFilter)
+  elements.browserImportFolder?.addEventListener('change', applyBrowserImportFilter)
+  elements.browserImportSelectAll?.addEventListener('click', () => {
+    filteredBrowserImportRecords.forEach(bookmark => selectedBrowserImportUrls.add(bookmark.url))
+    renderBrowserImportTable()
+  })
+  elements.browserImportClearSelection?.addEventListener('click', () => {
+    selectedBrowserImportUrls.clear()
+    renderBrowserImportTable()
+  })
+  elements.browserImportSelectAllCheckbox?.addEventListener('change', (event) => {
+    for (const bookmark of filteredBrowserImportRecords) {
+      if (event.target.checked) selectedBrowserImportUrls.add(bookmark.url)
+      else selectedBrowserImportUrls.delete(bookmark.url)
+    }
+    renderBrowserImportTable()
+  })
+  elements.browserImportTableBody?.addEventListener('change', (event) => {
+    const checkbox = event.target.closest('.browser-import-row-select')
+    if (!checkbox) return
+    if (checkbox.checked) selectedBrowserImportUrls.add(checkbox.dataset.url)
+    else selectedBrowserImportUrls.delete(checkbox.dataset.url)
+    renderBrowserImportTable()
+  })
 
   if (elements.timeColumnSource) timeColumnSource = elements.timeColumnSource.value
   if (elements.timeDisplayMode) timeDisplayMode = elements.timeDisplayMode.value

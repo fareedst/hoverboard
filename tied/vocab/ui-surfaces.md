@@ -64,7 +64,7 @@
 | Search Bookmarks | Search Bookmarks | — | `OPEN_BOOKMARKS_INDEX` + `{ q }` | [IMPL-LIBRARY_SEARCH_ENTRY] `OPEN_LIBRARY_SEARCH` |
 | linkHealthChecksEnabled | Enable link health checks | `linkHealthChecksEnabled` | — | ConfigManager / Options |
 | link health hint | (Details help text) | — | `GET_LINK_HEALTH` | `formatLinkHealthHint` / `refreshLinkHealthHint` |
-| Open import | Browser bookmark import | — | `openBrowserBookmarkImport` | chrome.tabs.create |
+| Open import | Browser bookmark import | — | `openBrowserBookmarkImport` | `tabs.create(bookmarks-table.html?source=browser)` |
 | Save page archive | Save page archive | — | `capturePageArchive` → `CAPTURE_PAGE_ARCHIVE` | PopupController |
 | Archive association feedback | archive saved / bookmark and archive saved | — | `CAPTURE_PAGE_ARCHIVE` result | [IMPL-PAGE_ARCHIVE_BOOKMARK_ASSOCIATION] |
 | Open Offline Reader | Open offline Reader | — | `openOfflineReader` | `src/ui/reader/reader.html` |
@@ -95,7 +95,7 @@
 - **overlay** — Transparent/fixed on-page UI for current bookmark status and tags.
 - **persistent popup session** — Popup stays open across actions (no automatic `window.close`).
 - **badge indicators** — Not bookmarked / no tags / private / to-read markers (defaults `-`, `0`, `*`, `!`).
-- **quick access** — Manifest `commands` and context-menu entries for side panel, options, index, import, and standalone Browser Bookmarks page (legacy command id `open-side-panel-browser-bookmarks`).
+- **quick access** — Manifest `commands` and context-menu entries for side panel, options, index, Browser import (`bookmarks-table.html?source=browser`), and standalone Browser Bookmarks page (legacy command id `open-side-panel-browser-bookmarks`).
 - **tools toolbar** — Compact badge popup on non-web tabs; five launchers to full-page tools (not side panel). Canonical detail in [`side-panel.md`](side-panel.md).
 - **tool page shell** — Shared brand-row / layout CSS for standalone tool pages; version via `initToolPageVersion`.
 - **UI action contract** — Single source of truth mapping action IDs ↔ messages for tests and inspector (`src/shared/ui-action-contract.js`).

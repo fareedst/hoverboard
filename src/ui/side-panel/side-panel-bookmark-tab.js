@@ -52,11 +52,11 @@ import { ConfigManager } from '../../config/config-manager.js'
  * === IMPL-FULL-BLOCK: IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS ===
  * ## MAIN
  *
- * - [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS] How: KeyboardManager shortcuts: add four entries so handleKeyDown finds handler and calls emit; PopupController already listens for openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport. Implements REQ "in-popup/panel shortcuts". Side panel Bookmark tab: enable keyboard and setup so panel has same shortcuts. Implements REQ "when popup or side panel has focus".
+ * - [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS] How: KeyboardManager shortcuts: add four entries so handleKeyDown finds handler and calls emit; PopupController already listens for openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport. Browser Import resolves to the Local Bookmarks Index live Browser source. Implements REQ "in-popup/panel shortcuts". Side panel Bookmark tab: enable keyboard and setup so panel has same shortcuts. Implements REQ "when popup or side panel has focus".
  * - Contract:
  *   - INPUT: user focuses popup or side panel Bookmark tab; user presses Ctrl+Shift+B/O/M/I
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
- *   - OUTPUT: same as footer button click (side panel opens, options opens, bookmarks index tab, or import tab)
+ *   - OUTPUT: same as footer button click (side panel opens, options opens, bookmarks index tab, or Index Browser source)
  *   - POST:
  *     - success => block outputs match OUTPUT shape
  *   - EFFECTS: pure

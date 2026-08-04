@@ -24097,15 +24097,15 @@ var PopupController = class {
   }
   /**
    * [REQ-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT]
-   * Open the browser bookmark import page in a new tab.
+   * Open the Browser source in the Local Bookmarks Index Import group.
    */
   handleOpenBrowserBookmarkImport() {
     recordAction(POPUP_ACTION_IDS.openBrowserBookmarkImport, void 0, "popup");
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openBrowserBookmarkImport, payload: void 0 });
     try {
-      const url2 = chrome.runtime.getURL("src/ui/browser-bookmark-import/browser-bookmark-import.html");
+      const url2 = `${chrome.runtime.getURL("src/ui/bookmarks-table/bookmarks-table.html")}?source=browser`;
       chrome.tabs.create({ url: url2 });
-      this.uiManager.showSuccess("Browser bookmark import opened in new tab");
+      this.uiManager.showSuccess("Browser bookmark import opened in Local Bookmarks Index");
     } catch (error48) {
       this.errorHandler.handleError("Failed to open browser bookmark import", error48);
     }

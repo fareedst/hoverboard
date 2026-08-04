@@ -28,11 +28,11 @@ describe('[REQ-NON_WEB_TOOLS_TOOLBAR] tools toolbar launcher composition', () =>
     expect(global.chrome.runtime.sendMessage).toHaveBeenCalledWith({ type: 'OPEN_BOOKMARKS_INDEX' })
   })
 
-  test('Import button opens browser-bookmark-import.html', () => {
+  test('Import button opens the Index Browser source', () => {
     bindToolsToolbarLaunchers(document)
     document.getElementById('btn-browser-import').click()
     expect(global.chrome.tabs.create).toHaveBeenCalledWith({
-      url: 'chrome-extension://test-id/src/ui/browser-bookmark-import/browser-bookmark-import.html'
+      url: 'chrome-extension://test-id/src/ui/bookmarks-table/bookmarks-table.html?source=browser'
     })
   })
 

@@ -11,8 +11,8 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
   essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS-pseudocode.md"
   implementation_approach:
     details:
-      - "side-panel.js initBookmarkTab: popup with enableKeyboard true; after uiManager.setupEventListeners(), if popupComponents.keyboardManager then popupComponents.keyboardManager.setupKeyboardNavigation()"
-      - KeyboardManager: "shortcuts['Ctrl+Shift+KeyB'] = () => this.uiManager.emit('openTagsTree'); same for KeyO (openOptions), KeyM (openBookmarksIndex), KeyI (openBrowserBookmarkImport). Meta can be used on Mac for consistency; getShortcutKey uses ctrlKey/metaKey so both Ctrl+Shift and Meta+Shift will match if we add both or use a normalized key (plan uses Ctrl+Shift for simplicity; Chrome on Mac often maps Ctrl to Control key)."
+      - "Ctrl+Shift+KeyI continues to emit openBrowserBookmarkImport; PopupController now opens bookmarks-table.html?source=browser so the Index Browser source is selected"
+      - "The shortcut preserves the existing popup and side-panel entry point while using the consolidated Import group"
     summary: "In KeyboardManager constructor shortcuts map, add Ctrl+Shift+KeyB to emit openTagsTree, Ctrl+Shift+KeyO openOptions, Ctrl+Shift+KeyM openBookmarksIndex, Ctrl+Shift+KeyI openBrowserBookmarkImport. getShortcutKey(event) already returns e.g. Ctrl+Shift+KeyB. In side-panel.js initBookmarkTab, set enableKeyboard true and after setupEventListeners call popupComponents.keyboardManager.setupKeyboardNavigation() so panel has same shortcuts."
   metadata:
     created:
